@@ -1,9 +1,13 @@
 import { describe, expect, it } from "bun:test"
 import {
+  ABOUT_WIDTH_LEAST,
+  ABOUT_WIDTH_MOST,
+  DEFAULT_ABOUT_WIDTH,
   DEFAULTS,
   DIFF_KNOBS,
   PAGE_KNOBS,
   THEME_KNOBS,
+  readAboutWidth,
   readSettings,
   TREE_KNOBS
 } from "./Settings"
@@ -294,5 +298,31 @@ describe("the run of steps the folder indent offers", () => {
       "14",
       "16"
     ])
+  })
+})
+
+describe("the width of the left part of a pull request's page", () => {
+  it("starts at twenty-six rem, which is what it always was", () => {
+    expect(DEFAULT_ABOUT_WIDTH).toBe(26)
+    expect(DEFAULTS.aboutWidth).toBe(26)
+    expect(readSettings({}).aboutWidth).toBe(26)
+  })
+
+  it("keeps what the reader chose, to a tenth of a rem", () => {
+    expect(readAboutWidth(31)).toBe(31)
+    expect(readAboutWidth(31.26)).toBe(31.3)
+    expect(readSettings({ aboutWidth: 24.04 }).aboutWidth).toBe(24)
+  })
+
+  it("holds a width to the least and the most a page can use", () => {
+    expect(readAboutWidth(3)).toBe(ABOUT_WIDTH_LEAST)
+    expect(readAboutWidth(500)).toBe(ABOUT_WIDTH_MOST)
+    expect(readAboutWidth(-4)).toBe(ABOUT_WIDTH_LEAST)
+  })
+
+  it("answers the default for anything that is not a number", () => {
+    for (const stored of [undefined, null, "wide", "30", Number.NaN, Number.POSITIVE_INFINITY, {}, [30]]) {
+      expect(readAboutWidth(stored)).toBe(DEFAULT_ABOUT_WIDTH)
+    }
   })
 })

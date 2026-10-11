@@ -42,6 +42,8 @@ import type { AskLayerSizes } from "./useLayerSizes"
 import { KeyboardScope, useKeys } from "./useKeys"
 import { addressOf, type LookingAt, lookingAt } from "../domain/lookingAt"
 import { keysOf } from "../app/keyboard"
+import { ColumnHandle } from "./ColumnHandle"
+import { useAboutWidth } from "./useAboutWidth"
 import { useSettings } from "./useSettings"
 import { whenIdle } from "../app/idle"
 import { onward } from "../observability/report"
@@ -669,6 +671,9 @@ export const Shell = ({
   // diff rather than at the top of the page. Writing goes through this one
   // reader either way, so nothing on the screen holds a second copy.
   const { settings, change } = useSettings()
+  const about = useAboutWidth(settings.aboutWidth, (rem) =>
+    change((current) => ({ ...current, aboutWidth: rem }))
+  )
   // The menu answers on the click; the diff follows. Redrawing every open file
   // is hundreds of milliseconds of main thread, and doing it in the click's own
   // task froze the menu mid-close. Deferred, the tick and the close paint first
@@ -774,11 +779,15 @@ export const Shell = ({
             Aligned to the top rather than stretched: the column to the left is
             as tall as what the author wrote and the reviewers said, which is
             nobody's business but its own. */}
-        <div className="flex items-start gap-1.5 pb-2">
+        <div
+          ref={about.row}
+          className={`flex items-start pb-2 ${detailsOpen && filesOpen ? "" : "gap-1.5"}`}
+        >
           {preparedStage >= 3 && detailsOpen ? (
             <About
               snapshot={snapshot}
               wide={!filesOpen}
+              width={about.width}
               prepareThrough={Math.min(preparedStage - 2, 11)}
               actions={actions}
               onOpenCommit={loadCommit === undefined ? undefined : setReading}
@@ -798,6 +807,17 @@ export const Shell = ({
               suggest={suggest}
               onUpload={onUpload}
               remarks={remarks}
+            />
+          ) : null}
+          {/* Between the two parts, while both are up: the reader's way to give the code more room, or the
+              conversation. It takes the six pixels the gap had, so nothing moves when it appears. */}
+          {preparedStage >= 14 && detailsOpen && filesOpen ? (
+            <ColumnHandle
+              width={about.width}
+              row={about.row}
+              rowRem={about.rowRem}
+              onChange={about.onChange}
+              onRest={about.onRest}
             />
           ) : null}
           {/* The code stays where it is while the page scrolls past it. A diff

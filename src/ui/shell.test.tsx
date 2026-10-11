@@ -17,9 +17,11 @@ import {
 import { loadPullRequest } from "../app/pullRequest"
 import type { FetchedDiff, NewComment, PullRequestSnapshot } from "../domain/PullRequest"
 import type { DiffRequest, Note } from "../ports/Renderer"
+import { forgetful } from "../app/settings"
 import { layerFromSnapshots } from "../github/GitHubGateway"
 import { PullRequestScreen } from "./PullRequestScreen"
 import { RendererProvider, type LoadEngine } from "./renderer"
+import { SettingsProvider } from "./settings"
 
 afterEach(cleanup)
 // The page writes which file is being read into the address, so a test that
@@ -321,13 +323,14 @@ describe("the header, which says which pull request this is", () => {
 
 describe("the panes beside each other", () => {
   test("lets the details column take the full width when the files pane is hidden", async () => {
-    // About is fixed at twenty-six rem beside the files. Hiding the files used
-    // to leave that width and an empty flex gap — the left part never grew.
+    // About is twenty-six rem beside the files, until the reader moves the handle.
+    // Hiding the files used to leave that width and an empty flex gap — the left
+    // part never grew.
     showing(aPullRequest())
     await awaitPage()
 
-    const column = () => section("Merge").closest(".t-panels")
-    expect(column()?.className).toContain("w-[26rem]")
+    const column = () => section("Merge").closest<HTMLElement>(".t-panels")
+    expect(column()?.style.width).toBe("26rem")
     expect(column()?.className).not.toContain("flex-1")
     expect(document.querySelector('[data-gitquiet-activation="files-panel"]')).not.toBeNull()
 
@@ -335,7 +338,7 @@ describe("the panes beside each other", () => {
 
     expect(document.querySelector('[data-gitquiet-activation="files-panel"]')).toBeNull()
     expect(column()?.className).toContain("flex-1")
-    expect(column()?.className).not.toContain("w-[26rem]")
+    expect(column()?.style.width).toBe("")
     expect(section("Merge")).toBeDefined()
   })
 
@@ -363,6 +366,90 @@ describe("the panes beside each other", () => {
     await userEvent.keyboard("{Meta>}{Shift>}b{/Shift}{/Meta}")
     expect(document.querySelector('[data-gitquiet-activation="files-panel"]')).toBeNull()
     expect(section("Merge").closest(".t-panels")?.className).toContain("flex-1")
+  })
+})
+
+describe("the handle between the two parts", () => {
+  const handle = () => screen.queryByRole("separator", { name: "How wide the conversation is" })
+  const column = () => section("Merge").closest<HTMLElement>(".t-panels")
+
+  test("stands between them while both are up, and only then", async () => {
+    showing(aPullRequest())
+    await awaitPage()
+    expect(handle()).not.toBeNull()
+
+    await userEvent.click(screen.getByRole("button", { name: "Hide files" }))
+    expect(handle()).toBeNull()
+    await userEvent.click(screen.getByRole("button", { name: "Show files" }))
+    expect(handle()).not.toBeNull()
+
+    await userEvent.click(screen.getByRole("button", { name: "Hide details" }))
+    expect(handle()).toBeNull()
+  })
+
+  test("stands in the gap, after the left part and before the files panel", async () => {
+    showing(aPullRequest())
+    await awaitPage()
+
+    const files = document.querySelector('[data-gitquiet-activation="files-panel"]')
+    const between = handle()
+    expect(column()?.compareDocumentPosition(between as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(between?.compareDocumentPosition(files as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  test("moves the line with the arrow keys, and gives the width back after a double press", async () => {
+    showing(aPullRequest())
+    await awaitPage()
+
+    handle()?.focus()
+    await userEvent.keyboard("{ArrowRight}{ArrowRight}")
+    expect(column()?.style.width).toBe("28rem")
+    expect(handle()?.getAttribute("aria-valuenow")).toBe("28")
+
+    await userEvent.keyboard("{Shift>}{ArrowLeft}{/Shift}")
+    expect(column()?.style.width).toBe("24rem")
+
+    await userEvent.dblClick(handle() as HTMLElement)
+    expect(column()?.style.width).toBe("26rem")
+  })
+
+  test("is not moved past the least by the keys", async () => {
+    showing(aPullRequest())
+    await awaitPage()
+
+    handle()?.focus()
+    await userEvent.keyboard("{Home}")
+    expect(column()?.style.width).toBe("20rem")
+    await userEvent.keyboard("{ArrowLeft}")
+    expect(column()?.style.width).toBe("20rem")
+  })
+
+  test("keeps the width in the reader's settings, and finds it there the next time the page is drawn", async () => {
+    const store = forgetful()
+    const snapshot = aPullRequest()
+    standAt(snapshot.reference)
+    const drawn = () => (
+      <SettingsProvider store={store}>
+        <PullRequestScreen
+          reference={snapshot.reference}
+          load={() => loadPullRequest(snapshot.reference).pipe(Effect.provide(layerFromSnapshots([snapshot])))}
+          fetchDiffs={() => Effect.succeed([])}
+          onStepAside={() => {}}
+        />
+      </SettingsProvider>
+    )
+    const view = render(drawn())
+    await awaitPage()
+
+    handle()?.focus()
+    await userEvent.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}")
+    expect(column()?.style.width).toBe("29rem")
+    expect((await Effect.runPromise(store.read)).aboutWidth).toBe(29)
+
+    view.unmount()
+    render(drawn())
+    await awaitPage()
+    await waitFor(() => expect(column()?.style.width).toBe("29rem"))
   })
 })
 

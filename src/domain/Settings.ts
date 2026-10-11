@@ -714,7 +714,34 @@ export type Settings = {
    * `src/ui/wayBack.ts`, which is the only thing that draws it.
    */
   readonly wayBack: Spot
+  /**
+   * How wide the left part of a pull request's page is, in rem, while the files panel stands beside it.
+   *
+   * Not a knob, for the reason `wayBack` is not: every width between two limits is an answer. In rem
+   * rather than pixels because this is synced, and a reader who made the column wider for a large
+   * monitor still wants one that follows the size of their text on a small one. The limits and the way
+   * the handle between the parts moves it belong to `src/ui/columns.ts`.
+   */
+  readonly aboutWidth: number
 }
+
+/** The left part's width in rem when the reader has not moved the handle. */
+export const DEFAULT_ABOUT_WIDTH = 26
+
+/** The least and the most a stored width can be: narrower and the checks lose their names, wider and the code loses its room. */
+export const ABOUT_WIDTH_LEAST = 20
+export const ABOUT_WIDTH_MOST = 48
+
+/**
+ * A stored width held to the limits, and the default when it is not a number.
+ *
+ * Rounded to a tenth of a rem: a drag passes through every fraction of a pixel, and a synced setting that
+ * changes by a thousandth on each press is a write per press.
+ */
+export const readAboutWidth = (stored: unknown): number =>
+  typeof stored === "number" && Number.isFinite(stored)
+    ? Math.round(Math.min(ABOUT_WIDTH_MOST, Math.max(ABOUT_WIDTH_LEAST, stored)) * 10) / 10
+    : DEFAULT_ABOUT_WIDTH
 
 /** A place on the screen, as fractions of the travel available on each axis. */
 export type Spot = {
@@ -799,6 +826,7 @@ export const DEFAULTS: Settings = {
   putAway: [],
   turned: [],
   wayBack: DEFAULT_SPOT,
+  aboutWidth: DEFAULT_ABOUT_WIDTH,
 }
 
 const readGroup = <Knobs extends ReadonlyArray<Knob<string, string>>>(
@@ -882,5 +910,6 @@ export const readSettings = (stored: unknown): Settings => {
       ? [...new Set(held["turned"].filter(isTurned))]
       : [],
     wayBack: readSpot(held["wayBack"]),
+    aboutWidth: readAboutWidth(held["aboutWidth"]),
   }
 }
