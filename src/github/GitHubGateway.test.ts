@@ -173,6 +173,56 @@ describe("what the gateway sends to GitHub", () => {
     expect(new URL(calls[0]?.url ?? "").pathname).toBe("/flazouh/githubpro/tree/main")
   })
 
+  /*
+   * Their code view as their router draws it since 2026-10-15: no payload script, and one
+   * query key per route the page was read from. The answers are `repoHomePayload` split
+   * the way those routes split it, and one route refuses, which must not cost the page.
+   */
+  test("reads a page their router drew from the routes it names", async () => {
+    const { codeViewRepoRoute, codeViewLayoutRoute, sidebarAbout } = repoHomePayload.payload
+    const query = (name: string, pathname: string) =>
+      `queryHash:${JSON.stringify(JSON.stringify(["code-view", "codeViewRepoRoute", "/:owner/:repo", name, { pathname }]))}},`
+    const document =
+      query("mainQuery", "/flazouh/githubpro/tree/main") +
+      query("mainQuery", "/flazouh/githubpro/_layout") +
+      query("sidebarAbout", "/flazouh/githubpro/_sidebar/about") +
+      query("latestCommit", "/flazouh/githubpro/latest-commit")
+
+    const calls = intercept((url) => {
+      const path = new URL(url).pathname
+      if (path === "/flazouh/githubpro/latest-commit") return new Response("", { status: 404 })
+      if (path === "/flazouh/githubpro/_layout") return Response.json({ payload: { codeViewLayoutRoute } })
+      if (path === "/flazouh/githubpro/_sidebar/about") return Response.json(sidebarAbout)
+      return calls.filter((call) => new URL(call.url).pathname === path).length === 1
+        ? new Response(document, { headers: { "Content-Type": "text/html" } })
+        : Response.json({ payload: { codeViewRepoRoute } })
+    })
+
+    const front = await Effect.runPromise(
+      Effect.gen(function* () {
+        const gateway = yield* GitHubGateway
+        return yield* gateway.repoHome({ owner: "flazouh", repo: "githubpro" }, "main")
+      }).pipe(Effect.provide(layer))
+    )
+
+    expect(front.branch).toBe("main")
+    expect(front.entries.length).toBeGreaterThan(0)
+    expect(Option.getOrNull(front.about.stars)).toBe(sidebarAbout.stargazerCount)
+    expect(calls[0]?.headers.get("Accept")).toBe("text/html")
+    expect(
+      calls
+        .slice(1)
+        .filter((call) => call.headers.get("Accept") === "application/json")
+        .map((call) => new URL(call.url).pathname)
+        .sort()
+    ).toEqual([
+      "/flazouh/githubpro/_layout",
+      "/flazouh/githubpro/_sidebar/about",
+      "/flazouh/githubpro/latest-commit",
+      "/flazouh/githubpro/tree/main"
+    ])
+  })
+
   test("asks for every route as JSON, with the header GitHub demands", async () => {
     const calls = intercept((url) => Response.json(payloadFor(url)))
 

@@ -115,7 +115,7 @@ import { statIn } from "./diffStat"
 import { authorsFrom, branchesFrom } from "./refs"
 import type { Stat } from "../domain/commitList"
 import { historyFrom, marksFrom } from "./commits"
-import { embeddedPayloads } from "./embedded"
+import { embeddedPayloads, queriedRoutes } from "./embedded"
 import { signOnWanted } from "./signOn"
 import { involvedIssuesFrom, listedIssuesFrom } from "./issues"
 import {
@@ -1716,13 +1716,28 @@ const keepTheTabs = (reference: RepoRef, html: string): Effect.Effect<void> =>
   Effect.sync(() => keepTabs(reference, tabsOnPage(html)))
 
 /**
+ * The payloads of a page their router drew, asked for at the routes it names.
+ *
+ * Since 2026-10-15 their code view carries no payload script: the document names the
+ * routes its data came from, and each answers its part as JSON — the tree, the layout
+ * with push rights, the About panel, the file's lines. All of them at once, because the
+ * page waits on the slowest either way. A route that refuses is left out rather than
+ * failing the page: the decoders say whether what came back is enough.
+ */
+const routedPayloads = (html: string): Effect.Effect<ReadonlyArray<unknown>> =>
+  Effect.forEach(queriedRoutes(html), (route) => saidAt(`https://github.com${route}`), {
+    concurrency: "unbounded"
+  }).pipe(Effect.map((answers) => answers.flatMap((said) => (said.ok ? [said.payload] : []))))
+
+/**
  * The payload out of a page of theirs, rather than out of a route of theirs.
  *
  * Two pages of the code view are read this way and both for the same reason:
  * `Accept: application/json` answers with the route alone and never with the
  * layout around it, and the layout is where the interesting half is — whether
  * the reader can push, on the front page, and the lines of the file, on a blob.
- * A document holds both halves and is the only answer that does.
+ * A document holds both halves, or since their router took the code view over,
+ * names the routes that do: see {@link routedPayloads}.
  */
 const readRepoPage = Effect.fn("GitHubGateway.readRepoPage")(function* (
   reference: RepoRef,
@@ -1757,7 +1772,8 @@ const readRepoPage = Effect.fn("GitHubGateway.readRepoPage")(function* (
    * decided by which one the schema decodes in. So a rename of any of those keys costs
    * a reader here nothing, which is what four renames in two days argued for.
    */
-  const payloads = embeddedPayloads(html)
+  const embedded = embeddedPayloads(html)
+  const payloads = embedded.length > 0 ? embedded : yield* routedPayloads(html)
   if (payloads.length === 0) {
     /*
      * A document with nothing in it for us is either a shape of theirs that
