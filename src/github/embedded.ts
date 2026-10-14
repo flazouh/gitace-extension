@@ -86,3 +86,89 @@ export const embeddedPayload = (html: string, naming: string): Option.Option<unk
 
   return Option.none()
 }
+
+/** How their router writes the key of a query it rendered into the page. */
+const QUERY = 'queryHash:"'
+
+/** The first value of every key their code view gives one of its queries. */
+const CODE_VIEW = "code-view"
+
+/**
+ * The end of a JavaScript string that starts at `from`: the first quote not escaped.
+ *
+ * A run of backslashes before a quote is counted rather than one looked at, because
+ * `\\"` is an escaped backslash and then the end, where `\"` is a quote inside.
+ */
+const stringEnd = (html: string, from: number): number => {
+  let at = html.indexOf('"', from)
+
+  while (at !== -1) {
+    let slashes = 0
+    while (html[at - 1 - slashes] === "\\") slashes += 1
+    if (slashes % 2 === 0) return at
+    at = html.indexOf('"', at + 1)
+  }
+
+  return -1
+}
+
+/**
+ * Every route their router read a page's code view from, in the order the page has them.
+ *
+ * Their code pages left the script tag above on 2026-10-15. The document is drawn by
+ * their router now, and it carries its data as JavaScript rather than JSON: one object
+ * per query, each keyed by a JSON array naming the route it was read from. Those routes
+ * answer the same data as JSON, which is what a reader here can decode, so this names
+ * them and the gateway asks.
+ *
+ * Every code view query, rather than the ones under a name. Their page splits one read
+ * into several (the file's lines, the About panel, push rights) and which of them a
+ * screen needs is the decoders' call, the same way `embeddedPayloads` leaves it to them.
+ *
+ * The key is a JSON string inside a JavaScript string, so it is unescaped once and then
+ * parsed. A key either step refuses is passed over.
+ */
+export const queriedRoutes = (html: string): ReadonlyArray<string> => {
+  const routes: Array<string> = []
+  let from = html.indexOf(QUERY)
+
+  while (from !== -1) {
+    const opens = from + QUERY.length
+    const closes = stringEnd(html, opens)
+    if (closes === -1) return routes
+
+    const key = Option.liftThrowable(JSON.parse)(`"${html.slice(opens, closes)}"`).pipe(
+      Option.flatMap((text) => Option.liftThrowable(JSON.parse)(String(text)))
+    )
+    const route = Option.flatMap(key, routeOfQuery)
+    if (Option.isSome(route) && !routes.includes(route.value)) routes.push(route.value)
+
+    from = html.indexOf(QUERY, closes)
+  }
+
+  return routes
+}
+
+/**
+ * The route a code view query key names: its last entry's `pathname`, with the
+ * `searchParams` beside it that hold a value. Their front page writes
+ * `include_sidebar_about: null` there, which their router leaves out of the address.
+ */
+const routeOfQuery = (key: unknown): Option.Option<string> => {
+  if (!Array.isArray(key) || key[0] !== CODE_VIEW) return Option.none()
+
+  const last: unknown = key[key.length - 1]
+  if (typeof last !== "object" || last === null || !("pathname" in last)) return Option.none()
+  if (typeof last.pathname !== "string" || !last.pathname.startsWith("/")) return Option.none()
+
+  const search = new URLSearchParams()
+  const params: unknown = "searchParams" in last ? last.searchParams : null
+  if (typeof params === "object" && params !== null) {
+    for (const [name, value] of Object.entries(params)) {
+      if (value !== null && value !== undefined) search.append(name, String(value))
+    }
+  }
+
+  const query = search.toString()
+  return Option.some(query === "" ? last.pathname : `${last.pathname}?${query}`)
+}
