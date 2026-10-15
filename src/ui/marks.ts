@@ -18,8 +18,8 @@
  * drawing that screen again, which looks exactly like a press that did not land. The
  * rule is `desktop/src/view/where.ts`.
  *
- * Not `data-gitquiet-outside`, which `outside.ts` already owns for markup drawn outside
+ * Not `data-gitace-outside`, which `outside.ts` already owns for markup drawn outside
  * our own root: a second meaning for it would also hand this anchor a stylesheet
  * written for GitHub's HTML.
  */
-export const BROWSER = "data-gitquiet-browser"
+export const BROWSER = "data-gitace-browser"

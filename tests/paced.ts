@@ -16,7 +16,7 @@ import { theHost } from "../src/ui/theHost"
  * the wait never goes up at all. Between those two, a test states the order of
  * events instead of betting on it.
  *
- * The host rather than a planted `#gitquiet-root`, which is what this was. A suite
+ * The host rather than a planted `#gitace-root`, which is what this was. A suite
  * is one document, and a test that plants a root while a screen stands its own is
  * two roots and a coin toss about which one a lookup answers with — green here and
  * red on a runner with a different number of cores, which is exactly how that

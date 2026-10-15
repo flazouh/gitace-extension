@@ -149,7 +149,7 @@ export const involvedIn = (
   if (undecodable > 0 && import.meta.env.DEV) {
     // eslint-disable-next-line no-console -- dev-only, never in a shipped build
     console.warn(
-      `[gitquiet] dropped ${undecodable} of ${rows.length} listing rows that would not decode`
+      `[gitace] dropped ${undecodable} of ${rows.length} listing rows that would not decode`
     )
   }
 

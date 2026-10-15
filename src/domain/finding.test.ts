@@ -18,7 +18,7 @@ const repository = (nameWithOwner: string): Repository => {
 
 const REPOSITORIES = [
   repository("flowline-labs/flowline"),
-  repository("flazouh/gitquiet"),
+  repository("flazouh/gitace-extension"),
   repository("flazouh/ego-browser"),
   repository("someone/flowline-forms")
 ]
@@ -31,7 +31,7 @@ const owed = [
   },
   {
     kind: "issue" as const,
-    reference: { owner: "flazouh", repo: "gitquiet", number: 88 },
+    reference: { owner: "flazouh", repo: "gitace-extension", number: 88 },
     title: "Render flat source previews and dismiss voice picker"
   }
 ]
@@ -74,13 +74,13 @@ describe("finding something to open", () => {
     const [first] = finding("voice picker", { repositories: REPOSITORIES, owed })
 
     expect(first?.name).toBe("Render flat source previews and dismiss voice picker")
-    expect(first?.detail).toBe("flazouh/gitquiet #88")
-    expect(first?.where).toBe("/flazouh/gitquiet/issues/88")
+    expect(first?.detail).toBe("flazouh/gitace-extension #88")
+    expect(first?.where).toBe("/flazouh/gitace-extension/issues/88")
   })
 
   test("sends a repository to its pull requests, which is a page we draw", () => {
-    expect(finding("gitquiet", { repositories: REPOSITORIES, owed: [] })[0]?.where).toBe(
-      "/flazouh/gitquiet/pulls"
+    expect(finding("gitace-extension", { repositories: REPOSITORIES, owed: [] })[0]?.where).toBe(
+      "/flazouh/gitace-extension/pulls"
     )
   })
 
@@ -119,18 +119,18 @@ describe("what the Working Set is owed, as the palette searches it", () => {
       court: "needs-you" as const,
       piles: [
         {
-          one: involved("flazouh", "gitquiet", 12, "the foundation"),
+          one: involved("flazouh", "gitace-extension", 12, "the foundation"),
           court: "needs-you" as const,
           above: [
             {
-              one: involved("flazouh", "gitquiet", 13, "the one stacked on it"),
+              one: involved("flazouh", "gitace-extension", 13, "the one stacked on it"),
               court: "waiting" as const,
               above: []
             }
           ]
         }
       ],
-      issues: [involved("flazouh", "gitquiet", 44, "an issue in the same Court")],
+      issues: [involved("flazouh", "gitace-extension", 44, "an issue in the same Court")],
       count: 3
     }
   ]
@@ -184,19 +184,19 @@ describe("a bare number, on a page that is already inside a repository", () => {
 })
 
 describe("the repository the reader is standing in", () => {
-  const inGitquiet = { owner: "flazouh", repo: "gitquiet" }
+  const inGitace = { owner: "flazouh", repo: "gitace-extension" }
 
   test("comes first when nothing is typed, being the one they are looking at", () => {
-    const found = finding("", { repositories: REPOSITORIES, owed, inside: inGitquiet })
+    const found = finding("", { repositories: REPOSITORIES, owed, inside: inGitace })
 
     expect(found[0]?.name).toBe("Render flat source previews and dismiss voice picker")
-    expect(found[1]?.name).toBe("flazouh/gitquiet")
+    expect(found[1]?.name).toBe("flazouh/gitace-extension")
   })
 
   test("keeps the rest in the order they came, rather than sorting the whole list", () => {
     // Everything else is still what is owed before every repository. One list is lifted;
     // nothing else moves, because a palette that reshuffles is a palette nobody learns.
-    const found = finding("", { repositories: REPOSITORIES, owed, inside: inGitquiet })
+    const found = finding("", { repositories: REPOSITORIES, owed, inside: inGitace })
 
     expect(found.slice(2).map((one) => one.name)).toEqual([
       "feat(design-system): canonical component library",
@@ -208,12 +208,12 @@ describe("the repository the reader is standing in", () => {
 
   test("breaks a tie in its own favour, and never a better match elsewhere", () => {
     /*
-     * "flo" starts the name of a repository in another account, and nothing in gitquiet
+     * "flo" starts the name of a repository in another account, and nothing in GitAce Extension
      * matches it at all. Being where the reader stands is worth a tie, not a ranking: a
      * palette that answered the wrong repository first would be worse than one that ignores
      * where they are.
      */
-    const found = finding("flo", { repositories: REPOSITORIES, owed, inside: inGitquiet })
+    const found = finding("flo", { repositories: REPOSITORIES, owed, inside: inGitace })
 
     expect(found[0]?.name).toBe("flowline-labs/flowline")
   })
@@ -227,14 +227,14 @@ describe("the repository the reader is standing in", () => {
       },
       {
         kind: "pull-request" as const,
-        reference: { owner: "flazouh", repo: "gitquiet", number: 13 },
+        reference: { owner: "flazouh", repo: "gitace-extension", number: 13 },
         title: "Render the thing"
       }
     ]
 
-    const found = finding("render", { repositories: REPOSITORIES, owed: alike, inside: inGitquiet })
+    const found = finding("render", { repositories: REPOSITORIES, owed: alike, inside: inGitace })
 
-    expect(found[0]?.detail).toBe("flazouh/gitquiet #13")
+    expect(found[0]?.detail).toBe("flazouh/gitace-extension #13")
   })
 
   test("says nothing about anywhere, on a page inside nothing", () => {

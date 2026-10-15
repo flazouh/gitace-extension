@@ -51,11 +51,11 @@ describe("the repositories a Participant is at work in", () => {
       asRead([
         involved(1, "octo-repo", "needs-action"),
         involved(2, "octo-repo", "waiting-for-review"),
-        involved(3, "gitquiet", "needs-action"),
+        involved(3, "gitace-extension", "needs-action"),
       ]),
     );
 
-    expect(found.map((one) => one.name)).toEqual(["octo-repo", "gitquiet"]);
+    expect(found.map((one) => one.name)).toEqual(["octo-repo", "gitace-extension"]);
   });
 
   test("says how much work is in each, and how much of it is the reader's own move", () => {

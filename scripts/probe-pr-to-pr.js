@@ -71,7 +71,7 @@ const leaveOneCopy = async (path) => {
   // By name, because an unpacked id is derived from its path: a build in a
   // worktree has another one, and a list written by id leaves it running.
   for (const one of await listThem()) {
-    if (!/gitquiet/i.test(one.name ?? "")) continue
+    if (!/gitace/i.test(one.name ?? "")) continue
     if (one.on === (one.id === mine)) continue
     await js(String.raw`(() => {
       const manager = document.querySelector("extensions-manager")
@@ -172,12 +172,12 @@ const RECORDER = String.raw`(() => {
     marks.push({ at: at(), what, ...extra })
   }
 
-  const root = () => document.querySelector("#gitquiet-root")
+  const root = () => document.querySelector("#gitace-root")
   const look = () => ({
     chars: root() === null ? -1 : root().textContent.length,
-    loading: root() === null ? -1 : root().querySelectorAll("[data-gitquiet-loading]").length,
-    shown: document.documentElement.getAttribute("data-gitquiet-shown"),
-    drawnAt: document.documentElement.getAttribute("data-gitquiet-at"),
+    loading: root() === null ? -1 : root().querySelectorAll("[data-gitace-loading]").length,
+    shown: document.documentElement.getAttribute("data-gitace-shown"),
+    drawnAt: document.documentElement.getAttribute("data-gitace-at"),
     path: location.pathname
   })
 
@@ -284,7 +284,7 @@ const RECORDER = String.raw`(() => {
  * the hour: the first candidate tried here held exactly one link, to itself.
  */
 const lookForSpot = (number) => js(String.raw`(() => {
-  const root = document.querySelector("#gitquiet-root")
+  const root = document.querySelector("#gitace-root")
   if (root === null) return null
   const link = [...root.querySelectorAll('a[href*="/pull/"]')]
     .filter((a) => !a.pathname.endsWith("/" + ${JSON.stringify(number)}))
@@ -306,7 +306,7 @@ let from = null
 for (const number of FROM === "" ? found.numbers : [FROM]) {
   await land(`https://github.com/${found.repo}/pull/${number}`, { timeout: 60, settle: 4 })
   try {
-    await waitForElement("#gitquiet-root", { timeout: 20 })
+    await waitForElement("#gitace-root", { timeout: 20 })
   } catch {
     continue
   }
@@ -323,12 +323,12 @@ for (const number of FROM === "" ? found.numbers : [FROM]) {
 
 if (spot === null) {
   const said = await js(String.raw`(() => {
-    const root = document.querySelector("#gitquiet-root")
+    const root = document.querySelector("#gitace-root")
     if (root === null) return JSON.stringify({ root: "missing", where: location.pathname })
     return JSON.stringify({
       where: location.pathname,
       chars: root.textContent.length,
-      shown: document.documentElement.getAttribute("data-gitquiet-shown"),
+      shown: document.documentElement.getAttribute("data-gitace-shown"),
       anchors: root.querySelectorAll("a").length,
       pulls: root.querySelectorAll('a[href*="/pull/"]').length,
       text: root.textContent.slice(0, 200)

@@ -165,7 +165,7 @@ export const CommitScreen = ({
           the window and a panel welded to that edge reads as part of the
           browser. Twenty-four is one number where the bar above reads three —
           sixteen, twenty-four and thirty-two by width — and it landed on top of
-          the inset `#gitquiet-root` already carries, so the panel started forty
+          the inset `#gitace-root` already carries, so the panel started forty
           pixels in on a narrow window against a bar at sixteen. The shell owns
           the frame now, on the container every screen has: see `widths.css`. */}
       <div ref={setOurs} className="flex flex-col pt-2">

@@ -453,7 +453,7 @@ document before the screen replacing it has anywhere to stand.
 That broke the sweep. A takeover finds the screen it replaces by searching the document for
 the leaving mark, and a container their router already removed is in no document to be found.
 Nothing told that React tree it was off the page, so it stayed mounted and its bar stayed in
-`#gitquiet-bar` beside the new one. Two bars, and it needs their router to be quick, which is
+`#gitace-bar` beside the new one. Two bars, and it needs their router to be quick, which is
 why it could not be reproduced on purpose: four clean transitions in a row, then one double.
 
 `mount.ts` holds on to the container it marked, and takes it off the page when it settles and

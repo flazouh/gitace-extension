@@ -28,7 +28,7 @@ const drawn = async (what) => {
     // Wrapped, because these run one after another in the page's own global
     // scope, and a second `const` of the same name is a syntax error there.
     const ready = await js(String.raw`(() => {
-      const root = document.getElementById('gitquiet-root')
+      const root = document.getElementById('gitace-root')
       if (root === null) return false
       return ${
         what === "list"
@@ -43,7 +43,7 @@ const drawn = async (what) => {
 
 const state = () =>
   js(String.raw`
-    const root = document.getElementById('gitquiet-root')
+    const root = document.getElementById('gitace-root')
     const seen = (element) => {
       if (element === null) return false
       for (let at = element; at !== null; at = at.parentElement) {
@@ -59,7 +59,7 @@ const state = () =>
       path: location.pathname,
       mounted: root !== null,
       inTheirLayout: root?.parentElement?.getAttribute('data-testid') ?? null,
-      gating: document.documentElement.hasAttribute('data-gitquiet-gating'),
+      gating: document.documentElement.hasAttribute('data-gitace-gating'),
       courts: [...(root?.querySelectorAll('section') ?? [])]
         .map((region) => (region.querySelector('h2')?.textContent ?? '').trim())
         .filter((name) => name.length > 0),
@@ -115,7 +115,7 @@ if (!onDashboard.path.startsWith("/pulls")) {
 // 2. Back out of it, into a pull request. Ours is on the page now, which is the
 //    case that used to be refused.
 const opened = await js(String.raw`
-  const row = document.querySelector('#gitquiet-root a[href*="/pull/"]')
+  const row = document.querySelector('#gitace-root a[href*="/pull/"]')
   if (row === null) return 'no pull request row to press'
   row.click()
   return 'pressed ' + new URL(row.href, location.origin).pathname

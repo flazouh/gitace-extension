@@ -9,9 +9,9 @@ const primer = () => readFileSync("src/ui/primer.css", "utf8")
 describe("standing outside the root", () => {
   test("makes a host at the end of the page, marked as ours", () => {
     const it = page()
-    const host = outsideHost(it, "gitquiet-over")
+    const host = outsideHost(it, "gitace-over")
 
-    expect(host.id).toBe("gitquiet-over")
+    expect(host.id).toBe("gitace-over")
     expect(host.hasAttribute(OUTSIDE)).toBe(true)
     expect(it.body.lastElementChild).toBe(host)
   })
@@ -19,18 +19,18 @@ describe("standing outside the root", () => {
   test("answers with the same host twice, rather than stacking them up", () => {
     const it = page()
 
-    expect(outsideHost(it, "gitquiet-over")).toBe(outsideHost(it, "gitquiet-over"))
-    expect(it.querySelectorAll("#gitquiet-over").length).toBe(1)
+    expect(outsideHost(it, "gitace-over")).toBe(outsideHost(it, "gitace-over"))
+    expect(it.querySelectorAll("#gitace-over").length).toBe(1)
   })
 
   test("lists every host of ours, which is what the theme paints", () => {
     const it = page()
-    outsideHost(it, "gitquiet-bar")
-    outsideHost(it, "gitquiet-over")
+    outsideHost(it, "gitace-bar")
+    outsideHost(it, "gitace-over")
     // Theirs, which must not be painted with our tokens.
     it.body.appendChild(it.createElement("div"))
 
-    expect(ourOutsides(it).map((one) => one.id)).toEqual(["gitquiet-bar", "gitquiet-over"])
+    expect(ourOutsides(it).map((one) => one.id)).toEqual(["gitace-bar", "gitace-over"])
   })
 })
 
@@ -40,7 +40,7 @@ describe("standing outside the root", () => {
  * Primer declares its utilities `!important` — `.border` is
  * `1px solid var(--borderColor-default) !important`, `.rounded-lg` is six pixels the same way —
  * and they are on the page before our stylesheet is. Every one of those arguments is answered in
- * `primer.css`, and every answer was scoped to `#gitquiet-root`, which is where this interface
+ * `primer.css`, and every answer was scoped to `#gitace-root`, which is where this interface
  * was when they were written.
  *
  * It is not all there any more. The settings sheet, the toaster and the hover cards hang in

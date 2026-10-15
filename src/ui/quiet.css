@@ -10,13 +10,13 @@
  * The floor, which is the one rule here that puts something on their page rather than taking
  * something off ours.
  *
- * `--gitquiet-floor` is written onto `<html>` by `Theme.tsx`, and it is one value under a name
- * nothing of theirs reads: the token set stays on `#gitquiet-root`, because their chrome reads
+ * `--gitace-floor` is written onto `<html>` by `Theme.tsx`, and it is one value under a name
+ * nothing of theirs reads: the token set stays on `#gitace-root`, because their chrome reads
  * Primer's names and ours would restyle it. The fallback is their own variable, so the moment
  * between their paint and ours is their colour rather than no colour.
  *
- * Two flags, and they are not the same claim. `[data-gitquiet-taken]` is a screen that is up.
- * `[data-gitquiet-gating]` is a screen on its way: set on the press, lifted when that screen is
+ * Two flags, and they are not the same claim. `[data-gitace-taken]` is a screen that is up.
+ * `[data-gitace-gating]` is a screen on its way: set on the press, lifted when that screen is
  * in place or gives up. A soft navigation to a page we do not draw carries neither — `mount.ts`
  * takes them off — and their floor comes back with them, so nothing here has to be undone.
  *
@@ -29,16 +29,16 @@
  * transparent, so `body` is the whole of it in one place and the two extra layers below are
  * Home's alone, where the feed sits on their inset inside a wrapper of their default.
  */
-html[data-gitquiet-taken],
-html[data-gitquiet-taken] body,
-html[data-gitquiet-gating],
-html[data-gitquiet-gating] body {
-  background-color: var(--gitquiet-floor, var(--bgColor-default)) !important;
+html[data-gitace-taken],
+html[data-gitace-taken] body,
+html[data-gitace-gating],
+html[data-gitace-gating] body {
+  background-color: var(--gitace-floor, var(--bgColor-default)) !important;
 }
 
-html[data-gitquiet-taken] div.color-bg-default[data-gitquiet-within],
-html[data-gitquiet-taken] div.feed-background[data-gitquiet-within] {
-  background-color: var(--gitquiet-floor, var(--bgColor-default)) !important;
+html[data-gitace-taken] div.color-bg-default[data-gitace-within],
+html[data-gitace-taken] div.feed-background[data-gitace-within] {
+  background-color: var(--gitace-floor, var(--bgColor-default)) !important;
 }
 
 /*
@@ -53,8 +53,8 @@ html[data-gitquiet-taken] div.feed-background[data-gitquiet-within] {
  * the floor, so a page we do not draw keeps its footer without anything being
  * undone.
  */
-html[data-gitquiet-taken] footer.footer,
-html[data-gitquiet-gating] footer.footer {
+html[data-gitace-taken] footer.footer,
+html[data-gitace-gating] footer.footer {
   display: none;
 }
 
@@ -64,14 +64,14 @@ html[data-gitquiet-gating] footer.footer {
  * cover it.
  *
  * Two openings: `html[…]` for the extension (attribute still written on
- * `<html>` when the Files host is not under `data-gitquiet-outside`), and
- * `[data-gitquiet-outside]:has([data-gitquiet-reviewing])` for Held / marketing
+ * `<html>` when the Files host is not under `data-gitace-outside`), and
+ * `[data-gitace-outside]:has([data-gitace-reviewing])` for Held / marketing
  * mounts where the attribute stays on the Files host and the bar lives inside
  * the outside root. Scoped `:has` on the outside host — not `html:has` — so the
  * document is not marked as wholly affected.
  */
-html[data-gitquiet-reviewing] :is(#gitquiet-bar, [data-gitquiet-bar]),
-[data-gitquiet-outside]:has([data-gitquiet-reviewing]) :is(#gitquiet-bar, [data-gitquiet-bar]) {
+html[data-gitace-reviewing] :is(#gitace-bar, [data-gitace-bar]),
+[data-gitace-outside]:has([data-gitace-reviewing]) :is(#gitace-bar, [data-gitace-bar]) {
   visibility: hidden;
   pointer-events: none;
 }

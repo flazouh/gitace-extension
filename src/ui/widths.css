@@ -16,7 +16,7 @@
  * these differ from the generated sheet. That sheet hides GitHub's regions and has to
  * speak for the page being arrived at from the instant of the press. These take a
  * measure off a region of theirs, and the only thing that says whether to is whether a
- * screen of ours is standing in it — so each names `#gitquiet-root` inside the region
+ * screen of ours is standing in it — so each names `#gitace-root` inside the region
  * it measures, and says nothing anywhere else.
  *
  * The screen's own name was the answer before this and was wrong wherever two screens
@@ -50,26 +50,26 @@
  * card under it.
  *
  * Declared for the page rather than for the interface, because the bar is deliberately not
- * inside `#gitquiet-root` — it stands above the region we replaced — so a value on the root
- * could not reach it. Our own name, like `--gitquiet-floor`, so nothing of theirs reads it.
+ * inside `#gitace-root` — it stands above the region we replaced — so a value on the root
+ * could not reach it. Our own name, like `--gitace-floor`, so nothing of theirs reads it.
  *
  * The window does not declare this, and `WorkingSetScreen` falls back to the sixteen pixels it
  * always had there: a window has an edge of its own and its bar spans it, and sixteen is the
  * narrow end of this same scale.
  */
 :root {
-  --gitquiet-gutter: 16px;
+  --gitace-gutter: 16px;
 }
 
 @media (min-width: 768px) {
   :root {
-    --gitquiet-gutter: 24px;
+    --gitace-gutter: 24px;
   }
 }
 
 @media (min-width: 1012px) {
   :root {
-    --gitquiet-gutter: 32px;
+    --gitace-gutter: 32px;
   }
 }
 
@@ -89,15 +89,15 @@
  * It cannot reach anything of GitHub's: they have no element with this id, which is the whole
  * of what keeps it off their page.
  *
- * It was `html[data-gitquiet-taken] #gitquiet-root` until the interface moved into a shadow
+ * It was `html[data-gitace-taken] #gitace-root` until the interface moved into a shadow
  * root, and `html` is the document's element — a shadow tree has none, so the rule matched
  * nothing and every screen lost its gutter, flush to the edge of the window with the bar above
  * it still inset. The takeover attribute was never load-bearing here, as the line above already
  * says: their page has no element with this id to reach. So it goes, and the id stands on its
  * own in both trees.
  */
-#gitquiet-root {
-  padding-inline: var(--gitquiet-gutter);
+#gitace-root {
+  padding-inline: var(--gitace-gutter);
 }
 
 /**
@@ -117,7 +117,7 @@
  *
  * Their inset goes with their measure. It is the frame this page was read in and
  * it was the right number — sixteen, twenty-four and thirty-two by width, which
- * is where `--gitquiet-gutter` comes from — but a frame owned by the region we
+ * is where `--gitace-gutter` comes from — but a frame owned by the region we
  * draw into is a frame only this one screen has. Ours is on the container now, so
  * theirs would be counted twice: sixty-four pixels on a wide window, and the code
  * pays for every one of them.
@@ -127,7 +127,7 @@
  * their system carries the flag, so no selector of ours outweighs it. Measured
  * without it: their thirty-two stood and the first card sat at sixty-four.
  */
-html[data-gitquiet-taken] #diff-comparison-viewer-container[data-gitquiet-within] {
+html[data-gitace-taken] #diff-comparison-viewer-container[data-gitace-within] {
   max-width: none;
   padding-inline: 0 !important;
 }
@@ -136,7 +136,7 @@ html[data-gitquiet-taken] #diff-comparison-viewer-container[data-gitquiet-within
  * A person's pages, where their own band is the region and carries their inset.
  *
  * `container-xl` holds the profile to 1280 pixels and insets it by sixteen, twenty-four
- * or thirty-two — the same three numbers `--gitquiet-gutter` is taken from, which is why
+ * or thirty-two — the same three numbers `--gitace-gutter` is taken from, which is why
  * the inset has to go rather than be doubled. Measured on a pull request first, where the
  * same pairing put the first card sixty-four pixels in on a wide window.
  *
@@ -147,7 +147,7 @@ html[data-gitquiet-taken] #diff-comparison-viewer-container[data-gitquiet-within
  * `!important` because theirs is: the number arrives from `tmp-px-3 tmp-px-md-4
  * tmp-px-lg-5`, and a utility class in their system carries the flag.
  */
-html[data-gitquiet-taken] main div.container-xl[data-gitquiet-within] {
+html[data-gitace-taken] main div.container-xl[data-gitace-within] {
   padding-inline: 0 !important;
 }
 
@@ -160,8 +160,8 @@ html[data-gitquiet-taken] main div.container-xl[data-gitquiet-within] {
  * count, a face and a time on one line. Every pixel taken away is a title
  * truncated earlier.
  */
-html[data-gitquiet-taken]
-  [data-testid="pulls-dashboard-surface-layout"][data-gitquiet-within] {
+html[data-gitace-taken]
+  [data-testid="pulls-dashboard-surface-layout"][data-gitace-within] {
   max-width: none;
 }
 
@@ -190,20 +190,20 @@ html[data-gitquiet-taken]
  * is not enough against a centred cross axis; `align-self: stretch` is the line that
  * answers it.
  */
-html[data-gitquiet-taken] div.feed-background > div[data-gitquiet-within],
-html[data-gitquiet-taken] div.feed-content[data-gitquiet-within],
-html[data-gitquiet-taken]
-  div.dashboard-route.feed-main__universe[data-gitquiet-within],
-html[data-gitquiet-taken] main[data-gitquiet-within],
-html[data-gitquiet-taken]
-  main[data-gitquiet-within]
-  > div[data-gitquiet-within],
-html[data-gitquiet-taken] #dashboard.dashboard[data-gitquiet-within] {
+html[data-gitace-taken] div.feed-background > div[data-gitace-within],
+html[data-gitace-taken] div.feed-content[data-gitace-within],
+html[data-gitace-taken]
+  div.dashboard-route.feed-main__universe[data-gitace-within],
+html[data-gitace-taken] main[data-gitace-within],
+html[data-gitace-taken]
+  main[data-gitace-within]
+  > div[data-gitace-within],
+html[data-gitace-taken] #dashboard.dashboard[data-gitace-within] {
   max-width: none;
   width: 100%;
 }
 
-html[data-gitquiet-taken] main[data-gitquiet-within] {
+html[data-gitace-taken] main[data-gitace-within] {
   align-self: stretch;
 }
 
@@ -217,7 +217,7 @@ html[data-gitquiet-taken] main[data-gitquiet-within] {
  * The same element the measure rule above names, and by the same class rather than by the
  * `tmp-` one beside it, which is theirs to delete.
  */
-html[data-gitquiet-taken] div.feed-content[data-gitquiet-within] {
+html[data-gitace-taken] div.feed-content[data-gitace-within] {
   padding-inline: 0;
 }
 
@@ -238,9 +238,9 @@ html[data-gitquiet-taken] div.feed-content[data-gitquiet-within] {
  * page of theirs that has finished loading is left entirely alone. It is written long
  * enough to outweigh theirs: an override that loses on specificity is not an override.
  */
-html[data-gitquiet-taken]
+html[data-gitace-taken]
   .feed-content
   .dashboard-route.feed-main__universe:not(:has([partial-name].loaded))
-  main[data-gitquiet-within] {
+  main[data-gitace-within] {
   display: block;
 }

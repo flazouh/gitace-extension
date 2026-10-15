@@ -1,4 +1,6 @@
+import { Effect } from "effect"
 import type { Store } from "../ports/Settings"
+import { carriedSync } from "./browserRenaming"
 import { settingsStore } from "./store"
 
 /**
@@ -23,9 +25,19 @@ export const browserSettings = (): Store => {
   const area = browser.storage?.sync
   if (area === undefined) return settingsStore(undefined)
 
-  return settingsStore({
+  const store = settingsStore({
     get: (key) => area.get(key),
     set: (items) => area.set(items),
     onChanged: area.onChanged
   })
+
+  // The settings may still sit under their name from before the rename to
+  // GitAce Extension. Waited on before the first read and the first write, so
+  // neither can run ahead of the carry: see `browserRenaming.ts`.
+  const carried = carriedSync()
+  return {
+    read: Effect.andThen(carried, store.read),
+    write: (settings) => Effect.andThen(carried, store.write(settings)),
+    watch: store.watch
+  }
 }

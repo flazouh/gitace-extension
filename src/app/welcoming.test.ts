@@ -22,7 +22,7 @@ describe("the page the extension opens by itself", () => {
 
   /*
    * Chrome reports every reload of an unpacked build as an install, so without this a
-   * developer gets a tab to gitquiet.com on each save.
+   * developer gets a tab to gitace.dev on each save.
    */
   test("opens nothing while the extension is being built", () => {
     expect(welcomeFor("install", { development: true })).toBeNull()

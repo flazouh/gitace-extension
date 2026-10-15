@@ -111,7 +111,7 @@ export const Palette = ({
             type="text"
             role="combobox"
             aria-expanded="true"
-            aria-controls="gitquiet-found"
+            aria-controls="gitace-found"
             aria-label="Find a repository, a pull request or an issue"
             placeholder={
               inside === undefined
@@ -138,7 +138,7 @@ export const Palette = ({
         ) : (
           <ul
             ref={list}
-            id="gitquiet-found"
+            id="gitace-found"
             role="listbox"
             /*
              * Eight rows and then it scrolls, rather than a dialog that grows to twenty and covers

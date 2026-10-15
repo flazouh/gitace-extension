@@ -36,7 +36,7 @@ const session = await withExtension(PAGE, EXTENSION)
 
 const warm = (at: (typeof REPOS)[number], exact = false) => `
   chrome.runtime.sendMessage({
-    kind: "gitquiet/ledger-warm",
+    kind: "gitace/ledger-warm",
     owner: ${JSON.stringify(at.owner)},
     repo: ${JSON.stringify(at.repo)},
     sha: ${JSON.stringify(at.sha)},
@@ -64,7 +64,7 @@ try {
         places?: ReadonlyArray<{ path: string; writing: { name: string; line: number } }>
       }>(`
         chrome.runtime.sendMessage({
-          kind: "gitquiet/ledger-names",
+          kind: "gitace/ledger-names",
           owner: ${JSON.stringify(at.owner)},
           repo: ${JSON.stringify(at.repo)},
           sha: ${JSON.stringify(at.sha)},
@@ -86,7 +86,7 @@ try {
         ? Promise.resolve({ uses: [], ready: false })
         : session.evaluateInExtension<{ uses?: ReadonlyArray<unknown>; ready?: boolean }>(`
             chrome.runtime.sendMessage({
-              kind: "gitquiet/ledger-across",
+              kind: "gitace/ledger-across",
               owner: ${JSON.stringify(at.owner)},
               repo: ${JSON.stringify(at.repo)},
               sha: ${JSON.stringify(at.sha)},

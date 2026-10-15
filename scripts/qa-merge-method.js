@@ -21,7 +21,7 @@ await gotoAndWait(PULL, { timeout: 30, settle: 3 });
 await wait(3);
 
 const said = await js(String.raw`(() => {
-  const root = document.getElementById("gitquiet-root")
+  const root = document.getElementById("gitace-root")
   if (root === null) return { mounted: false }
 
   const section = [...root.querySelectorAll("section, div")].find(
@@ -61,14 +61,14 @@ await cdp("Emulation.setDeviceMetricsOverride", {
 await wait(2);
 
 const box = await js(String.raw`(() => {
-  const root = document.getElementById("gitquiet-root")
+  const root = document.getElementById("gitace-root")
   const heading = [...root.querySelectorAll("h2, h3")].find((one) => one.textContent.trim() === "Merge")
   /*
    * From the heading down to the last control, rather than from any one
    * ancestor's rectangle. The card sits in a column of sections and no single
    * element's box covers the heading and the row of buttons both.
    */
-  const buttons = [...document.querySelectorAll("#gitquiet-root button")].filter((one) =>
+  const buttons = [...document.querySelectorAll("#gitace-root button")].filter((one) =>
     /Squash and merge|Close pull request/.test(one.innerText)
   )
   const top = heading.getBoundingClientRect()

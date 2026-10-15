@@ -6,7 +6,7 @@
  *     bun run build && ego-browser nodejs < scripts/one-copy.js --back   # on again
  *
  * Every measurement here is worthless without it. A copy installed from the
- * store attaches on navigation and wins `#gitquiet-root`, so a run that installs
+ * store attaches on navigation and wins `#gitace-root`, so a run that installs
  * the build under test and never checks again reports the store's numbers under
  * the branch's name. It did, twice, before this existed.
  *
@@ -95,7 +95,7 @@ for (const one of them) cliLog(`${one.on ? "on " : "off"}  ${one.id}  ${one.name
  * unpacked one is derived from the path, so a build in a worktree has a
  * different one and a list written by id would quietly leave it running.
  */
-const ours = them.filter((one) => /gitquiet/i.test(one.name ?? ""))
+const ours = them.filter((one) => /gitace/i.test(one.name ?? ""))
 
 for (const one of ours) {
   const wanted = BACK ? one.id !== mine : one.id === mine
@@ -105,7 +105,7 @@ for (const one of ours) {
 }
 
 for (const one of await listThem()) {
-  if (/gitquiet/i.test(one.name ?? "")) cliLog(`${one.on ? "on " : "off"}  ${one.id}  ${one.name}`)
+  if (/gitace/i.test(one.name ?? "")) cliLog(`${one.on ? "on " : "off"}  ${one.id}  ${one.name}`)
 }
 
 if (BACK) {

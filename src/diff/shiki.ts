@@ -232,5 +232,5 @@ export const createHighlighter = (options: {
  * policy, and is where this goes if the second is ever worth chasing.
  */
 export const createOnigurumaEngine = (): never => {
-  throw new Error("gitquiet highlights with the JavaScript engine; GitHub's CSP refuses WASM")
+  throw new Error("GitAce Extension highlights with the JavaScript engine; GitHub's CSP refuses WASM")
 }

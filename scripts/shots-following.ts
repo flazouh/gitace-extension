@@ -10,7 +10,7 @@
  * and no key. The first run of this photographed four identical screens and
  * called them the outline, the peek and two other things.
  *
- *     bun run build && GITQUIET_CDP_PROFILE=... bun scripts/shots-following.ts
+ *     bun run build && GITACE_CDP_PROFILE=... bun scripts/shots-following.ts
  */
 import { mkdir, rm } from "node:fs/promises"
 import { PANES, withExtension } from "./chrome"
@@ -22,7 +22,7 @@ const argued = (flag: string): string | undefined => {
 
 const PAGE =
   argued("--page") ??
-  "https://github.com/flazouh/gitquiet/pull/74/files#src/ledger/writings.ts:R161"
+  "https://github.com/flazouh/gitace-extension/pull/74/files#src/ledger/writings.ts:R161"
 const WORD = argued("--word") ?? "kindOf"
 const WRITTEN = argued("--written") ?? "161"
 /**

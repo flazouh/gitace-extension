@@ -47,7 +47,7 @@ try {
     lines: number
   }>(`
     (() => {
-      const root = document.querySelector("#gitquiet-root")
+      const root = document.querySelector("#gitace-root")
       const host = document.querySelector("diffs-container")
       const shadow = host && host.shadowRoot
       return {

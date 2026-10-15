@@ -31,7 +31,7 @@
  * It used to open the list and press a row, timing from a click listener and a
  * `window.__marks` object. That works only while the anchor it presses is the one
  * a reader sees. With the extension installed it is not: the extension draws its
- * own list into `#gitquiet-root` and leaves GitHub's markup in the document,
+ * own list into `#gitace-root` and leaves GitHub's markup in the document,
  * hidden. Those anchors measure 0x0 at the origin, so a coordinate click on
  * `a[href$="/pull/N"]` was landing in the top left corner of the page, on a `div`
  * whose `closest('a')` is null. Nothing was pressed, `location.pathname` never
@@ -101,7 +101,7 @@ const RECORDER = String.raw`
     window.__gq = marks
 
     const timer = setInterval(() => {
-      const root = document.getElementById('gitquiet-root')
+      const root = document.getElementById('gitace-root')
 
       if (root !== null) {
         const headings = root.querySelectorAll('h2').length
@@ -255,7 +255,7 @@ for (const id of await installedHere()) {
  */
 await gotoAndWait(LIST, { timeout: 60, settle: 3 });
 await wait(2);
-if (await js(`!!document.getElementById("gitquiet-root")`)) {
+if (await js(`!!document.getElementById("gitace-root")`)) {
   throw new Error("the interface is still on the page; disable every copy in chrome://extensions first");
 }
 

@@ -31,23 +31,23 @@ const attr = (source: string, name: string): string => {
 
 const titleFromH1 = (name: string, h1: string): string => {
   const stem = h1.replace(/\.$/, "")
-  return `GitQuiet vs ${name}: ${stem.charAt(0).toLowerCase()}${stem.slice(1)}`
+  return `GitAce Extension vs ${name}: ${stem.charAt(0).toLowerCase()}${stem.slice(1)}`
 }
 
 const titleOf = (page: (typeof COMPARED)[number]): string =>
   page.slug === "github-pr-sidebar"
-    ? "GitQuiet vs GitHub PR Sidebar: one screen, not a side panel"
+    ? "GitAce Extension vs GitHub PR Sidebar: one screen, not a side panel"
     : titleFromH1(page.name, page.h1)
 
 const META = {
   prflow:
-    "GitQuiet is in the tab on github.com. PRFlow is a Chromium side panel with a PAT. No extra login. Filed by next action. Not an AI reviewer.",
+    "GitAce Extension is in the tab on github.com. PRFlow is a Chromium side panel with a PAT. No extra login. Filed by next action. Not an AI reviewer.",
   "github-pr-sidebar":
-    "GitQuiet is one screen in the tab. GitHub PR Sidebar is a Chromium side panel with a PAT; clicks open a new tab. Not an AI reviewer.",
+    "GitAce Extension is one screen in the tab. GitHub PR Sidebar is a Chromium side panel with a PAT; clicks open a new tab. Not an AI reviewer.",
   "refined-github":
-    "Refined GitHub polishes github.com. GitQuiet is a queue: every pull request you are in, sorted by next action. No extra login. Not an AI reviewer.",
+    "Refined GitHub polishes github.com. GitAce Extension is a queue: every pull request you are in, sorted by next action. No extra login. Not an AI reviewer.",
   octobox:
-    "Octobox is a hosted notifications inbox with its own login. GitQuiet is on github.com. No extra login. Filed by next action. Not an AI reviewer."
+    "Octobox is a hosted notifications inbox with its own login. GitAce Extension is on github.com. No extra login. Filed by next action. Not an AI reviewer."
 } as const
 
 describe("crawler-visible copy inside #page", () => {
@@ -117,15 +117,15 @@ describe("crawler-visible titles and metas", () => {
       const source = html(`../compare/${page.slug}.html`)
       const href = attr(source, `rel="canonical" href`)
       const og = attr(source, `property="og:url" content`)
-      expect(href).toBe(`https://gitquiet.com/compare/${page.slug}`)
+      expect(href).toBe(`https://gitace.dev/compare/${page.slug}`)
       expect(og).toBe(href)
       return href
     })
     expect(canonicals).toEqual([
-      "https://gitquiet.com/compare/prflow",
-      "https://gitquiet.com/compare/github-pr-sidebar",
-      "https://gitquiet.com/compare/refined-github",
-      "https://gitquiet.com/compare/octobox"
+      "https://gitace.dev/compare/prflow",
+      "https://gitace.dev/compare/github-pr-sidebar",
+      "https://gitace.dev/compare/refined-github",
+      "https://gitace.dev/compare/octobox"
     ])
     expect(new Set(canonicals).size).toBe(4)
   })

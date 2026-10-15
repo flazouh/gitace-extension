@@ -6,7 +6,7 @@ import { CompareScreen } from "./CompareScreen"
 afterEach(cleanup)
 
 const COMPARING: Comparing = {
-  repo: { owner: "flazouh", repo: "gitquiet" },
+  repo: { owner: "flazouh", repo: "gitace-extension" },
   base: "main",
   head: "claude/gist-screen"
 }

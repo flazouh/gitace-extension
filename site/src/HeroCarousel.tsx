@@ -31,7 +31,7 @@ type Slide = {
 const SLIDES: ReadonlyArray<Slide> = [
   {
     src: "/hero/inbox.png",
-    alt: "GitQuiet pull request inbox",
+    alt: "GitAce Extension pull request inbox",
     label: "Inbox",
     live: "working-set"
   },
@@ -148,7 +148,7 @@ export const HeroCarousel = () => {
       ref={rootRef}
       role="region"
       aria-roledescription="carousel"
-      aria-label="GitQuiet product screens"
+      aria-label="GitAce Extension product screens"
       tabIndex={0}
       onKeyDown={onKeyDown}
       onMouseEnter={() => setPaused(true)}

@@ -1,10 +1,10 @@
 <div align="center">
 
-![GitQuiet](site/public/store/marquee.png)
+![GitAce Extension](site/public/store/marquee.png)
 
 **A faster, quieter GitHub.**
 
-[Install for Chrome](https://chromewebstore.google.com/detail/gitquiet/ichobjnihnofjkpoegikjhefmoekaahe) · [gitquiet.com](https://gitquiet.com) · [Licence](#licence)
+[Install for Chrome](https://chromewebstore.google.com/detail/gitace-extension/ichobjnihnofjkpoegikjhefmoekaahe) · [gitace.dev](https://gitace.dev) · [Licence](#licence)
 
 </div>
 
@@ -14,7 +14,7 @@ GitHub splits a pull request by record type: Conversation, Commits, Checks, File
 None of those four tabs answers the question you opened it with, so you read all
 of them and work it out again on the next visit.
 
-GitQuiet is its own interface on that data, and it files everything by what needs
+GitAce Extension is its own interface on that data, and it files everything by what needs
 you. It opens on github.com's own addresses, in Primer tokens and Octicons, so it
 follows whichever theme you already use. Their header, nav and repository tabs
 are left exactly as they are.
@@ -130,7 +130,7 @@ repository does not permit is never on the menu.
 
 ## Privacy
 
-There is no account and no server of ours. GitQuiet uses the GitHub session you
+There is no account and no server of ours. GitAce Extension uses the GitHub session you
 already have, and your code and reviews stay in your browser. Every review,
 comment and merge goes back through GitHub, so a colleague who has never
 installed it sees your work exactly as usual.
@@ -151,10 +151,7 @@ goes to the browser's own console and nowhere else. See
 | Tests | `bun test`, `effect/testing`, Testing Library, happy-dom |
 
 The domain, the ports and the screens do not know what they are running inside.
-That is what lets [`desktop/`](./desktop) import the same `src/domain`, `src/app`,
-`src/ports` and `src/ui` and draw them in an Electrobun window instead of on
-GitHub's page, reaching GitHub through the documented API with a token rather
-than through page routes with a cookie.
+A screen reads ports, and what is behind a port is decided at the edge.
 
 Effect v4 differs from v3 in ways worth knowing before writing code: `Either` is
 `Result`, `Effect.catchAll` and `Effect.orElse` are gone in favour of
@@ -183,7 +180,7 @@ Developer mode, choose Load unpacked, and select `.output/chrome-mv3`. Open any
 pull request.
 
 For Firefox, `RELEASE_VERSION=0.2.1 bun run zip:firefox` writes
-`.output/gitquiet-0.2.1-firefox.zip` and the sources archive beside it. Without
+`.output/gitace-extension-0.2.1-firefox.zip` and the sources archive beside it. Without
 `RELEASE_VERSION` the build carries version `0.0.0`, which is what a local build
 wants and what a store rejects.
 
@@ -201,7 +198,7 @@ bun run build
 RELEASE_VERSION=0.2.1 bun run zip:firefox
 ```
 
-`.output/gitquiet-0.2.1-firefox.zip` comes back out, the same 2.71 MB as the
+`.output/gitace-extension-0.2.1-firefox.zip` comes back out, the same 2.71 MB as the
 uploaded one.
 
 `bun run drift` needs a session cookie and is not part of CI; see
@@ -215,7 +212,7 @@ gitignored.
 - [`CONTEXT.md`](./CONTEXT.md) — the glossary. The code uses these terms exactly.
 - [`docs/spec/`](./docs/spec) — what each screen is for.
 - [`src/ui/place.ts`](./src/ui/place.ts) — how a page is taken over.
-- [`site/`](./site) — the landing page. [`desktop/`](./desktop) — the macOS app.
+- [`site/`](./site) — the landing page.
 
 ## Release
 

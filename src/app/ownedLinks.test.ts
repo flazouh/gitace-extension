@@ -9,16 +9,16 @@ const owned = (link: HTMLAnchorElement) => link.getAttribute("href")?.startsWith
 
 const pageWithLinks = () => {
   const page = document.implementation.createHTMLDocument("GitHub")
-  page.body.innerHTML = '<main><a href="/pull/native">native</a></main><div id="gitquiet-root"><a href="/pull/one">one</a><a href="https://example.com">external</a></div><div id="gitquiet-bar"><a href="/pull/two">two</a></div>'
+  page.body.innerHTML = '<main><a href="/pull/native">native</a></main><div id="gitace-root"><a href="/pull/one">one</a><a href="https://example.com">external</a></div><div id="gitace-bar"><a href="/pull/two">two</a></div>'
   return page
 }
 
 test("existing and added owned links are protected without taking native links", async () => {
   const page = pageWithLinks()
   stop = protectOwnedLinks(page, owned)
-  const root = page.getElementById("gitquiet-root")!
+  const root = page.getElementById("gitace-root")!
   expect(root.querySelector("a")?.getAttribute(OWNED_ROUTE)).toBe("/pull/one")
-  expect(page.getElementById("gitquiet-bar")?.querySelector("a")?.getAttribute(OWNED_ROUTE)).toBe("/pull/two")
+  expect(page.getElementById("gitace-bar")?.querySelector("a")?.getAttribute(OWNED_ROUTE)).toBe("/pull/two")
   expect(page.querySelector("main a")?.hasAttribute(OWNED_ROUTE)).toBe(false)
   expect(root.querySelector('a[href="https://example.com"]')?.hasAttribute(OWNED_ROUTE)).toBe(false)
   const link = page.createElement("a")
@@ -44,13 +44,13 @@ test("native diff updates neither traverse the document nor reconsider existing 
   }
   expect(owns).not.toHaveBeenCalled()
   expect(queries).not.toHaveBeenCalled()
-  expect(page.getElementById("gitquiet-root")?.querySelector("a")?.getAttribute(OWNED_ROUTE)).toBe("/pull/one")
+  expect(page.getElementById("gitace-root")?.querySelector("a")?.getAttribute(OWNED_ROUTE)).toBe("/pull/one")
 })
 
 test("a reused anchor follows its new route and stops intercepting an external destination", async () => {
   const page = pageWithLinks()
   stop = protectOwnedLinks(page, owned)
-  const link = page.getElementById("gitquiet-root")!.querySelector("a")!
+  const link = page.getElementById("gitace-root")!.querySelector("a")!
   link.href = "/pull/changed"
   await turn()
   expect(link.getAttribute(OWNED_ROUTE)).toBe("/pull/changed")
@@ -69,7 +69,7 @@ test("late and replaced roots protect nested additions once", async () => {
   const owns = mock(owned)
   stop = protectOwnedLinks(page, owns)
   const root = page.createElement("div")
-  root.id = "gitquiet-root"
+  root.id = "gitace-root"
   page.body.append(root)
   const group = page.createElement("section")
   root.append(group)
@@ -83,7 +83,7 @@ test("late and replaced roots protect nested additions once", async () => {
   expect(link.getAttribute(OWNED_ROUTE)).toBe("/pull/late")
   expect(owns).toHaveBeenCalledTimes(1)
   const replacement = page.createElement("div")
-  replacement.id = "gitquiet-root"
+  replacement.id = "gitace-root"
   replacement.innerHTML = '<a href="/pull/replacement">replacement</a>'
   root.replaceWith(replacement)
   await turn()
@@ -96,7 +96,7 @@ test("a removed addition and changes after teardown stay untouched", async () =>
   stop = protectOwnedLinks(page, owns)
   await turn()
   owns.mockClear()
-  const root = page.getElementById("gitquiet-root")!
+  const root = page.getElementById("gitace-root")!
   const link = page.createElement("a")
   link.href = "/pull/removed"
   root.append(link)
@@ -117,7 +117,7 @@ test("a link moved into native content before delivery is not intercepted", asyn
   await turn()
   const link = page.createElement("a")
   link.href = "/pull/native-move"
-  page.getElementById("gitquiet-root")!.append(link)
+  page.getElementById("gitace-root")!.append(link)
   page.querySelector("main")!.append(link)
   await turn()
   expect(link.hasAttribute(OWNED_ROUTE)).toBe(false)

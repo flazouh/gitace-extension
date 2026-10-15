@@ -2,7 +2,7 @@ import { writeFileSync } from "node:fs"
 
 const SITE = "http://localhost:5173"
 
-await useOrCreateTaskSpace("gitquiet landing look")
+await useOrCreateTaskSpace("GitAce Extension landing look")
 await openOrReuseTab(SITE, { wait: true, timeout: 30 })
 await gotoAndWait(`${SITE}/?copy=${Date.now()}`, { timeout: 30, settle: 3 })
 

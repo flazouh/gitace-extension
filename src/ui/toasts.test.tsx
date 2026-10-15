@@ -64,7 +64,7 @@ describe("what the interface says when GitHub says no", () => {
      * glass. The fix is where it is mounted, not what number it asks for.
      */
     const { container } = render(
-      <div id="gitquiet-root">
+      <div id="gitace-root">
         <Toasts />
       </div>
     )
@@ -76,9 +76,9 @@ describe("what the interface says when GitHub says no", () => {
     const toaster = document.querySelector("[data-sonner-toaster]")
 
     expect(container.querySelector("[data-sonner-toaster]")).toBeNull()
-    expect(toaster?.closest("#gitquiet-root")).toBeNull()
+    expect(toaster?.closest("#gitace-root")).toBeNull()
     // In one of the marked hosts, which is what the stylesheet and the theme look for.
-    expect(toaster?.closest("[data-gitquiet-outside]")?.id).toBe("gitquiet-over")
+    expect(toaster?.closest("[data-gitace-outside]")?.id).toBe("gitace-over")
   })
 
   test("goes on speaking after one screen hands over to the next", async () => {

@@ -11,7 +11,7 @@
 /** `feat-c -> feat-b -> feat-a -> main`, the top of a stack of three. */
 const PR = "https://github.com/flazouh/stack-probe/pull/10"
 
-const task = await useOrCreateTaskSpace("test gitquiet extension on real PR")
+const task = await useOrCreateTaskSpace("test GitAce Extension on real PR")
 await takeOverTaskSpace(task.id)
 
 await gotoAndWait(PR, { timeout: 30, settle: 3 })
@@ -21,7 +21,7 @@ cliLog(
   JSON.stringify(
     JSON.parse(
       await js(String.raw`(() => {
-        const root = document.getElementById("gitquiet-root")
+        const root = document.getElementById("gitace-root")
         const shadow = root?.shadowRoot ?? root
         if (root === null) return JSON.stringify({ mounted: false })
 

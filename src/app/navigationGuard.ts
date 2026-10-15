@@ -1,6 +1,6 @@
-export const OWNED_ROUTE = "data-gitquiet-owned-route"
-const OWNED_ROUTE_OFFER = "data-gitquiet-owned-route-offer"
-const OWNED_ROUTE_OFFER_PATH = "data-gitquiet-owned-route-offer-path"
+export const OWNED_ROUTE = "data-gitace-owned-route"
+const OWNED_ROUTE_OFFER = "data-gitace-owned-route-offer"
+const OWNED_ROUTE_OFFER_PATH = "data-gitace-owned-route-offer-path"
 import {
   clearPreparedTraversal,
   offerPreparedTraversal,
@@ -15,7 +15,7 @@ import {
  * `theHost` pulls Effect and the whole of `mount` behind it — a cost, and a
  * dependency, that has no business in GitHub's own world.
  */
-const HOST = "gitquiet-host"
+const HOST = "gitace-host"
 
 /**
  * The anchor a press was aimed at, across the shadow boundary.
@@ -24,7 +24,7 @@ const HOST = "gitquiet-host"
  * press landed on that tree's host, not on the element inside it — so the whole
  * interface, living in one shadow root, presses as a single `<div>` and
  * `target.closest("a")` answers null for every link in it. Measured on a
- * repository's pull requests: `target=DIV#gitquiet-host`,
+ * repository's pull requests: `target=DIV#gitace-host`,
  * `target.closest('a')=false`, and the anchor sitting in `composedPath` all
  * along.
  *
@@ -234,7 +234,7 @@ export const guardOwnedRoute = (event: MouseEvent): void => {
 
   if (
     event.type === "pointerdown" &&
-    link.closest("#gitquiet-root, #gitquiet-bar") !== null &&
+    link.closest("#gitace-root, #gitace-bar") !== null &&
     link.hostname === window.location.hostname &&
     link.target !== "_blank" &&
     link.target !== "_new" &&

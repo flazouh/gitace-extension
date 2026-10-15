@@ -26,15 +26,15 @@ describe("resolving appearance", () => {
 })
 
 describe("the colour packs", () => {
-  it("gives gitquiet dark the desktop window's canvas", () => {
+  it("gives GitAce Extension dark the desktop window's canvas", () => {
     // Literals from desktop/src/view/style.css (.dark --surface-1 / --foreground).
-    expect(tokensOf("gitquiet", "dark")["--color-canvas"]).toBe("#171717")
-    expect(tokensOf("gitquiet", "dark")["--color-ink"]).toBe("#f5f5f5")
+    expect(tokensOf("gitace", "dark")["--color-canvas"]).toBe("#171717")
+    expect(tokensOf("gitace", "dark")["--color-ink"]).toBe("#f5f5f5")
   })
 
-  it("gives gitquiet light the desktop window's canvas", () => {
-    expect(tokensOf("gitquiet", "light")["--color-canvas"]).toBe("#FAFAFA")
-    expect(tokensOf("gitquiet", "light")["--color-ink"]).toBe("#171717")
+  it("gives GitAce Extension light the desktop window's canvas", () => {
+    expect(tokensOf("gitace", "light")["--color-canvas"]).toBe("#FAFAFA")
+    expect(tokensOf("gitace", "light")["--color-ink"]).toBe("#171717")
   })
 
   it("matches Cursor Dark Anysphere and Cursor Light", () => {
@@ -58,7 +58,7 @@ describe("the colour packs", () => {
   })
 
   it("answers every token name the screens spend", () => {
-    const tokens = tokensOf("gitquiet", "dark")
+    const tokens = tokensOf("gitace", "dark")
     for (const name of [
       "--color-canvas",
       "--color-inset",
@@ -84,12 +84,12 @@ describe("the colour packs", () => {
 describe("the pack a place wears when nobody asked for one", () => {
   it("is the place's own, which is what match means", () => {
     expect(packOf("match", "github")).toBe("github")
-    expect(packOf("match", "gitquiet")).toBe("gitquiet")
+    expect(packOf("match", "gitace")).toBe("gitace")
   })
 
   it("is the reader's, wherever they are, once they name one", () => {
     expect(packOf("dracula", "github")).toBe("dracula")
-    expect(packOf("gitquiet", "github")).toBe("gitquiet")
+    expect(packOf("gitace", "github")).toBe("gitace")
   })
 
   it("never answers with something the table cannot paint", () => {

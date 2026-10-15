@@ -135,7 +135,7 @@ export const GistListScreen = ({
       */}
       <TheBar where={{ kind: "home" }} />
       {/*
-        No frame of its own. The shell puts one inset on `#gitquiet-root` for every
+        No frame of its own. The shell puts one inset on `#gitace-root` for every
         screen at once — see `widths.test.ts`, which measured two insets on five screens
         before that rule existed and now refuses a screen that grows a third.
       */}

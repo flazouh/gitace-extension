@@ -23,7 +23,7 @@ const hint = (over: Partial<Hint> = {}): Hint => ({
 /** A document of its own per test, so no test can read what another one drew. */
 const aPage = () => new DOMParser().parseFromString("<!doctype html><body>", "text/html")
 
-const shown = (page: Document) => page.getElementById("gitquiet-lingering-hint")?.textContent ?? ""
+const shown = (page: Document) => page.getElementById("gitace-lingering-hint")?.textContent ?? ""
 
 afterEach(() => {
   // The last page read is remembered across frames on purpose, so it is cleared by hand.
@@ -119,7 +119,7 @@ describe("the read-ahead hint", () => {
 
     showLingering(same, page)
 
-    const panel = page.getElementById("gitquiet-lingering-hint")
+    const panel = page.getElementById("gitace-lingering-hint")
     const writes = new MutationObserver(() => {})
     writes.observe(panel as Node, { childList: true, characterData: true, subtree: true })
 
@@ -135,7 +135,7 @@ describe("the read-ahead hint", () => {
   test("draws itself again where the page it was on took it away", () => {
     const page = aPage()
     showLingering(hint({ lingering: new Map([["one", 40]]) }), page)
-    page.getElementById("gitquiet-lingering-hint")?.remove()
+    page.getElementById("gitace-lingering-hint")?.remove()
 
     showLingering(hint({ lingering: new Map([["one", 40]]) }), page)
 

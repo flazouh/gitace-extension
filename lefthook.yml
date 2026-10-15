@@ -14,7 +14,7 @@
 # `root` rather than a `src/**` glob, for two reasons. Lefthook's `**` does not
 # match a file sitting directly in `src`, so `src/**/*.ts` silently inspects
 # nothing and the hook reports success; and the linter has to stay off
-# `scripts`, `desktop` and `tests`, which do not pass these rules and are not
+# `scripts` and `tests`, which do not pass these rules and are not
 # asked to. `root` does both, by handing over only what is under `src`.
 pre-commit:
   commands:

@@ -74,7 +74,7 @@ await useOrCreateTaskSpace("verify palette")
 await freshly(HOME)
 
 const barOnHome = await js(String.raw`
-  const bar = document.getElementById('gitquiet-bar')
+  const bar = document.getElementById('gitace-bar')
   const search = bar?.querySelector('button')
   return JSON.stringify({
     bar: bar === null ? null : Math.round(bar.getBoundingClientRect().height),
@@ -102,7 +102,7 @@ console.log("home palette, 'flowl':", await reading())
 await freshly(PULL)
 
 const barOnPull = await js(String.raw`
-  const bar = document.getElementById('gitquiet-bar')
+  const bar = document.getElementById('gitace-bar')
   return JSON.stringify({
     bar: bar === null ? null : Math.round(bar.getBoundingClientRect().height),
     search: [...(bar?.querySelectorAll('button') ?? [])]

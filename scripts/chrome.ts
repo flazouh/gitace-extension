@@ -71,8 +71,8 @@ const CHROME = findChrome()
  * A probe that must not touch a browser already running sets this to a port
  * nothing else has. The default stays where every existing probe expects it.
  */
-const PORT = Number(process.env["GITQUIET_CDP_PORT"] ?? 9222)
-const PROFILE = process.env["GITQUIET_CDP_PROFILE"] ?? "/tmp/gitquiet-csp-profile"
+const PORT = Number(process.env["GITACE_CDP_PORT"] ?? 9222)
+const PROFILE = process.env["GITACE_CDP_PROFILE"] ?? "/tmp/gitace-csp-profile"
 
 /**
  * Whether to run without a window, which on a machine with no display is the
@@ -88,10 +88,10 @@ const PROFILE = process.env["GITQUIET_CDP_PROFILE"] ?? "/tmp/gitquiet-csp-profil
  * an arrival would have measured a page of zeroes; the new one is the same
  * renderer as a window, without the window.
  *
- * `GITQUIET_CDP_HEADLESS` overrides in both directions, for a machine that has a
+ * `GITACE_CDP_HEADLESS` overrides in both directions, for a machine that has a
  * display and wants to watch, and for one that has a display and would rather not.
  */
-const asked = process.env["GITQUIET_CDP_HEADLESS"]
+const asked = process.env["GITACE_CDP_HEADLESS"]
 const HEADLESS =
   asked === undefined
     ? process.platform === "linux" &&
@@ -370,7 +370,7 @@ export const withExtension = async (
 
   await withinNode(evaluate<boolean>(`
     new Promise((resolve) => {
-      const found = () => document.querySelector("#gitquiet-root") !== null
+      const found = () => document.querySelector("#gitace-root") !== null
       if (found()) return resolve(true)
       const until = Date.now() + 20000
       /*

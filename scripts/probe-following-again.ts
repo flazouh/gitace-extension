@@ -22,7 +22,7 @@ const argued = (flag: string): string | undefined => {
   return at === -1 ? undefined : Bun.argv[at + 1]
 }
 
-const PAGE = argued("--page") ?? "https://github.com/flazouh/gitquiet/commit/3ecd76e"
+const PAGE = argued("--page") ?? "https://github.com/flazouh/gitace-extension/commit/3ecd76e"
 const WORD = argued("--word") ?? "asRemembered"
 /** Long enough that an idle MV3 service worker has been collected. */
 const IDLE = Number(argued("--idle") ?? 45_000)

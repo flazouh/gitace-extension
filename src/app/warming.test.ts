@@ -10,7 +10,7 @@ import { dataToSpare, warmingFor } from "./warming"
  * branch that happens to be new.
  */
 
-const HERE = "https://github.com/flazouh/gitquiet/pull/1"
+const HERE = "https://github.com/flazouh/gitace-extension/pull/1"
 
 const warming = (href: string, at: string = HERE) => warmingFor(href, at)
 
@@ -106,10 +106,10 @@ describe("what lingering near a link reads", () => {
    * reader arrived on and handed it to a router that drops about every other one.
    */
   test("reads a pull request the reader has moved off, rather than declining it", () => {
-    const arrived = "https://github.com/flazouh/gitquiet/pull/1"
+    const arrived = "https://github.com/flazouh/gitace-extension/pull/1"
 
-    expect(warming(arrived, "https://github.com/flazouh/gitquiet/pull/2")?.key).toBe(
-      "flazouh/gitquiet/1"
+    expect(warming(arrived, "https://github.com/flazouh/gitace-extension/pull/2")?.key).toBe(
+      "flazouh/gitace-extension/1"
     )
   })
 

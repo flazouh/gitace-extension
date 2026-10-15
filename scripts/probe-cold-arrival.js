@@ -63,7 +63,7 @@ const arriveAt = async (number) => {
 
   for (let look = 0; look < 45; look += 1) {
     const chars = await Promise.race([
-      js(String.raw`(document.getElementById('gitquiet-root')?.textContent ?? '').length`),
+      js(String.raw`(document.getElementById('gitace-root')?.textContent ?? '').length`),
       new Promise((resolve) => setTimeout(() => resolve(null), 1500))
     ]).catch(() => null)
     if (typeof chars === "number" && chars > DRAWN) return Date.now() - started

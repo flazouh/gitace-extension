@@ -12,20 +12,20 @@
 const EXTENSION = "/Users/alex/Documents/githubpro-notifications/.output/chrome-mv3"
 const LOADS = 6
 
-const task = await useOrCreateTaskSpace("gitquiet inbox double mount")
+const task = await useOrCreateTaskSpace("GitAce Extension inbox double mount")
 
 await cdp("Extensions.loadUnpacked", { path: EXTENSION }, null)
 
 const READ = String.raw`(() => {
-  const roots = [...document.querySelectorAll("#gitquiet-root")]
+  const roots = [...document.querySelectorAll("#gitace-root")]
   return {
     roots: roots.length,
-    for: roots.map((one) => one.getAttribute("data-gitquiet-for")),
+    for: roots.map((one) => one.getAttribute("data-gitace-for")),
     rects: roots.map((one) => {
       const box = one.getBoundingClientRect()
       return [Math.round(box.x), Math.round(box.width)]
     }),
-    courts: [...document.querySelectorAll("#gitquiet-root section[aria-label]")].map(
+    courts: [...document.querySelectorAll("#gitace-root section[aria-label]")].map(
       (one) => one.getAttribute("aria-label")
     ),
     theirRowsShown: [...document.querySelectorAll("li[data-notification-id]")].filter(

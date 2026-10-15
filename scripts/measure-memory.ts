@@ -16,7 +16,7 @@ import { connect, withExtension } from "./chrome"
 
 const PAGE = "https://github.com/microsoft/vscode/pull/327442"
 const EXTENSION = `${import.meta.dir}/../.output/chrome-mv3`
-const PORT = process.env["GITQUIET_CDP_PORT"] ?? "9222"
+const PORT = process.env["GITACE_CDP_PORT"] ?? "9222"
 
 const REPOS = [
   { owner: "sindresorhus", repo: "p-limit", sha: "main" },
@@ -56,7 +56,7 @@ try {
       const ask = () =>
         session.evaluateInExtension<{ read?: number; exactReady?: boolean; why?: string }>(`
           chrome.runtime.sendMessage({
-            kind: "gitquiet/ledger-warm",
+            kind: "gitace/ledger-warm",
             owner: ${JSON.stringify(at.owner)},
             repo: ${JSON.stringify(at.repo)},
             sha: ${JSON.stringify(at.sha)},
@@ -93,7 +93,7 @@ try {
        */
       const asked = await session.evaluateInExtension<{ uses?: ReadonlyArray<unknown> }>(`
         chrome.runtime.sendMessage({
-          kind: "gitquiet/ledger-names",
+          kind: "gitace/ledger-names",
           owner: ${JSON.stringify(at.owner)},
           repo: ${JSON.stringify(at.repo)},
           sha: ${JSON.stringify(at.sha)},
@@ -103,7 +103,7 @@ try {
           const one = names && names.places && names.places[0]
           if (!one) return { uses: [] }
           return chrome.runtime.sendMessage({
-            kind: "gitquiet/ledger-across",
+            kind: "gitace/ledger-across",
             owner: ${JSON.stringify(at.owner)},
             repo: ${JSON.stringify(at.repo)},
             sha: ${JSON.stringify(at.sha)},

@@ -39,7 +39,7 @@ const repository = (nameWithOwner: string) => {
 
 const THEIRS = [
   repository("flowline-labs/flowline"),
-  repository("flazouh/gitquiet"),
+  repository("flazouh/gitace-extension"),
   repository("octo-org/octo-repo")
 ]
 
@@ -117,7 +117,7 @@ describe("the bar, in a repository", () => {
 
     expect([...menu.querySelectorAll("a")].map((one) => one.textContent?.trim())).toEqual([
       "flowline-labs/flowline",
-      "flazouh/gitquiet",
+      "flazouh/gitace-extension",
       "octo-org/octo-repo"
     ])
     expect(menu.querySelector("a")?.getAttribute("href")).toBe("/flowline-labs/flowline")
@@ -132,7 +132,7 @@ describe("the bar, in a repository", () => {
      */
     render(
       <Bar
-        where={{ kind: "repository", owner: "flazouh", repo: "gitquiet" }}
+        where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }}
         tabs={THEIR_TABS}
         repositories={THEIRS}
       />
@@ -142,7 +142,7 @@ describe("the bar, in a repository", () => {
     const menu = screen.getByRole("menu", { name: "Your repositories" })
 
     expect([...menu.querySelectorAll("a")].map((one) => one.textContent?.trim())).toEqual([
-      "flazouh/gitquiet",
+      "flazouh/gitace-extension",
       "flowline-labs/flowline",
       "octo-org/octo-repo"
     ])
@@ -158,7 +158,7 @@ describe("the bar, in a repository", () => {
         tabs={THEIR_TABS}
         repositories={THEIRS}
         pinned={["octo-org/octo-repo"]}
-        lately={["flazouh/gitquiet"]}
+        lately={["flazouh/gitace-extension"]}
       />
     )
 
@@ -168,7 +168,7 @@ describe("the bar, in a repository", () => {
     expect([...menu.querySelectorAll("a")].map((one) => one.textContent?.trim())).toEqual([
       "flowline-labs/flowline",
       "octo-org/octo-repo",
-      "flazouh/gitquiet"
+      "flazouh/gitace-extension"
     ])
   })
 
@@ -589,7 +589,7 @@ describe("what the bar keeps of GitHub's", () => {
     let handedBack = 0
     render(<Bar where={{ kind: "home" }} onStepAside={() => (handedBack += 1)} />)
 
-    await userEvent.click(screen.getByRole("button", { name: "Leave GitQuiet" }))
+    await userEvent.click(screen.getByRole("button", { name: "Leave GitAce Extension" }))
 
     expect(handedBack).toBe(1)
   })
@@ -607,7 +607,7 @@ describe("what the bar keeps of GitHub's", () => {
 
     const controls = screen.getByRole("banner").querySelectorAll("a, button")
     const last = controls[controls.length - 1]
-    expect(last?.getAttribute("aria-label")).toBe("Leave GitQuiet")
+    expect(last?.getAttribute("aria-label")).toBe("Leave GitAce Extension")
   })
 
   test("offers no way out where nothing is holding a page to go back to", () => {
@@ -615,14 +615,14 @@ describe("what the bar keeps of GitHub's", () => {
     // and a button that presses into nothing is the mistake this bar undoes.
     render(<Bar where={{ kind: "home" }} />)
 
-    expect(screen.queryByRole("button", { name: "Leave GitQuiet" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Leave GitAce Extension" })).toBeNull()
   })
 
-  test("offers a bug report that opens the GitQuiet issues board", () => {
+  test("offers a bug report that opens the GitAce Extension issues board", () => {
     render(<Bar where={{ kind: "home" }} />)
 
-    const report = screen.getByRole("link", { name: "Report a problem on GitQuiet" })
-    expect(report.getAttribute("href")).toBe("https://github.com/flazouh/gitquiet/issues")
+    const report = screen.getByRole("link", { name: "Report a problem on GitAce Extension" })
+    expect(report.getAttribute("href")).toBe("https://github.com/flazouh/gitace-extension/issues")
     expect(report.getAttribute("target")).toBe("_blank")
   })
 
@@ -638,10 +638,10 @@ describe("what the bar keeps of GitHub's", () => {
       }
     }
     render(<Bar where={{ kind: "home" }} />)
-    await userEvent.click(screen.getByRole("link", { name: "Report a problem on GitQuiet" }))
+    await userEvent.click(screen.getByRole("link", { name: "Report a problem on GitAce Extension" }))
     ;(globalThis as unknown as { browser?: unknown }).browser = prior
     expect(asked).toEqual([
-      { kind: "gitquiet/open-tab", url: "https://github.com/flazouh/gitquiet/issues" }
+      { kind: "gitace/open-tab", url: "https://github.com/flazouh/gitace-extension/issues" }
     ])
   })
 
@@ -742,7 +742,7 @@ describe("the way back and the way forward", () => {
     render(<Bar where={REPOSITORY} onBack={() => undefined} onStepAside={() => undefined} />)
 
     const back = screen.getByRole("button", { name: "Back" })
-    const out = screen.getByRole("button", { name: "Leave GitQuiet" })
+    const out = screen.getByRole("button", { name: "Leave GitAce Extension" })
 
     expect(back).not.toBe(out)
     expect(back.compareDocumentPosition(out) & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0)
@@ -886,7 +886,7 @@ describe("the bar, in a window rather than in a tab", () => {
      * no address bar, and GitHub's dashboard where the interface had been.
      */
     let went = 0
-    render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitquiet" }} onHome={() => (went += 1)} />)
+    render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }} onHome={() => (went += 1)} />)
 
     const home = screen.getByLabelText("Home")
     expect(home.tagName).toBe("BUTTON")
@@ -897,7 +897,7 @@ describe("the bar, in a window rather than in a tab", () => {
   })
 
   test("keeps the address where nothing says otherwise, which is every page", () => {
-    render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitquiet" }} />)
+    render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }} />)
 
     expect(screen.getByLabelText("Home").getAttribute("href")).toBe("/")
   })
@@ -911,10 +911,10 @@ describe("the bar, in a window rather than in a tab", () => {
     let went = 0
     render(
       <Bar
-        where={{ kind: "repository", owner: "flazouh", repo: "gitquiet" }}
+        where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }}
         tabs={[
-          { name: "Pull requests", href: "/flazouh/gitquiet/pulls", here: false },
-          { name: "Issues", href: "/flazouh/gitquiet/issues", here: false }
+          { name: "Pull requests", href: "/flazouh/gitace-extension/pulls", here: false },
+          { name: "Issues", href: "/flazouh/gitace-extension/issues", here: false }
         ]}
         onHome={() => (went += 1)}
       />
@@ -927,20 +927,20 @@ describe("the bar, in a window rather than in a tab", () => {
     /* And Issues stays a link, because a repository's issues are a page and nothing in
        this window draws one. */
     expect(screen.getByRole("link", { name: /Issues/ }).getAttribute("href")).toBe(
-      "/flazouh/gitquiet/issues"
+      "/flazouh/gitace-extension/issues"
     )
   })
 
   test("keeps that tab a link on a page, where the list is an address", () => {
     render(
       <Bar
-        where={{ kind: "repository", owner: "flazouh", repo: "gitquiet" }}
-        tabs={[{ name: "Pull requests", href: "/flazouh/gitquiet/pulls", here: false }]}
+        where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }}
+        tabs={[{ name: "Pull requests", href: "/flazouh/gitace-extension/pulls", here: false }]}
       />
     )
 
     expect(screen.getByRole("link", { name: /Pull requests/ }).getAttribute("href")).toBe(
-      "/flazouh/gitquiet/pulls"
+      "/flazouh/gitace-extension/pulls"
     )
   })
 
@@ -958,7 +958,7 @@ describe("the bar, in a window rather than in a tab", () => {
     const tray = screen.getByRole("button", { name: "Signed in as flazouh" })
     expect(tray).toBeDefined()
     expect(
-      tray.compareDocumentPosition(screen.getByRole("button", { name: "Leave GitQuiet" })) &
+      tray.compareDocumentPosition(screen.getByRole("button", { name: "Leave GitAce Extension" })) &
         Node.DOCUMENT_POSITION_PRECEDING
     ).toBeGreaterThan(0)
   })

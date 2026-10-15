@@ -1,5 +1,5 @@
-export const HIGHLIGHT_REQUEST = "gitquiet:highlight-request"
-export const HIGHLIGHT_ANSWER = "gitquiet:highlight-answer"
+export const HIGHLIGHT_REQUEST = "gitace:highlight-request"
+export const HIGHLIGHT_ANSWER = "gitace:highlight-answer"
 
 export type HighlightRequest = {
   readonly kind: typeof HIGHLIGHT_REQUEST

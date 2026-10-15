@@ -47,7 +47,7 @@ describe("extension navigation timing", () => {
     const page = view.document as unknown as Document
     const screen = page.createElement("div")
     const waiting = page.createElement("div")
-    waiting.setAttribute("data-gitquiet-loading", "")
+    waiting.setAttribute("data-gitace-loading", "")
     screen.append(waiting)
     page.body.append(screen)
 
@@ -89,7 +89,7 @@ describe("extension navigation timing", () => {
     const view = new HappyWindow({ url: "https://github.com/pulls/inbox" })
     const page = view.document as unknown as Document
     const screen = page.createElement("div")
-    screen.setAttribute("data-gitquiet-loading", "")
+    screen.setAttribute("data-gitace-loading", "")
     page.body.append(screen)
     let cancelled = 0
     const clearTimeout = view.clearTimeout.bind(view)
@@ -110,7 +110,7 @@ describe("extension navigation timing", () => {
     const view = new HappyWindow({ url: "https://github.com/pulls/inbox" })
     const page = view.document as unknown as Document
     const screen = page.createElement("div")
-    screen.setAttribute("data-gitquiet-loading", "")
+    screen.setAttribute("data-gitace-loading", "")
     page.body.append(screen)
     let expire = () => {}
     const timeoutHandle = view.setTimeout(() => {}, 0)
@@ -125,7 +125,7 @@ describe("extension navigation timing", () => {
     finishNavigation(page, "/owner/repo/pull/2", screen)
     expire()
 
-    expect(page.documentElement.getAttribute("data-gitquiet-navigation-started")).toBeNull()
+    expect(page.documentElement.getAttribute("data-gitace-navigation-started")).toBeNull()
     view.close()
   })
 
@@ -138,6 +138,6 @@ describe("extension navigation timing", () => {
     now = 42.5
     beginTraversalNavigation(target)
 
-    expect(page.documentElement.getAttribute("data-gitquiet-navigation-started")).toBe("42")
+    expect(page.documentElement.getAttribute("data-gitace-navigation-started")).toBe("42")
   })
 })

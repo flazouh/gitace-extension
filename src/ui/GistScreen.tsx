@@ -107,7 +107,7 @@ export const GistScreen = ({
     <>
       <TheBar where={{ kind: "home" }} />
       {/*
-        No frame of its own. The shell puts one inset on `#gitquiet-root` for every screen
+        No frame of its own. The shell puts one inset on `#gitace-root` for every screen
         at once — see `widths.test.ts`.
 
         Aligned to the top rather than stretched: the column on the left is as tall as

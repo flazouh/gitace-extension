@@ -62,7 +62,7 @@ const Inbox = () => (
         <p className="m-0 mt-4 max-w-2xl text-[16px] leading-relaxed text-muted">
           GitHub shipped Inbox at github.com/pulls. The{" "}
           <Quietly at={GITHUB_INBOX_AT}>pull requests dashboard</Quietly> is generally available:
-          review requests, things that need fixing, ready to merge. GitQuiet is that inbox on
+          review requests, things that need fixing, ready to merge. GitAce Extension is that inbox on
           github.com—existing session, no extra login—filed by next action: Needs You, Waiting,
           Running, Settled. Writes go back through GitHub&apos;s own routes.
         </p>
@@ -79,7 +79,7 @@ const Inbox = () => (
         <p className="m-0 mt-4 max-w-2xl text-[16px] leading-relaxed text-muted">
           <Quietly at="/compare/prflow">PRFlow</Quietly> and{" "}
           <Quietly at="/compare/github-pr-sidebar">GitHub PR Sidebar</Quietly> are Chromium side
-          panels that ask for a PAT. They sit beside the tab. GitQuiet is the tab.
+          panels that ask for a PAT. They sit beside the tab. GitAce Extension is the tab.
         </p>
         <p className="m-0 mt-4 max-w-2xl text-[16px] leading-relaxed text-muted">
           Attention Set is a PAT whose-turn popup (Needs you / Waiting, no Running)—a near-miss,
@@ -92,7 +92,7 @@ const Inbox = () => (
         <ul className="m-0 mt-6 flex list-none flex-col gap-3 p-0">
           {COMPARED.map((other) => (
             <li key={other.slug}>
-              <Quietly at={`/compare/${other.slug}`}>GitQuiet vs {other.name}</Quietly>
+              <Quietly at={`/compare/${other.slug}`}>GitAce Extension vs {other.name}</Quietly>
             </li>
           ))}
         </ul>

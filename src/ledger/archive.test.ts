@@ -39,14 +39,14 @@ const gnuFormat = async (): Promise<string> => {
  * repository.
  */
 const made = async (): Promise<Uint8Array> => {
-  const root = `/tmp/gitquiet-archive-${Date.now()}`
+  const root = `/tmp/gitace-archive-${Date.now()}`
   const long = "long".repeat(40)
   const format = await gnuFormat()
-  await Bun.$`mkdir -p ${root}/gitquiet-abc123/src/ui`.quiet()
-  await Bun.write(`${root}/gitquiet-abc123/README.md`, "# A repository\n")
-  await Bun.write(`${root}/gitquiet-abc123/src/ui/place.ts`, "export const place = 1\n")
-  await Bun.write(`${root}/gitquiet-abc123/src/ui/${long}.ts`, "export const long = 2\n")
-  await Bun.$`tar --format=${format} -czf ${root}/out.tar.gz -C ${root} gitquiet-abc123`
+  await Bun.$`mkdir -p ${root}/gitace-abc123/src/ui`.quiet()
+  await Bun.write(`${root}/gitace-abc123/README.md`, "# A repository\n")
+  await Bun.write(`${root}/gitace-abc123/src/ui/place.ts`, "export const place = 1\n")
+  await Bun.write(`${root}/gitace-abc123/src/ui/${long}.ts`, "export const long = 2\n")
+  await Bun.$`tar --format=${format} -czf ${root}/out.tar.gz -C ${root} gitace-abc123`
     .env({ ...process.env, COPYFILE_DISABLE: "1" })
     .quiet()
 
@@ -65,7 +65,7 @@ describe("a repository out of its archive", () => {
     const files = filesIn(await made())
 
     // GitHub writes `{repo}-{sha}/`, which is not a folder the repository has.
-    expect([...files.keys()].some((path) => path.startsWith("gitquiet-abc123/"))).toBe(false)
+    expect([...files.keys()].some((path) => path.startsWith("gitace-abc123/"))).toBe(false)
   })
 
   test("keeps the directories out of it, which are not files anyone opens", async () => {
@@ -108,7 +108,7 @@ describe("a repository out of its archive", () => {
  * mechanisms a tar reaches for then is the whole of what is being tested.
  */
 const wrapped = async (format: string): Promise<Uint8Array> => {
-  const root = `/tmp/gitquiet-archive-${format}-${Date.now()}`
+  const root = `/tmp/gitace-archive-${format}-${Date.now()}`
   const folder = "openrouter-web-2b005925ea970da33cc5020898aa1ba3c50bfd63"
   const deep = "services/cfw-intern-api/src/routes/vault"
   await Bun.$`mkdir -p ${root}/${folder}/${deep}`.quiet()

@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the maintainer, [@flazouh](https://github.com/flazouh), through
-[a private report](https://github.com/flazouh/gitquiet/security/advisories/new),
+[a private report](https://github.com/flazouh/gitace-extension/security/advisories/new),
 which is visible only to the maintainer until it is closed.
 
 All complaints will be reviewed and investigated promptly and fairly. All

@@ -246,7 +246,7 @@ export const standAScreen = (screen: Screen): Standing => {
             adopted = screen
           }
         })
-        const exactRoute = container.getAttribute("data-gitquiet-route")
+        const exactRoute = container.getAttribute("data-gitace-route")
         if (exactRoute !== null) {
           const resume = (event: Event): void => {
             if ((event as CustomEvent<string>).detail !== exactRoute) return

@@ -1,6 +1,6 @@
 # Keep home gating without body-wide style invalidation
 
-The style-invalidation trace names the generated home `body:has(#dashboard.dashboard)` rules when an empty span changes inside GitQuiet. A diagnostic build that replaces only that CSS condition records no body-subtree invalidation in the sampled cycle. The real gate must still wait for the native home dashboard before hiding the page being left.
+The style-invalidation trace names the generated home `body:has(#dashboard.dashboard)` rules when an empty span changes inside GitAce Extension. A diagnostic build that replaces only that CSS condition records no body-subtree invalidation in the sampled cycle. The real gate must still wait for the native home dashboard before hiding the page being left.
 
 Use the existing home region selector for finding the screen. Give its CSS stages the plain body surface. For the soft gate, use a body marker maintained by a small document observer. Start it with the shell and stop it on shell invalidation. Read the dashboard by ID and check its class and body membership; do not scan the full page on each update.
 

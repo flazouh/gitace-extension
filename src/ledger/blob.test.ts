@@ -10,7 +10,7 @@ import { blobSha } from "./blob"
  * spending SHA-1 on it rather than something faster.
  */
 const gitSays = async (text: string): Promise<string> => {
-  const path = `/tmp/gitquiet-blob-${Math.random().toString(36).slice(2)}`
+  const path = `/tmp/gitace-blob-${Math.random().toString(36).slice(2)}`
   await Bun.write(path, text)
   const said = await Bun.$`git hash-object ${path}`.text()
   return said.trim()

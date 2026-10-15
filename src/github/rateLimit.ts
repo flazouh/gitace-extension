@@ -23,7 +23,7 @@ export const spentUntil = (status: number, headers: Headers): Date | null => {
  * content script reads ahead and a screen reads on the press; each asking again on its own
  * would spend a refusal each on an allowance already known to be gone.
  */
-const BUDGET = Symbol.for("gitquiet.anonymousBudget")
+const BUDGET = Symbol.for("gitace.anonymousBudget")
 type Budget = { until: number }
 const budget: Budget = ((globalThis as { [BUDGET]?: Budget })[BUDGET] ??= { until: 0 })
 

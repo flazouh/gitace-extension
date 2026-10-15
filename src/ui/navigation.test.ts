@@ -115,7 +115,7 @@ describe("noticing GitHub navigate without loading a page", () => {
       } as unknown as Event)
     }
 
-    expect(page.documentElement.getAttribute("data-gitquiet-navigation-started")).toBe("42")
+    expect(page.documentElement.getAttribute("data-gitace-navigation-started")).toBe("42")
   })
 
   test("reports the new path when the address changes", () => {

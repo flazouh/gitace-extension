@@ -740,7 +740,7 @@ export const Shell = ({
 
   return (
     <KeyboardScope value={ours}>
-      <div ref={setOurs} data-gitquiet-landed={landed ? "" : undefined} className="flex flex-col pt-2">
+      <div ref={setOurs} data-gitace-landed={landed ? "" : undefined} className="flex flex-col pt-2">
         <PageKeys keys={keying} onDismiss={() => setReading(undefined)} />
         {namingRepo ? (
           <GoToName
@@ -828,12 +828,12 @@ export const Shell = ({
               have it, it simply sits still and the page scrolls as one. */}
           {/* Below the bar, not under it: the bar floats over the top of the
               viewport on its own sticky, and it says how tall it is through
-              `--gitquiet-bar-h` — see `TheBar.tsx`. Zero where there is no bar,
+              `--gitace-bar-h` — see `TheBar.tsx`. Zero where there is no bar,
               which is the desktop window and a test. */}
           {preparedStage >= 14 && filesOpen ? (
             <div
-              data-gitquiet-activation="files-panel"
-              className="sticky top-[calc(var(--gitquiet-bar-h,0px)+0.5rem)] flex h-[calc(100vh-var(--gitquiet-bar-h,0px)-1rem)] min-h-[40rem] min-w-0 flex-1"
+              data-gitace-activation="files-panel"
+              className="sticky top-[calc(var(--gitace-bar-h,0px)+0.5rem)] flex h-[calc(100vh-var(--gitace-bar-h,0px)-1rem)] min-h-[40rem] min-w-0 flex-1"
             >
               {bringingIn && readPaths !== undefined && readWholeFile !== undefined ? (
                 <BroughtIn

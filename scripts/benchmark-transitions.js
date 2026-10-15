@@ -149,7 +149,7 @@ const leaveOneCopy = async (path) => {
   // By name, because an unpacked id is derived from its path: a build in a
   // worktree has another one, and a list written by id leaves it running.
   for (const one of await listThem()) {
-    if (!/gitquiet/i.test(one.name ?? "")) continue
+    if (!/gitace/i.test(one.name ?? "")) continue
     if (one.on === (one.id === mine)) continue
     await js(String.raw`(() => {
       const manager = document.querySelector("extensions-manager")
@@ -211,11 +211,11 @@ const SAMPLER = String.raw`(() => {
   }
 
   const look = () => {
-    const root = document.querySelector("#gitquiet-root")
+    const root = document.querySelector("#gitace-root")
     return {
       chars: root === null ? -1 : root.textContent.length,
-      loading: root === null ? -1 : root.querySelectorAll("[data-gitquiet-loading]").length,
-      shown: document.documentElement.getAttribute("data-gitquiet-shown"),
+      loading: root === null ? -1 : root.querySelectorAll("[data-gitace-loading]").length,
+      shown: document.documentElement.getAttribute("data-gitace-shown"),
       path: location.pathname
     }
   }
@@ -306,7 +306,7 @@ const once = async (move, rest) => {
   await wait(BREATHE)
   await gotoAndWait(move.from, { timeout: 60, settle: 4 })
   try {
-    await waitForElement("#gitquiet-root", { timeout: 20 })
+    await waitForElement("#gitace-root", { timeout: 20 })
   } catch {
     return { skipped: "the interface never stood up" }
   }
@@ -324,7 +324,7 @@ const once = async (move, rest) => {
   const lookForSpot = async () => {
     for (let look = 0; look < 10; look++) {
       const found = await js(String.raw`(() => {
-        const root = document.querySelector("#gitquiet-root")
+        const root = document.querySelector("#gitace-root")
         if (root === null) return null
         const links = ${move.find}
         const link = links.find((a) => {
@@ -380,7 +380,7 @@ await focus()
  * Down to one copy answering before anything is read, rather than before anything
  * is timed.
  *
- * Two of them fight over `#gitquiet-root` — each sees the other's tree as a stray,
+ * Two of them fight over `#gitace-root` — each sees the other's tree as a stray,
  * removes it, and unmounts — and what they leave is an empty page. Worse than
  * empty, lately: the pair wedge the renderer between them, and `Page.navigate`
  * timed out three runs in a row against a site that answers in five seconds.
@@ -485,13 +485,13 @@ const stacked = async () => {
       settle: 4
     })
     try {
-      await waitForElement("#gitquiet-root", { timeout: 20 })
+      await waitForElement("#gitace-root", { timeout: 20 })
     } catch {
       continue
     }
     for (let look = 0; look < 8; look++) {
       const has = await js(String.raw`(() => {
-        const root = document.querySelector("#gitquiet-root")
+        const root = document.querySelector("#gitace-root")
         if (root === null) return false
         return [...root.querySelectorAll('a[href*="/pull/"]')]
           .some((a) => !a.pathname.endsWith("/" + ${JSON.stringify(number)}))

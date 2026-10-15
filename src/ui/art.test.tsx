@@ -117,7 +117,7 @@ describe("the icons a screen is drawn in", () => {
     // Asked for by name, the place stops mattering: a reader who wants GitHub's
     // glyphs in a window of ours gets them.
     expect(setOf("github", HUGEICONS)).toBe(OCTICONS)
-    expect(setOf("gitquiet", OCTICONS)).toBe(HUGEICONS)
+    expect(setOf("gitace", OCTICONS)).toBe(HUGEICONS)
   })
 
   test("come from the two set modules, which is the whole of what a set means here", () => {

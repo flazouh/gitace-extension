@@ -64,7 +64,9 @@ as the one being looked at.
 
 The first review finished with v0.3.0, so
 [the public listing](https://addons.mozilla.org/firefox/addon/gitquiet/) answers
-now, and gitquiet.com links it.
+now, and gitace.dev links it. Both addresses keep the `gitquiet` slug Mozilla
+gave the add-on before the rename to GitAce Extension; the slug changes only
+when it is changed on Mozilla's side.
 
 ## What gets built
 
@@ -74,7 +76,6 @@ tag.yml                     release.yml
   write the tag               package   chrome zip, firefox zip, sources zip
   open the release            chrome    Chrome Web Store
                               firefox   Firefox Add-ons, listed
-                              desktop   signed, notarised .dmg
                               safari    Xcode wrapper -> .dmg, and the App Store
 ```
 
@@ -103,7 +104,8 @@ Already set. Four secrets, and a Google Cloud service account behind them.
 
 The account is `cws-publisher@gitquiet-web-store.iam.gserviceaccount.com`, in
 the `gitquiet-web-store` Google Cloud project, with the Chrome Web Store API
-enabled on it. A key alone grants nothing: the dashboard has to hand the account
+enabled on it. Both names are from before the rename and stay, because they are
+the real account and project. A key alone grants nothing: the dashboard has to hand the account
 the publisher, under **Settings**, **Service account**, and it can be taken back
 there just as fast. `bunx wxt submit init` asks for the same four and writes
 them to `.env.submit`, which is not committed.
@@ -129,14 +131,14 @@ Then three secrets:
 
 | Secret                 | Where it comes from                                                                 |
 | ---------------------- | ----------------------------------------------------------------------------------- |
-| `FIREFOX_EXTENSION_ID` | `gitquiet@gitquiet.dev`, the id in `wxt.config.ts`                                  |
+| `FIREFOX_EXTENSION_ID` | `gitquiet@gitquiet.dev`, the id in `wxt.config.ts`, kept through the rename         |
 | `FIREFOX_JWT_ISSUER`   | [Manage API keys](https://addons.mozilla.org/developers/addon/api/key/), JWT issuer |
 | `FIREFOX_JWT_SECRET`   | The same page, JWT secret. Shown once                                               |
 
-### macOS and Safari
+### Safari
 
-Both Apple jobs share one certificate, so these six turn on both at once. They
-need a paid Apple Developer Program membership.
+These six turn on the Safari job. They need a paid Apple Developer Program
+membership.
 
 | Secret                       | Where it comes from                                                                                                      |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -189,6 +191,3 @@ privacy answers, and the trader status the EU asks for.
 Edge takes the Chrome zip unchanged. It needs a Partner Center product, three
 secrets, and a job in `release.yml` shaped like the Chrome one, with
 `--edge-zip`, `--edge-product-id`, `--edge-client-id` and `--edge-api-key`.
-
-An Intel Mac build is `targets` in `desktop/electrobun.config.ts`, set to
-`macos-arm64,macos-x64`.

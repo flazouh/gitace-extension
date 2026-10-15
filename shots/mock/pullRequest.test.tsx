@@ -102,7 +102,7 @@ describe("the pull request peek view", () => {
   test("is the same frame as the pull request, already peeked", () => {
     expect(PULL_REQUEST_PEEK_VIEW.name).toBe("pull-request-peek")
     expect([PULL_REQUEST_PEEK_VIEW.width, PULL_REQUEST_PEEK_VIEW.height]).toEqual([1280, 800])
-    expect(PULL_REQUEST_PEEK_VIEW.ready).toBe("[data-gitquiet-peek]")
+    expect(PULL_REQUEST_PEEK_VIEW.ready).toBe("[data-gitace-peek]")
   })
 
   test("draws the same pull request with a Peek seed", async () => {

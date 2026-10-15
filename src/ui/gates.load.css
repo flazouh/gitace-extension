@@ -11,7 +11,7 @@
  */
 
 /* Their page, for as long as one of ours is drawn over it. */
-html[data-gitquiet-page]:not([data-gitquiet-revealed]) body > *:not(#gitquiet-host):not([data-gitquiet-outside]),
-html[data-gitquiet-page][data-gitquiet-taken] body > *:not(#gitquiet-host):not([data-gitquiet-outside]) {
+html[data-gitace-page]:not([data-gitace-revealed]) body > *:not(#gitace-host):not([data-gitace-outside]),
+html[data-gitace-page][data-gitace-taken] body > *:not(#gitace-host):not([data-gitace-outside]) {
   display: none;
 }

@@ -33,7 +33,7 @@ const Compare = ({ page }: { readonly page: Compared }) => {
 
         <div className="pb-16 pt-10 sm:pt-16">
           <p className="eyebrow m-0">
-            GitQuiet vs {page.name}
+            GitAce Extension vs {page.name}
           </p>
           <h1 className="m-0 mt-4 max-w-3xl text-balance text-[clamp(2.1rem,5.5vw,3.4rem)] font-semibold leading-[1.05] tracking-[-0.04em]">
             {page.h1}
@@ -59,7 +59,7 @@ const Compare = ({ page }: { readonly page: Compared }) => {
             )}
           </div>
           <div>
-            <h2 className="m-0 text-[22px] font-semibold tracking-[-0.02em]">GitQuiet</h2>
+            <h2 className="m-0 text-[22px] font-semibold tracking-[-0.02em]">GitAce Extension</h2>
             <p className="m-0 mt-4 text-[16px] leading-relaxed text-muted">{page.we}</p>
           </div>
         </section>
@@ -75,7 +75,7 @@ const Compare = ({ page }: { readonly page: Compared }) => {
             {others.map((other) => (
               <li key={other.slug}>
                 <Quietly at={`/compare/${other.slug}`}>
-                  GitQuiet vs {other.name}
+                  GitAce Extension vs {other.name}
                 </Quietly>
               </li>
             ))}

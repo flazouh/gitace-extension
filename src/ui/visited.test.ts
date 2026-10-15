@@ -59,7 +59,7 @@ describe("the repositories most recently read", () => {
   })
 
   test("says nowhere when what was kept is not a list of addresses", () => {
-    localStorage.setItem("gitquiet.lately", "{oh no")
+    localStorage.setItem("gitace.lately", "{oh no")
 
     expect(visited()).toEqual([])
   })

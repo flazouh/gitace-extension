@@ -19,7 +19,7 @@ await openOrReuseTab(PAGE, { wait: true, timeout: 60 })
 await new Promise((wake) => setTimeout(wake, 6000))
 
 const found = await js(String.raw`
-  const root = document.getElementById('gitquiet-root')
+  const root = document.getElementById('gitace-root')
   const text = (node) => (node?.textContent ?? '').trim()
   const seen = (element) => {
     if (element === null) return false
@@ -43,9 +43,9 @@ const found = await js(String.raw`
     // Ours is up, and in their layout rather than nailed somewhere else.
     mounted: root !== null,
     inTheirLayout: root?.parentElement?.getAttribute('data-testid') ?? null,
-    taken: document.documentElement.hasAttribute('data-gitquiet-taken'),
-    revealed: document.documentElement.hasAttribute('data-gitquiet-revealed'),
-    gating: document.documentElement.hasAttribute('data-gitquiet-gating'),
+    taken: document.documentElement.hasAttribute('data-gitace-taken'),
+    revealed: document.documentElement.hasAttribute('data-gitace-revealed'),
+    gating: document.documentElement.hasAttribute('data-gitace-gating'),
 
     // What it is showing.
     courts,

@@ -54,7 +54,7 @@ describe("the bar as glass", () => {
      * gap; a margin on the pane would let the page slide up underneath it.
      */
     const rule = glass().slice(glass().indexOf(`${BAR_AT} {`))
-    expect(rule).toContain("padding: 8px var(--gitquiet-gutter) 0")
+    expect(rule).toContain("padding: 8px var(--gitace-gutter) 0")
   })
 
   test("takes the frame across and not above, height being the scarce one", () => {
@@ -72,21 +72,12 @@ describe("the bar as glass", () => {
      * their own feed band was adding on Home, and the inset both columns share. It was
      * twelve, twenty-four and sixteen, and a reader saw a bar at one left edge with a Rail
      * at another twenty-eight pixels in.
-     *
-     * The window wears this file and declares the number itself, which is the whole use of
-     * a token: there are no columns in a window for the bar to start level with, so it
-     * floats on the eight it always did, and the room the traffic lights take is the row's
-     * to hold rather than the pane's.
      */
-    expect(readFileSync("src/ui/widths.css", "utf8")).toContain("--gitquiet-gutter: 16px")
+    expect(readFileSync("src/ui/widths.css", "utf8")).toContain("--gitace-gutter: 16px")
     expect(readFileSync("src/ui/widths.css", "utf8")).toContain("padding-inline: 0")
     expect(readFileSync("src/ui/widths.css", "utf8")).toContain(
-      "padding-inline: var(--gitquiet-gutter)"
+      "padding-inline: var(--gitace-gutter)"
     )
-
-    const window = readFileSync("desktop/src/view/style.css", "utf8")
-    expect(window).toContain("--gitquiet-gutter: 8px")
-    expect(window).toContain("padding-left: calc(var(--lights) - var(--gitquiet-gutter))")
   })
 
   test("is GitHub's own three numbers, so their body needs no rule of ours", () => {
@@ -98,7 +89,7 @@ describe("the bar as glass", () => {
      * we cannot restate — the frame follows it rather than fighting it.
      */
     const frame = readFileSync("src/ui/widths.css", "utf8")
-    const steps = [...frame.matchAll(/--gitquiet-gutter: (\d+)px/g)].map(([, one]) => one)
+    const steps = [...frame.matchAll(/--gitace-gutter: (\d+)px/g)].map(([, one]) => one)
     const breaks = [...frame.matchAll(/@media \(min-width: (\d+)px\)/g)].map(([, one]) => one)
 
     expect(steps).toEqual(["16", "24", "32"])
@@ -148,23 +139,8 @@ describe("the bar as glass", () => {
     expect(slot).toContain("backdrop-filter: none")
   })
 
-  test("is worn by both hosts, off one file rather than off a copy of it", () => {
-    /*
-     * The window floats its bar in the row the traffic lights sit in, and it was given the
-     * corner and the cast by hand: two of these declarations retyped, and the lens left out
-     * on the grounds that a window has nothing behind the pane to bend. It has. What it
-     * reads is the window's own fill, which comes back a shade darker on a dark pack and
-     * lighter on a light one, and the lit edge and the cast are what make the corner read.
-     *
-     * The list scrolling under the row was tried and taken out — the strip left of the pane
-     * belongs to the traffic lights — so the two hosts give the lens different things to
-     * read. They read it with the same four layers, because one pane drawn twice is one
-     * pane that drifts.
-     */
+  test("is worn off one file rather than off a copy of it", () => {
     expect(readFileSync("src/ui/styles.css", "utf8")).toContain('@import "./glass.css"')
-    expect(readFileSync("desktop/src/view/style.css", "utf8")).toContain(
-      '@import "../../../src/ui/glass.css"'
-    )
   })
 
   /*
@@ -258,11 +234,8 @@ describe("the bar as glass", () => {
      */
     const sheet = readFileSync("src/ui/glass.css", "utf8")
 
-    expect(sheet).toContain("html[data-gitquiet-bar-standing] [data-sonner-toaster]")
-    expect(sheet).toContain("--offset-right: var(--gitquiet-gutter) !important")
-    expect(sheet).toContain("--offset-bottom: var(--gitquiet-gutter) !important")
-    // The window keeps the twelve the component asks for: this file is only ever loaded
-    // over a page of theirs.
-    expect(readFileSync("desktop/src/view/style.css", "utf8")).not.toContain("--offset-")
+    expect(sheet).toContain("html[data-gitace-bar-standing] [data-sonner-toaster]")
+    expect(sheet).toContain("--offset-right: var(--gitace-gutter) !important")
+    expect(sheet).toContain("--offset-bottom: var(--gitace-gutter) !important")
   })
 })

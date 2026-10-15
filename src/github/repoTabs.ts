@@ -76,7 +76,7 @@ export const tabsOnPage = (html: string): ReadonlyArray<Tab> => {
  * `hello-world` for as long as the page took to hydrate — and a row that can only ever be found
  * under the name it was read from cannot do that.
  */
-const named = (repo: RepoRef): string => `gitquiet:tabs:${repo.owner}/${repo.repo}`
+const named = (repo: RepoRef): string => `gitace:tabs:${repo.owner}/${repo.repo}`
 
 /**
  * Storage that cannot throw, as `keptRepositories.ts` next door has it.

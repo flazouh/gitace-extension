@@ -334,7 +334,7 @@ const useSource = (
  * The README.
  *
  * Held to a measure, which is the one thing on this page that is. Everywhere else
- * gitquiet takes the width of the window, because a row of file names and commit
+ * GitAce Extension takes the width of the window, because a row of file names and commit
  * messages gains from every pixel. This is prose, and a line of prose that runs
  * fourteen hundred pixels is a line nobody can follow back to its start.
  *

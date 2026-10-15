@@ -3,14 +3,14 @@
  * gives for running the worker's install listener.
  *
  * A page of the site rather than a page of the extension's own. The onboarding is drawn
- * in two places — the app's first window and `gitquiet.com/welcome` — and the web copy
+ * in two places — the app's first window and `gitace.dev/welcome` — and the web copy
  * is the one that can mount the screens and run them instead of showing photographs of
  * them. Served also means it is fixed without anybody updating anything.
  *
  * `from=extension` changes the last beat: there is nothing left to install, so it must
  * not end on a button back to the store they have this second come from.
  */
-export const WELCOME_AT = "https://gitquiet.com/welcome?from=extension"
+export const WELCOME_AT = "https://gitace.dev/welcome?from=extension"
 
 /**
  * The address to open for one of the browser's install reasons, or nothing.
@@ -26,7 +26,7 @@ export const WELCOME_AT = "https://gitquiet.com/welcome?from=extension"
  * else.
  *
  * `development` is not a nicety. Chrome reports every reload of an unpacked build as an
- * install, so a developer running the extension gets a tab to gitquiet.com on each save.
+ * install, so a developer running the extension gets a tab to gitace.dev on each save.
  */
 export const welcomeFor = (reason: string, at: { readonly development: boolean }): string | null =>
   reason === "install" && !at.development ? WELCOME_AT : null

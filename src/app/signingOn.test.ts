@@ -174,7 +174,7 @@ describe("answering their single sign-on without being asked", () => {
    */
   test("asks the reader where something else wrote to its key", () => {
     const tab = aTab()
-    tab.setItem("gitquiet:signed-on:octo-org", "yesterday")
+    tab.setItem("gitace:signed-on:octo-org", "yesterday")
 
     expect(whatTheWallGets(theWall(), byItself, inSession(tab), 1_000).go).toBe("ask")
   })

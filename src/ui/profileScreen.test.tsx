@@ -56,7 +56,7 @@ const who = (): Person => ({
 })
 
 const LIST: ReadonlyArray<ListedRepository> = [
-  row({ repo: "gitquiet", pushedAt: daysAgo(1) }),
+  row({ repo: "gitace-extension", pushedAt: daysAgo(1) }),
   row({ repo: "coadra", pushedAt: daysAgo(3) }),
   row({ repo: "unhog", pushedAt: daysAgo(4) }),
   row({ repo: "liya", pushedAt: daysAgo(5) }),

@@ -5,19 +5,19 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before anything else, please check the same page with GitQuiet turned
+        Before anything else, please check the same page with GitAce Extension turned
         off at `chrome://extensions`. If GitHub does the same thing on its own,
         the bug is theirs and not ours.
 
         For a security problem, do not use this form. Use
-        [a private report](https://github.com/flazouh/gitquiet/security/advisories/new)
+        [a private report](https://github.com/flazouh/gitace-extension/security/advisories/new)
         instead.
 
   - type: dropdown
     id: page
     attributes:
       label: Which page
-      description: Every page GitQuiet draws is listed in `src/ui/place.ts`.
+      description: Every page GitAce Extension draws is listed in `src/ui/place.ts`.
       options:
         - The home dashboard
         - Your pull requests
@@ -66,7 +66,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: GitQuiet version
+      label: GitAce Extension version
       description: From `chrome://extensions`.
       placeholder: "0.2.0"
     validations:
@@ -92,7 +92,7 @@ body:
     attributes:
       label: Before submitting
       options:
-        - label: GitHub does not do this with GitQuiet turned off.
+        - label: GitHub does not do this with GitAce Extension turned off.
           required: true
         - label: I searched the open issues for the same thing.
           required: true

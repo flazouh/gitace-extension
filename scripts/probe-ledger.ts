@@ -25,7 +25,7 @@ const session = await withExtension(PAGE, EXTENSION)
 try {
   const ask = (question: unknown) => `
     chrome.runtime.sendMessage({
-      kind: "gitquiet/ledger-ask",
+      kind: "gitace/ledger-ask",
       path: "shadowing.ts",
       text: ${JSON.stringify(SOURCE)},
       question: ${JSON.stringify(question)}
@@ -58,7 +58,7 @@ try {
   // And the other half, asked of the file it names.
   const named = await session.evaluateInExtension<{ writing?: { name: string; line: number } }>(`
     chrome.runtime.sendMessage({
-      kind: "gitquiet/ledger-ask",
+      kind: "gitace/ledger-ask",
       path: "whole.ts",
       text: ${JSON.stringify(await Bun.file(`${import.meta.dir}/../fixtures/code/whole.ts`).text())},
       question: { of: "writingNamed", name: "two" }
@@ -77,12 +77,12 @@ try {
     why?: string
   }>(`
     chrome.runtime.sendMessage({
-      kind: "gitquiet/ledger-warm",
+      kind: "gitace/ledger-warm",
       owner: "sindresorhus",
       repo: "p-limit",
       sha: "main"
     }).then(() => chrome.runtime.sendMessage({
-      kind: "gitquiet/ledger-beyond",
+      kind: "gitace/ledger-beyond",
       owner: "sindresorhus",
       repo: "p-limit",
       sha: "main",
@@ -93,7 +93,7 @@ try {
 
   const plain = await session.evaluateInExtension<{ why?: string }>(`
     chrome.runtime.sendMessage({
-      kind: "gitquiet/ledger-ask",
+      kind: "gitace/ledger-ask",
       path: "notes.txt",
       text: "nothing here is code",
       question: { of: "writingsIn" }
@@ -145,7 +145,7 @@ try {
       why?: string
     }>(`
       chrome.runtime.sendMessage({
-        kind: "gitquiet/ledger-ask",
+        kind: "gitace/ledger-ask",
         path: ${JSON.stringify(one.path)},
         text: ${JSON.stringify(text)},
         question: ${JSON.stringify({ of: "writingAt", at: { row, column } })}
@@ -255,7 +255,7 @@ try {
       orFrom?: ReadonlyArray<{ name: string; specifier: string }>
     }>(`
       chrome.runtime.sendMessage({
-        kind: "gitquiet/ledger-ask",
+        kind: "gitace/ledger-ask",
         path: ${JSON.stringify(one.from)},
         text: ${JSON.stringify(text)},
         question: ${JSON.stringify({ of: "writingAt", at: { row, column } })}
@@ -278,7 +278,7 @@ try {
 
     const written = await session.evaluateInExtension<{ writing?: { line: number } }>(`
       chrome.runtime.sendMessage({
-        kind: "gitquiet/ledger-ask",
+        kind: "gitace/ledger-ask",
         path: ${JSON.stringify(one.wrote)},
         text: ${JSON.stringify(one.files[one.wrote]!)},
         question: ${JSON.stringify({ of: "writingNamed", name: "" })}
@@ -305,7 +305,7 @@ try {
     why?: string
   }>(`
     chrome.runtime.sendMessage({
-      kind: "gitquiet/ledger-warm",
+      kind: "gitace/ledger-warm",
       owner: "sindresorhus",
       repo: "p-limit",
       sha: "main"
@@ -318,7 +318,7 @@ try {
     places?: ReadonlyArray<{ path: string; writing: { name: string; line: number } }>
   }>(`
     chrome.runtime.sendMessage({
-      kind: "gitquiet/ledger-names",
+      kind: "gitace/ledger-names",
       owner: "sindresorhus",
       repo: "p-limit",
       sha: "main",

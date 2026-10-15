@@ -14,7 +14,7 @@ import { mkdirSync, writeFileSync } from "node:fs"
 const EXTENSION = "/Users/alex/Documents/githubpro-notifications/.output/chrome-mv3"
 const INTO = "/Users/alex/Documents/githubpro-notifications/.tmp"
 
-const task = await useOrCreateTaskSpace("verify gitquiet on the notifications page")
+const task = await useOrCreateTaskSpace("verify GitAce Extension on the notifications page")
 await takeOverTaskSpace(task.id)
 
 await cdp("Extensions.loadUnpacked", { path: EXTENSION }, null)

@@ -19,7 +19,7 @@ cliLog(
   JSON.stringify(
     JSON.parse(
       await js(String.raw`(() => {
-        const root = document.getElementById("gitquiet-root")
+        const root = document.getElementById("gitace-root")
         const shadow = root?.shadowRoot ?? root
         if (root === null) return JSON.stringify({ mounted: false })
 

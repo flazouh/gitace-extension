@@ -20,7 +20,7 @@ const sheetAt = (path: string) => readFileSync(path, "utf8")
 /** The declarations of the rule that draws the ring, by the sheet it is written in. */
 const ringRule = (path: string): string => {
   const sheet = sheetAt(path)
-  const at = sheet.indexOf("#gitquiet-root :focus-visible {")
+  const at = sheet.indexOf("#gitace-root :focus-visible {")
   return at === -1 ? "" : sheet.slice(at, sheet.indexOf("}", at))
 }
 
@@ -71,8 +71,7 @@ const everyFace = function* (): Generator<readonly [Pack, Scheme, ThemeTokens]> 
 }
 
 describe.each([
-  ["on GitHub's page", "src/ui/primer.css"],
-  ["in a window of our own", "desktop/src/view/style.css"]
+  ["on GitHub's page", "src/ui/primer.css"]
 ])("the ring the keyboard leaves %s", (_where, path) => {
   test("is drawn outside the control, where its own fill cannot reach it", () => {
     // A negative offset pulls the ring inside the border box and paints it on

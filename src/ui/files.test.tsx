@@ -584,7 +584,7 @@ describe("a Peek in a diff", () => {
       expect(filled?.textContent).toContain("const two = 2")
     })
     expect(request.fillNote?.("peeking")?.textContent).toContain("line 2")
-    expect(request.fillNote?.("peeking")?.querySelector("[data-gitquiet-peek]")).not.toBeNull()
+    expect(request.fillNote?.("peeking")?.querySelector("[data-gitace-peek]")).not.toBeNull()
   })
 
   test("opens with a seeded Peek without a Shift-press", async () => {
@@ -605,7 +605,7 @@ describe("a Peek in a diff", () => {
 
     await waitFor(() => {
       const filled = request.fillNote?.("peeking")
-      expect(filled?.querySelector("[data-gitquiet-peek]")).not.toBeNull()
+      expect(filled?.querySelector("[data-gitace-peek]")).not.toBeNull()
       expect(filled?.textContent).toContain("const two = 2")
     })
   })

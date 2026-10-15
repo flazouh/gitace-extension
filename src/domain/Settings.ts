@@ -163,10 +163,12 @@ export const THEME_KNOBS = [
     "pack",
     "Theme",
     "Which colour pack paints the interface",
-    "Which colour pack paints the screens. Match is the default and means the place: GitHub's own colours on GitHub's page, where this interface stands under their header and inside their tab, and Gitquiet — this product's own look — in a window of its own. The rest are familiar editor and terminal packs, Dracula, Gruvbox, Tokyo Night, One Dark and others, each with its own light and dark face, and each of them holds everywhere once it is asked for by name.",
+    "Which colour pack paints the screens. Match is the default and means the place: GitHub's own colours on GitHub's page, where this interface stands under their header and inside their tab, and GitAce Extension — this product's own look — in a window of its own. The rest are familiar editor and terminal packs, Dracula, Gruvbox, Tokyo Night, One Dark and others, each with its own light and dark face, and each of them holds everywhere once it is asked for by name.",
     [
       { value: "match", label: "Match the page" },
-      { value: "gitquiet", label: "Gitquiet" },
+      // "GitAce" alone: a chip in a trough of one-word names, where the full name
+      // takes half a row. See the Icons knob below, which says the same.
+      { value: "gitace", label: "GitAce" },
       { value: "anthropic", label: "Anthropic" },
       { value: "cursor", label: "Cursor" },
       { value: "github", label: "GitHub" },
@@ -203,7 +205,8 @@ export const THEME_KNOBS = [
     [
       { value: "match", label: "Match the page" },
       { value: "github", label: "GitHub" },
-      { value: "gitquiet", label: "Gitquiet" }
+      // "GitAce" alone: the full name pushes these three choices onto two rows.
+      { value: "gitace", label: "GitAce" }
     ],
     "match"
   )
@@ -829,6 +832,20 @@ export const DEFAULTS: Settings = {
   aboutWidth: DEFAULT_ABOUT_WIDTH,
 }
 
+/**
+ * Stored words that were renamed with the product, from GitQuiet to GitAce Extension.
+ *
+ * The product's own colour pack and icon set were kept as `gitquiet` and are now
+ * `gitace`. Read through this so a reader who picked them keeps them, rather than
+ * falling back to Match on the first start under the new name. The old word is
+ * spelled here on purpose; nothing writes it any more.
+ */
+const RENAMED_CHOICES: Readonly<Record<string, string>> = { gitquiet: "gitace" }
+
+/** The stored word as this version names it: the new word for a renamed one, the same value otherwise. */
+export const renamedChoice = (stored: unknown): unknown =>
+  typeof stored === "string" && Object.hasOwn(RENAMED_CHOICES, stored) ? RENAMED_CHOICES[stored] : stored
+
 const readGroup = <Knobs extends ReadonlyArray<Knob<string, string>>>(
   knobs: Knobs,
   stored: unknown,
@@ -839,7 +856,7 @@ const readGroup = <Knobs extends ReadonlyArray<Knob<string, string>>>(
       : {}
   return Object.fromEntries(
     knobs.map((one) => {
-      const found = held[one.key]
+      const found = renamedChoice(held[one.key])
       const known = one.choices.some((choice) => choice.value === found)
       return [one.key, known ? found : one.fallback]
     }),

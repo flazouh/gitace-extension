@@ -47,7 +47,7 @@ const STORE = `${REPO}/site/public/store`
 /** Which frame is the site's rather than the store's, and where it goes instead. */
 const ELSEWHERE = { "social-card": `${REPO}/site/public/og.png` }
 
-const task = await useOrCreateTaskSpace("gitquiet store assets")
+const task = await useOrCreateTaskSpace("GitAce Extension store assets")
 
 mkdirSync(STORE, { recursive: true })
 

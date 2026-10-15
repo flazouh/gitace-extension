@@ -74,7 +74,7 @@ export const Tour = ({
   }, [])
 
   return (
-    <section className="tour" aria-label="What GitQuiet does">
+    <section className="tour" aria-label="What GitAce Extension does">
       <div
         className="tour-beat"
         /* Whether this beat has a picture, said out here rather than worked out in CSS:

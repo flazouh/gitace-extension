@@ -125,7 +125,7 @@ describe("the frame before the store has answered", () => {
     // desktop is the case that first put a white panel in a black page.
     document.documentElement.setAttribute("data-color-mode", "dark")
     localStorage.setItem(SCHEME_KEY, "system")
-    localStorage.setItem(PACK_KEY, "gitquiet")
+    localStorage.setItem(PACK_KEY, "gitace")
 
     const container = aContainer()
     document.body.append(container)
@@ -141,7 +141,7 @@ describe("the frame before the store has answered", () => {
     document.documentElement.removeAttribute("data-color-mode")
 
     expect(container.style.getPropertyValue("--color-canvas")).toBe(
-      tokensOf("gitquiet", "dark")["--color-canvas"]
+      tokensOf("gitace", "dark")["--color-canvas"]
     )
   })
 
@@ -164,7 +164,7 @@ describe("the frame before the store has answered", () => {
     expect(container.style.getPropertyValue("--color-canvas")).toBe(
       // Resolved, because the default answer is `match` and a test rendering a
       // screen with no shell around it is the window case.
-      tokensOf(packOf(DEFAULTS.theme.pack, "gitquiet"), "dark")["--color-canvas"]
+      tokensOf(packOf(DEFAULTS.theme.pack, "gitace"), "dark")["--color-canvas"]
     )
   })
 
@@ -207,7 +207,7 @@ describe("the frame before the store has answered", () => {
  *
  * The bar stands outside the screen's root and used to carry a Theme of its own,
  * with nothing telling it whose page it stood on: the screen remembered the pack
- * as `github`, the bar remembered it as `gitquiet`, and whichever wrote last is
+ * as `github`, the bar remembered it as `gitace`, and whichever wrote last is
  * what the next page's first frame wore — the theme changing between the pages.
  * The bar is an outside host now, painted by the one Theme above it.
  */
@@ -228,7 +228,7 @@ describe("the bar wears the theme of the page it stands on", () => {
       root.render(
         <SettingsProvider store={holding(DEFAULTS)}>
           <TheBar
-            where={{ kind: "repository", owner: "flazouh", repo: "gitquiet" }}
+            where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }}
             participant={{ login: "flazouh", faceUrl: Option.none() }}
           />
         </SettingsProvider>
@@ -256,7 +256,7 @@ describe("the bar wears the theme of the page it stands on", () => {
         <SettingsProvider store={holding(dracula)}>
           <Theme element={container} here="github">
             <TheBar
-              where={{ kind: "repository", owner: "flazouh", repo: "gitquiet" }}
+              where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }}
               participant={{ login: "flazouh", faceUrl: Option.none() }}
             />
           </Theme>

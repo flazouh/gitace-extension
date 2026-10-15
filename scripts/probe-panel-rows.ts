@@ -16,7 +16,7 @@ const argued = (flag: string): string | undefined => {
   return at === -1 ? undefined : Bun.argv[at + 1]
 }
 
-const PAGE = argued("--page") ?? "https://github.com/flazouh/gitquiet/blob/main/src/ledger/reaching.ts"
+const PAGE = argued("--page") ?? "https://github.com/flazouh/gitace-extension/blob/main/src/ledger/reaching.ts"
 const WORD = argued("--word") ?? "ENDINGS"
 const EXTENSION = `${import.meta.dir}/../.output/chrome-mv3`
 const META = 4

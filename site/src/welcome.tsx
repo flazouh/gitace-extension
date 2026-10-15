@@ -12,7 +12,7 @@ import { Footer, HELD, Nav, Source, STORE_AT } from "./Shell"
 import "./index.css"
 import "@/ui/onboarding.css"
 
-const LIGHT = { [SETTINGS]: { theme: { appearance: "light", pack: "gitquiet" } } }
+const LIGHT = { [SETTINGS]: { theme: { appearance: "light", pack: "gitace" } } }
 const THEIR_PULLS = "https://github.com/pulls"
 
 const Screen = ({ shot }: { readonly shot: Shot }) => {
@@ -71,7 +71,7 @@ const Welcome = () => {
                 : {
                     title: "Install for Chrome.",
                     says: [
-                      "It works on the pages you already use. Firefox, Safari, and a Mac app too."
+                      "It works on the pages you already use. Firefox and Safari too."
                     ],
                     act: (
                       <a className="tour-press" href={STORE_AT}>

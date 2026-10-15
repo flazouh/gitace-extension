@@ -9,7 +9,7 @@
  *
  * Every observation is a `MutationObserver` batch rather than a frame: `requestAnimationFrame`
  * is throttled in a tab nobody is looking at, and a soft navigation is exactly the moment that
- * would hide. The digest of `#gitquiet-root` is only written down when it *changes*, so the log
+ * would hide. The digest of `#gitace-root` is only written down when it *changes*, so the log
  * is the sequence of distinct things that were on the screen and nothing else.
  *
  * `theirs` is the measurement that matters for the gate: how much of GitHub's own page was
@@ -34,11 +34,11 @@ const RECORDER = String.raw`(() => {
   const at = () => Math.round(performance.now() - started)
 
   const GATES = [
-    "data-gitquiet-page",
-    "data-gitquiet-gating",
-    "data-gitquiet-revealed",
-    "data-gitquiet-taken",
-    "data-gitquiet-shown"
+    "data-gitace-page",
+    "data-gitace-gating",
+    "data-gitace-revealed",
+    "data-gitace-taken",
+    "data-gitace-shown"
   ]
 
   /* Every region either script may be standing in, so "GitHub's own page" is measured
@@ -49,7 +49,7 @@ const RECORDER = String.raw`(() => {
     '[class*="PageLayoutContent"]'
   ]
 
-  const ours = (el) => el.id === "gitquiet-root" || el.querySelector("#gitquiet-root") !== null
+  const ours = (el) => el.id === "gitace-root" || el.querySelector("#gitace-root") !== null
 
   const theirs = () => {
     let painted = 0
@@ -65,12 +65,12 @@ const RECORDER = String.raw`(() => {
   }
 
   const digest = () => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     if (root === null) return { root: "gone", theirs: theirs() }
     const text = (root.innerText || "").replace(/\s+/g, " ").trim()
     return {
-      root: root.getAttribute("data-gitquiet-for"),
-      leaving: root.hasAttribute("data-gitquiet-leaving") ? 1 : 0,
+      root: root.getAttribute("data-gitace-for"),
+      leaving: root.hasAttribute("data-gitace-leaving") ? 1 : 0,
       inDoc: root.isConnected ? 1 : 0,
       opacity: getComputedStyle(root).opacity,
       chars: text.length,
@@ -146,7 +146,7 @@ await cdp("Page.reload", { ignoreCache: true })
 const cold = []
 for (let round = 0; round < 60; round += 1) {
   const now = await js(String.raw`(() => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     const text = root === null ? "" : (root.innerText || "").replace(/\s+/g, " ").trim()
     return JSON.stringify({ at: Math.round(performance.now()), chars: text.length, head: text.slice(0, 60) })
   })()`).catch(() => null)
@@ -164,7 +164,7 @@ console.log(await js(RECORDER))
 
 // Into a pull request, from the row on our own list: the soft navigation the card arrives on.
 await js(String.raw`window.__flick.mark("press row #10")`)
-await click('#gitquiet-root a[href="/flazouh/ghpro-scratch/pull/10"]', {
+await click('#gitace-root a[href="/flazouh/ghpro-scratch/pull/10"]', {
   label: "open pull request 10"
 })
 await wait(5)
@@ -172,7 +172,7 @@ await dump("list -> pull request")
 
 // And back out through the bar, which is the navigation on the recording.
 await js(String.raw`window.__flick.mark("press Pull requests")`)
-await click('#gitquiet-bar a[href="/flazouh/ghpro-scratch/pulls"]', {
+await click('#gitace-bar a[href="/flazouh/ghpro-scratch/pulls"]', {
   label: "back to the list"
 })
 await wait(5)

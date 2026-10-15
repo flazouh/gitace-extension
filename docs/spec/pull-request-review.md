@@ -103,7 +103,7 @@ Speed comes from already having the data. The extension holds the Participant's 
 A Chrome MV3 extension built with WXT, replacing the conversation on a pull request's own page. It replaces that region rather than augmenting it, because GitHub's server latency cannot be improved by client-side work and the information architecture being replaced is the region's structure itself. Everything around it — the site header, the repository nav, the pull request title and its Files, Commits and Checks tabs — is GitHub's and stays GitHub's, both because those parts already work and because a page that is half theirs must navigate like theirs.
 
 Rendering is React and Tailwind. Colour and type follow Appearance × Pack (see
-`docs/spec/themes.md`): Gitquiet is the default, Inter is the typeface, and the
+`docs/spec/themes.md`): GitAce Extension is the default, Inter is the typeface, and the
 reader can switch packs in Settings. Icons remain Octicons. Tailwind's preflight
 is not imported, and its utilities are imported unlayered — a layered rule loses
 to GitHub's unlayered element rules regardless of specificity.

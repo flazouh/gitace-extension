@@ -54,7 +54,7 @@ const ReviewQueue = () => (
         <h2 className="m-0 text-[22px] font-semibold tracking-[-0.02em]">A filter is not a queue</h2>
         <p className="m-0 mt-4 max-w-2xl text-[16px] leading-relaxed text-muted">
           GitHub&apos;s review-requested list is a filter. Newest first. Still a list you scan.
-          GitQuiet is a queue on github.com—existing session, no extra login—writing back through
+          GitAce Extension is a queue on github.com—existing session, no extra login—writing back through
           GitHub&apos;s own routes. Not an AI reviewer.
         </p>
       </section>
@@ -70,7 +70,7 @@ const ReviewQueue = () => (
         <p className="m-0 mt-4 max-w-2xl text-[16px] leading-relaxed text-muted">
           <Quietly at="/compare/prflow">PRFlow</Quietly> and{" "}
           <Quietly at="/compare/github-pr-sidebar">GitHub PR Sidebar</Quietly> are Chromium side
-          panels that ask for a PAT. They sit beside the tab. GitQuiet is the tab.
+          panels that ask for a PAT. They sit beside the tab. GitAce Extension is the tab.
         </p>
         <p className="m-0 mt-4 max-w-2xl text-[16px] leading-relaxed text-muted">
           Attention Set is a PAT whose-turn popup—a near-miss, not its own URL. Graphite is stacked
@@ -83,7 +83,7 @@ const ReviewQueue = () => (
         <ul className="m-0 mt-6 flex list-none flex-col gap-3 p-0">
           {COMPARED.map((other) => (
             <li key={other.slug}>
-              <Quietly at={`/compare/${other.slug}`}>GitQuiet vs {other.name}</Quietly>
+              <Quietly at={`/compare/${other.slug}`}>GitAce Extension vs {other.name}</Quietly>
             </li>
           ))}
         </ul>

@@ -1,6 +1,6 @@
 // Run with ego-browser nodejs after starting observer-server.ts.
 const fs = await import('node:fs/promises')
-const task = await taskSpace('GitQuiet performance optimization')
+const task = await taskSpace('GitAce Extension performance optimization')
 const page = (await task.pages())[0] ?? await task.newPage()
 const results = []
 await (async () => {

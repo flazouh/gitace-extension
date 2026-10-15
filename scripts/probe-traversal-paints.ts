@@ -12,7 +12,7 @@
  *
  * Three things are written down, all of them off the document itself:
  *
- *   - every mutation batch under `#gitquiet-root`, which is one commit apiece,
+ *   - every mutation batch under `#gitace-root`, which is one commit apiece,
  *     with how much of the screen existed after it;
  *   - every CSS animation that starts, which says whether the entrance is being
  *     replayed for a page the reader is returning to rather than arriving at;
@@ -32,10 +32,10 @@
  * profile is signed out, and signed out there is nothing to measure: GitHub
  * answers as if a public pull request does not exist, and the screen says so
  * rather than drawing a card. So the profile has to carry a session. Point
- * GITQUIET_CDP_PROFILE at a Chrome profile directory that is already signed in
+ * GITACE_CDP_PROFILE at a Chrome profile directory that is already signed in
  * to github.com, with Chrome closed while this runs, and the screens draw.
  *
- *     GITQUIET_CDP_PROFILE=~/some-signed-in-profile bun scripts/probe-traversal-paints.ts
+ *     GITACE_CDP_PROFILE=~/some-signed-in-profile bun scripts/probe-traversal-paints.ts
  */
 import { rm } from "node:fs/promises"
 
@@ -46,9 +46,9 @@ const EXTENSION = `${import.meta.dir}/../.output/chrome-mv3`
  * static import is evaluated ahead of every statement in this file, and that
  * module reads both of these at the top of itself.
  */
-const PROFILE = process.env["GITQUIET_CDP_PROFILE"] ?? "/tmp/gitquiet-traversal-profile"
-process.env["GITQUIET_CDP_PORT"] ??= "9333"
-process.env["GITQUIET_CDP_PROFILE"] = PROFILE
+const PROFILE = process.env["GITACE_CDP_PROFILE"] ?? "/tmp/gitace-traversal-profile"
+process.env["GITACE_CDP_PORT"] ??= "9333"
+process.env["GITACE_CDP_PROFILE"] = PROFILE
 
 const { withExtension } = await import("./chrome")
 
@@ -70,12 +70,12 @@ type Moment = {
 const RECORDER = `
   (() => {
     const seen = []
-    globalThis.__gitquietSeen = seen
+    globalThis.__gitaceSeen = seen
     const from = performance.now()
     const since = () => Math.round(performance.now() - from)
 
     const size = () => {
-      const standing = document.getElementById("gitquiet-root")
+      const standing = document.getElementById("gitace-root")
       return standing === null ? 0 : standing.querySelectorAll("*").length
     }
 
@@ -102,14 +102,14 @@ const RECORDER = `
 
     let held = false
     new MutationObserver(() => {
-      const now = document.querySelector("[data-gitquiet-leaving]") !== null
+      const now = document.querySelector("[data-gitace-leaving]") !== null
       if (now === held) return
       held = now
       seen.push({ at: since(), what: "held", said: now ? "surface held" : "hold released" })
     }).observe(document.documentElement, {
       attributes: true,
       subtree: true,
-      attributeFilter: ["data-gitquiet-leaving"]
+      attributeFilter: ["data-gitace-leaving"]
     })
 
     addEventListener("popstate", () => {
@@ -129,11 +129,11 @@ const session = await (async () => {
 const look = () =>
   session.evaluate<Record<string, unknown>>(`
     (() => {
-      const root = document.getElementById("gitquiet-root")
+      const root = document.getElementById("gitace-root")
       return {
         path: location.pathname,
-        shown: document.documentElement.getAttribute("data-gitquiet-shown"),
-        roots: document.querySelectorAll("#gitquiet-root").length,
+        shown: document.documentElement.getAttribute("data-gitace-shown"),
+        roots: document.querySelectorAll("#gitace-root").length,
         nodes: root === null ? 0 : root.querySelectorAll("*").length,
         words: (root?.textContent ?? "").slice(0, 120)
       }
@@ -150,7 +150,7 @@ const report = (title: string, moments: ReadonlyArray<Moment>): void => {
   console.log(`  → ${commits.length} commits across ${span}ms`)
 }
 
-const collect = () => session.evaluate<ReadonlyArray<Moment>>("globalThis.__gitquietSeen ?? []")
+const collect = () => session.evaluate<ReadonlyArray<Moment>>("globalThis.__gitaceSeen ?? []")
 
 await sleep(SETTLING)
 console.log(`On arrival: ${JSON.stringify(await look())}`)
@@ -158,7 +158,7 @@ console.log(`On arrival: ${JSON.stringify(await look())}`)
 /** A link of ours to somewhere else of ours, which is what a traversal needs behind it. */
 const wentTo = await session.evaluate<string | null>(`
   (() => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     if (root === null) return null
     const away = [...root.querySelectorAll("a[href]")].find((link) => {
       const href = link.getAttribute("href") ?? ""

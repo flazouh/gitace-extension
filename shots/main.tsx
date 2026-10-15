@@ -25,7 +25,7 @@ import "./stage.css"
  * The extension's own root id, taken from the extension.
  *
  * Not a name this stage chose. The interface's stylesheets are all scoped to
- * `:is(#gitquiet-root, [data-gitquiet-outside])`, so a screen mounted under any other
+ * `:is(#gitace-root, [data-gitace-outside])`, so a screen mounted under any other
  * id draws with the Tailwind utilities and none of the rules written by hand — which
  * is a screen that looks nearly right and is wrong in the places worth photographing.
  */
@@ -40,8 +40,8 @@ if (stage === null) throw new Error(`#${ROOT_ID} is missing from index.html`)
  * extension that is what covers GitHub's own page. Here there is no page to cover,
  * and without it the frame around a screen is white.
  */
-paintFloor(document, tokensOf("gitquiet", "dark"))
-document.documentElement.style.background = "var(--gitquiet-floor)"
+paintFloor(document, tokensOf("gitace", "dark"))
+document.documentElement.style.background = "var(--gitace-floor)"
 
 /*
  * What there is to photograph, said to whoever is driving the browser.
@@ -75,7 +75,7 @@ if (view === undefined) {
       ).join("")}
     </ul>`
 } else {
-  document.title = `gitquiet: ${view.name}`
+  document.title = `gitace: ${view.name}`
   stage.style.width = `${view.width}px`
   stage.style.height = `${view.height}px`
   stage.style.overflow = "hidden"
@@ -84,13 +84,13 @@ if (view === undefined) {
   /*
    * Own the page the way the extension does once a screen is up.
    *
-   * Without `data-gitquiet-taken`, `quiet.css` never paints the floor and
+   * Without `data-gitace-taken`, `quiet.css` never paints the floor and
    * `widths.css` never applies the gutter — the stage looked like a floating
-   * card with wrong margins. Without `data-gitquiet-arrived`, entrance
+   * card with wrong margins. Without `data-gitace-arrived`, entrance
    * animations can leave panels at their backwards fill (opacity 0) if a
    * remount interrupts the clock `Shell` would otherwise set.
    */
-  document.documentElement.setAttribute("data-gitquiet-taken", "")
+  document.documentElement.setAttribute("data-gitace-taken", "")
   markLanded(document)
 
   createRoot(stage).render(

@@ -79,7 +79,7 @@ export const Held = ({
         ref={setHost}
         /* What tells the interface it is not standing on a page of GitHub's, and what the
            shared motion scale is declared on. See `motion.css`. */
-        data-gitquiet-outside
+        data-gitace-outside
         style={{
           width: view.width,
           height: tall,

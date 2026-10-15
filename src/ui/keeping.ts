@@ -2,7 +2,7 @@
  * Every name this product writes into somebody else's storage, in one place.
  *
  * Four modules were each holding a `const KEY` of their own, in three
- * conventions: `gitquiet.scheme` with a dot, `gitquiet:filter:` with colons,
+ * conventions: `gitace.scheme` with a dot, `gitace:filter:` with colons,
  * and settings under the bare word `settings`. Nothing was broken by that, and
  * that is the point — the cost of scattered names is not a collision, it is that
  * nobody can answer "what does this app keep, and where" without reading four
@@ -16,18 +16,19 @@
  */
 
 /**
- * Nothing here reads an older spelling, on purpose.
+ * Nothing here reads an older spelling. The one rename that is carried forward
+ * is done before anything reads these names, not by them.
  *
  * Settings used to sit under the bare word `settings`, and every name below was
- * spelled `githubpro.` before the product was. Both moves orphan what a reader
- * already had, and neither is being carried forward: the app is pre-release, and
- * what is lost is a filter worth one keystroke, a light-or-dark choice worth one
- * press, and a cache that is refilled by the read happening anyway. A fallback
- * would be two names alive in the code for years to save that.
+ * spelled `githubpro.` before it was spelled `gitquiet.`. Those two moves were not
+ * carried: the product was pre-release. The move from `gitquiet` to `gitace`, with
+ * the rename to GitAce Extension, came after people had installed it, so
+ * `settings/renaming.ts` moves each old entry to its new name once, and the
+ * names below never have to know there was another.
  */
 
 /** One prefix, because a key of ours should be recognisable as ours at a glance. */
-const OURS = "gitquiet."
+const OURS = "gitace."
 
 /** The reader's choices: theme, diff layout, tree width. */
 export const SETTINGS = `${OURS}settings`
@@ -51,13 +52,13 @@ export const SCHEME = `${OURS}scheme`
 export const PACK = `${OURS}pack`
 
 /**
- * The filter left in the box, per list: `gitquiet:filter:working-set`.
+ * The filter left in the box, per list: `gitace:filter:working-set`.
  *
  * The one name that does not follow the dots. Kept as a colon form because that
  * is how filters were first written; only the product prefix changed with the
  * rename from githubpro.
  */
-export const FILTER = "gitquiet:filter:"
+export const FILTER = "gitace:filter:"
 
 /** The repositories most recently read, so the switcher opens on the few that are used. */
 export const LATELY = `${OURS}lately`

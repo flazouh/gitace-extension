@@ -5,7 +5,7 @@
  * keep a blank target in this tab, and a synthetic click (or a popup blocker)
  * turns `window.open` into a no-op. The background's `tabs.create` is neither.
  */
-export const OPEN_TAB = "gitquiet/open-tab" as const
+export const OPEN_TAB = "gitace/open-tab" as const
 
 export type OpenTab = {
   readonly kind: typeof OPEN_TAB

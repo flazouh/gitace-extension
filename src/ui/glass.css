@@ -25,7 +25,7 @@
  * that space. The bar stops short of the top when stuck, and the reader's content scrolls
  * through the gap.
  *
- * The same `--gitquiet-gutter` the columns under it read — see `widths.css` — because a bar at
+ * The same `--gitace-gutter` the columns under it read — see `widths.css` — because a bar at
  * one inset above a Rail at another is two left edges in one window.
  *
  * Across only. The gutter is thirty-two pixels on a wide window, which is the frame the page is
@@ -34,8 +34,8 @@
  * what the bar has always floated on, and it is the same eight `Shell` puts above the first
  * card.
  */
-:is(#gitquiet-bar, [data-gitquiet-bar]) {
-  padding: 8px var(--gitquiet-gutter) 0;
+:is(#gitace-bar, [data-gitace-bar]) {
+  padding: 8px var(--gitace-gutter) 0;
 }
 
 /*
@@ -50,12 +50,12 @@
  * a tree that outlived its screen used to keep its bar here for good, and the worst that
  * can now do is nothing at all.
  */
-:is(#gitquiet-bar, [data-gitquiet-bar]) > header:not(:last-child) {
+:is(#gitace-bar, [data-gitace-bar]) > header:not(:last-child) {
   display: none;
 }
 
 /* A prepared bar uses a display-contents host until its route owns the page. */
-:is(#gitquiet-bar, [data-gitquiet-bar]) > :not(:last-child) {
+:is(#gitace-bar, [data-gitace-bar]) > :not(:last-child) {
   display: none !important;
 }
 
@@ -88,7 +88,7 @@
  * has something to be absolute against. No `overflow: hidden`: every menu in this bar opens
  * downward out of it.
  */
-:is(#gitquiet-bar, [data-gitquiet-bar]) > header {
+:is(#gitace-bar, [data-gitace-bar]) > header {
   position: relative;
   isolation: isolate;
   border-radius: var(--radius-lg);
@@ -135,14 +135,14 @@
  * No `-webkit-` twin: the prefixed property does not accept `url()`, and a declaration Chrome
  * cannot parse takes the whole layer with it.
  */
-:is(#gitquiet-bar, [data-gitquiet-bar]) > header::before {
+:is(#gitace-bar, [data-gitace-bar]) > header::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   border-radius: inherit;
   background-color: color-mix(in oklab, var(--color-surface) 55%, transparent);
-  backdrop-filter: blur(3px) url(#gitquiet-refraction) saturate(1.8);
+  backdrop-filter: blur(3px) url(#gitace-refraction) saturate(1.8);
 }
 
 /*
@@ -152,12 +152,12 @@
  * over a diff. The same fill the component asked for in the first place.
  */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  :is(#gitquiet-bar, [data-gitquiet-bar]) > header {
+  :is(#gitace-bar, [data-gitace-bar]) > header {
     background-color: var(--color-surface);
   }
 
   /* And the lens comes off, rather than sitting over a solid pane as a wash of nothing. */
-  :is(#gitquiet-bar, [data-gitquiet-bar]) > header::before {
+  :is(#gitace-bar, [data-gitace-bar]) > header::before {
     content: none;
   }
 }
@@ -185,13 +185,13 @@
  * The small inset glow falls away inside three pixels. A one-pixel spread shadow looked like the
  * border the rest of this interface does not draw, so the glow now carries the edge by itself.
  */
-:is(#gitquiet-bar, [data-gitquiet-bar]).dark > header::before {
-  backdrop-filter: blur(3px) url(#gitquiet-refraction) saturate(1.8) brightness(0.74);
+:is(#gitace-bar, [data-gitace-bar]).dark > header::before {
+  backdrop-filter: blur(3px) url(#gitace-refraction) saturate(1.8) brightness(0.74);
   box-shadow: inset 0 0 6px -4px rgb(255 255 255 / 0.28);
 }
 
-:is(#gitquiet-bar, [data-gitquiet-bar]):not(.dark) > header::before {
-  backdrop-filter: blur(3px) url(#gitquiet-refraction) saturate(1.8) brightness(1.18);
+:is(#gitace-bar, [data-gitace-bar]):not(.dark) > header::before {
+  backdrop-filter: blur(3px) url(#gitace-refraction) saturate(1.8) brightness(1.18);
   box-shadow: inset 0 0 6px -4px rgb(255 255 255 / 0.45);
 }
 
@@ -203,7 +203,7 @@
  * ancestor stops covering the viewport and starts covering the bar. So the glass goes on the
  * pane itself and the slot around it stays a plain sticky box.
  */
-:is(#gitquiet-bar, [data-gitquiet-bar]) {
+:is(#gitace-bar, [data-gitace-bar]) {
   backdrop-filter: none;
 }
 
@@ -212,7 +212,7 @@
  *
  * The corner it stands in is the one the columns end at, so twelve against their eight was a
  * sentence hanging a little further out than the interface it belongs to. The same
- * `--gitquiet-gutter` the bar and the columns read, so the three move together.
+ * `--gitace-gutter` the bar and the columns read, so the three move together.
  *
  * `!important` because Sonner writes these offsets inline from its own prop, and an important
  * declaration is the one thing that answers an inline one. The mark on the document, not the
@@ -221,7 +221,7 @@
  * ours has a bar too and must not move that page's toasts. The window keeps the twelve the
  * component asks for.
  */
-html[data-gitquiet-bar-standing] [data-sonner-toaster] {
-  --offset-right: var(--gitquiet-gutter) !important;
-  --offset-bottom: var(--gitquiet-gutter) !important;
+html[data-gitace-bar-standing] [data-sonner-toaster] {
+  --offset-right: var(--gitace-gutter) !important;
+  --offset-bottom: var(--gitace-gutter) !important;
 }

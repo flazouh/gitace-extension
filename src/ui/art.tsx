@@ -327,7 +327,7 @@ export type Set = Record<ArtName, Art>
  * Two, and the type will not let a third through with a name missing. Adding one
  * is a module exporting a `Set`, a line here, and a choice on the knob.
  */
-export const SETS = { github: OCTICONS, gitquiet: HUGEICONS } as const
+export const SETS = { github: OCTICONS, gitace: HUGEICONS } as const
 
 export type ArtChoice = Settings["theme"]["art"]
 

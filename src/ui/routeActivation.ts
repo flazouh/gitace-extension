@@ -1,10 +1,10 @@
-const FILES_PANEL = '[data-gitquiet-activation="files-panel"]'
-const FILES_TREE = '[data-gitquiet-activation="files-tree"]'
-const FILES_CONTENT = '[data-gitquiet-activation="files-content"]'
-const LIST = '[data-gitquiet-activation="list"]'
-const LIST_SECTION = '[data-gitquiet-activation="list-section"]'
+const FILES_PANEL = '[data-gitace-activation="files-panel"]'
+const FILES_TREE = '[data-gitace-activation="files-tree"]'
+const FILES_CONTENT = '[data-gitace-activation="files-content"]'
+const LIST = '[data-gitace-activation="list"]'
+const LIST_SECTION = '[data-gitace-activation="list-section"]'
 const ACTIVE_DRAWING = '[data-file][aria-hidden="false"]'
-const PROSE_RUNS = "[data-gitquiet-prose-runs]"
+const PROSE_RUNS = "[data-gitace-prose-runs]"
 
 const FIRST_VISIBLE_RUNS = 1
 const RUN_BATCH = 1

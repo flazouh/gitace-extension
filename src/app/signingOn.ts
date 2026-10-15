@@ -64,7 +64,7 @@ export type Lately = {
 }
 
 /** Where it is kept, which is the tab's own storage and nowhere else. */
-const KEY = (organisation: string): string => `gitquiet:signed-on:${organisation}`
+const KEY = (organisation: string): string => `gitace:signed-on:${organisation}`
 
 /**
  * Storage, which throws rather than answers where a profile has switched it off.

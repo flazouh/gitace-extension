@@ -13,7 +13,7 @@ await openOrReuseTab("https://github.com/", { wait: true, timeout: 60 })
 await new Promise((wake) => setTimeout(wake, 6000))
 
 const where = await js(String.raw`
-  const row = document.querySelector('#gitquiet-root a[href*="/pull/"]')
+  const row = document.querySelector('#gitace-root a[href*="/pull/"]')
   return row?.href ?? ''
 `)
 

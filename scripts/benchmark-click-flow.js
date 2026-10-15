@@ -31,7 +31,7 @@
  *    comes back empty. Discover the id from the loaded targets instead.
  * 4. On the pages the interface takes over, GitHub's own anchors are still in
  *    the document at zero by zero. Pressing one navigates nowhere. Our half
- *    has to press our row, inside `#gitquiet-root`, and the baseline half
+ *    has to press our row, inside `#gitace-root`, and the baseline half
  *    theirs.
  */
 
@@ -111,7 +111,7 @@ const removeEveryExtension = async () => {
   }
   await gotoAndWait(LIST, { timeout: 60, settle: 3 });
   await wait(2);
-  const left = await js(`!!document.getElementById("gitquiet-root")`);
+  const left = await js(`!!document.getElementById("gitace-root")`);
   if (left) throw new Error("the interface is still on the page after uninstalling " + ids.join(", "));
   return ids;
 };
@@ -138,19 +138,19 @@ const RECORDER = String.raw`(() => {
     const marks = read()
     if (marks === null || marks.t0 === null || marks.done) return
     const since = () => Date.now() - marks.t0
-    if (marks.gate === null && document.documentElement.hasAttribute("data-gitquiet-gating")) {
+    if (marks.gate === null && document.documentElement.hasAttribute("data-gitace-gating")) {
       marks.gate = since()
     }
     if (location.pathname.includes("/pull/")) {
-      const root = document.getElementById("gitquiet-root")
+      const root = document.getElementById("gitace-root")
       // Ours is readable when the interface says it is showing the conversation
       // and the skeleton has gone. The attribute matters: without it the timer
       // catches the list still standing under the new URL and reports the gate
       // twice, which is how cold once came out faster than warm.
       if (marks.ours === null &&
-          document.documentElement.getAttribute("data-gitquiet-shown") === "conversation" &&
+          document.documentElement.getAttribute("data-gitace-shown") === "conversation" &&
           root !== null && root.querySelector("h2") !== null &&
-          root.querySelector("[data-gitquiet-loading]") === null) {
+          root.querySelector("[data-gitace-loading]") === null) {
         marks.ours = since()
         marks.done = true
       }
@@ -207,7 +207,7 @@ const watch = async (seconds) => {
 const numbersOnTheList = (scope) =>
   js(String.raw`(() => {
     const within = ` + JSON.stringify(scope) + String.raw`
-    const root = within === "" ? document : document.getElementById("gitquiet-root")
+    const root = within === "" ? document : document.getElementById("gitace-root")
     if (root === null) return []
     const seen = new Set()
     for (const link of root.querySelectorAll('a[href*="/pull/"]')) {
@@ -285,7 +285,7 @@ await wait(3);
 
 const ours = { warm: [], cold: [] };
 const gates = { warm: [], cold: [] };
-const mine = (await numbersOnTheList("#gitquiet-root ")).filter((n) => numbers.includes(n));
+const mine = (await numbersOnTheList("#gitace-root ")).filter((n) => numbers.includes(n));
 const pressed = mine.length > 0 ? mine : numbers;
 cliLog(`\nThe interface, extension ${id}. Pressing: ${pressed.join(", ")}`);
 
@@ -294,7 +294,7 @@ for (const dwell of [DWELL, 0]) {
   cliLog(`\nThe interface, ${which}:`);
   const mineFor = which === "warm" ? pressed.slice(0, pressed.length / 2) : pressed.slice(pressed.length / 2);
   for (const number of mineFor) {
-    const marks = await clickThrough(number, "#gitquiet-root ", dwell);
+    const marks = await clickThrough(number, "#gitace-root ", dwell);
     if (typeof marks.ours === "number") ours[which].push(marks.ours);
     if (typeof marks.gate === "number") gates[which].push(marks.gate);
     cliLog(

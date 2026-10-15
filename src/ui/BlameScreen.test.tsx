@@ -88,9 +88,9 @@ describe("a file's blame", () => {
  * that hold into the read the reader is waiting for.
  */
 describe("which address this blame claims to have drawn", () => {
-  const drawn = () => document.documentElement.getAttribute("data-gitquiet-at")
+  const drawn = () => document.documentElement.getAttribute("data-gitace-at")
 
-  afterEach(() => document.documentElement.removeAttribute("data-gitquiet-at"))
+  afterEach(() => document.documentElement.removeAttribute("data-gitace-at"))
 
   test("claims nothing while it is still reading", async () => {
     showing(() => Effect.never as Effect.Effect<Blamed>, {

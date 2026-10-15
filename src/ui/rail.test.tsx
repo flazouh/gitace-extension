@@ -399,7 +399,7 @@ const onScreen = (
           sittingsIn(
             over.rows ?? [
               involved(1, "octo-repo", "needs-action"),
-              involved(2, "gitquiet", "waiting-for-review"),
+              involved(2, "gitace-extension", "waiting-for-review"),
             ],
             () => Option.none(),
           ),
@@ -429,7 +429,7 @@ describe("the Rail on the Working Set", () => {
 
     // Derived from the same read the Courts were drawn from, so it names both.
     await waitFor(() => expect(within(rail()).getByText("octo-repo")).toBeDefined());
-    expect(within(rail()).getByText("gitquiet")).toBeDefined();
+    expect(within(rail()).getByText("gitace-extension")).toBeDefined();
     // One is the reader's move, and the Working Set Destination says so.
     expect(
       within(rail()).getByRole("button", { name: "Working Set, 1" }),

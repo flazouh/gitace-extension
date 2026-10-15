@@ -7,7 +7,7 @@
  * searches, that they land under the right repository, and that an issue row and a pull request
  * row sitting next to each other are drawn on the same tracks.
  *
- * Two lessons are built into it. Every query is scoped to `#gitquiet-root`, because GitHub's
+ * Two lessons are built into it. Every query is scoped to `#gitace-root`, because GitHub's
  * own gated partials are still in the DOM at zero height and will happily answer a query for a
  * link to a pull request. And it presses Working Set first, because the Destination is
  * remembered and the previous run may have left the Rail somewhere else.
@@ -51,7 +51,7 @@ cliLog(
 
 await until(
   "a pull request row of ours",
-  String.raw`document.querySelectorAll('#gitquiet-root [data-row]').length > 0`
+  String.raw`document.querySelectorAll('#gitace-root [data-row]').length > 0`
 );
 /* The three issue searches land after the pull requests, so give them their own moment. */
 await new Promise((wake) => setTimeout(wake, 5000));
@@ -59,7 +59,7 @@ await new Promise((wake) => setTimeout(wake, 5000));
 cliLog("=== what the Courts hold ===");
 cliLog(
   await js(String.raw`(() => {
-    const root = document.querySelector('#gitquiet-root')
+    const root = document.querySelector('#gitace-root')
     const rows = [...root.querySelectorAll('[data-row]')].map((row) => {
       const link = row.querySelector('a[href*="/pull/"], a[href*="/issues/"]')
       const href = link?.getAttribute('href') ?? ''
@@ -110,7 +110,7 @@ await shot("home-issues");
 cliLog("=== the walk: j through the rows ===");
 cliLog(
   await js(String.raw`(async () => {
-    const root = document.querySelector('#gitquiet-root')
+    const root = document.querySelector('#gitace-root')
     const press = (key) => document.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
     const walked = []
     for (let step = 0; step < 10; step += 1) {

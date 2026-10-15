@@ -4,7 +4,7 @@
  * Two of them have to: a bar stands above the page rather than inside the region of it we
  * replaced, and a hover card has to escape whatever the row it belongs to is clipped by. Both are
  * therefore in `document.body`, where three things we take for granted stop being true — the
- * theme tokens are inline custom properties on `#gitquiet-root`, and so is the half of Tailwind's
+ * theme tokens are inline custom properties on `#gitace-root`, and so is the half of Tailwind's
  * preflight this interface keeps (border reset, box sizing), because the rest of the document is
  * GitHub's page and resetting that would take their own chrome with it.
  *
@@ -23,7 +23,7 @@ import { OUTSIDE, ROOT_ID } from "./mount"
 export { OUTSIDE };
 
 /** Where the hover cards, and anything else Radix portals, are put. */
-export const OVER_ID = "gitquiet-over";
+export const OVER_ID = "gitace-over";
 
 /**
  * A host with this id, made if it is not there yet.

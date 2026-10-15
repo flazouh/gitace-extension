@@ -20,7 +20,7 @@
 const EXTENSION = "/Users/alex/Documents/githubpro-notifications/.output/chrome-mv3"
 const INBOX = "https://github.com/notifications"
 
-const task = await useOrCreateTaskSpace("verify gitquiet on the notifications page")
+const task = await useOrCreateTaskSpace("verify GitAce Extension on the notifications page")
 await takeOverTaskSpace(task.id)
 
 const { id } = await cdp("Extensions.loadUnpacked", { path: EXTENSION }, null)
@@ -32,7 +32,7 @@ await wait(3)
 cliLog(
   JSON.stringify(
     await js(String.raw`(() => {
-      const root = document.getElementById("gitquiet-root")
+      const root = document.getElementById("gitace-root")
       const region = document.querySelector("div.js-notifications-container")
       const seen = (element) => {
         for (let at = element; at !== null; at = at.parentElement) {
@@ -42,7 +42,7 @@ cliLog(
         return true
       }
 
-      const courts = [...document.querySelectorAll("#gitquiet-root section[aria-label]")].map(
+      const courts = [...document.querySelectorAll("#gitace-root section[aria-label]")].map(
         (one) => ({
           court: one.getAttribute("aria-label"),
           rows: one.querySelectorAll("li").length
@@ -53,7 +53,7 @@ cliLog(
 
       return {
         url: location.pathname,
-        page: document.documentElement.getAttribute("data-gitquiet-page"),
+        page: document.documentElement.getAttribute("data-gitace-page"),
         mounted: root !== null,
         insideTheirRegion: region !== null && region.contains(root),
         theirHeaderStands: seen(document.querySelector("header.AppHeader") ?? document.body),
@@ -65,8 +65,8 @@ cliLog(
           return pane === null ? null : !seen(pane)
         })(),
         courts,
-        presses: document.querySelectorAll('#gitquiet-root button[aria-label="Done"]').length,
-        octicons: document.querySelectorAll("#gitquiet-root svg.octicon").length,
+        presses: document.querySelectorAll('#gitace-root button[aria-label="Done"]').length,
+        octicons: document.querySelectorAll("#gitace-root svg.octicon").length,
         ourFont: root === null ? null : getComputedStyle(root).fontFamily.split(",")[0],
         theirFont: getComputedStyle(document.body).fontFamily.split(",")[0],
         ourSurface: root === null ? null : getComputedStyle(root).backgroundColor,

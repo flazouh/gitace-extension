@@ -23,9 +23,9 @@
  * speaks on a page it was not asked to. See `isGistEditing`.
  */
 
-[data-gitquiet-gist-editing] .gist-content,
-[data-gitquiet-gist-editing] .js-blob-form,
-[data-gitquiet-gist-editing] .container-lg {
+[data-gitace-gist-editing] .gist-content,
+[data-gitace-gist-editing] .js-blob-form,
+[data-gitace-gist-editing] .container-lg {
   /*
    * The width first, which is the half their own container decides. Their form sits in
    * a 980-pixel column inside whatever the window is, so a wide screen spends its extra
@@ -45,12 +45,12 @@
  * editor than that is one that pushes its own Save button off the bottom, which is a
  * different way to be unusable.
  */
-[data-gitquiet-gist-editing] .CodeMirror {
+[data-gitace-gist-editing] .CodeMirror {
   min-height: 65vh;
   resize: vertical;
   overflow: auto;
 }
 
-[data-gitquiet-gist-editing] .CodeMirror-scroll {
+[data-gitace-gist-editing] .CodeMirror-scroll {
   min-height: 65vh;
 }

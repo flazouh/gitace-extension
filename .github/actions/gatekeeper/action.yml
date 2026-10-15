@@ -11,7 +11,7 @@ inputs:
   app:
     description: Name of the app bundle inside it
     required: false
-    default: GitQuiet.app
+    default: GitAce Extension.app
 
 runs:
   using: composite

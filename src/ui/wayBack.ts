@@ -21,10 +21,10 @@
 import { DEFAULT_SPOT, type Spot } from "@/domain/Settings"
 
 /** The holder, which is what a caller looks for and what a test asks about. */
-export const WAY_BACK_ID = "gitquiet-way-back"
+export const WAY_BACK_ID = "gitace-way-back"
 
 /** The handle that appears on hover, and the only part of this that drags. */
-export const GRIP_ID = "gitquiet-way-back-grip"
+export const GRIP_ID = "gitace-way-back-grip"
 
 /**
  * The mark on everything of ours that stands on `body` rather than inside our root.
@@ -33,7 +33,7 @@ export const GRIP_ID = "gitquiet-way-back-grip"
  * nothing of ours is mounted at all and importing the mounting module to read one
  * string would pull the whole of it onto a page that has no use for it.
  */
-const OUTSIDE = "data-gitquiet-outside"
+const OUTSIDE = "data-gitace-outside"
 
 /** How wide and tall the mark's own button is. */
 const SIZE = 34
@@ -58,10 +58,10 @@ const EDGE = 16
 /** How far one arrow key moves it, for a reader who is not using a pointer. */
 const STEP = 24
 
-const LABEL = "Turn the gitquiet interface back on"
+const LABEL = "Turn the GitAce Extension interface back on"
 
 /**
- * The gitquiet mark, drawn here rather than imported.
+ * The GitAce Extension mark, drawn here rather than imported.
  *
  * `Mark.tsx` is the one this product draws everywhere else and it is a React component.
  * There is no React on this page — this widget exists precisely because ours is not

@@ -19,13 +19,13 @@ const WALK = [
   [`${REPO}/10`, "behind: the base has moved on"]
 ]
 
-const task = await useOrCreateTaskSpace("test gitquiet extension on real PR")
+const task = await useOrCreateTaskSpace("test GitAce Extension on real PR")
 await takeOverTaskSpace(task.id)
 
 /** Opens every folded Court, Settled starting that way and being worth reading here. */
 const unfold = async () => {
   await js(String.raw`(() => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     const shadow = root?.shadowRoot ?? root
     const owed = [...(shadow?.querySelectorAll("section") ?? [])].find(
       (one) => one.querySelector("h2")?.textContent === "What is owed"
@@ -42,7 +42,7 @@ const unfold = async () => {
 const read = async () =>
   JSON.parse(
     await js(String.raw`(() => {
-      const root = document.getElementById("gitquiet-root")
+      const root = document.getElementById("gitace-root")
       const shadow = root?.shadowRoot ?? root
       if (root === null) return JSON.stringify({ mounted: false, url: location.pathname })
 

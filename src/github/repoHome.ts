@@ -256,7 +256,7 @@ export const frontInDocument = Effect.fn("repoHome.frontInDocument")(function* (
    * required rather than taken on trust when absent. The document holds
    * whatever page it last was — after an in-place switch that is the previous
    * repository — and `frontFrom` stamps the asked-for name onto whatever tree
-   * it is handed. Unchecked, that stamped slackcli's address onto gitquiet's
+   * it is handed. Unchecked, that stamped slackcli's address onto GitAce Extension's
    * files, and the memory and the store then kept the wrong page under the
    * right name.
    */

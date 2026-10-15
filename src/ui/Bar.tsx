@@ -889,20 +889,20 @@ export const Bar = ({
          * in the row. Sign-out rather than GitHub's mark: the press leaves this
          * interface; the destination is already in the name.
          *
-         * The bug report sits just before it — filing a problem with GitQuiet,
+         * The bug report sits just before it — filing a problem with GitAce Extension,
          * not an issue in the repository being read.
          */}
         <a
-          href="https://github.com/flazouh/gitquiet/issues"
+          href="https://github.com/flazouh/gitace-extension/issues"
           target="_blank"
           rel="noreferrer"
-          aria-label="Report a problem on GitQuiet"
-          title="Report a problem on GitQuiet"
+          aria-label="Report a problem on GitAce Extension"
+          title="Report a problem on GitAce Extension"
           onClick={(event) => {
             // Background tabs.create — not window.open (popup-blocked) and not a
             // same-tab Turbo walk of target=_blank on github.com.
             event.preventDefault()
-            openTab("https://github.com/flazouh/gitquiet/issues")
+            openTab("https://github.com/flazouh/gitace-extension/issues")
           }}
           className="grid size-7 place-items-center rounded-md text-ink-muted no-underline hover:bg-hover hover:text-ink"
         >
@@ -913,8 +913,8 @@ export const Bar = ({
           <button
             type="button"
             onClick={onStepAside}
-            aria-label="Leave GitQuiet"
-            title="Leave GitQuiet"
+            aria-label="Leave GitAce Extension"
+            title="Leave GitAce Extension"
             className="grid size-7 place-items-center rounded-md text-ink-muted hover:bg-hover hover:text-ink"
           >
             <Leave size={16} />

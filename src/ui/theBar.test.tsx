@@ -48,11 +48,11 @@ const repository = (nameWithOwner: string): Repository => {
   }
 }
 
-const KEPT = [repository("flazouh/gitquiet")]
+const KEPT = [repository("flazouh/gitace-extension")]
 
 const SOMEONE = { login: "flazouh", faceUrl: Option.none() }
 
-const WHERE = { kind: "repository" as const, owner: "flazouh", repo: "gitquiet" }
+const WHERE = { kind: "repository" as const, owner: "flazouh", repo: "gitace-extension" }
 
 /**
  * A tab that has been somewhere, as the browser describes one.
@@ -94,19 +94,19 @@ describe("the places the trail names", () => {
   test("names each kind a reader walks between, nearest first", async () => {
     havingBeen([
       "/pulls",
-      "/flazouh/gitquiet",
-      "/flazouh/gitquiet/issues",
-      "/flazouh/gitquiet/pull/12",
-      "/flazouh/gitquiet/pull/14"
+      "/flazouh/gitace-extension",
+      "/flazouh/gitace-extension/issues",
+      "/flazouh/gitace-extension/pull/12",
+      "/flazouh/gitace-extension/pull/14"
     ])
 
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
     await userEvent.click(screen.getByRole("button", { name: "Where you have been" }))
 
     expect(screen.getAllByRole("menuitem").map((one) => one.textContent)).toEqual([
-      "#12 in flazouh/gitquiet",
-      "flazouh/gitquiet: issues",
-      "flazouh/gitquiet",
+      "#12 in flazouh/gitace-extension",
+      "flazouh/gitace-extension: issues",
+      "flazouh/gitace-extension",
       "Working Set"
     ])
   })
@@ -118,37 +118,37 @@ describe("the places the trail names", () => {
    */
   test("says one name once, keeping the nearest place that wears it", async () => {
     havingBeen([
-      "/flazouh/gitquiet/pull/12?diff=split",
+      "/flazouh/gitace-extension/pull/12?diff=split",
       "/pulls",
-      "/flazouh/gitquiet/pull/12",
-      "/flazouh/gitquiet/pull/14"
+      "/flazouh/gitace-extension/pull/12",
+      "/flazouh/gitace-extension/pull/14"
     ])
 
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
     await userEvent.click(screen.getByRole("button", { name: "Where you have been" }))
 
     expect(screen.getAllByRole("menuitem").map((one) => one.textContent)).toEqual([
-      "#12 in flazouh/gitquiet",
+      "#12 in flazouh/gitace-extension",
       "Working Set"
     ])
   })
 
   test("keeps the path itself for a page of theirs nothing here can name", async () => {
-    havingBeen(["/flazouh/gitquiet/blob/main/README.md", "/pulls", "/flazouh/gitquiet/pull/14"])
+    havingBeen(["/flazouh/gitace-extension/blob/main/README.md", "/pulls", "/flazouh/gitace-extension/pull/14"])
 
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
     await userEvent.click(screen.getByRole("button", { name: "Where you have been" }))
 
     expect(screen.getAllByRole("menuitem").map((one) => one.textContent)).toEqual([
       "Working Set",
-      "/flazouh/gitquiet/blob/main/README.md"
+      "/flazouh/gitace-extension/blob/main/README.md"
     ])
   })
 })
 
 describe("the bar and where the reader has been", () => {
   test("prepares Back from a screen that did not wire its own route handler", async () => {
-    havingBeen(["/pulls/inbox", "/flazouh/gitquiet/pull/14"])
+    havingBeen(["/pulls/inbox", "/flazouh/gitace-extension/pull/14"])
     const prepared: Array<string> = []
     const stop = whenPreparing(window, (path) => prepared.push(path))
 
@@ -163,7 +163,7 @@ describe("the bar and where the reader has been", () => {
     let current = 0
     ;(window as { navigation?: unknown }).navigation = {
       entries: () =>
-        ["/pulls/inbox", "/flazouh/gitquiet/pull/14"].map((at, index) => ({
+        ["/pulls/inbox", "/flazouh/gitace-extension/pull/14"].map((at, index) => ({
           url: `https://github.com${at}`,
           key: `k${index}`,
           index
@@ -262,9 +262,9 @@ describe("the bar and where the reader has been", () => {
   test("prepares the exact route behind and ahead before a return press", async () => {
     havingBeen(
       [
-        "/flazouh/gitquiet/pull/12",
-        "/flazouh/gitquiet/pull/14",
-        "/flazouh/gitquiet/pull/16"
+        "/flazouh/gitace-extension/pull/12",
+        "/flazouh/gitace-extension/pull/14",
+        "/flazouh/gitace-extension/pull/16"
       ],
       1
     )
@@ -283,15 +283,15 @@ describe("the bar and where the reader has been", () => {
     await userEvent.hover(screen.getByRole("button", { name: "Forward" }))
 
     expect(prepared).toEqual([
-      "/flazouh/gitquiet/pull/12",
-      "/flazouh/gitquiet/pull/16"
+      "/flazouh/gitace-extension/pull/12",
+      "/flazouh/gitace-extension/pull/16"
     ])
   })
 
   test("records the repository being read, so the next switcher opens on it", async () => {
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
 
-    await waitFor(() => expect(visited()).toEqual(["flazouh/gitquiet"]))
+    await waitFor(() => expect(visited()).toEqual(["flazouh/gitace-extension"]))
   })
 
   test("records nothing off a repository, Home being nowhere in particular", async () => {
@@ -315,7 +315,7 @@ describe("the bar and where the reader has been", () => {
     const menu = screen.getByRole("menu", { name: "Your repositories" })
 
     expect([...menu.querySelectorAll("a")].map((one) => one.textContent?.trim())).toEqual([
-      "flazouh/gitquiet",
+      "flazouh/gitace-extension",
       "octo-org/octo-repo",
       "acme/alpha"
     ])
@@ -364,7 +364,7 @@ describe("the bar's palette", () => {
     )
     await userEvent.keyboard("{Meta>}k{/Meta}")
 
-    expect(screen.getByRole("option").textContent).toContain("flazouh/gitquiet")
+    expect(screen.getByRole("option").textContent).toContain("flazouh/gitace-extension")
   })
 
   test("stays quiet when the store has nothing kept", async () => {
@@ -441,11 +441,11 @@ describe("two screens of ours, and the one bar between them", () => {
     for (const root of document.querySelectorAll(`#${ROOT_ID}`)) root.remove()
     document.querySelector("run-summary")?.remove()
     for (const name of [
-      "data-gitquiet-taken",
-      "data-gitquiet-shown",
-      "data-gitquiet-revealed",
-      "data-gitquiet-gating",
-      "data-gitquiet-page"
+      "data-gitace-taken",
+      "data-gitace-shown",
+      "data-gitace-revealed",
+      "data-gitace-gating",
+      "data-gitace-page"
     ])
       document.documentElement.removeAttribute(name)
   }
@@ -538,7 +538,7 @@ describe("a number, on a page inside a repository", () => {
   test("offers that pull request in the repository being read", async () => {
     render(
       <TheBar
-        where={{ kind: "repository", owner: "flazouh", repo: "gitquiet" }}
+        where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }}
         participant={SOMEONE}
         repositories={KEPT}
       />
@@ -576,7 +576,7 @@ describe("the switcher on a strip that has only just been built", () => {
    * about a tenth of a second on a press from a list to a card.
    */
   test("draws the chevron on the first render, off the list the last read kept", () => {
-    keepRepositories([repository("flazouh/gitquiet"), repository("acme/alpha")])
+    keepRepositories([repository("flazouh/gitace-extension"), repository("acme/alpha")])
 
     // A read that never answers, so the only list on the screen is the kept one.
     render(<TheBar where={WHERE} participant={SOMEONE} recall={neverAnswers} />)
@@ -594,7 +594,7 @@ describe("the switcher on a strip that has only just been built", () => {
     )
 
     await waitFor(() =>
-      expect(keptRepositories().map((one) => one.nameWithOwner)).toEqual(["flazouh/gitquiet"])
+      expect(keptRepositories().map((one) => one.nameWithOwner)).toEqual(["flazouh/gitace-extension"])
     )
   })
 
@@ -607,7 +607,7 @@ describe("the switcher on a strip that has only just been built", () => {
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
 
     await waitFor(() =>
-      expect(keptRepositories().map((one) => one.nameWithOwner)).toEqual(["flazouh/gitquiet"])
+      expect(keptRepositories().map((one) => one.nameWithOwner)).toEqual(["flazouh/gitace-extension"])
     )
   })
 
@@ -622,7 +622,7 @@ describe("the switcher on a strip that has only just been built", () => {
     render(<TheBar where={WHERE} participant={SOMEONE} recall={answersNothing} />)
 
     await waitFor(() => expect(chevron()).not.toBeNull())
-    expect(keptRepositories().map((one) => one.nameWithOwner)).toEqual(["flazouh/gitquiet"])
+    expect(keptRepositories().map((one) => one.nameWithOwner)).toEqual(["flazouh/gitace-extension"])
   })
 
   test("draws no chevron where nothing is kept and nothing has answered yet", () => {
@@ -660,9 +660,9 @@ describe("the strip before their nav lands", () => {
     const theirs = document.createElement("nav")
     theirs.setAttribute("aria-label", "Repository")
     theirs.innerHTML = `<ul>
-         <li><a href="/flazouh/gitquiet">Code</a></li>
-         <li><a href="/flazouh/gitquiet/issues">Issues</a></li>
-         <li><a href="/flazouh/gitquiet/pulls">Pull requests</a></li>
+         <li><a href="/flazouh/gitace-extension">Code</a></li>
+         <li><a href="/flazouh/gitace-extension/issues">Issues</a></li>
+         <li><a href="/flazouh/gitace-extension/pulls">Pull requests</a></li>
        </ul>`
     document.body.append(theirs)
 
@@ -702,11 +702,11 @@ describe("the strip before GitHub's own row has hydrated", () => {
 
   test("draws the row this repository was read to have, counts and all", () => {
     keepTabs(
-      { owner: "flazouh", repo: "gitquiet" },
+      { owner: "flazouh", repo: "gitace-extension" },
       [
-        { name: "Code", href: "/flazouh/gitquiet", here: true },
-        { name: "Issues", href: "/flazouh/gitquiet/issues", count: 195, here: false },
-        { name: "Pull requests", href: "/flazouh/gitquiet/pulls", count: 9, here: false }
+        { name: "Code", href: "/flazouh/gitace-extension", here: true },
+        { name: "Issues", href: "/flazouh/gitace-extension/issues", count: 195, here: false },
+        { name: "Pull requests", href: "/flazouh/gitace-extension/pulls", count: 9, here: false }
       ]
     )
 
@@ -740,16 +740,16 @@ describe("the strip before GitHub's own row has hydrated", () => {
     const theirs = document.createElement("nav")
     theirs.setAttribute("aria-label", "Repository")
     theirs.innerHTML = `<ul>
-         <li><a href="/flazouh/gitquiet">Code</a></li>
-         <li><a href="/flazouh/gitquiet/issues">Issues</a></li>
-         <li><a href="/flazouh/gitquiet/actions">Actions</a></li>
-         <li><a href="/flazouh/gitquiet/pulls">Pull requests</a></li>
+         <li><a href="/flazouh/gitace-extension">Code</a></li>
+         <li><a href="/flazouh/gitace-extension/issues">Issues</a></li>
+         <li><a href="/flazouh/gitace-extension/actions">Actions</a></li>
+         <li><a href="/flazouh/gitace-extension/pulls">Pull requests</a></li>
        </ul>`
     document.body.append(theirs)
 
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
 
-    expect(keptTabs({ owner: "flazouh", repo: "gitquiet" }).map((one) => one.name)).toEqual([
+    expect(keptTabs({ owner: "flazouh", repo: "gitace-extension" }).map((one) => one.name)).toEqual([
       "Code",
       "Issues",
       "Actions",
@@ -900,10 +900,10 @@ describe("the bar says how much sky it takes", () => {
 
     await waitFor(() => {
       expect(
-        document.documentElement.style.getPropertyValue("--gitquiet-bar-h")
+        document.documentElement.style.getPropertyValue("--gitace-bar-h")
       ).toMatch(/px$/)
     })
 
-    document.documentElement.style.removeProperty("--gitquiet-bar-h")
+    document.documentElement.style.removeProperty("--gitace-bar-h")
   })
 })

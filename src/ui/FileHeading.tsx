@@ -5,7 +5,7 @@ import { folderOf, materialIcon, nameOf } from "./fileIcon"
 import { MATERIAL_SPRITE } from "./materialIcons.generated"
 
 /** The one copy of the icon sheet the page needs, wherever it is referenced. */
-const SPRITE_ID = "gitquiet-material-sprite"
+const SPRITE_ID = "gitace-material-sprite"
 
 /**
  * Puts the Material symbols on the page, once.

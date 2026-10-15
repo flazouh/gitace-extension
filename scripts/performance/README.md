@@ -46,14 +46,14 @@ The observer now skips batches containing only empty focus guards under `body`. 
 
 The expanded browser matrix passed all four phases at all five sizes. At 500,000 nodes, focus-guard cycles took a median 72.2 ms on the original baseline and 4.6 ms with the combined fixes. Document selector calls fell from 280 to zero across 40 cycles. Existing-link checks fell from 1,600 to zero. These figures compare all fixes with `a5d71df`, not the focus-guard change alone.
 
-Initial-load profiles showed that most remaining selector work came from GitHub's scripts. One large-page sample attributed about 188 ms to GitHub selector code and about 9 ms to GitQuiet selectors. Network and cache state varied between pages, so these samples do not establish an initial-render speedup.
+Initial-load profiles showed that most remaining selector work came from GitHub's scripts. One large-page sample attributed about 188 ms to GitHub selector code and about 9 ms to GitAce Extension selectors. Network and cache state varied between pages, so these samples do not establish an initial-render speedup.
 
 The code-quality review found a link moved into native content before observer delivery. A failing regression test reproduced it. The fix checks final root containment. The final review found no remaining blockers in the observer changes. The changed extension loaded automatically through Ego’s explicit browser-target session. The store copy was disabled, and the large PR mounted one root. A matched 30-wheel-event probe recorded no tasks above 50 ms on the small PR and one 59 ms task on the large PR. The earlier store-build probe recorded six large-PR tasks of 52 to 116 ms. These are separate live runs with different native DOM sizes, not a controlled release comparison. Initial-render speedup remains unproven; the later transition check is recorded below.
 
 
 ## Final live transition check
 
-The rebuilt development extension ran six file-settings open/close cycles on each PR at a 1600 by 900 viewport. The large PR recorded no main-thread tasks above 50 ms. The small PR recorded one 51 ms task. After the final large-PR close, the dialog was removed, no animations remained active, and one GitQuiet root remained.
+The rebuilt development extension ran six file-settings open/close cycles on each PR at a 1600 by 900 viewport. The large PR recorded no main-thread tasks above 50 ms. The small PR recorded one 51 ms task. After the final large-PR close, the dialog was removed, no animations remained active, and one GitAce Extension root remained.
 
 The final probe used pointer clicks and direct trigger-state reads. The earlier selector-based probe added its own document traversals, so its long-task count is not a controlled before/after comparison. The final large-PR CPU profile no longer showed the recovery selector calls among its leading selector costs. The deterministic guard probe independently verifies zero recovery scans.
 

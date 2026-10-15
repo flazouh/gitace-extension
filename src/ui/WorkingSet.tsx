@@ -1484,7 +1484,7 @@ export const WorkingSet = ({
 
   return (
     // Down the page only, and unless somebody outside is already doing it. Across, the frame
-    // belongs to the shell — `#gitquiet-root` on GitHub's page, `.page` in the window — so that
+    // belongs to the shell — `#gitace-root` on GitHub's page, `.page` in the window — so that
     // this list starts on the same line as the bar above it and as every other screen. It had
     // sixteen pixels of its own, which stacked with the shell's to sixty-four on a wide window.
     //
@@ -1495,7 +1495,7 @@ export const WorkingSet = ({
     <Keying value={keys}>
       <div
         ref={list}
-        data-gitquiet-activation="list"
+        data-gitace-activation="list"
         onPointerEnter={() => setPointing(true)}
         onPointerLeave={() => setPointing(false)}
         /* Four pixels between the filter row and the Courts, and between the Courts themselves.
@@ -1525,7 +1525,7 @@ export const WorkingSet = ({
             {arranged.courts.map((sitting) => (
               <div
                 key={sitting.court}
-                data-gitquiet-activation="list-section"
+                data-gitace-activation="list-section"
                 className="contents"
               >
                 <Section
@@ -1590,7 +1590,7 @@ export const WorkingSet = ({
              * is the one thing this arrangement takes off the screen.
              */}
             {arranged.loose.length === 0 ? null : (
-              <div data-gitquiet-activation="list-section" className="contents">
+              <div data-gitace-activation="list-section" className="contents">
                 <Section
                   name="Involved Issues"
                   art="issue"

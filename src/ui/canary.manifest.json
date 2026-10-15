@@ -6,7 +6,7 @@
       "url": "https://github.com/",
       "regions": [
         "body:has(#dashboard.dashboard)",
-        "body[data-gitquiet-home]"
+        "body[data-gitace-home]"
       ],
       "bands": []
     },

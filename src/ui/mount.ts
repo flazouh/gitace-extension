@@ -11,7 +11,7 @@ import {
 } from "./preparedNavigation"
 import { finishNavigation, READING } from "./navigationTiming"
 
-export const ROOT_ID = "gitquiet-root"
+export const ROOT_ID = "gitace-root"
 
 /**
  * The mark on everything of ours that lives in `body` rather than in the root — the
@@ -20,8 +20,8 @@ export const ROOT_ID = "gitquiet-root"
  * standing on `body` itself needs the mark to tell its own furniture from the page it
  * is hiding.
  */
-export const OUTSIDE = "data-gitquiet-outside"
-export const SCREEN_ACTIVITY = "data-gitquiet-screen-activity"
+export const OUTSIDE = "data-gitace-outside"
+export const SCREEN_ACTIVITY = "data-gitace-screen-activity"
 
 /**
  * The mark on every element between our root and the document, written when the
@@ -29,7 +29,7 @@ export const SCREEN_ACTIVITY = "data-gitquiet-screen-activity"
  *
  * It says the one thing the rules around it need to know: this box holds the
  * interface, so it is not a box to hide, to inset or to hold to their measure.
- * Every rule that asks it used to ask `:has(#gitquiet-root)` instead, which is
+ * Every rule that asks it used to ask `:has(#gitace-root)` instead, which is
  * the same question and the wrong way to put it. A `:has()` whose subject can be
  * `body` or `main` marks that ancestor as affected for the life of the page, and
  * Chrome then invalidates its whole subtree on *any* change beneath it — so one
@@ -45,7 +45,7 @@ export const SCREEN_ACTIVITY = "data-gitquiet-screen-activity"
  * recompute style, so there is no frame in which a gate rule sees an unmarked
  * ancestor and hides the interface inside it.
  */
-export const WITHIN = "data-gitquiet-within"
+export const WITHIN = "data-gitace-within"
 
 /**
  * Marks the way down to our root, and unmarks whatever no longer leads to it.
@@ -134,20 +134,20 @@ export const rootIn = (target: Document): HTMLElement | null =>
   target.querySelector<HTMLElement>(`#${ROOT_ID}`)
 
 /** Marks what GitHub rendered into the slot, so it can be hidden again if it comes back. */
-const HIDDEN = "data-gitquiet-hidden"
+const HIDDEN = "data-gitace-hidden"
 
 /**
  * Which of this extension's interfaces a container was made for.
  *
- * There is one `#gitquiet-root` per document because every stylesheet here is
+ * There is one `#gitace-root` per document because every stylesheet here is
  * scoped to that id, and for a moment while a reader moves from the Working Set
  * to a pull request both interfaces' scripts are running. This is how the second
  * one knows the element it found is not its own.
  */
-const BELONGS_TO = "data-gitquiet-for"
+const BELONGS_TO = "data-gitace-for"
 
 /** The exact address whose finished DOM this container holds. */
-const ROUTE = "data-gitquiet-route"
+const ROUTE = "data-gitace-route"
 
 type Snapshot = {
   readonly place: string
@@ -158,7 +158,7 @@ type Snapshot = {
   }
 }
 
-type World = Window & { gitquietScreens?: Map<string, Snapshot> }
+type World = Window & { gitaceScreens?: Map<string, Snapshot> }
 
 /** Enough for a short Back trail without retaining a whole browsing session. */
 const HOW_MANY_SCREENS = 8
@@ -166,8 +166,8 @@ const HOW_MANY_SCREENS = 8
 const screenSnapshots = (target: Document): Map<string, Snapshot> | null => {
   const view = target.defaultView as World | null
   if (view === null) return null
-  view.gitquietScreens ??= new Map<string, Snapshot>()
-  return view.gitquietScreens
+  view.gitaceScreens ??= new Map<string, Snapshot>()
+  return view.gitaceScreens
 }
 
 const keepScreenSnapshot = (
@@ -320,7 +320,7 @@ const seedRememberedScreen = (
  * sweeps it away as it settles; and to the search for somewhere to stand, which
  * is stricter about what counts while the page belongs to somebody else.
  */
-const LEAVING = "data-gitquiet-leaving"
+const LEAVING = "data-gitace-leaving"
 
 /**
  * Told to a container as it is taken off the page, whether by the interface
@@ -331,7 +331,7 @@ const LEAVING = "data-gitquiet-leaving"
  * left mounted after the page has stopped goes on reading GitHub for nobody.
  * Both used to be possible, because it was the address changing that decided.
  */
-export const GOING = "gitquiet:going"
+export const GOING = "gitace:going"
 
 const takeOffThePage = (element: Element, rememberLive = false): void => {
   const page = element.ownerDocument
@@ -384,7 +384,7 @@ const isOurContainer = (container: Element): boolean => container === ours
  * entirely. The bar of the screen being left never heard it, and stayed on the page
  * beside the new one. That is the second bar, and this is the channel it was missing.
  */
-export const SCREEN_MOVED = "gitquiet:screen-moved"
+export const SCREEN_MOVED = "gitace:screen-moved"
 
 /** One pending announcement per document, so one takeover causes one React update. */
 const moving = new WeakSet<Document>()
@@ -450,7 +450,7 @@ export const whenTheScreenMoves = (page: Document, watcher: () => void): (() => 
  * children wholesale, so the Run's container is gone from the document before
  * the next screen has anywhere to stand. Nothing tells that tree it is off the
  * page, so it stays mounted — reading GitHub for a page nobody is on, with its
- * bar still in `#gitquiet-bar` beside the new one. Two bars, and the reason
+ * bar still in `#gitace-bar` beside the new one. Two bars, and the reason
  * nobody could reproduce it is that it needs their router to be quick.
  *
  * Held in the module doing the replacing, which is the same module that marked
@@ -472,7 +472,7 @@ const markAsLeaving = (element: Element): void => {
  * and tabs off the screen. Nothing else sets it, and something must: a page
  * left gated is a blank page.
  */
-const REVEALED = "data-gitquiet-revealed"
+const REVEALED = "data-gitace-revealed"
 
 /**
  * The other gate: the one belonging to the small script that runs on every
@@ -487,7 +487,7 @@ const REVEALED = "data-gitquiet-revealed"
  * revealing also lifted this gate, it would be dropping the guard a fraction of
  * a second before the conversation it exists to hide is rendered.
  */
-const GATING = "data-gitquiet-gating"
+const GATING = "data-gitace-gating"
 
 /**
  * Which of GitHub's pages this document is, as the rules that hide it are written.
@@ -501,7 +501,7 @@ const GATING = "data-gitquiet-gating"
  *
  * So the sheet says which page each rule is for and this says which page this is.
  */
-export const PAGE = "data-gitquiet-page"
+export const PAGE = "data-gitace-page"
 
 /**
  * Says so, from the address, before anything has been displayed.
@@ -608,7 +608,7 @@ export const gate = (target: Document): void => {
  * children that are, for the moment before the observer notices them, perfectly
  * visible. A rule keyed off this hides them from the instant they exist.
  */
-const TAKEN = "data-gitquiet-taken"
+const TAKEN = "data-gitace-taken"
 
 /**
  * When their page is kept off the screen: the document is one of ours, and either
@@ -654,7 +654,7 @@ export const HIDING_MARKS: ReadonlyArray<string> = [PAGE, REVEALED, TAKEN]
  * Read by {@link theScreenShown}, and through it by the push in `going.ts`, which
  * has to know whether the screen it sent the reader to ever arrived.
  */
-const SHOWN = "data-gitquiet-shown"
+const SHOWN = "data-gitace-shown"
 
 /**
  * Which of them it is, for a caller that has just sent the reader somewhere.
@@ -677,7 +677,7 @@ export const theScreenShown = (target: Document): string | null =>
  * again. So the kind reads "conversation" from the pull request they left, through the
  * press, and on into the one they arrived at.
  */
-const AT = "data-gitquiet-at"
+const AT = "data-gitace-at"
 
 /**
  * Who has the mark up, so that only they can take it down.
@@ -1176,7 +1176,7 @@ export const takeOverSlot = (
   const settle = (into: Element): void => {
     // The interface this one replaces goes now, in the same breath as ours
     // arriving, so that the page is never without one of them — and so that
-    // there is never more than one `#gitquiet-root` on it, which every
+    // there is never more than one `#gitace-root` on it, which every
     // stylesheet here is scoped to.
     // The one their router removed before this got here, read before the sweep
     // rather than after: the sweep disconnects what it takes, and asking

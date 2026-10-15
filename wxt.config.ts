@@ -47,9 +47,9 @@ export default defineConfig({
      * The length that fits all of them is the App Store's (112), and
      * `manifest.test.ts` holds every target to it and says what happened without it.
      */
-    name: "GitQuiet - A faster, quieter GitHub",
+    name: "GitAce Extension - A faster, quieter GitHub",
     // Toolbar / overflow menus. Store listing keeps the longer `name`.
-    short_name: "GitQuiet",
+    short_name: "GitAce Extension",
     description: `A faster, quieter GitHub in ${readIn[browser] ?? "your browser"}. Every pull request you're in, one screen, sorted by next action.`,
     ...(process.env.RELEASE_VERSION === undefined
       ? {}
@@ -68,6 +68,9 @@ export default defineConfig({
       ? {
           browser_specific_settings: {
             gecko: {
+              // The id from before the rename to GitAce Extension, kept on
+              // purpose: it is what Mozilla knows this add-on by, and a new one
+              // would stop updates reaching everyone who has it installed.
               id: "gitquiet@gitquiet.dev",
               strict_min_version: "115.0",
               /*
@@ -203,8 +206,7 @@ export default defineConfig({
    * Firefox asks for the sources next to the package, because a reviewer has to
    * rebuild a bundle to see what is in it. What they need is this extension:
    * `src`, the scripts `bun run build` runs, and the lockfile. What they were
-   * getting was the whole repository — the desktop app's build folder alone
-   * carries a 63 MB `bun` binary, and the zip came to 72 MB of which almost
+   * getting was the whole repository, and the zip came to 72 MB of which almost
    * none was readable source.
    *
    * WXT already leaves out `node_modules`, dotfiles, tests and `.output`. These
@@ -219,7 +221,7 @@ export default defineConfig({
      * `{{version}}` is the manifest's, which reads `RELEASE_VERSION` above.
      * `{{packageVersion}}` is package.json's, and package.json here says `0.0.0`
      * on purpose, so WXT's default names every zip of every release
-     * `gitquiet-0.0.0-`. The bytes inside are right either way: this is the label
+     * `gitace-extension-0.0.0-`. The bytes inside are right either way: this is the label
      * on the tin, which is what a release page shows and what a link points at.
      *
      * Otherwise these are WXT's defaults, `{{modeSuffix}}` included. It is empty
@@ -232,20 +234,8 @@ export default defineConfig({
      * The prose stays in. Mozilla asks a reviewer to rebuild the extension from
      * this archive, and refuses one that arrives without instructions, so the
      * README that carries them is the last thing to drop for size.
-     *
-     * `desktop/*\/**` is every file in every folder under `desktop`, and no file
-     * sitting directly in it. Not `desktop/**`, because an exclusion beats an
-     * inclusion and `desktop/package.json` has to survive: the root package.json
-     * calls `desktop` a workspace, and bun refuses to install a workspace it
-     * cannot find. Six small config files stay. 154 MB goes, including the 63 MB
-     * `bun` binary under `build`.
-     *
-     * One pattern rather than a folder each, so a folder added to the desktop app
-     * next year is dropped by default instead of shipping until somebody notices
-     * the archive is large again.
      */
     excludeSources: [
-      "desktop/*/**",
       "site/**",
       "video/**",
       "shots/**",

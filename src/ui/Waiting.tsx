@@ -89,7 +89,7 @@ export const Waiting = ({ what, detail, leaving = false, room = "card" }: Waitin
     // The one contract the rest of the extension reads off the wait: the page has
     // not been read yet. The click benchmark keys on it to decide when a reader
     // could start reading, and so does every measurement taken since.
-    data-gitquiet-loading=""
+    data-gitace-loading=""
     data-leaving={leaving ? "" : undefined}
     className={`t-waiting flex flex-col items-center justify-center gap-3 ${ROOM[room]}`}
   >

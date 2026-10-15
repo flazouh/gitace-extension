@@ -36,18 +36,18 @@ const tidy = (): void => {
   clearPreparedTraversal(document)
   const screens = (
     window as Window & {
-      gitquietScreens?: Map<string, { prepared?: { dispose: () => void } }>
+      gitaceScreens?: Map<string, { prepared?: { dispose: () => void } }>
     }
-  ).gitquietScreens
+  ).gitaceScreens
   for (const screen of screens?.values() ?? []) screen.prepared?.dispose()
   screens?.clear()
   document.body.innerHTML = ""
   for (const name of [
-    "data-gitquiet-taken",
-    "data-gitquiet-shown",
-    "data-gitquiet-revealed",
-    "data-gitquiet-gating",
-    "data-gitquiet-page"
+    "data-gitace-taken",
+    "data-gitace-shown",
+    "data-gitace-revealed",
+    "data-gitace-gating",
+    "data-gitace-page"
   ])
     document.documentElement.removeAttribute(name)
 }
@@ -70,7 +70,7 @@ const settled = (): Promise<void> => new Promise((done) => setTimeout(() => done
  * tests assert are unchanged; only the tree they are asked of.
  */
 const ours = (): ParentNode =>
-  document.getElementById("gitquiet-host")?.shadowRoot ?? document
+  document.getElementById("gitace-host")?.shadowRoot ?? document
 
 /**
  * The container the reader is looking at, which during a handover is not the only one.
@@ -81,8 +81,8 @@ const ours = (): ParentNode =>
  * document; in our own tree both are here, so the mark is what tells them apart.
  */
 const ourRoot = (): HTMLElement | null => {
-  const all = [...ours().querySelectorAll<HTMLElement>("#gitquiet-root")]
-  return all.find((one) => !one.hasAttribute("data-gitquiet-leaving")) ?? all[0] ?? null
+  const all = [...ours().querySelectorAll<HTMLElement>("#gitace-root")]
+  return all.find((one) => !one.hasAttribute("data-gitace-leaving")) ?? all[0] ?? null
 }
 
 const drawn = async (said: string): Promise<void> => {
@@ -168,8 +168,8 @@ describe("standing a screen on the page", () => {
      * What hides their page is one rule keyed on the mark below, so there is
      * nothing here to assert about their regions or their bands — there are none.
      */
-    expect(ourRoot()?.parentElement?.id).toBe("gitquiet-stage")
-    expect(document.documentElement.getAttribute("data-gitquiet-shown")).toBe("test-screen")
+    expect(ourRoot()?.parentElement?.id).toBe("gitace-stage")
+    expect(document.documentElement.getAttribute("data-gitace-shown")).toBe("test-screen")
     page.close()
   })
 
@@ -183,7 +183,7 @@ describe("standing a screen on the page", () => {
     await until(() => ourRoot() === null)
 
     expect(ourRoot()).toBeNull()
-    expect(document.documentElement.hasAttribute("data-gitquiet-taken")).toBe(false)
+    expect(document.documentElement.hasAttribute("data-gitace-taken")).toBe(false)
   })
 
   test("keeps the exact last DOM ready while React refreshes a returned screen", async () => {
@@ -338,7 +338,7 @@ describe("standing a screen on the page", () => {
   test("reuses a held surface when Back redraws the same screen kind", async () => {
     history.replaceState(null, "", "/mine")
     document.body.innerHTML =
-      '<main><div id="gitquiet-root" data-gitquiet-for="test-screen">old screen</div></main>'
+      '<main><div id="gitace-root" data-gitace-for="test-screen">old screen</div></main>'
     holdTheSurface(document)
 
     const nowhere: Place = {
@@ -347,7 +347,7 @@ describe("standing a screen on the page", () => {
     const returned = standAScreen({ place: nowhere, draw: () => <p>returned screen</p> })
     await drawn("returned screen")
 
-    expect(document.documentElement.hasAttribute("data-gitquiet-taken")).toBe(true)
+    expect(document.documentElement.hasAttribute("data-gitace-taken")).toBe(true)
     returned.close()
   })
 
@@ -547,7 +547,7 @@ describe("a read already running by the time the screen asks for it", () => {
  * Each screen that stood up listened on its container for being taken off the page, and
  * nothing took the listener off again. The container is the same one on every visit to
  * that page, so a session left one closure per visit on it, each holding that visit's
- * screen. Measured over forty presses: one `gitquiet:going` listener more per round.
+ * screen. Measured over forty presses: one `gitace:going` listener more per round.
  */
 describe("a screen that has come down", () => {
   beforeEach(tidy)
@@ -563,11 +563,11 @@ describe("a screen that has come down", () => {
     const add = listening.addEventListener
     const remove = listening.removeEventListener
     listening.addEventListener = function (this: EventTarget, type: string, ...rest: Array<never>) {
-      if (type === "gitquiet:going") live.set(this, (live.get(this) ?? 0) + 1)
+      if (type === "gitace:going") live.set(this, (live.get(this) ?? 0) + 1)
       return add.call(this, type, ...(rest as [never]))
     } as typeof add
     listening.removeEventListener = function (this: EventTarget, type: string, ...rest: Array<never>) {
-      if (type === "gitquiet:going") live.set(this, (live.get(this) ?? 0) - 1)
+      if (type === "gitace:going") live.set(this, (live.get(this) ?? 0) - 1)
       return remove.call(this, type, ...(rest as [never]))
     } as typeof remove
 

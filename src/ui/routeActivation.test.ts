@@ -10,11 +10,11 @@ describe("prepared route activation", () => {
   test("reveals a prepared file panel in bounded stages", () => {
     const root = document.createElement("div")
     root.innerHTML = `
-      <div data-gitquiet-activation="files-panel">
-        <div data-gitquiet-activation="files-tree"></div>
-        <div data-gitquiet-activation="files-content">
+      <div data-gitace-activation="files-panel">
+        <div data-gitace-activation="files-tree"></div>
+        <div data-gitace-activation="files-content">
           <div data-file="one.md" aria-hidden="false">
-            <div data-gitquiet-prose-runs>
+            <div data-gitace-prose-runs>
               ${Array.from({ length: 10 }, (_, at) => `<div data-run="${at}"></div>`).join("")}
             </div>
           </div>
@@ -23,9 +23,9 @@ describe("prepared route activation", () => {
     `
     const queued: Array<() => void> = []
     const activation = prepareRouteActivation(root, (work) => queued.push(work))
-    const panel = root.querySelector<HTMLElement>('[data-gitquiet-activation="files-panel"]')!
-    const tree = root.querySelector<HTMLElement>('[data-gitquiet-activation="files-tree"]')!
-    const content = root.querySelector<HTMLElement>('[data-gitquiet-activation="files-content"]')!
+    const panel = root.querySelector<HTMLElement>('[data-gitace-activation="files-panel"]')!
+    const tree = root.querySelector<HTMLElement>('[data-gitace-activation="files-tree"]')!
+    const content = root.querySelector<HTMLElement>('[data-gitace-activation="files-content"]')!
     const drawing = root.querySelector<HTMLElement>('[data-file][aria-hidden="false"]')!
     const runs = [...root.querySelectorAll<HTMLElement>("[data-run]")]
 
@@ -84,17 +84,17 @@ describe("prepared route activation", () => {
   test("reveals cached list sections one task at a time", () => {
     const root = document.createElement("div")
     root.innerHTML = `
-      <div data-gitquiet-activation="list">
-        <div data-gitquiet-activation="list-section"></div>
-        <div data-gitquiet-activation="list-section"></div>
+      <div data-gitace-activation="list">
+        <div data-gitace-activation="list-section"></div>
+        <div data-gitace-activation="list-section"></div>
       </div>
     `
     const queued: Array<() => void> = []
     const sections = [
-      ...root.querySelectorAll<HTMLElement>('[data-gitquiet-activation="list-section"]')
+      ...root.querySelectorAll<HTMLElement>('[data-gitace-activation="list-section"]')
     ]
     const activation = prepareRouteActivation(root, (work) => queued.push(work))
-    const list = root.querySelector<HTMLElement>('[data-gitquiet-activation="list"]')!
+    const list = root.querySelector<HTMLElement>('[data-gitace-activation="list"]')!
 
     expect(list.hidden).toBe(true)
     expect(sections.map((section) => section.hidden)).toEqual([true, true])

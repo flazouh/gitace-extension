@@ -368,7 +368,7 @@ export const IssueScreen = ({
         // because their container runs the full width of the window and a card
         // flush to that edge reads as part of the browser — and so did five
         // other screens, each choosing again, none of them agreeing with the
-        // bar above. `#gitquiet-root` insets every screen now.
+        // bar above. `#gitace-root` insets every screen now.
         <div className="t-panels flex flex-col pt-2">
           <IssueHeader
             snapshot={holding === undefined ? snapshot : { ...snapshot, ...holding }}

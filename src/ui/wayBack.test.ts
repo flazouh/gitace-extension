@@ -97,13 +97,13 @@ describe("the way back, on a page this interface has been turned off on", () => 
     expect(widgetIn(page)!.parentElement).toBe(page.documentElement)
   })
 
-  test("carries the gitquiet mark, so it is recognisable before it is read", () => {
+  test("carries the GitAce Extension mark, so it is recognisable before it is read", () => {
     const page = githubPage()
 
     offer(page)
 
     expect(markIn(page).querySelector("svg")).not.toBeNull()
-    expect(markIn(page).getAttribute("aria-label")).toContain("gitquiet")
+    expect(markIn(page).getAttribute("aria-label")).toContain("GitAce Extension")
   })
 
   test("is marked as ours, so a takeover does not hide it as part of their page", () => {
@@ -111,7 +111,7 @@ describe("the way back, on a page this interface has been turned off on", () => 
 
     offer(page)
 
-    expect(widgetIn(page)!.hasAttribute("data-gitquiet-outside")).toBe(true)
+    expect(widgetIn(page)!.hasAttribute("data-gitace-outside")).toBe(true)
   })
 
   test("turns the interface back on when the mark is pressed", () => {

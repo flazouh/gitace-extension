@@ -20,7 +20,7 @@ const page: Place = {
 describe("the rule that keeps GitHub's page off the screen", () => {
   test("hides everything in body that is not our host", () => {
     expect(loadSheet([page])).toContain(
-      "body > *:not(#gitquiet-host):not([data-gitquiet-outside])"
+      "body > *:not(#gitace-host):not([data-gitace-outside])"
     )
     expect(loadSheet([page])).toContain("display: none")
   })
@@ -29,7 +29,7 @@ describe("the rule that keeps GitHub's page off the screen", () => {
     // The mark goes on when a place is claimed and comes off when the page is
     // handed back, so one condition covers both the wait before ours is drawn and
     // the whole time it is up. Unkeyed, this would empty a page we never took.
-    expect(loadSheet([page])).toContain("html[data-gitquiet-page]")
+    expect(loadSheet([page])).toContain("html[data-gitace-page]")
   })
 
   test("names nothing of GitHub's", () => {
@@ -53,7 +53,7 @@ describe("the rule that keeps GitHub's page off the screen", () => {
     // The bar and the overlay hosts are inside the host now, but anything of ours
     // that has to sit in their document carries the outside mark, and the rule
     // reads that mark rather than a list of ids.
-    expect(loadSheet([page])).toContain(":not([data-gitquiet-outside])")
+    expect(loadSheet([page])).toContain(":not([data-gitace-outside])")
   })
 })
 

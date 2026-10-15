@@ -15,7 +15,7 @@ import { useRead } from "./read"
  * read's alone.
  */
 
-const COUNT_AT = "https://api.github.com/repos/flazouh/gitquiet"
+const COUNT_AT = "https://api.github.com/repos/flazouh/gitace-extension"
 
 const ASKING = { Accept: "application/vnd.github+json" }
 
@@ -26,7 +26,7 @@ const ASKING = { Accept: "application/vnd.github+json" }
  * quarter of a second in. It is shown while the live read runs behind it and replaced
  * when that lands, which for a star count is the whole of the policy worth having.
  */
-const KEPT = "gitquiet.stars"
+const KEPT = "gitace.stars"
 
 const remembered = (): number | undefined => {
   try {

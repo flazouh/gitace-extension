@@ -43,7 +43,7 @@ const walkTree = (node: unknown, visit: (node: Node) => void) => {
 
 const APPLY = process.argv.includes("--apply")
 const FORCE = process.argv.includes("--force")
-const MANIFEST = "../gitquiet-text-manifest.json"
+const MANIFEST = "../gitace-text-manifest.json"
 
 /** JSX attributes a reader hears or sees. Anything not named here is left alone. */
 const SPOKEN_ATTRS = new Set([

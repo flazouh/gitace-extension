@@ -52,7 +52,7 @@ const RETINA = `${REPO}/site/public/shots`
  */
 const SETTLE_SECONDS = 20
 
-const task = await useOrCreateTaskSpace("gitquiet store screenshots")
+const task = await useOrCreateTaskSpace("GitAce Extension store screenshots")
 
 mkdirSync(RETINA, { recursive: true })
 

@@ -14,7 +14,7 @@ import { layer } from "./GitHubGateway"
  * without anything carried across it has no idea a press ever happened. The row
  * goes back under Needs You, which is the same complaint the press was about.
  */
-const one = { owner: "flazouh", repo: "gitquiet", number: 7 }
+const one = { owner: "flazouh", repo: "gitace-extension", number: 7 }
 
 beforeEach(() => {
   installStorage()
@@ -31,16 +31,16 @@ describe("a write carried from one document to the next", () => {
   test("writes down what the map holds", async () => {
     recordLanded(one, "closed")
 
-    await Effect.runPromise(rememberLanded({ "flazouh/gitquiet#7": { state: "closed", at: Date.now() } }))
+    await Effect.runPromise(rememberLanded({ "flazouh/gitace-extension#7": { state: "closed", at: Date.now() } }))
 
     expect(stored("landed")).toEqual({
-      "flazouh/gitquiet#7": { state: "closed", at: expect.any(Number) }
+      "flazouh/gitace-extension#7": { state: "closed", at: expect.any(Number) }
     })
   })
 
   test("puts it back before the first read decodes", async () => {
     // The store as the last document left it, and a map that knows nothing.
-    place("landed", { "flazouh/gitquiet#7": { state: "closed", at: Date.now() } })
+    place("landed", { "flazouh/gitace-extension#7": { state: "closed", at: Date.now() } })
 
     expect(Option.isNone(landedState(one))).toBe(true)
 
@@ -71,7 +71,7 @@ describe("a write carried from one document to the next", () => {
       return real(keys)
     }
 
-    place("landed", { "flazouh/gitquiet#7": { state: "closed", at: Date.now() } })
+    place("landed", { "flazouh/gitace-extension#7": { state: "closed", at: Date.now() } })
 
     // The six shelves decode together, and each of them joins the same read
     // rather than starting one.

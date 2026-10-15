@@ -13,14 +13,14 @@ export const millisOf = (name: string, fallback: number): number => {
   /*
    * Read off the host, which is the one element that always carries the scale.
    *
-   * The durations are declared on `#gitquiet-root, [data-gitquiet-outside]`, and
+   * The durations are declared on `#gitace-root, [data-gitace-outside]`, and
    * the host carries the outside mark — so it has every one of them, and there is
    * exactly one host in a document. That last part is the whole reason it is the
    * host and not the root: a suite is one document, and a test that plants
    * durations while a screen stands its own root is two roots and a coin toss
    * about which one a lookup answers with.
    *
-   * It was `document.getElementById("gitquiet-root")`, which found nothing at all
+   * It was `document.getElementById("gitace-root")`, which found nothing at all
    * once the interface moved into a shadow root: every duration in the interface
    * had quietly fallen back to the number written beside it in JavaScript, and the
    * stylesheet had stopped owning the timing it is meant to own. Nothing looked

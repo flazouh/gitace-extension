@@ -19,7 +19,7 @@
 import { Effect } from "effect"
 import type { Told } from "./writings"
 
-const NAME = "gitquiet-ledger"
+const NAME = "gitace-ledger"
 const VERSION = 1
 
 /**

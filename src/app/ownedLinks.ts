@@ -14,8 +14,8 @@ export const protectOwnedLinks = (
   const update = (changes: readonly MutationRecord[]) => {
     const ours = ourTree(target) ?? target
     const current = [
-      ours.querySelector<HTMLElement>("#gitquiet-root"),
-      ours.querySelector<HTMLElement>("#gitquiet-bar")
+      ours.querySelector<HTMLElement>("#gitace-root"),
+      ours.querySelector<HTMLElement>("#gitace-bar")
     ]
       .filter((root) => root !== null)
     const added = new Set<Element>(current.filter((root) => !roots.includes(root)))

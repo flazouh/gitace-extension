@@ -28,8 +28,8 @@ describe("the generated gate stylesheets", () => {
   test("hide their bar on the presence of ours, never on the takeover starting", () => {
     // Keyed the other way round, a press would take their bar off the screen before ours
     // arrived, and the page would have no bar at all for as long as that took.
-    expect(barSheet()).toContain("html[data-gitquiet-bar-standing] header.GlobalNav")
-    expect(barSheet()).not.toContain("data-gitquiet-gating")
+    expect(barSheet()).toContain("html[data-gitace-bar-standing] header.GlobalNav")
+    expect(barSheet()).not.toContain("data-gitace-gating")
   })
 
   test("hide their page on any page of ours, without naming one of them", () => {
@@ -45,8 +45,8 @@ describe("the generated gate stylesheets", () => {
      * the name alone, every hand-back left the reader in front of a black page.
      */
     const sheet = readFileSync("src/ui/gates.load.css", "utf8")
-    expect(sheet).toContain("html[data-gitquiet-page]:not([data-gitquiet-revealed]) body >")
-    expect(sheet).toContain("html[data-gitquiet-page][data-gitquiet-taken] body >")
-    for (const place of PLACES) expect(sheet).not.toContain(`data-gitquiet-page="${place.name}"`)
+    expect(sheet).toContain("html[data-gitace-page]:not([data-gitace-revealed]) body >")
+    expect(sheet).toContain("html[data-gitace-page][data-gitace-taken] body >")
+    for (const place of PLACES) expect(sheet).not.toContain(`data-gitace-page="${place.name}"`)
   })
 })

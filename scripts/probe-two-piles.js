@@ -11,7 +11,7 @@ const LIST = "https://github.com/flazouh/stack-probe/pulls"
 const PAGE = "https://github.com/flazouh/stack-probe/pull/10"
 
 const READ = String.raw`(() => {
-  const root = document.getElementById("gitquiet-root")
+  const root = document.getElementById("gitace-root")
   const shadow = root?.shadowRoot ?? root
   if (root === null) return JSON.stringify({ mounted: false })
 
@@ -25,7 +25,7 @@ const READ = String.raw`(() => {
   return JSON.stringify({ rows })
 })()`
 
-const task = await useOrCreateTaskSpace("test gitquiet extension on real PR")
+const task = await useOrCreateTaskSpace("test GitAce Extension on real PR")
 await takeOverTaskSpace(task.id)
 
 for (const where of [LIST, PAGE]) {

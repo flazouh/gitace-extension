@@ -8,9 +8,9 @@ import { entryOf, heldIn, mightBe, nameOf, withinPackage } from "./packages"
 
 describe("the packages a repository holds itself", () => {
   const FILES = new Map([
-    ["package.json", '{"name":"gitquiet","workspaces":["desktop"],"main":"index.ts"}'],
-    ["desktop/package.json", '{"name":"@gitquiet/desktop","types":"./src/main.ts"}'],
-    ["packages/ui/package.json", '{"name":"@gitquiet/ui","exports":{".":{"types":"./index.d.ts"}}}'],
+    ["package.json", '{"name":"gitace-extension","workspaces":["desktop"],"main":"index.ts"}'],
+    ["desktop/package.json", '{"name":"@gitace/desktop","types":"./src/main.ts"}'],
+    ["packages/ui/package.json", '{"name":"@gitace/ui","exports":{".":{"types":"./index.d.ts"}}}'],
     ["node_modules/left-pad/package.json", '{"name":"left-pad"}'],
     ["docs/package.json", "{ not json at all"]
   ])
@@ -18,17 +18,17 @@ describe("the packages a repository holds itself", () => {
   test("knows each one by the name other files import it as", () => {
     const held = heldIn(FILES)
 
-    expect(held.get("@gitquiet/desktop")?.at).toBe("desktop")
-    expect(held.get("@gitquiet/ui")?.at).toBe("packages/ui")
-    expect(held.get("gitquiet")?.at).toBe("")
+    expect(held.get("@gitace/desktop")?.at).toBe("desktop")
+    expect(held.get("@gitace/ui")?.at).toBe("packages/ui")
+    expect(held.get("gitace-extension")?.at).toBe("")
   })
 
   test("resolves each one to the file its name means", () => {
     const held = heldIn(FILES)
 
-    expect(held.get("@gitquiet/desktop")?.entry).toBe("desktop/src/main.ts")
-    expect(held.get("@gitquiet/ui")?.entry).toBe("packages/ui/index.d.ts")
-    expect(held.get("gitquiet")?.entry).toBe("index.ts")
+    expect(held.get("@gitace/desktop")?.entry).toBe("desktop/src/main.ts")
+    expect(held.get("@gitace/ui")?.entry).toBe("packages/ui/index.d.ts")
+    expect(held.get("gitace-extension")?.entry).toBe("index.ts")
   })
 
   test("leaves out a vendored copy, which is not a package this repository holds", () => {
