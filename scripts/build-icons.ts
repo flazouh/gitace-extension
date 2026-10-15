@@ -12,11 +12,12 @@
  * (`brew install librsvg`): rendering each size from the vector keeps the ring crisp at
  * 16, which reducing the 128 would not.
  *
- * Transparent, and drawn in the brand's one purple at every size. Chrome shows this
- * image on a light toolbar and a dark one, so a baked square would be a light square on
- * somebody's dark browser.
+ * Ace's mark in white on a rounded square of the brand's one purple, at every size. Chrome
+ * shows this image on a light toolbar and a dark one; a light or an ink square vanishes on
+ * one of them, and the purple reads on both. The mark is Ace's own, unchanged: the colour
+ * is what tells GitAce Extension from Ace.
  *
- * The geometry below is the same three shapes as `site/src/Mark.tsx`, which is where the
+ * The mark below is the same as `src/ui/Mark.tsx`, which is where the
  * mark is defined for the landing page and for the store's own images. Two copies of it,
  * because the site is a separate app with its own toolchain and nothing here can hand a
  * React component to a rasteriser. Change one and change the other.
@@ -29,13 +30,13 @@ import { fileURLToPath } from "node:url"
 /** `MARK` in `site/src/brand.ts`. */
 const MARK = "#8b5cf6"
 
-/** The three shapes, without the document around them, so a tile can place them too. */
-const shapes = `  <circle cx="15.4" cy="12.2" r="7" stroke-width="2.5" />
-  <path d="M22.4 12.2 V23.4" stroke-width="2.5" />
-  <circle cx="22.4" cy="25.6" r="2.5" fill="${MARK}" stroke="none" />`
+/** Ace's mark (`crates/ui/assets/ace-mark.svg` in flazouh/ace), 120 x 82. */
+const ACE = "M43.7 81.4H0L85.7 0H120v81.4H76.9L61.6 64.7 43.7 81.4Zm29.2-32.2h24.4V24.6L72.9 49.2Z"
 
-const mark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="${MARK}">
-${shapes}
+/** The mark on its tile: a 128 square with Ace's corner radius, the mark centred in the middle 60%. */
+const mark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="28" fill="${MARK}" />
+  <g transform="translate(25.6 37.3) scale(0.64)"><path fill="#fff" d="${ACE}" /></g>
 </svg>
 `
 
