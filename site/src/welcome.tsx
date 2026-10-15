@@ -8,7 +8,8 @@ import { mount } from "./mount"
 import { Supplied } from "../../shots/Supplied"
 import { viewNamed } from "../../shots/views"
 import { Bed } from "./Bed"
-import { Footer, HELD, Nav, Source, STORE_AT } from "./Shell"
+import { Footer, Masthead } from "./Shell"
+import { CHROME_AT } from "./stores"
 import "./index.css"
 import "@/ui/onboarding.css"
 
@@ -47,10 +48,8 @@ const Welcome = () => {
         alive
       />
 
-      <div className={`relative z-1 ${HELD}`}>
-        <Nav>
-          <Source />
-        </Nav>
+      <div className="relative z-1">
+        <Masthead />
       </div>
 
       <main className="relative z-1 flex flex-1 items-center justify-center px-6 pb-14">
@@ -74,7 +73,7 @@ const Welcome = () => {
                       "It works on the pages you already use. Firefox and Safari too."
                     ],
                     act: (
-                      <a className="tour-press" href={STORE_AT}>
+                      <a className="tour-press" href={CHROME_AT}>
                         Install for Chrome
                       </a>
                     )
@@ -84,7 +83,7 @@ const Welcome = () => {
         </div>
       </main>
 
-      <div className={`relative z-1 ${HELD}`}>
+      <div className="relative z-1">
         <Footer />
       </div>
     </div>

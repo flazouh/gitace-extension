@@ -52,7 +52,7 @@ const META = {
 
 describe("crawler-visible copy inside #page", () => {
   test("home has the live h1", () => {
-    expect(h1In(html("../index.html"))).toBe("A faster, quieter GitHub.")
+    expect(h1In(html("../index.html"))).toBe("A faster, quieter GitHub")
   })
 
   test("home crawler copy links the two job pages", () => {

@@ -13,40 +13,50 @@
     <style>
       :root {
         color-scheme: light;
-        --ink: #1b1725;
-        --muted: #5f596d;
-        --paper: #fbf9f7;
       }
       body {
         margin: 0;
-        font: 16px/1.55 ui-sans-serif, system-ui, sans-serif;
+        font: 16px/1.55 Geist, ui-sans-serif, system-ui, sans-serif;
         color: var(--ink);
         background: var(--paper);
       }
+      /* Scoped to the policy, so none of it reaches the shared nav and footer. */
       main {
         max-width: 40rem;
         margin: 0 auto;
         padding: 3rem 1.25rem 4rem;
       }
-      h1 {
+      main h1 {
         font-size: 1.75rem;
         line-height: 1.2;
         margin: 0 0 0.5rem;
       }
-      h2 {
+      main h2 {
         font-size: 1.1rem;
+        font-weight: 600;
         margin: 2rem 0 0.5rem;
       }
-      p,
-      li {
-        color: var(--muted);
+      main p {
+        margin: 0 0 1em;
       }
-      a {
+      main ul {
+        margin: 0 0 1em;
+        padding-left: 1.25rem;
+        list-style: disc;
+      }
+      main p,
+      main li {
+        color: var(--ink-2);
+      }
+      main a {
         color: var(--ink);
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
+    <!-- The shared bar, nav and footer mount here; the policy itself is plain HTML. -->
+    <div id="masthead"></div>
     <main>
       <h1>GitAce Extension privacy policy</h1>
       <p>Last updated: 16 August 2026</p>
@@ -87,5 +97,7 @@
         <a href="https://github.com/flazouh/gitace-extension/issues">open an issue on GitHub</a>.
       </p>
     </main>
+    <div id="footer"></div>
+    <script type="module" src="/src/privacy.tsx"></script>
   </body>
 </html>

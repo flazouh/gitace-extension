@@ -28,17 +28,22 @@
     />
     <meta name="twitter:image" content="https://gitace.dev/og.png" />
     <!--
-      First paint: sober dark field before the bundle. Crawler <main> clipped out of view.
+      First paint: Ace's night behind the page and its paper under it, before the bundle.
+      Crawler <main> clipped out of view.
     -->
+    <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/archivo-narrow-latin.woff2" as="font" type="font/woff2" crossorigin />
     <style>
-      html,
+      html {
+        background: #120d0b;
+      }
       body {
         margin: 0;
         min-height: 100%;
         min-height: 100dvh;
-        background: #0c0c0c;
-        color: #f2f2ee;
-        color-scheme: dark;
+        background: #ecebe7;
+        color: #0b0a09;
+        color-scheme: light;
       }
       #page > main {
         position: absolute;
@@ -56,13 +61,18 @@
   <body>
     <div id="page">
       <main>
-        <h1>A faster, quieter GitHub.</h1>
+        <h1>A faster, quieter GitHub</h1>
+        <p>No account. No server. Open source. Not an AI reviewer.</p>
+        <h2>Pull requests, filed by what they need.</h2>
         <p>
-          Pull requests that need you, filed by next action—on the session you already have. Not an
-          AI reviewer.
+          Every pull request you are in, sorted into what needs you, what waits on someone else,
+          what is still running and what is settled. The next action is the first thing you see,
+          not the twentieth row of a list.
         </p>
+        <p>GitAce Extension is part of Ace: <a href="https://useace.dev">meet the Ace app</a>.</p>
         <p>
           <a href="https://chromewebstore.google.com/detail/gitace-extension/ichobjnihnofjkpoegikjhefmoekaahe">Install for Chrome</a>
+          <a href="https://addons.mozilla.org/firefox/addon/gitquiet/">Install for Firefox</a>
           <a href="/github-pr-inbox">GitHub PR inbox</a>
           <a href="/github-review-queue">GitHub review queue</a>
         </p>

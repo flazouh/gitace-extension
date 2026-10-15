@@ -1,16 +1,7 @@
 import "@fontsource-variable/inter"
 import { mount } from "./mount"
 import { comparedAt, COMPARED, type Compared } from "./compare/pages"
-import {
-  Above,
-  AddToChrome,
-  Footer,
-  HELD,
-  Nav,
-  Quietly,
-  SkipTo,
-  Source
-} from "./Shell"
+import { Above, Footer, HELD, Install, Masthead, Quietly, SkipTo } from "./Shell"
 import "./index.css"
 
 const slugOf = (pathname: string): string => {
@@ -25,12 +16,9 @@ const Compare = ({ page }: { readonly page: Compared }) => {
     <>
       <SkipTo id="axis" says="Skip to the comparison" />
 
-      <Above>
-        <Nav>
-          <Source />
-          <AddToChrome />
-        </Nav>
+      <Masthead />
 
+      <Above>
         <div className="pb-16 pt-10 sm:pt-16">
           <p className="eyebrow m-0">
             GitAce Extension vs {page.name}
@@ -40,7 +28,7 @@ const Compare = ({ page }: { readonly page: Compared }) => {
           </h1>
           <p className="mt-6 max-w-xl text-pretty text-[17px] leading-relaxed text-ink/70">{page.dek}</p>
           <div className="mt-10">
-            <AddToChrome big />
+            <Install />
           </div>
         </div>
       </Above>
@@ -83,9 +71,7 @@ const Compare = ({ page }: { readonly page: Compared }) => {
         </section>
       </main>
 
-      <div className={HELD}>
-        <Footer />
-      </div>
+      <Footer />
     </>
   )
 }

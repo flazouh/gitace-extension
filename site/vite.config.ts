@@ -85,6 +85,12 @@ export default defineConfig({
         welcome: fileURLToPath(new URL("./welcome.html", import.meta.url)),
 
         /*
+         * `/privacy`, plain HTML with the shared nav and footer mounted around it.
+         * It was a file in `public/`; it moved here so it could carry the same nav.
+         */
+        privacy: fileURLToPath(new URL("./privacy.html", import.meta.url)),
+
+        /*
          * `/github-pr-inbox`, a job page for github pr inbox, not a fifth compare.
          *
          * Same reason it is a file rather than a router: `site/serve.ts` maps
