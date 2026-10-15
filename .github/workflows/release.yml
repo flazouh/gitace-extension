@@ -326,12 +326,14 @@ jobs:
     # bundle. Written once here rather than at each use below, where one use would
     # eventually be missed.
     #
-    # Still the name from before the rename to GitAce Extension, on purpose. The
-    # bundle id below is built from it (`dev.gitquiet.GitQuiet-for-Safari`), and
-    # that id is the App Store record: a new one is a new app, which current
-    # users would never be offered as an update.
+    # The bundle id is apart from it and is still the one from before the rename
+    # to GitAce Extension, on purpose: that id is the App Store record, and a new
+    # one is a new app, which current users would never be offered as an update.
+    # It used to be built from the name; it is written out now, so the name a
+    # reader sees in Applications can change and the id cannot.
     env:
-      APP: GitQuiet for Safari
+      APP: GitAce Extension for Safari
+      BUNDLE: dev.gitquiet.GitQuiet-for-Safari
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -380,7 +382,7 @@ jobs:
           xcrun safari-web-extension-converter .output/safari-mv3 \
             --project-location "$RUNNER_TEMP/safari" \
             --app-name "$APP" \
-            --bundle-identifier "dev.gitquiet.${APP// /-}" \
+            --bundle-identifier "$BUNDLE" \
             --macos-only --swift --copy-resources --no-open --no-prompt --force
 
       # Archive and export, rather than signing the app once it is built. The
@@ -514,7 +516,7 @@ jobs:
           APPLE_ASC_KEY_ID: ${{ secrets.APPLE_ASC_KEY_ID }}
           APPLE_ASC_ISSUER_ID: ${{ secrets.APPLE_ASC_ISSUER_ID }}
         run: |
-          id="dev.gitquiet.${APP// /-}"
+          id="$BUNDLE"
           # The script writes the file, rather than this piping its output into
           # one. A step here runs under `bash -e` with no `pipefail`, so through a
           # pipe the status read is `tee`'s: a throw from the script would leave a
@@ -537,7 +539,7 @@ jobs:
           # Asked of the action that made it, rather than written twice.
           KEYCHAIN: ${{ steps.store-keychain.outputs.keychain }}
         run: |
-          id="dev.gitquiet.${APP// /-}"
+          id="$BUNDLE"
           identities() {
             security find-identity -v "$KEYCHAIN" | sed -n "s/.*\"\($1: [^\"]*\)\".*/\1/p"
           }
@@ -644,7 +646,7 @@ jobs:
           # Read into a variable first, on a line of its own, because a command
           # that fails inside an `if` condition is the one place `bash -e` looks
           # away: the answer would come back empty and be read as `new`.
-          held=$(bun scripts/apple-build.ts "dev.gitquiet.${APP// /-}" "$RELEASE_VERSION")
+          held=$(bun scripts/apple-build.ts "$BUNDLE" "$RELEASE_VERSION")
           if [ "$held" = held ]; then
             echo "Apple already holds build $RELEASE_VERSION. Nothing to send."
             exit 0
