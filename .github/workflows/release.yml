@@ -325,6 +325,11 @@ jobs:
     # The app's name, which is also its folder, its project, its scheme and its
     # bundle. Written once here rather than at each use below, where one use would
     # eventually be missed.
+    #
+    # Still the name from before the rename to GitAce Extension, on purpose. The
+    # bundle id below is built from it (`dev.gitquiet.GitQuiet-for-Safari`), and
+    # that id is the App Store record: a new one is a new app, which current
+    # users would never be offered as an update.
     env:
       APP: GitQuiet for Safari
     steps:

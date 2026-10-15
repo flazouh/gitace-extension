@@ -20,6 +20,7 @@ import {
   type MermaidWork
 } from "@/markdown/mermaidProtocol"
 import { browserSettings } from "@/settings/browserStore"
+import { carryExtensionStorage } from "@/settings/browserRenaming"
 import { onward } from "@/observability/report"
 import {
   isLedgerAcross,
@@ -304,6 +305,10 @@ export default defineBackground(() => {
    * uninstalled.
    */
   browser.runtime.onInstalled.addListener((details) => {
+    // What a reader kept under the names from before GitAce Extension, moved to
+    // the new ones once, when the version that reads the new names arrives.
+    Effect.runFork(carryExtensionStorage())
+
     const at = welcomeFor(details.reason, { development: import.meta.env.DEV })
     if (at === null) return
 

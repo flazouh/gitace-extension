@@ -47,3 +47,13 @@ export type WatchedKeyValue = KeyValue & {
 export type ForgetfulKeyValue = KeyValue & {
   readonly remove: (keys: Array<string>) => PromiseLike<void>
 }
+
+/**
+ * A store that can say everything it holds, as well as forget some of it.
+ *
+ * What carrying keys across a rename needs and nothing else does: the old names
+ * are found by their prefix, so the store has to be asked for all of them at once.
+ */
+export type ListedKeyValue = ForgetfulKeyValue & {
+  readonly getAll: () => PromiseLike<Record<string, unknown>>
+}

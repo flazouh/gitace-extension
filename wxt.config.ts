@@ -68,6 +68,9 @@ export default defineConfig({
       ? {
           browser_specific_settings: {
             gecko: {
+              // The id from before the rename to GitAce Extension, kept on
+              // purpose: it is what Mozilla knows this add-on by, and a new one
+              // would stop updates reaching everyone who has it installed.
               id: "gitquiet@gitquiet.dev",
               strict_min_version: "115.0",
               /*

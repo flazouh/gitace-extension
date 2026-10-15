@@ -5,6 +5,7 @@ import { readOwnGists } from "@/app/ownGists"
 import { withLabels, withName, type KeptGists } from "@/domain/gistLabels"
 import type { GistRow } from "@/domain/gistList"
 import { reportError } from "@/observability/report"
+import { carryPageStorage } from "@/settings/browserRenaming"
 import { standAScreen, type Standing } from "@/shell/screen"
 import { gistViewIn, isGistEditing } from "@/domain/gist"
 import type { GistSeen } from "@/domain/gist"
@@ -73,6 +74,9 @@ export default defineContentScript({
   matches: ["*://gist.github.com/*"],
   runAt: "document_idle",
   main() {
+    // gist.github.com keeps its own page storage, so the names from before
+    // GitAce Extension are carried here as well as on github.com.
+    Effect.runSync(carryPageStorage())
 
     let kept: KeptGists = new Map()
     let rows: ReadonlyArray<GistRow> = []

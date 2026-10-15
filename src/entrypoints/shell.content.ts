@@ -29,6 +29,7 @@ import { layer as gatewayLayer } from "@/github/GitHubGateway";
 import { reportError } from "@/observability/report";
 import type { View } from "@/domain/Settings";
 import { browserSettings } from "@/settings/browserStore";
+import { carryPageStorage } from "@/settings/browserRenaming";
 import {
   addressIn,
   answerPress,
@@ -280,6 +281,10 @@ export default defineContentScript({
   runAt: "document_start",
   main(ctx) {
     if (!claimShell(document)) return;
+
+    // Before anything reads the page's storage, the first paint included: what a
+    // reader kept under the names from before GitAce Extension moves to the new ones.
+    Effect.runSync(carryPageStorage());
 
 
     // Everything below is in aid of an interface that a reader can turn off,

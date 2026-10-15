@@ -16,6 +16,7 @@ import { inShort, useStars } from "./stars"
  * Mono CTAs (near-black / white). No cobalt, no pink Shell leftovers.
  */
 
+/** The item id is the store's record of this extension, kept through the rename so updates still arrive. */
 export const STORE_AT =
   "https://chromewebstore.google.com/detail/gitace-extension/ichobjnihnofjkpoegikjhefmoekaahe"
 

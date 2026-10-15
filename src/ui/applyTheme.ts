@@ -12,7 +12,7 @@
  */
 
 import { UndefinedOr } from "effect"
-import { THEME_KNOBS } from "../domain/Settings"
+import { renamedChoice, THEME_KNOBS } from "../domain/Settings"
 import {
   resolveAppearance,
   tokensOf,
@@ -122,7 +122,7 @@ const isPack = (value: unknown): value is Pack => PACK_NAMES.some((one) => one =
  */
 export const rememberedTheme = (): { appearance: Appearance; pack: Pack } | undefined => {
   const appearance = recall(SCHEME_KEY)
-  const pack = recall(PACK_KEY)
+  const pack = renamedChoice(recall(PACK_KEY))
   if (!isAppearance(appearance) || !isPack(pack)) return undefined
   return { appearance, pack }
 }

@@ -16,14 +16,15 @@
  */
 
 /**
- * Nothing here reads an older spelling, on purpose.
+ * Nothing here reads an older spelling. The one rename that is carried forward
+ * is done before anything reads these names, not by them.
  *
  * Settings used to sit under the bare word `settings`, and every name below was
- * spelled `githubpro.` before the product was. Both moves orphan what a reader
- * already had, and neither is being carried forward: the app is pre-release, and
- * what is lost is a filter worth one keystroke, a light-or-dark choice worth one
- * press, and a cache that is refilled by the read happening anyway. A fallback
- * would be two names alive in the code for years to save that.
+ * spelled `githubpro.` before it was spelled `gitquiet.`. Those two moves were not
+ * carried: the product was pre-release. The move from `gitquiet` to `gitace`, with
+ * the rename to GitAce Extension, came after people had installed it, so
+ * `settings/renaming.ts` moves each old entry to its new name once, and the
+ * names below never have to know there was another.
  */
 
 /** One prefix, because a key of ours should be recognisable as ours at a glance. */

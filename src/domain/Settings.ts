@@ -829,6 +829,20 @@ export const DEFAULTS: Settings = {
   aboutWidth: DEFAULT_ABOUT_WIDTH,
 }
 
+/**
+ * Stored words that were renamed with the product, from GitQuiet to GitAce Extension.
+ *
+ * The product's own colour pack and icon set were kept as `gitquiet` and are now
+ * `gitace`. Read through this so a reader who picked them keeps them, rather than
+ * falling back to Match on the first start under the new name. The old word is
+ * spelled here on purpose; nothing writes it any more.
+ */
+const RENAMED_CHOICES: Readonly<Record<string, string>> = { gitquiet: "gitace" }
+
+/** The stored word as this version names it: the new word for a renamed one, the same value otherwise. */
+export const renamedChoice = (stored: unknown): unknown =>
+  typeof stored === "string" && Object.hasOwn(RENAMED_CHOICES, stored) ? RENAMED_CHOICES[stored] : stored
+
 const readGroup = <Knobs extends ReadonlyArray<Knob<string, string>>>(
   knobs: Knobs,
   stored: unknown,
@@ -839,7 +853,7 @@ const readGroup = <Knobs extends ReadonlyArray<Knob<string, string>>>(
       : {}
   return Object.fromEntries(
     knobs.map((one) => {
-      const found = held[one.key]
+      const found = renamedChoice(held[one.key])
       const known = one.choices.some((choice) => choice.value === found)
       return [one.key, known ? found : one.fallback]
     }),

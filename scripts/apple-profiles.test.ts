@@ -4,6 +4,8 @@ import { profileHomes, readable, usable, type Profile } from "./apple-profiles"
 
 const now = new Date("2026-08-16T00:00:00Z")
 
+// The Safari app's bundle id from before the rename to GitAce Extension, kept on
+// purpose so the App Store keeps treating it as the same app.
 const profile = (over: Partial<Profile> = {}): Profile => ({
   name: "dev.gitquiet.GitQuiet-for-Safari Mac App Store",
   state: "ACTIVE",
