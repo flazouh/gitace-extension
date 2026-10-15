@@ -71,9 +71,9 @@ const Veil = () => (
 /** The cream curve the window rests on, lit blue from behind. */
 const Horizon = () => (
   <div
+    className="ace-horizon"
     style={{
       position: "absolute",
-      top: "calc(100% - 300px)",
       left: "-20%",
       right: "-20%",
       height: 900,

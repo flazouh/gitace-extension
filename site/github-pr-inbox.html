@@ -38,10 +38,11 @@
         margin: 0;
         min-height: 100%;
         min-height: 100dvh;
-        background: #f2f2ee;
-        color: #141416;
+        background: #ecebe7;
+        color: #0b0a09;
       }
-      #page > main {
+      /* Only the crawler copy, alone in #page before React mounts; never the page's own main after. */
+      #page > main:only-child {
         position: absolute;
         width: 1px;
         height: 1px;

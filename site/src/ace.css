@@ -329,6 +329,11 @@
   font: 400 15px/1.1 var(--ace-narrow);
 }
 
+/* Where the hero's cream horizon rises: under the window, never under the words. */
+.ace-horizon {
+  top: calc(100% - 300px);
+}
+
 /* The window the live product stands in, tilted back the way Ace's is. */
 
 .ace-object {
@@ -435,13 +440,16 @@
   transform: rotateX(58deg) rotateZ(-38deg);
 }
 
+/* Painted in this order rather than the markup's, since the scene is flat. */
 .ace-plane.ace-top {
+  z-index: 3;
   border-color: #0b0a09e6;
   background: #141413;
   transform: rotateX(58deg) rotateZ(-38deg) translateZ(150px);
 }
 
 .ace-plane.ace-session {
+  z-index: 2;
   background:
     repeating-linear-gradient(90deg, #0b0a091f 0 1px, transparent 1px 12px),
     #e2e0dbd9;
@@ -704,6 +712,11 @@ a.ace-prod:hover {
     display: none;
   }
 
+  .ace-nav {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .ace-nav .ace-r {
     gap: 16px;
   }
@@ -742,6 +755,10 @@ a.ace-prod:hover {
   .ace-object {
     width: calc(100% - 24px);
     margin: 48px auto -120px;
+  }
+
+  .ace-horizon {
+    top: calc(100% - 150px);
   }
 
   .ace-split {

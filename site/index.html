@@ -45,7 +45,8 @@
         color: #0b0a09;
         color-scheme: light;
       }
-      #page > main {
+      /* Only the crawler copy, alone in #page before React mounts; never the page's own main after. */
+      #page > main:only-child {
         position: absolute;
         width: 1px;
         height: 1px;

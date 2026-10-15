@@ -146,12 +146,13 @@ describe("crawler-visible titles and metas", () => {
 })
 
 describe("first-paint shell", () => {
-  test("home hides the crawler main on sober dark first paint", () => {
+  test("home hides the crawler main on Ace's night and paper first paint", () => {
     const source = html("../index.html")
     expect(source).toContain("#page > main")
     expect(source).toContain("clip: rect(0, 0, 0, 0)")
     expect(source).toContain("100dvh")
-    expect(source).toContain("#0c0c0c")
+    expect(source).toContain("#120d0b")
+    expect(source).toContain("#ecebe7")
     expect(source).not.toContain("#ff9ad1")
     expect(source).not.toContain("#0c0b10")
   })
@@ -168,7 +169,7 @@ describe("first-paint shell", () => {
       expect(source).toContain("#page > main")
       expect(source).toContain("clip: rect(0, 0, 0, 0)")
       expect(source).toContain("100dvh")
-      expect(source).toContain("#f2f2ee")
+      expect(source).toContain("#ecebe7")
     }
   })
 })
