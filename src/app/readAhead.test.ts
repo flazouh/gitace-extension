@@ -217,7 +217,11 @@ describe("a read that was called off but has not finished dying", () => {
      * catches the day this stops being true.
      */
     const ahead = readingAhead()
-    const stubborn = Effect.uninterruptible(Effect.sleep("120 millis"))
+    // Held by a gate this test opens, not by a timer: a timer runs out on a slow machine
+    // while the steps below are still running, and the next read then starts for the right
+    // reason at the wrong moment for this test.
+    const gate = Deferred.makeUnsafe<void>()
+    const stubborn = Effect.uninterruptible(Deferred.await(gate))
     const next = held()
 
     ahead.offer("a", stubborn)
@@ -233,7 +237,8 @@ describe("a read that was called off but has not finished dying", () => {
 
     expect(next.marks.started).toBe(0)
 
-    await new Promise((rest) => setTimeout(rest, 150))
+    Deferred.doneUnsafe(gate, Effect.void)
+    await settle()
 
     // And it is read, rather than lost, the moment the place is free.
     expect(next.marks.started).toBe(1)
