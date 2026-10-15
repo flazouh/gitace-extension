@@ -4,7 +4,7 @@ import { INK, MARK } from "./bed"
  * The mark and the wordmark, drawn by the site and by the app's first screen.
  *
  * Shared for the reason the gradient is: they are the two things a reader has just
- * seen on gitquiet.com, and a logo that is nearly the same is worse than one that is
+ * seen on gitace.dev, and a logo that is nearly the same is worse than one that is
  * plainly different. The icon geometry the build script rasterises into `.icns` is
  * still its own copy — that one runs without React — and it says so in its own file.
  */
@@ -47,6 +47,6 @@ export const Wordmark = ({
       lineHeight: 1
     }}
   >
-    gitquiet
+    GitAce Extension
   </span>
 )

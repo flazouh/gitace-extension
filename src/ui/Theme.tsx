@@ -46,14 +46,14 @@ export const usePaintedTheme = (): PaintedTheme => {
   if (painted !== null) return painted
   return {
     scheme: schemeOnPage(document.documentElement, prefersDarkScheme()),
-    pack: "gitquiet"
+    pack: "gitace"
   }
 }
 
 /**
  * Where the tokens land.
  *
- * `root` — only `#gitquiet-root`. The extension must not paint `<html>`: that
+ * `root` — only `#gitace-root`. The extension must not paint `<html>`: that
  * is GitHub's page, and our variables would restyle their chrome.
  *
  * `document` — `<html>`. The desktop window portals menus to `body`, so the
@@ -84,7 +84,7 @@ const targetOf = (scope: ThemeScope): HTMLElement | null => {
 export const Theme = ({
   scope = "root",
   element,
-  here = "gitquiet",
+  here = "gitace",
   children
 }: {
   readonly scope?: ThemeScope
@@ -152,12 +152,12 @@ export const Theme = ({
        *
        * One value, under our own name, so the rule in `quiet.css` has something
        * to read while their chrome keeps reading Primer's. The rule is gated on
-       * `data-gitquiet-taken`, so leaving a page we own hands the colour back
+       * `data-gitace-taken`, so leaving a page we own hands the colour back
        * without this having to be undone.
        */
       /*
        * The floor used to skip `scope === "document"` (desktop + shots), which left
-       * `--gitquiet-floor` stuck at whatever painted it first while tokens moved —
+       * `--gitace-floor` stuck at whatever painted it first while tokens moved —
        * light surfaces on a dark floor when the OS answered light. Always keep them
        * together; on GitHub `taken` still gates whether the rule paints anything.
        */

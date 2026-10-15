@@ -90,10 +90,10 @@ const WALKER = String.raw`(() => {
   const at = () => Math.round(performance.now() - started)
 
   const digest = () => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     if (root === null) return { root: "gone" }
     const text = (root.innerText || "").replace(/\s+/g, " ").trim()
-    return { for: root.getAttribute("data-gitquiet-for"), chars: text.length }
+    return { for: root.getAttribute("data-gitace-for"), chars: text.length }
   }
 
   let last = ""

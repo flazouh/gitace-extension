@@ -2,7 +2,7 @@
  * Every name this product writes into somebody else's storage, in one place.
  *
  * Four modules were each holding a `const KEY` of their own, in three
- * conventions: `gitquiet.scheme` with a dot, `gitquiet:filter:` with colons,
+ * conventions: `gitace.scheme` with a dot, `gitace:filter:` with colons,
  * and settings under the bare word `settings`. Nothing was broken by that, and
  * that is the point — the cost of scattered names is not a collision, it is that
  * nobody can answer "what does this app keep, and where" without reading four
@@ -27,7 +27,7 @@
  */
 
 /** One prefix, because a key of ours should be recognisable as ours at a glance. */
-const OURS = "gitquiet."
+const OURS = "gitace."
 
 /** The reader's choices: theme, diff layout, tree width. */
 export const SETTINGS = `${OURS}settings`
@@ -51,13 +51,13 @@ export const SCHEME = `${OURS}scheme`
 export const PACK = `${OURS}pack`
 
 /**
- * The filter left in the box, per list: `gitquiet:filter:working-set`.
+ * The filter left in the box, per list: `gitace:filter:working-set`.
  *
  * The one name that does not follow the dots. Kept as a colon form because that
  * is how filters were first written; only the product prefix changed with the
  * rename from githubpro.
  */
-export const FILTER = "gitquiet:filter:"
+export const FILTER = "gitace:filter:"
 
 /** The repositories most recently read, so the switcher opens on the few that are used. */
 export const LATELY = `${OURS}lately`

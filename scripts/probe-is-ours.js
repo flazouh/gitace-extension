@@ -17,7 +17,7 @@ await new Promise((wake) => setTimeout(wake, 5000));
 cliLog(`task space: ${where}`);
 cliLog(
   await js(String.raw`(() => {
-    const ours = document.querySelector('#gitquiet-root')
+    const ours = document.querySelector('#gitace-root')
     const partials = [...document.querySelectorAll('react-partial')].map((one) => ({
       name: one.getAttribute('partial-name'),
       shown: getComputedStyle(one).display,
@@ -32,9 +32,9 @@ cliLog(
       rail: document.querySelector('nav[aria-label="Rail"]') !== null,
       gateStyles: [...document.querySelectorAll('style[id], link[rel="stylesheet"]')]
         .map((one) => one.id || one.getAttribute('href'))
-        .filter((one) => /gate|gitquiet/.test(one ?? '')),
+        .filter((one) => /gate|gitace/.test(one ?? '')),
       partials,
-      html: document.documentElement.getAttribute('data-gitquiet') ?? document.documentElement.className.slice(0, 120)
+      html: document.documentElement.getAttribute('data-gitace') ?? document.documentElement.className.slice(0, 120)
     }, null, 2)
   })()`)
 );

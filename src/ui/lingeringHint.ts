@@ -28,7 +28,7 @@ export type Hint = {
   readonly sparing: boolean
 }
 
-const PANEL = "gitquiet-lingering-hint"
+const PANEL = "gitace-lingering-hint"
 
 /** How long the last page read stays named under the bars. */
 const REMEMBER = 2_000

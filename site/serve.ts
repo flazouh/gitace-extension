@@ -4,14 +4,14 @@
  *
  * Without `-s`, `serve` already maps `/welcome` to `welcome.html` and `/privacy` to
  * `privacy.html`. This file keeps that, then adds the two redirects the live site
- * was missing: `www.gitquiet.com` to `https://gitquiet.com`, and a trailing slash
+ * was missing: `www.gitace.dev` to `https://gitace.dev`, and a trailing slash
  * (except `/`) to the same path without it.
  */
 import { stat } from "node:fs/promises"
 import { extname, join, resolve, sep } from "node:path"
 
 const ROOT = join(import.meta.dir, "dist")
-const APEX = "https://gitquiet.com"
+const APEX = "https://gitace.dev"
 const PORT = Number(process.env.PORT ?? 3000)
 
 const MIME: Record<string, string> = {
@@ -77,7 +77,7 @@ Bun.serve({
     const slash = url.pathname.length > 1 && url.pathname.endsWith("/")
     const path = slash ? url.pathname.slice(0, -1) : url.pathname
 
-    if (host === "www.gitquiet.com") {
+    if (host === "www.gitace.dev") {
       return Response.redirect(`${APEX}${path}${url.search}`, 301)
     }
 
@@ -95,4 +95,4 @@ Bun.serve({
   }
 })
 
-console.log(`gitquiet site on ${PORT}`)
+console.log(`GitAce Extension site on ${PORT}`)

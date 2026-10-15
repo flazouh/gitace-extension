@@ -89,7 +89,7 @@ describe("where our bar stands", () => {
 
   test("is not put back once the page has been handed to GitHub", async () => {
     // The leaving bar's keeper outlives the hand-over by a render, and it put the slot
-    // straight back: an empty band of ours over their page after "Leave GitQuiet".
+    // straight back: an empty band of ours over their page after "Leave GitAce Extension".
     const page = aPage()
     const slot = theBarSlot(page)
     const stop = keepTheBarSlot(page, slot)
@@ -120,7 +120,7 @@ describe("where our bar stands", () => {
     await Promise.resolve()
 
     expect(asked).toBe(first)
-    expect(page.querySelectorAll("[data-gitquiet-bar]")).toHaveLength(1)
+    expect(page.querySelectorAll("[data-gitace-bar]")).toHaveLength(1)
     expect(fresh.firstElementChild).toBe(first)
     stop()
   })

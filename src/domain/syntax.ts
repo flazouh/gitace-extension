@@ -26,7 +26,7 @@ export const ONE_DARK_SYNTAX: SyntaxPair = {
 }
 
 const OF = {
-  gitquiet: GITHUB_SYNTAX,
+  gitace: GITHUB_SYNTAX,
   anthropic: GITHUB_SYNTAX,
   cursor: { dark: "one-dark-pro", light: "one-light" },
   github: GITHUB_SYNTAX,

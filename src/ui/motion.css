@@ -25,8 +25,8 @@
  * rules below without widening this block would leave them reading `var(--menu-open-dur)` as
  * nothing at all, which is a transition with no duration. See `outside.ts`.
  */
-#gitquiet-root,
-[data-gitquiet-outside] {
+#gitace-root,
+[data-gitace-outside] {
   /*
    * Emil Kowalski's scale for UI that people live in.
    *
@@ -122,7 +122,7 @@
  * `:where` keeps this below utilities so a `transition-transform` still wins.
  */
 @media (hover: hover) and (pointer: fine) {
-  :where(#gitquiet-root, [data-gitquiet-outside]) :is(button, a, summary, [role="button"], [role="menuitem"], [role="option"]) {
+  :where(#gitace-root, [data-gitace-outside]) :is(button, a, summary, [role="button"], [role="menuitem"], [role="option"]) {
     transition-property: background-color, color, opacity, border-color;
     transition-duration: var(--hover-dur);
     transition-timing-function: var(--hover-ease);
@@ -156,7 +156,7 @@
  * specificity, so anything wanting its own press (the ask buttons below, the
  * window's chrome button) simply names itself and wins.
  */
-:where(#gitquiet-root, [data-gitquiet-outside])
+:where(#gitace-root, [data-gitace-outside])
   :is(button, [role="button"]):not(
     :disabled,
     [aria-disabled="true"],
@@ -178,7 +178,7 @@
   transition-timing-function: var(--ease-out);
 }
 
-:where(#gitquiet-root, [data-gitquiet-outside])
+:where(#gitace-root, [data-gitace-outside])
   :is(button, [role="button"]):not(
     :disabled,
     [aria-disabled="true"],
@@ -205,17 +205,17 @@
  * every one of them is present the whole time so the pair can go back the way it
  * came.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask {
+:is(#gitace-root, [data-gitace-outside]) .t-ask {
   /* Layout and padding live on the component. This is the track that opens. */
   grid-template-columns: auto 0fr;
   transition: grid-template-columns var(--resize-dur) var(--resize-ease);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask[data-asking] {
+:is(#gitace-root, [data-gitace-outside]) .t-ask[data-asking] {
   grid-template-columns: auto 1fr;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-yes {
+:is(#gitace-root, [data-gitace-outside]) .t-ask-yes {
   /* Flat on the side the cross arrives at; the resting round lives below. */
   border-radius: var(--radius-md) 0 0 var(--radius-md);
   transition:
@@ -239,9 +239,9 @@
  * Press is `scale(0.97)` in 160ms — the feedback that makes a control feel like
  * it is listening. The veil deepens to `--color-active` with it.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-yes::after,
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-more::after,
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-no::after {
+:is(#gitace-root, [data-gitace-outside]) .t-ask-yes::after,
+:is(#gitace-root, [data-gitace-outside]) .t-ask-more::after,
+:is(#gitace-root, [data-gitace-outside]) .t-ask-no::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -258,27 +258,27 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-yes:not(:disabled):hover::after,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-more:not(:disabled):hover::after,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-no:hover::after {
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-yes:not(:disabled):hover::after,
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-more:not(:disabled):hover::after,
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-no:hover::after {
     opacity: 0.12;
   }
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-yes:not(:disabled):active {
+:is(#gitace-root, [data-gitace-outside]) .t-ask-yes:not(:disabled):active {
   transform: scale(var(--scale-press));
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-yes:not(:disabled):active::after,
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-more:not(:disabled):active::after,
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-no:active::after {
+:is(#gitace-root, [data-gitace-outside]) .t-ask-yes:not(:disabled):active::after,
+:is(#gitace-root, [data-gitace-outside]) .t-ask-more:not(:disabled):active::after,
+:is(#gitace-root, [data-gitace-outside]) .t-ask-no:active::after {
   opacity: 0.2;
 }
 
 /* Square only on the side the cross arrives at, and round again the moment it
    leaves — a button left with one flat edge and nothing beside it reads as
    half of something missing. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask:not([data-asking]) .t-ask-yes {
+:is(#gitace-root, [data-gitace-outside]) .t-ask:not([data-asking]) .t-ask-yes {
   border-radius: var(--radius-md);
 }
 
@@ -295,17 +295,17 @@
  * trick the cancelling cross uses — neither half carries a border, so the pair
  * works on a green fill and on a grey one.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-more {
+:is(#gitace-root, [data-gitace-outside]) .t-ask-more {
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
 /* With a caret beside it the verb keeps its flat right edge, cross or no cross.
    Without one it is round again, which is what the rule above this says. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask[data-more]:not([data-asking]) .t-ask-yes {
+:is(#gitace-root, [data-gitace-outside]) .t-ask[data-more]:not([data-asking]) .t-ask-yes {
   border-radius: var(--radius-md) 0 0 var(--radius-md);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-no {
+:is(#gitace-root, [data-gitace-outside]) .t-ask-no {
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   /* Quick in: the cross is a response, not a surface opening. */
   animation: t-ask-in var(--duration-quick) var(--ease-out) both;
@@ -321,11 +321,11 @@
 /* Same arrival on the row menu's cancel cross. */
 /* Armed by a key: see `data-snap` in `Doings.tsx`. The cross is a target, and a target that
    is still arriving is one the second keypress can miss. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-doing-out[data-snap] {
+:is(#gitace-root, [data-gitace-outside]) .t-doing-out[data-snap] {
   animation: none;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-doing-out {
+:is(#gitace-root, [data-gitace-outside]) .t-doing-out {
   animation: t-ask-in var(--duration-quick) var(--ease-out) both;
 }
 
@@ -344,13 +344,13 @@
  * word nobody is told about are the same word, and a second attribute saying so
  * would be the one that goes stale.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-says {
+:is(#gitace-root, [data-gitace-outside]) .t-says {
   display: inline-grid;
   grid-template-areas: "word";
   justify-items: center;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-say {
+:is(#gitace-root, [data-gitace-outside]) .t-say {
   grid-area: word;
   transition:
     transform var(--text-swap-dur) var(--text-swap-ease),
@@ -359,7 +359,7 @@
 }
 
 /* A word not being said waits below, blurred and gone. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-say[aria-hidden] {
+:is(#gitace-root, [data-gitace-outside]) .t-say[aria-hidden] {
   opacity: 0;
   filter: blur(var(--text-swap-blur));
   transform: translateY(var(--text-swap-translate-y));
@@ -367,7 +367,7 @@
 }
 
 /* Except one already said, which left upward — the direction the next arrives from. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-say[aria-hidden][data-past] {
+:is(#gitace-root, [data-gitace-outside]) .t-say[aria-hidden][data-past] {
   transform: translateY(calc(var(--text-swap-translate-y) * -1));
 }
 
@@ -375,7 +375,7 @@
    wears `.anim-rotate`, which is `rotate-keyframes 1s linear infinite`; this is
    the same second, under a name we own — so that the preference below can stop
    it, which theirs does not. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-rotate {
+:is(#gitace-root, [data-gitace-outside]) .t-rotate {
   animation: t-rotate var(--duration-turn) var(--ease-linear) infinite;
 }
 
@@ -395,13 +395,13 @@
  * `forwards`, because what is being drawn is a state and not an event: the mark has to still be
  * there when the animation has run, for as long as the toast stands.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-drawn > path {
+:is(#gitace-root, [data-gitace-outside]) .t-drawn > path {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   animation: t-draw var(--duration-fast) var(--ease-out) forwards;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-drawn > path + path {
+:is(#gitace-root, [data-gitace-outside]) .t-drawn > path + path {
   animation-delay: var(--duration-quick);
 }
 
@@ -413,7 +413,7 @@
 
 /* transitions.dev — shimmer text, tuned to Primer's own foreground colours so
    the sweep reads as GitHub's text catching light rather than as a gradient. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-shimmer {
+:is(#gitace-root, [data-gitace-outside]) .t-shimmer {
   background: linear-gradient(
     90deg,
     var(--fgColor-muted) 0%,
@@ -447,13 +447,13 @@
  * the dissolve is the wait going, blurring as it goes, with the finished page
  * showing through it.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-waiting {
+:is(#gitace-root, [data-gitace-outside]) .t-waiting {
   transition:
     opacity var(--wait-reveal-dur) var(--wait-reveal-ease),
     filter var(--wait-reveal-dur) var(--wait-reveal-ease);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-waiting[data-leaving] {
+:is(#gitace-root, [data-gitace-outside]) .t-waiting[data-leaving] {
   position: absolute;
   inset: 0;
   opacity: 0;
@@ -470,7 +470,7 @@
  * into the region to dissolve would start the fade by jumping it to the middle of a
  * card several screens tall — the reader would see it move rather than go.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-waiting.t-over-window[data-leaving] {
+:is(#gitace-root, [data-gitace-outside]) .t-waiting.t-over-window[data-leaving] {
   position: fixed;
 }
 
@@ -487,7 +487,7 @@
  * climbing after a handful, which holds the whole run under a quarter of a
  * second no matter how many pull requests the repository has open.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-row-in {
+:is(#gitace-root, [data-gitace-outside]) .t-row-in {
   animation: t-row-in var(--row-in-dur) var(--row-in-ease) both;
   animation-delay: calc(var(--row-at, 0) * var(--row-in-stagger));
 }
@@ -529,27 +529,27 @@
  * showing through a menu that is supposedly on top. Backwards holds the panel
  * hidden through its delay and hands every property back the moment it lands.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-panels > * {
+:is(#gitace-root, [data-gitace-outside]) .t-panels > * {
   animation: t-panel-in var(--panel-in-dur) var(--panel-in-ease) backwards;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-panels > *:nth-child(2) {
+:is(#gitace-root, [data-gitace-outside]) .t-panels > *:nth-child(2) {
   animation-delay: var(--panel-in-stagger);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-panels > *:nth-child(3) {
+:is(#gitace-root, [data-gitace-outside]) .t-panels > *:nth-child(3) {
   animation-delay: calc(var(--panel-in-stagger) * 2);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-panels > *:nth-child(4) {
+:is(#gitace-root, [data-gitace-outside]) .t-panels > *:nth-child(4) {
   animation-delay: calc(var(--panel-in-stagger) * 3);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-panels > *:nth-child(5) {
+:is(#gitace-root, [data-gitace-outside]) .t-panels > *:nth-child(5) {
   animation-delay: calc(var(--panel-in-stagger) * 4);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-panels > *:nth-child(n + 6) {
+:is(#gitace-root, [data-gitace-outside]) .t-panels > *:nth-child(n + 6) {
   animation-delay: calc(var(--panel-in-stagger) * 5);
 }
 
@@ -565,12 +565,12 @@
  * pixels of it: the reader pressed a key, so the answer is already theirs — this is orientation,
  * not an announcement. The veil behind it fades on the same clock so the pair reads as one thing.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-palette {
+:is(#gitace-root, [data-gitace-outside]) .t-palette {
   transform-origin: top center;
   animation: t-palette-in var(--menu-open-dur) var(--menu-ease) both;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-palette-veil {
+:is(#gitace-root, [data-gitace-outside]) .t-palette-veil {
   animation: t-veil-in var(--menu-open-dur) var(--menu-ease) both;
 }
 
@@ -616,7 +616,7 @@
  * as though the page were still deciding — rather than as the code arriving.
  * They fade and unblur on the same clock as everything else instead.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-panel-fade {
+:is(#gitace-root, [data-gitace-outside]) .t-panel-fade {
   animation: t-panel-fade var(--panel-in-dur) var(--panel-in-ease) backwards;
 }
 
@@ -638,12 +638,12 @@
  * an element's neighbours by re-inserting them. On a prefetched pull request
  * the live read added the merge card above six settled panels and the whole
  * column replayed its entrance — the page visibly arriving twice. The screen
- * sets `data-gitquiet-landed` once its arrival is over (see `Shell.tsx`), and
+ * sets `data-gitace-landed` once its arrival is over (see `Shell.tsx`), and
  * from then on a panel that appears, or is moved by one appearing above it,
  * simply is there.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) [data-gitquiet-landed] .t-panels > *,
-:is(#gitquiet-root, [data-gitquiet-outside]) [data-gitquiet-landed] .t-panel-fade {
+:is(#gitace-root, [data-gitace-outside]) [data-gitace-landed] .t-panels > *,
+:is(#gitace-root, [data-gitace-outside]) [data-gitace-landed] .t-panel-fade {
   animation: none;
 }
 
@@ -657,12 +657,12 @@
  * Recorded at 120 frames a second: 183 milliseconds of one strip of a settled
  * page still arriving.
  *
- * `data-gitquiet-arrived` is set on the document once any screen's own arrival is
+ * `data-gitace-arrived` is set on the document once any screen's own arrival is
  * over, so it is absent for exactly the one entrance worth watching and present
  * for every move after it. A real page load empties it. See `hasLandedBefore`.
  */
-[data-gitquiet-arrived] :is(#gitquiet-root, [data-gitquiet-outside]) .t-panels > *,
-[data-gitquiet-arrived] :is(#gitquiet-root, [data-gitquiet-outside]) .t-panel-fade {
+[data-gitace-arrived] :is(#gitace-root, [data-gitace-outside]) .t-panels > *,
+[data-gitace-arrived] :is(#gitace-root, [data-gitace-outside]) .t-panel-fade {
   animation: none;
 }
 
@@ -679,7 +679,7 @@
  * leaving — the keyboard walk through the list pauses while one is up, and a ghost
  * fading out is not something anybody can point at.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-menu {
+:is(#gitace-root, [data-gitace-outside]) .t-menu {
   transform-origin: top left;
   transform: scale(var(--menu-pre-scale));
   opacity: 0;
@@ -689,23 +689,23 @@
     opacity var(--menu-open-dur) var(--menu-ease);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-menu[data-origin="top-right"] {
+:is(#gitace-root, [data-gitace-outside]) .t-menu[data-origin="top-right"] {
   transform-origin: top right;
 }
 
 /* The Rail's own two menus, whose controls sit at the foot of a full-height strip and
    whose surfaces therefore open upwards over it. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-menu[data-origin="bottom-left"] {
+:is(#gitace-root, [data-gitace-outside]) .t-menu[data-origin="bottom-left"] {
   transform-origin: bottom left;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-menu.is-open {
+:is(#gitace-root, [data-gitace-outside]) .t-menu.is-open {
   transform: scale(1);
   opacity: 1;
   pointer-events: auto;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-menu.is-closing {
+:is(#gitace-root, [data-gitace-outside]) .t-menu.is-closing {
   transform: scale(var(--menu-closing-scale));
   opacity: 0;
   pointer-events: none;
@@ -731,11 +731,11 @@
  * nothing reflows twice, and every control here carries its own `aria-label` — the visible
  * word is decoration a screen reader was already ignoring.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-rail {
+:is(#gitace-root, [data-gitace-outside]) .t-rail {
   transition: width var(--resize-dur) var(--resize-ease);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-rail-word {
+:is(#gitace-root, [data-gitace-outside]) .t-rail-word {
   transition:
     opacity var(--text-swap-dur) var(--text-swap-ease),
     filter var(--text-swap-dur) var(--text-swap-ease);
@@ -750,12 +750,12 @@
  * repository name is the animation charging the reader for its own arrival. The Rail wears this
  * for the one frame of that change — see `atOnce` in `Rail.tsx`.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-rail[data-snap],
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-rail[data-snap] .t-rail-word {
+:is(#gitace-root, [data-gitace-outside]) .t-rail[data-snap],
+:is(#gitace-root, [data-gitace-outside]) .t-rail[data-snap] .t-rail-word {
   transition: none;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-rail[data-narrow] .t-rail-word {
+:is(#gitace-root, [data-gitace-outside]) .t-rail[data-narrow] .t-rail-word {
   opacity: 0;
   filter: blur(var(--text-swap-blur));
   /* Out of flow once it cannot be read.
@@ -777,11 +777,11 @@
  * turn on the hover clock: the menu is already opening, and a chevron that arrives after it
  * is a second event for one press.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-turn {
+:is(#gitace-root, [data-gitace-outside]) .t-turn {
   transition: transform var(--duration-quick) var(--ease-out);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-turn.is-turned {
+:is(#gitace-root, [data-gitace-outside]) .t-turn.is-turned {
   transform: rotate(180deg);
 }
 
@@ -793,7 +793,7 @@
  * The card behind a face.
  *
  * Its own three tokens rather than the ones at the top of this file: a hover card
- * is portalled to the end of the document, so it stands outside `#gitquiet-root`
+ * is portalled to the end of the document, so it stands outside `#gitace-root`
  * and inherits nothing from it. The values are the tooltip row of the same scale —
  * quick, eased out, and barely scaled, because a hint that announces itself is a
  * hint in the way.
@@ -875,7 +875,7 @@
 /**
  * A modal surface — check dialog, settings, keyboard sheet.
  *
- * Own tokens: a `<dialog>` and a portalled sheet can sit outside `#gitquiet-root`.
+ * Own tokens: a `<dialog>` and a portalled sheet can sit outside `#gitace-root`.
  * Open is the invitation (250ms from `--scale-large`); close is not animated here
  * because these mounts are torn down the moment they shut — dismissal stays
  * instant, which is what a close wants.
@@ -1026,30 +1026,30 @@
 
 @media (prefers-reduced-motion: reduce) {
   /* The row is there either way. What goes is the arriving. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-row-in {
+  :is(#gitace-root, [data-gitace-outside]) .t-row-in {
     animation: none;
   }
 
   /* Same for the panels: the card is the answer, and the answer is not motion. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-panels > *,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-panel-fade {
+  :is(#gitace-root, [data-gitace-outside]) .t-panels > *,
+  :is(#gitace-root, [data-gitace-outside]) .t-panel-fade {
     animation: none;
   }
 
   /* The palette is on the screen either way. What goes is the arriving. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-palette,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-palette-veil {
+  :is(#gitace-root, [data-gitace-outside]) .t-palette,
+  :is(#gitace-root, [data-gitace-outside]) .t-palette-veil {
     animation: none;
   }
 
   /* The menu still opens and shuts. It simply does it between two frames. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-menu {
+  :is(#gitace-root, [data-gitace-outside]) .t-menu {
     transition: none;
   }
 
   /* The Rail still narrows. It is simply the width it asked for on the next frame. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-rail,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-rail-word {
+  :is(#gitace-root, [data-gitace-outside]) .t-rail,
+  :is(#gitace-root, [data-gitace-outside]) .t-rail-word {
     transition: none;
   }
 
@@ -1068,12 +1068,12 @@
    * and the sparks are travel in six directions at once, which is the shape of
    * motion this setting exists to refuse.
    */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-star-mark,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-star-spark {
+  :is(#gitace-root, [data-gitace-outside]) .t-star-mark,
+  :is(#gitace-root, [data-gitace-outside]) .t-star-spark {
     animation: none;
   }
 
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-star-sparks {
+  :is(#gitace-root, [data-gitace-outside]) .t-star-sparks {
     display: none;
   }
 
@@ -1087,63 +1087,63 @@
    * one piece of feedback that says "this is the row you are on" arriving with no relationship to
    * the hand that caused it.
    */
-  :where(#gitquiet-root, [data-gitquiet-outside]) :is(button, a, summary, [role="button"], [role="menuitem"], [role="option"]) {
+  :where(#gitace-root, [data-gitace-outside]) :is(button, a, summary, [role="button"], [role="menuitem"], [role="option"]) {
     transition-property: color, background-color, border-color, box-shadow !important;
   }
 
   /* The words still swap. They simply do it between two frames, which leaves the
      one being said in the cell and the rest of them out of sight where they were. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-yes,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-say {
+  :is(#gitace-root, [data-gitace-outside]) .t-ask,
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-yes,
+  :is(#gitace-root, [data-gitace-outside]) .t-say {
     transition: none !important;
   }
 
   /* Veil (colour) stays; press scale goes. Colour aids comprehension;
      movement is what reduced motion asks us not to do. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-yes:active,
-  :is(#gitquiet-root, [data-gitquiet-outside]) :is(button, [role="button"]):active {
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-yes:active,
+  :is(#gitace-root, [data-gitace-outside]) :is(button, [role="button"]):active {
     transform: none;
   }
 
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-yes::after,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-more::after,
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-no::after {
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-yes::after,
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-more::after,
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-no::after {
     transition: none !important;
   }
 
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-ask-no,
+  :is(#gitace-root, [data-gitace-outside]) .t-ask-no,
   /* Armed by a key: see `data-snap` in `Doings.tsx`. The cross is a target, and a target that
    is still arriving is one the second keypress can miss. */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-doing-out[data-snap] {
+:is(#gitace-root, [data-gitace-outside]) .t-doing-out[data-snap] {
   animation: none;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-doing-out {
+:is(#gitace-root, [data-gitace-outside]) .t-doing-out {
     animation: none;
   }
 
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-shimmer {
+  :is(#gitace-root, [data-gitace-outside]) .t-shimmer {
     animation: none;
     background: none;
     color: var(--fgColor-muted);
   }
 
   /* Still, but not gone: the broken ring still reads as work in progress. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-rotate {
+  :is(#gitace-root, [data-gitace-outside]) .t-rotate {
     animation: none;
   }
 
   /* The finished mark, not a missing one. Drawing is the part a reader asked to be
      spared; a check with the tick still undrawn would be a ring saying nothing. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-drawn > path {
+  :is(#gitace-root, [data-gitace-outside]) .t-drawn > path {
     animation: none;
     stroke-dashoffset: 0;
   }
 
   /* The words and the ring stay — they are what says the page is being read.
      What goes is the dissolve: the wait simply stops being there. */
-  :is(#gitquiet-root, [data-gitquiet-outside]) .t-waiting {
+  :is(#gitace-root, [data-gitace-outside]) .t-waiting {
     transition: none !important;
   }
 
@@ -1158,9 +1158,9 @@
    * so anything added to the sheet later is still and legible by default rather than by having
    * remembered to add a rule.
    */
-  :is(#gitquiet-root, [data-gitquiet-outside]) *,
-  :is(#gitquiet-root, [data-gitquiet-outside]) *::before,
-  :is(#gitquiet-root, [data-gitquiet-outside]) *::after {
+  :is(#gitace-root, [data-gitace-outside]) *,
+  :is(#gitace-root, [data-gitace-outside]) *::before,
+  :is(#gitace-root, [data-gitace-outside]) *::after {
     transition-property: color, background-color, border-color, box-shadow !important;
   }
 }

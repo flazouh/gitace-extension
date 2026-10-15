@@ -8,7 +8,7 @@ const here = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 
 
 const redirectGoneInstall = (): Plugin => ({
-  name: "gitquiet:redirect-gone-install",
+  name: "gitace:redirect-gone-install",
   configureServer: (server) => {
     server.middlewares.use((request, response, next) => {
       const path = (request.url ?? "").split("?", 1)[0]
@@ -28,7 +28,7 @@ const chunkBeside = (file: string, missing: string): Plugin => {
   const at = `/${file}`
 
   return {
-    name: `gitquiet:${file}-beside`,
+    name: `gitace:${file}-beside`,
     configureServer: (server) => {
       server.middlewares.use(at, (_request, response) => {
         try {

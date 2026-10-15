@@ -15,8 +15,8 @@ import {
   withdrawTheWayBack
 } from "./handOver"
 
-const REVEALED = "data-gitquiet-revealed"
-const GATING = "data-gitquiet-gating"
+const REVEALED = "data-gitace-revealed"
+const GATING = "data-gitace-gating"
 
 /**
  * A page of GitHub's with our gate up, which is what a screen hands over from.
@@ -32,7 +32,7 @@ const gatedPage = (): Document => {
 }
 
 const widget = () => document.getElementById(WAY_BACK_ID)
-const gripIn = () => document.getElementById("gitquiet-way-back-grip")!
+const gripIn = () => document.getElementById("gitace-way-back-grip")!
 const leftOf = (): number => Number.parseFloat((widget() as HTMLElement).style.left)
 
 const ran = <A>(effect: Effect.Effect<A>): Promise<A> => Effect.runPromise(effect)
@@ -87,7 +87,7 @@ describe("handing a page to GitHub", () => {
   })
 
   test("gives them their own bar back", () => {
-    // Measured on a pull request: after "Leave GitQuiet" their header stayed hidden
+    // Measured on a pull request: after "Leave GitAce Extension" their header stayed hidden
     // behind the mark that said our bar was standing, and an empty slot of ours sat
     // at the top of their page.
     gatedPage()
@@ -154,7 +154,7 @@ describe("handing a page to GitHub", () => {
       asked += 1
     })
     document
-      .querySelector(`#${WAY_BACK_ID} button:not(#gitquiet-way-back-grip)`)!
+      .querySelector(`#${WAY_BACK_ID} button:not(#gitace-way-back-grip)`)!
       .dispatchEvent(new PointerEvent("click", { bubbles: true }))
 
     expect(asked).toBe(1)

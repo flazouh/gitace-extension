@@ -893,7 +893,7 @@ describe("narrowing the Working Set down", () => {
     // Filtering is how this screen is used, not a thing done once: a reader who
     // works from `author:me is:failing` should not retype it every time they open
     // a repository.
-    localStorage.setItem("gitquiet:filter:working-set", "is:unread")
+    localStorage.setItem("gitace:filter:working-set", "is:unread")
 
     render(<WorkingSet sittings={flat(many)} onOpen={() => {}} scope="working-set" />)
 
@@ -908,7 +908,7 @@ describe("narrowing the Working Set down", () => {
     // The seed is what the reader just did, and the rows on the screen were
     // fetched by it. A box showing last week's filter over this minute's list
     // describes neither.
-    localStorage.setItem("gitquiet:filter:o/r", "author:bob")
+    localStorage.setItem("gitace:filter:o/r", "author:bob")
 
     render(
       <WorkingSet sittings={flat(many)} onOpen={() => {}} scope="o/r" seed="is:merged" />
@@ -925,7 +925,7 @@ describe("narrowing the Working Set down", () => {
     // it. That is the box as it stood a moment ago, when a state term moved the
     // address out from under it: the address carries what it can, and the box
     // takes back the words and refinements only this side knows.
-    localStorage.setItem("gitquiet:filter:o/r", "flaky author:me is:merged")
+    localStorage.setItem("gitace:filter:o/r", "flaky author:me is:merged")
 
     render(
       <WorkingSet sittings={flat(many)} onOpen={() => {}} scope="o/r" seed="author:me is:merged" />
@@ -941,7 +941,7 @@ describe("narrowing the Working Set down", () => {
     // The mount call carries the filter this list remembered on its own, which
     // arrives with no keystroke to announce it; a screen fetched by an address
     // hears both and moves the address where the ask needs rows it never fetched.
-    localStorage.setItem("gitquiet:filter:o/r", "is:unread")
+    localStorage.setItem("gitace:filter:o/r", "is:unread")
     const heard: Array<string> = []
 
     render(
@@ -961,8 +961,8 @@ describe("narrowing the Working Set down", () => {
 
     await userEvent.type(screen.getByRole("searchbox", { name: /Filter/ }), "is:unread")
 
-    expect(localStorage.getItem("gitquiet:filter:flazouh/octo-repo")).toBe("is:unread")
-    expect(localStorage.getItem("gitquiet:filter:working-set")).toBeNull()
+    expect(localStorage.getItem("gitace:filter:flazouh/octo-repo")).toBe("is:unread")
+    expect(localStorage.getItem("gitace:filter:working-set")).toBeNull()
 
     localStorage.clear()
   })
@@ -980,7 +980,7 @@ describe("narrowing the Working Set down", () => {
     // whole list of rows nothing has been asked about. Saying "Nothing matches that."
     // there tells the reader their filter is wrong when the page is unfinished — and
     // for the second it lasts, the list has a heading and nothing under it.
-    localStorage.setItem("gitquiet:filter:working-set", "is:passing")
+    localStorage.setItem("gitace:filter:working-set", "is:passing")
 
     render(<WorkingSet sittings={flat(many)} onOpen={() => {}} scope="working-set" />)
 
@@ -998,7 +998,7 @@ describe("narrowing the Working Set down", () => {
       failed: 2,
       running: 0
     })
-    localStorage.setItem("gitquiet:filter:working-set", "is:passing")
+    localStorage.setItem("gitace:filter:working-set", "is:passing")
 
     render(
       <WorkingSet
@@ -1228,7 +1228,7 @@ describe("a list the reader is pointing into", () => {
     const rows = [on("needs-action", 1), on("needs-action", 2), on("needs-action", 3)]
     const { container, rerender } = render(<WorkingSet sittings={flat(rows)} onOpen={() => {}} />)
     const before = order()
-    const list = container.querySelector('[data-gitquiet-activation="list"]')!
+    const list = container.querySelector('[data-gitace-activation="list"]')!
 
     fireEvent.pointerEnter(list)
     rerender(<WorkingSet sittings={reversed(rows)} onOpen={() => {}} />)

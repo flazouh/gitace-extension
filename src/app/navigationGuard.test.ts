@@ -38,9 +38,9 @@ describe("the page-world guard for an owned route", () => {
 
   test("leaves a new-tab bar link for the browser", async () => {
     const bar = document.createElement("div")
-    bar.id = "gitquiet-bar"
+    bar.id = "gitace-bar"
     bar.innerHTML =
-      '<a href="https://github.com/flazouh/gitquiet/issues" target="_blank">Report</a>'
+      '<a href="https://github.com/flazouh/gitace-extension/issues" target="_blank">Report</a>'
     document.body.append(bar)
     const link = bar.querySelector("a") as HTMLAnchorElement
     const offered: Array<string> = []
@@ -59,7 +59,7 @@ describe("the page-world guard for an owned route", () => {
 
   test("offers an extension link through the shared document", async () => {
     const root = document.createElement("div")
-    root.id = "gitquiet-root"
+    root.id = "gitace-root"
     root.innerHTML = '<a href="/owner/repo/issues">Issues</a>'
     document.body.append(root)
     const link = root.querySelector("a") as HTMLAnchorElement
@@ -197,7 +197,7 @@ describe("the page-world guard for an owned route", () => {
 
   test("offers an interface link to the extension before GitHub sees the press", async () => {
     const root = document.createElement("div")
-    root.id = "gitquiet-root"
+    root.id = "gitace-root"
     root.innerHTML = '<a href="/owner/repo/pull/12"><span>Pull request 12</span></a>'
     document.body.append(root)
     const link = root.querySelector("a") as HTMLAnchorElement
@@ -308,7 +308,7 @@ describe("a press that happens inside our shadow root", () => {
   const withShadow = (): { page: Document; link: HTMLAnchorElement; host: HTMLElement } => {
     const page = document.implementation.createHTMLDocument("github")
     const host = page.createElement("div")
-    host.id = "gitquiet-host"
+    host.id = "gitace-host"
     page.body.append(host)
     const shadow = host.attachShadow({ mode: "open" })
     const link = page.createElement("a")
@@ -357,8 +357,8 @@ describe("a press that happens inside our shadow root", () => {
     const heard: Array<string> = []
     const stop = whenOwnedRouteIsOffered(page, (kind, route) => heard.push(`${kind} ${route}`))
 
-    link.setAttribute("data-gitquiet-owned-route-offer-path", "/owner/repo/pull/7")
-    link.setAttribute("data-gitquiet-owned-route-offer", "click")
+    link.setAttribute("data-gitace-owned-route-offer-path", "/owner/repo/pull/7")
+    link.setAttribute("data-gitace-owned-route-offer", "click")
     await new Promise((resume) => setTimeout(resume, 0))
     stop()
 
@@ -375,8 +375,8 @@ describe("a press that happens inside our shadow root", () => {
     const heard: Array<string> = []
     const stop = whenOwnedRouteIsOffered(page, (kind, route) => heard.push(`${kind} ${route}`))
 
-    link.setAttribute("data-gitquiet-owned-route-offer-path", "/owner/repo/pull/9")
-    link.setAttribute("data-gitquiet-owned-route-offer", "press")
+    link.setAttribute("data-gitace-owned-route-offer-path", "/owner/repo/pull/9")
+    link.setAttribute("data-gitace-owned-route-offer", "press")
     await new Promise((resume) => setTimeout(resume, 0))
     stop()
 
@@ -394,7 +394,7 @@ describe("a press that happens inside our shadow root", () => {
     const stop = whenOwnedRouteIsOffered(page, (kind, route) => heard.push(`${kind} ${route}`))
 
     const host = page.createElement("div")
-    host.id = "gitquiet-host"
+    host.id = "gitace-host"
     page.body.append(host)
     const shadow = host.attachShadow({ mode: "open" })
     await new Promise((resume) => setTimeout(resume, 0))
@@ -402,8 +402,8 @@ describe("a press that happens inside our shadow root", () => {
     const link = page.createElement("a")
     link.setAttribute("href", "/owner/repo/pull/11")
     shadow.append(link)
-    link.setAttribute("data-gitquiet-owned-route-offer-path", "/owner/repo/pull/11")
-    link.setAttribute("data-gitquiet-owned-route-offer", "click")
+    link.setAttribute("data-gitace-owned-route-offer-path", "/owner/repo/pull/11")
+    link.setAttribute("data-gitace-owned-route-offer", "click")
     await new Promise((resume) => setTimeout(resume, 0))
     stop()
 
@@ -414,6 +414,6 @@ describe("a press that happens inside our shadow root", () => {
     // The id is spelled in `navigationGuard` rather than imported, to keep
     // Effect and the whole of `mount` out of the page-world bundle. This is what
     // stops the two spellings drifting apart.
-    expect(HOST_ID).toBe("gitquiet-host")
+    expect(HOST_ID).toBe("gitace-host")
   })
 })

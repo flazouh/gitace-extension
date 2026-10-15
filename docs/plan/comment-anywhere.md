@@ -281,7 +281,7 @@ Four consequences follow from that key and from where the list is held.
   put the file into the walk first.
 - The key already carries a side, so the side fix in step 1 does not disturb it.
 
-### The colleague without GitQuiet
+### The colleague without GitAce Extension
 
 `CONTEXT.md` states the promise: this interface writes back through GitHub's own
 routes so that nothing done here is invisible to anyone still using their page.

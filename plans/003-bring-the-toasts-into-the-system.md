@@ -67,7 +67,7 @@ already wrong.
 
 ## Repo conventions to follow
 
-- Rules for surfaces that render outside `#gitquiet-root` are declared on the surface's own
+- Rules for surfaces that render outside `#gitace-root` are declared on the surface's own
   hook rather than under the root scope, because a portal is not inside it. Exemplar:
   `.t-dropdown` at `src/ui/motion.css:777`, which redeclares its tokens on the class for
   exactly this reason.

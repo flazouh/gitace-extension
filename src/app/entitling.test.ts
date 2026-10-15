@@ -3,24 +3,24 @@ import { issueEntitled, pullRequestEntitled, repoEntitled, titleAt } from "./ent
 
 describe("the title an address earns the moment it is the page", () => {
   test("a repository's front page is its name", () => {
-    expect(titleAt("repo-home", "/flazouh/gitquiet")).toBe("flazouh/gitquiet")
+    expect(titleAt("repo-home", "/flazouh/gitace-extension")).toBe("flazouh/gitace-extension")
   })
 
   test("a file keeps its own name in front of the repository's", () => {
-    expect(titleAt("repo-home", "/flazouh/gitquiet/blob/main/src/ui/going.ts")).toBe(
-      "going.ts · flazouh/gitquiet"
+    expect(titleAt("repo-home", "/flazouh/gitace-extension/blob/main/src/ui/going.ts")).toBe(
+      "going.ts · flazouh/gitace-extension"
     )
   })
 
   test("a branch's tree is still the repository", () => {
-    expect(titleAt("repo-home", "/flazouh/gitquiet/tree/quiet-corners")).toBe(
-      "flazouh/gitquiet"
+    expect(titleAt("repo-home", "/flazouh/gitace-extension/tree/quiet-corners")).toBe(
+      "flazouh/gitace-extension"
     )
   })
 
   test("blame keeps the file's own name in front of the repository's", () => {
-    expect(titleAt("blame", "/flazouh/gitquiet/blame/main/src/ui/going.ts")).toBe(
-      "Blame of going.ts · flazouh/gitquiet"
+    expect(titleAt("blame", "/flazouh/gitace-extension/blame/main/src/ui/going.ts")).toBe(
+      "Blame of going.ts · flazouh/gitace-extension"
     )
   })
 
@@ -80,13 +80,13 @@ describe("the title an address earns the moment it is the page", () => {
 describe("the fuller titles a screen says once it has read", () => {
   test("a repository adds its description, the way GitHub's own page says it", () => {
     expect(
-      repoEntitled({ owner: "flazouh", repo: "gitquiet" }, "A quieter GitHub")
-    ).toBe("flazouh/gitquiet: A quieter GitHub")
+      repoEntitled({ owner: "flazouh", repo: "gitace-extension" }, "A quieter GitHub")
+    ).toBe("flazouh/gitace-extension: A quieter GitHub")
   })
 
   test("and stays the bare name where there is none", () => {
-    expect(repoEntitled({ owner: "flazouh", repo: "gitquiet" }, null)).toBe(
-      "flazouh/gitquiet"
+    expect(repoEntitled({ owner: "flazouh", repo: "gitace-extension" }, null)).toBe(
+      "flazouh/gitace-extension"
     )
   })
 

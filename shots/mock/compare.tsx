@@ -13,7 +13,7 @@ import { STORE, type View } from "../view"
  */
 
 const COMPARING: Comparing = {
-  repo: { owner: "flazouh", repo: "gitquiet" },
+  repo: { owner: "flazouh", repo: "gitace-extension" },
   base: "main",
   head: "claude/gist-screen"
 }

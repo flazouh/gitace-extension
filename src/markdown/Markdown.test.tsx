@@ -73,11 +73,11 @@ describe("rendering our markdown document", () => {
 
   test("draws a repository's own shot from its raw host", () => {
     render(
-      <Markdown markdown={"![A shot](docs/shot.png)"} owner="flazouh" repo="gitquiet" />
+      <Markdown markdown={"![A shot](docs/shot.png)"} owner="flazouh" repo="gitace-extension" />
     )
 
     expect(screen.getByRole("img", { name: "A shot" }).getAttribute("src")).toBe(
-      "https://raw.githubusercontent.com/flazouh/gitquiet/HEAD/docs/shot.png"
+      "https://raw.githubusercontent.com/flazouh/gitace-extension/HEAD/docs/shot.png"
     )
   })
 

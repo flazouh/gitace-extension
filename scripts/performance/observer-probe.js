@@ -1,6 +1,6 @@
 /** Browser probe for the real mount and link observers. No animation clock. */
 export const runObserverProbe = async (api, { nodes, updates = 40 }) => {
-  const page = document.implementation.createHTMLDocument("GitQuiet performance fixture")
+  const page = document.implementation.createHTMLDocument("GitAce Extension performance fixture")
   page.body.innerHTML = '<main><div class="PageLayoutContent"><section></section></div></main>'
   const region = page.querySelector(".PageLayoutContent")
   const native = page.querySelector("section")
@@ -56,7 +56,7 @@ export const runObserverProbe = async (api, { nodes, updates = 40 }) => {
         throw new Error(`Visibility invariant failed during ${phase}`)
     }
     const links = [...root.querySelectorAll("a")]
-    if (links.length !== updates || links.some(link => link.getAttribute("data-gitquiet-owned-route") !== link.getAttribute("href")))
+    if (links.length !== updates || links.some(link => link.getAttribute("data-gitace-owned-route") !== link.getAttribute("href")))
       throw new Error("An added link lost its route")
     const replacement = page.createElement("div")
     replacement.className = "PageLayoutContent"

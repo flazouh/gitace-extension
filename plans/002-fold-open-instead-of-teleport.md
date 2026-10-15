@@ -47,13 +47,13 @@ because a fold is reversible mid-motion: AUDIT §4.
 /**
  * A fold, which opens rather than appearing.
  */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-fold {
+:is(#gitace-root, [data-gitace-outside]) .t-fold {
   --fold-dur: var(--duration-quick);
   --fold-ease: var(--ease-in-out);
   interpolate-size: allow-keywords;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-fold::details-content {
+:is(#gitace-root, [data-gitace-outside]) .t-fold::details-content {
   height: 0;
   overflow: hidden;
   opacity: 0;
@@ -63,7 +63,7 @@ because a fold is reversible mid-motion: AUDIT §4.
     content-visibility var(--fold-dur) allow-discrete;
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-fold[open]::details-content {
+:is(#gitace-root, [data-gitace-outside]) .t-fold[open]::details-content {
   height: auto;
   opacity: 1;
 }
@@ -74,7 +74,7 @@ and what every other rule in that block does:
 
 ```css
 /* target — inside the existing @media (prefers-reduced-motion: reduce) block */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-fold::details-content {
+:is(#gitace-root, [data-gitace-outside]) .t-fold::details-content {
   transition: opacity var(--fold-dur) var(--fold-ease);
   height: auto;
 }
@@ -87,7 +87,7 @@ invent a new duration token.
 ## Repo conventions to follow
 
 - Every animating class lives in `src/ui/motion.css` and is named `t-…`. The rule that
-  animates is scoped with `:is(#gitquiet-root, [data-gitquiet-outside])`. Exemplar: the
+  animates is scoped with `:is(#gitace-root, [data-gitace-outside])`. Exemplar: the
   `.t-turn` block at `src/ui/motion.css:741`.
 - The token declarations are the exception, and they sit on the class itself with no
   scope, the way `.t-card` does at `src/ui/motion.css:762`, so a copy portalled outside

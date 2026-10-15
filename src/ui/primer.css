@@ -1,9 +1,9 @@
 /**
  * The colour vocabulary shared screens spend.
  *
- * Defaults below are Gitquiet light — the product pack — so Tailwind emits the
+ * Defaults below are GitAce Extension light — the product pack — so Tailwind emits the
  * utilities and a frame painted before JS runs already looks like ours rather
- * than like Primer. `Theme` / `paintTheme` overwrite these on `#gitquiet-root`
+ * than like Primer. `Theme` / `paintTheme` overwrite these on `#gitace-root`
  * (and the desktop document element) from the reader's Appearance × Pack choice.
  *
  * Size scale stays at GitHub's numbers: the screens were laid out against 12px
@@ -65,7 +65,7 @@
  * every element on the page, and the page is GitHub's. What the interface needs
  * instead is this one rule, scoped to its own subtree.
  */
-#gitquiet-root {
+#gitace-root {
   /* Tailwind sizes every padding, margin and gap as `calc(var(--spacing) * n)`,
      and the Primer React layout this interface is planted inside sets
      `--spacing: 0` for its own purposes. Inheritance carried that in and
@@ -90,7 +90,7 @@
 /**
  * The same typographic baseline for our furniture out in their document.
  *
- * `#gitquiet-root` above declares the font and the size; everything outside it —
+ * `#gitace-root` above declares the font and the size; everything outside it —
  * the bar, the hover cards, anything Radix portals — used to need no such
  * declaration, because it stood in `body` and inherited whatever GitHub's
  * stylesheet put there. Then we started turning their stylesheets off, and
@@ -104,7 +104,7 @@
  * from. Through `:where` so it costs nothing: a `text-sm` on the bar itself
  * still wins, and so does every utility inside it.
  */
-:where([data-gitquiet-outside]) {
+:where([data-gitace-outside]) {
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: var(--text-base);
@@ -113,7 +113,7 @@
 /*
  * The root itself is in this list, and was not.
  *
- * `#gitquiet-root *` is every descendant and not the element, so the root kept
+ * `#gitace-root *` is every descendant and not the element, so the root kept
  * the browser's `content-box` — and the root is the one element here carrying
  * both `width: 100%` and a horizontal padding. Content-box adds the padding to
  * the width instead of taking it out of it, so the interface laid itself out
@@ -126,14 +126,14 @@
  * with the rest. Inside a shadow root it reaches nothing, and this rule was
  * written when it did not have to.
  */
-#gitquiet-root,
-#gitquiet-root *,
-#gitquiet-root *::before,
-#gitquiet-root *::after,
-[data-gitquiet-outside],
-[data-gitquiet-outside] *,
-[data-gitquiet-outside] *::before,
-[data-gitquiet-outside] *::after {
+#gitace-root,
+#gitace-root *,
+#gitace-root *::before,
+#gitace-root *::after,
+[data-gitace-outside],
+[data-gitace-outside] *,
+[data-gitace-outside] *::before,
+[data-gitace-outside] *::after {
   box-sizing: border-box;
 }
 
@@ -147,12 +147,12 @@
  * specificity, so a `border-b` utility and GitHub's own `.Box` both still win
  * over it.
  */
-:where(#gitquiet-root) *,
-:where(#gitquiet-root) *::before,
-:where(#gitquiet-root) *::after,
-:where([data-gitquiet-outside]) *,
-:where([data-gitquiet-outside]) *::before,
-:where([data-gitquiet-outside]) *::after {
+:where(#gitace-root) *,
+:where(#gitace-root) *::before,
+:where(#gitace-root) *::after,
+:where([data-gitace-outside]) *,
+:where([data-gitace-outside]) *::before,
+:where([data-gitace-outside]) *::after {
   border-style: solid;
   border-width: 0;
 }
@@ -169,8 +169,8 @@
  * said otherwise: a face keeps its `rounded-full` and a card its own radius. `markdown.css`
  * says the same thing about a picture in a document, and says it as the same token.
  */
-:where(#gitquiet-root) img,
-:where([data-gitquiet-outside]) img {
+:where(#gitace-root) img,
+:where([data-gitace-outside]) img {
   border-radius: var(--radius-sm);
 }
 
@@ -191,7 +191,7 @@
  * back, and `.markdown-body p` — GitHub's own sixteen pixels between the
  * paragraphs of a README we insert whole — never hears this at all.
  */
-:where(#gitquiet-root) :is(p, h1, h2, h3, h4, h5, h6, ul, ol, dl, dd, figure, blockquote, pre) {
+:where(#gitace-root) :is(p, h1, h2, h3, h4, h5, h6, ul, ol, dl, dd, figure, blockquote, pre) {
   margin: 0;
 }
 
@@ -213,7 +213,7 @@
  * this is fixing. `.markdown ul` keeps its `2em` either way, being a class
  * against an element and heavier than this.
  */
-:where(#gitquiet-root) :is(ul, ol, menu) {
+:where(#gitace-root) :is(ul, ol, menu) {
   padding: 0;
 }
 
@@ -230,7 +230,7 @@
  * `html` for the same weight the margin rule needs out here: GitHub's own
  * stylesheet is still on the page, and this has to outweigh it.
  */
-html :where([data-gitquiet-outside]) :is(ul, ol, menu) {
+html :where([data-gitace-outside]) :is(ul, ol, menu) {
   padding: 0;
 }
 
@@ -251,7 +251,7 @@ html :where([data-gitquiet-outside]) :is(ul, ol, menu) {
  * still on the page and this has to outweigh `p { margin-bottom: 10px }`.
  */
 html
-  :where([data-gitquiet-outside])
+  :where([data-gitace-outside])
   :is(p, h1, h2, h3, h4, h5, h6, ul, ol, dl, dd, figure, blockquote, pre) {
   margin: 0;
 }
@@ -260,20 +260,20 @@ html
  * The rest of the button reset, for the elements of ours outside the root.
  *
  * A `<button>` with no author styles wears the platform's: a two-pixel white `outset` border,
- * a grey face and the system font. Inside `#gitquiet-root` the rules above take those off; the
+ * a grey face and the system font. Inside `#gitace-root` the rules above take those off; the
  * bar and the hover cards are in `document.body`, where they showed up as white boxes drawn
  * around our own controls. Buttons and inputs only — this must not reach GitHub's own page,
  * which is why the selector carries the mark.
  *
  * The mark sits in `:where` for the same reason the border reset above does, and here it was
- * not optional. Written plainly, `[data-gitquiet-outside] button` is an attribute and an
+ * not optional. Written plainly, `[data-gitace-outside] button` is an attribute and an
  * element, which outweighs a class — so `background: none` beat every `bg-*` a button out here
  * asked for, and `font: inherit` beat every `text-*`. The bar's search field is the one that
  * showed it: `bg-active` on the control that opens the palette, painting nothing, a field with
  * no fill on a dark strip. Through `:where` the reset costs the element alone and any utility
  * wins, while a button nobody dressed still gets the platform's styling taken off it.
  */
-:where([data-gitquiet-outside]) :is(button, input, select, textarea) {
+:where([data-gitace-outside]) :is(button, input, select, textarea) {
   border: 0;
   background: none;
   color: inherit;
@@ -303,13 +303,13 @@ html
  * their own chrome is drawing light while the reader has asked us for dark, that is a white line
  * around a dark card, and it was there in every dark pack.
  */
-#gitquiet-root .border-line,
-[data-gitquiet-outside] .border-line {
+#gitace-root .border-line,
+[data-gitace-outside] .border-line {
   border-color: var(--color-line) !important;
 }
 
-#gitquiet-root .border-line-muted,
-[data-gitquiet-outside] .border-line-muted {
+#gitace-root .border-line-muted,
+[data-gitace-outside] .border-line-muted {
   border-color: var(--color-line-muted) !important;
 }
 
@@ -322,18 +322,18 @@ html
  * on the panel and only one of them shouts. A colour that means something is worth
  * raising our voice for.
  */
-#gitquiet-root .border-fail,
-[data-gitquiet-outside] .border-fail {
+#gitace-root .border-fail,
+[data-gitace-outside] .border-fail {
   border-color: var(--color-fail) !important;
 }
 
-#gitquiet-root .border-busy,
-[data-gitquiet-outside] .border-busy {
+#gitace-root .border-busy,
+[data-gitace-outside] .border-busy {
   border-color: var(--color-busy) !important;
 }
 
-#gitquiet-root .border-done,
-[data-gitquiet-outside] .border-done {
+#gitace-root .border-done,
+[data-gitace-outside] .border-done {
   border-color: var(--color-done) !important;
 }
 
@@ -349,11 +349,11 @@ html
  * The token rather than the number, so a pack that retunes its corners retunes this one with it.
  * Scoped to the mark, so nothing here reaches GitHub's own page.
  */
-[data-gitquiet-outside] .rounded-lg {
+[data-gitace-outside] .rounded-lg {
   border-radius: var(--radius-lg) !important;
 }
 
-[data-gitquiet-outside] .rounded-md {
+[data-gitace-outside] .rounded-md {
   border-radius: var(--radius-md) !important;
 }
 
@@ -366,7 +366,7 @@ html
  * go. Through `:where` again, so GitHub's `.btn` and our own utilities both
  * still win over it.
  */
-:where(#gitquiet-root) button {
+:where(#gitace-root) button {
   appearance: none;
   background: transparent;
   color: inherit;
@@ -396,7 +396,7 @@ html
  * reading, and marks where the reader is standing in full-strength ink. Measured
  * over every pack and both faces in `focusRing.test.ts`.
  */
-#gitquiet-root :focus-visible {
+#gitace-root :focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }

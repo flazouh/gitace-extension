@@ -47,9 +47,9 @@ export default defineConfig({
      * The length that fits all of them is the App Store's (112), and
      * `manifest.test.ts` holds every target to it and says what happened without it.
      */
-    name: "GitQuiet - A faster, quieter GitHub",
+    name: "GitAce Extension - A faster, quieter GitHub",
     // Toolbar / overflow menus. Store listing keeps the longer `name`.
-    short_name: "GitQuiet",
+    short_name: "GitAce Extension",
     description: `A faster, quieter GitHub in ${readIn[browser] ?? "your browser"}. Every pull request you're in, one screen, sorted by next action.`,
     ...(process.env.RELEASE_VERSION === undefined
       ? {}
@@ -218,7 +218,7 @@ export default defineConfig({
      * `{{version}}` is the manifest's, which reads `RELEASE_VERSION` above.
      * `{{packageVersion}}` is package.json's, and package.json here says `0.0.0`
      * on purpose, so WXT's default names every zip of every release
-     * `gitquiet-0.0.0-`. The bytes inside are right either way: this is the label
+     * `gitace-extension-0.0.0-`. The bytes inside are right either way: this is the label
      * on the tin, which is what a release page shows and what a link points at.
      *
      * Otherwise these are WXT's defaults, `{{modeSuffix}}` included. It is empty

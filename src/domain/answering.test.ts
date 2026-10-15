@@ -37,7 +37,7 @@ describe("whether somebody answers anybody", () => {
         act("commented", "facebook/react", 3),
         act("opened", "vercel/next.js", 4),
         // Their own work, and a star, which say nothing about answering anybody.
-        act("reviewed", "alex/gitquiet", 1),
+        act("reviewed", "alex/gitace-extension", 1),
         act("pushed", "facebook/react", 1),
         act("starred", "facebook/react", 1)
       ],
@@ -87,7 +87,7 @@ describe("whether somebody answers anybody", () => {
   })
 
   test("reads a login the way GitHub does, which is either case", () => {
-    const said = answering([act("reviewed", "Alex/gitquiet", 1)], "alex", now)
+    const said = answering([act("reviewed", "Alex/gitace-extension", 1)], "alex", now)
 
     expect(said.reviews).toBe(0)
   })

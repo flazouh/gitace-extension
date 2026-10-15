@@ -139,7 +139,7 @@ describe("the entrance runs once, on arrival", () => {
     // including a Back onto the list the reader had just left.
     const arrived = sheet
       .split("}")
-      .filter((rule) => rule.includes("[data-gitquiet-arrived]"))
+      .filter((rule) => rule.includes("[data-gitace-arrived]"))
     expect(arrived.length).toBeGreaterThan(0)
     const covered = arrived.join("}")
     expect(covered).toContain(".t-panels > *")
@@ -150,7 +150,7 @@ describe("the entrance runs once, on arrival", () => {
   test("a landed page takes the entrance off its panels", () => {
     const landed = sheet
       .split("}")
-      .filter((rule) => rule.includes("[data-gitquiet-landed]"))
+      .filter((rule) => rule.includes("[data-gitace-landed]"))
     expect(landed.length).toBeGreaterThan(0)
     const covered = landed.join("}")
     expect(covered).toContain(".t-panels > *")
@@ -162,7 +162,7 @@ describe("the entrance runs once, on arrival", () => {
 /**
  * The clock itself, which had no test and had stopped working.
  *
- * `millisOf` read the durations off `#gitquiet-root` through `document`, and once
+ * `millisOf` read the durations off `#gitace-root` through `document`, and once
  * the interface moved into a shadow root that lookup found nothing: every timer in
  * the interface fell back to the number written beside it in JavaScript and the
  * stylesheet stopped owning the timing it is meant to own. Nothing looked broken,

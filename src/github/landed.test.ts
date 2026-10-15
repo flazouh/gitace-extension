@@ -11,8 +11,8 @@ import {
   seedLanded
 } from "./landed"
 
-const one: PullRequestRef = { owner: "flazouh", repo: "gitquiet", number: 7 }
-const other: PullRequestRef = { owner: "flazouh", repo: "gitquiet", number: 8 }
+const one: PullRequestRef = { owner: "flazouh", repo: "gitace-extension", number: 7 }
+const other: PullRequestRef = { owner: "flazouh", repo: "gitace-extension", number: 8 }
 
 const clock = Date.now
 
@@ -101,7 +101,7 @@ describe("what one document tells the next about its own writes", () => {
     recordLanded(one, "merged")
 
     expect(landedNow()).toEqual({
-      "flazouh/gitquiet#7": { state: "merged", at }
+      "flazouh/gitace-extension#7": { state: "merged", at }
     })
   })
 
@@ -113,20 +113,20 @@ describe("what one document tells the next about its own writes", () => {
   })
 
   test("puts back what an earlier document wrote", () => {
-    seedLanded({ "flazouh/gitquiet#7": { state: "closed", at: Date.now() } })
+    seedLanded({ "flazouh/gitace-extension#7": { state: "closed", at: Date.now() } })
 
     expect(landedState(one)).toEqual(Option.some("closed"))
   })
 
   test("leaves this document's own press alone, it being the newer", () => {
     recordLanded(one, "open")
-    seedLanded({ "flazouh/gitquiet#7": { state: "closed", at: Date.now() } })
+    seedLanded({ "flazouh/gitace-extension#7": { state: "closed", at: Date.now() } })
 
     expect(landedState(one)).toEqual(Option.some("open"))
   })
 
   test("ignores a record older than the window", () => {
-    seedLanded({ "flazouh/gitquiet#7": { state: "closed", at: Date.now() - 6 * 60_000 } })
+    seedLanded({ "flazouh/gitace-extension#7": { state: "closed", at: Date.now() - 6 * 60_000 } })
 
     expect(Option.isNone(landedState(one))).toBe(true)
   })
@@ -135,9 +135,9 @@ describe("what one document tells the next about its own writes", () => {
     // Whatever is in storage was written by a build that may not be this one, so
     // it is shaped rather than trusted.
     seedLanded({
-      "flazouh/gitquiet#7": { state: "abandoned", at: Date.now() },
-      "flazouh/gitquiet#8": "closed",
-      "flazouh/gitquiet#9": { state: "closed" }
+      "flazouh/gitace-extension#7": { state: "abandoned", at: Date.now() },
+      "flazouh/gitace-extension#8": "closed",
+      "flazouh/gitace-extension#9": { state: "closed" }
     })
 
     expect(Option.isNone(landedState(one))).toBe(true)

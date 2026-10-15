@@ -25,7 +25,7 @@
 const EXTENSION = "/Users/alex/Documents/githubpro/.output/chrome-mv3"
 const START = "https://github.com/pulls"
 
-const task = await useOrCreateTaskSpace("test gitquiet extension on real PR")
+const task = await useOrCreateTaskSpace("test GitAce Extension on real PR")
 await takeOverTaskSpace(task.id)
 
 // The dev build is a second extension as far as the browser is concerned, and it
@@ -59,7 +59,7 @@ await wait(3)
 cliLog(
   JSON.stringify(
     await js(String.raw`(() => {
-      const root = document.getElementById("gitquiet-root")
+      const root = document.getElementById("gitace-root")
       return {
         url: location.pathname,
         mounted: root !== null,

@@ -32,10 +32,10 @@ const RECORDER = String.raw`
   new MutationObserver((changes) => {
     for (const change of changes) {
       for (const node of change.addedNodes) {
-        if (node.nodeType === 1 && node.id === 'gitquiet-root') note('put on the page', node)
+        if (node.nodeType === 1 && node.id === 'gitace-root') note('put on the page', node)
       }
       for (const node of change.removedNodes) {
-        if (node.nodeType === 1 && node.id === 'gitquiet-root') note('taken off it', node)
+        if (node.nodeType === 1 && node.id === 'gitace-root') note('taken off it', node)
       }
     }
   }).observe(document, { childList: true, subtree: true })
@@ -43,7 +43,7 @@ const RECORDER = String.raw`
   // What the reader sees, sampled: a list that goes back to nothing having once
   // been drawn is the hole this is looking for.
   setInterval(() => {
-    const root = document.getElementById('gitquiet-root')
+    const root = document.getElementById('gitace-root')
     window.__life.heights.push({
       at: Math.round(performance.now()),
       h: root === null ? -1 : Math.round(root.getBoundingClientRect().height),
@@ -64,7 +64,7 @@ const drawn = async () => {
   for (let attempt = 0; attempt < 30; attempt += 1) {
     await new Promise((wake) => setTimeout(wake, 1000))
     const ready = await js(String.raw`(() => {
-      const root = document.getElementById('gitquiet-root')
+      const root = document.getElementById('gitace-root')
       return root !== null && root.querySelectorAll('a[aria-label]').length > 0
     })()`)
     if (ready === true) return true

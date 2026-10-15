@@ -81,7 +81,7 @@ const chrome = Bun.spawn(
   [
     findChrome(),
     `--remote-debugging-port=${PORT}`,
-    `--user-data-dir=/tmp/gitquiet-qa-profile`,
+    `--user-data-dir=/tmp/gitace-qa-profile`,
     // The new headless, which is a real Chrome without a window rather than the
     // separate renderer the old flag named. A container has no display to give.
     "--headless=new",

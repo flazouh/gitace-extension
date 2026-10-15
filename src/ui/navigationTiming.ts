@@ -1,15 +1,15 @@
 /** The start of the latest extension-owned route change, from the input task. */
-export const NAVIGATION_STARTED = "data-gitquiet-navigation-started"
+export const NAVIGATION_STARTED = "data-gitace-navigation-started"
 
 /** The last measured input-to-screen duration, in milliseconds. */
-export const NAVIGATION_DURATION = "data-gitquiet-navigation-duration"
+export const NAVIGATION_DURATION = "data-gitace-navigation-duration"
 
 /** The exact route shown by the last completed measurement. */
-export const NAVIGATION_ROUTE = "data-gitquiet-navigation-measured-route"
+export const NAVIGATION_ROUTE = "data-gitace-navigation-measured-route"
 
 /** Exact trace boundaries for extension-owned input-to-screen work. */
-export const NAVIGATION_START_MARK = "gitquiet:navigation-start"
-export const NAVIGATION_END_MARK = "gitquiet:navigation-end"
+export const NAVIGATION_START_MARK = "gitace:navigation-start"
+export const NAVIGATION_END_MARK = "gitace:navigation-end"
 
 /** The browser announces a traversal just after the button that started it. */
 const SAME_TRAVERSAL_MS = 100
@@ -23,12 +23,12 @@ const SAME_TRAVERSAL_MS = 100
  * asks whether a screen standing with this inside it is working rather than
  * wedged.
  *
- * Named here rather than beside the other `data-gitquiet-*` names in `mount.ts`,
+ * Named here rather than beside the other `data-gitace-*` names in `mount.ts`,
  * which is where it belongs by ownership and cannot go by dependency: `mount.ts`
  * already imports `finishNavigation` from this file, so the name moving there
  * would make the two import each other for one string.
  */
-export const READING = "[data-gitquiet-loading]"
+export const READING = "[data-gitace-loading]"
 
 /** Do not retain a screen that never finishes its read. */
 const READING_LIMIT_MS = 20_000

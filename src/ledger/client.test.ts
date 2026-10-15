@@ -15,7 +15,7 @@ describe("a question put to a worker that is still waking", () => {
   const reading = { path: "one.ts", text: "const a = 1\n" }
   const at = { row: 0, column: 6 }
 
-  const answers = (writing: unknown) => ({ kind: "gitquiet/ledger-answer", writing })
+  const answers = (writing: unknown) => ({ kind: "gitace/ledger-answer", writing })
 
   test("is put again, and the second answer is the answer", async () => {
     let asked = 0

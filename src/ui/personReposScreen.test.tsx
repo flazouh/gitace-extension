@@ -84,7 +84,7 @@ const names = () =>
     .filter((one) => one !== undefined)
 
 const LIST: ReadonlyArray<ListedRepository> = [
-  row({ repo: "gitquiet", pushedAt: daysAgo(1) }),
+  row({ repo: "gitace-extension", pushedAt: daysAgo(1) }),
   row({ repo: "notes", pushedAt: daysAgo(400) }),
   row({ repo: "old-cli", isArchived: true, pushedAt: daysAgo(3) }),
   row({ repo: "vscode", forkedFrom: Option.some("microsoft/vscode"), pushedAt: daysAgo(500) })
@@ -103,7 +103,7 @@ describe("a person's repositories, in groups", () => {
   })
 
   test("draws no card for a group with nothing in it", async () => {
-    shown([row({ repo: "gitquiet" })])
+    shown([row({ repo: "gitace-extension" })])
     await screen.findByRole("heading", { name: /^Moving$/ })
 
     expect(screen.queryByRole("heading", { name: /^Retired$/ })).toBeNull()
@@ -158,7 +158,7 @@ describe("one row", () => {
   test("carries what the repository is, its language, its stars and its forks", async () => {
     shown([
       row({
-        repo: "gitquiet",
+        repo: "gitace-extension",
         description: Option.some("A quieter GitHub"),
         language: Option.some({ name: "TypeScript", colour: "#3178c6" }),
         stars: 42,
@@ -180,7 +180,7 @@ describe("one row", () => {
     // them, so the fourth is still how a reader gets to the row.
     shown([
       row({
-        repo: "gitquiet",
+        repo: "gitace-extension",
         topics: ["browser-extension", "github", "typescript", "effect-ts"]
       })
     ])
@@ -191,7 +191,7 @@ describe("one row", () => {
 
     await userEvent.type(screen.getByRole("searchbox"), "effect-ts")
 
-    expect(names()).toEqual(["gitquiet"])
+    expect(names()).toEqual(["gitace-extension"])
   })
 
   test("says what a row is with a glyph, before its name is read", async () => {
@@ -235,7 +235,7 @@ describe("one row", () => {
     // nothing else would fail about. The Working Set holds the same line.
     shown([
       row({
-        repo: "gitquiet",
+        repo: "gitace-extension",
         language: Option.some({ name: "TypeScript", colour: "#3178c6" }),
         stars: 42,
         forks: 3
@@ -251,7 +251,7 @@ describe("one row", () => {
   test("keeps no column for a fact no row in the list has", async () => {
     // Seven rems held open on every line for a language none of these rows has is
     // width taken from the descriptions, which are the part worth reading.
-    shown([row({ repo: "gitquiet" }), row({ repo: "notes" })])
+    shown([row({ repo: "gitace-extension" }), row({ repo: "notes" })])
     const rows = await screen.findAllByRole("listitem")
 
     expect(rows[0]?.style.gridTemplateColumns).not.toContain("7rem")
@@ -265,7 +265,7 @@ describe("the two figures over the list", () => {
     const strip = await screen.findByRole("region", { name: "Last moved" })
     const cells = strip.querySelectorAll("a")
     expect(cells).toHaveLength(4)
-    expect(cells[0]?.getAttribute("aria-label")).toBe("flazouh/gitquiet")
+    expect(cells[0]?.getAttribute("aria-label")).toBe("flazouh/gitace-extension")
   })
 
   test("the language bar counts repositories rather than claiming bytes", async () => {
@@ -297,7 +297,7 @@ describe("finding one of them", () => {
     // Their own box reads names, which their documentation says outright.
     shown([
       row({ repo: "chrono", description: Option.some("parses dates") }),
-      row({ repo: "gitquiet", topics: ["browser-extension"] })
+      row({ repo: "gitace-extension", topics: ["browser-extension"] })
     ])
     await screen.findAllByRole("listitem")
 
@@ -310,7 +310,7 @@ describe("finding one of them", () => {
     shown(LIST)
     await screen.findAllByRole("listitem")
 
-    await userEvent.type(screen.getByRole("searchbox"), "gitquiet")
+    await userEvent.type(screen.getByRole("searchbox"), "gitace-extension")
 
     expect(screen.getByText("1 of 4")).toBeTruthy()
   })
@@ -338,7 +338,7 @@ describe("finding one of them", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Clear the filter" }))
 
-    expect(names()).toContain("gitquiet")
+    expect(names()).toContain("gitace-extension")
   })
 
   test("rows arrive without motion while somebody is typing", async () => {

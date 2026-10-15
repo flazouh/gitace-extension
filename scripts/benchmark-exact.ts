@@ -34,7 +34,7 @@ try {
     const [warmth, warmMs] = await timed(() =>
       session.evaluateInExtension<{ ready: boolean; read?: number; why?: string }>(`
         chrome.runtime.sendMessage({
-          kind: "gitquiet/ledger-warm",
+          kind: "gitace/ledger-warm",
           owner: ${JSON.stringify(at.owner)},
           repo: ${JSON.stringify(at.repo)},
           sha: ${JSON.stringify(at.sha)},
@@ -51,7 +51,7 @@ try {
     const ask = () =>
       session.evaluateInExtension<{ uses?: ReadonlyArray<unknown>; exact?: boolean; ready: boolean }>(`
         chrome.runtime.sendMessage({
-          kind: "gitquiet/ledger-across",
+          kind: "gitace/ledger-across",
           owner: ${JSON.stringify(at.owner)},
           repo: ${JSON.stringify(at.repo)},
           sha: ${JSON.stringify(at.sha)},

@@ -498,9 +498,9 @@ describe("the Working Set screen", () => {
 
 /* The same mark every list publishes now. See `repoPullsScreen.test.tsx` for why. */
 describe("which address this list claims to have drawn", () => {
-  const drawn = () => document.documentElement.getAttribute("data-gitquiet-at")
+  const drawn = () => document.documentElement.getAttribute("data-gitace-at")
 
-  afterEach(() => document.documentElement.removeAttribute("data-gitquiet-at"))
+  afterEach(() => document.documentElement.removeAttribute("data-gitace-at"))
 
   test("claims the pathname it stands for once rows are drawn", async () => {
     render(

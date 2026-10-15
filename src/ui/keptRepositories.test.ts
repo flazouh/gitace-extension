@@ -108,14 +108,14 @@ describe("the repository list as the last read left it", () => {
   })
 
   test("keeps nothing when what was kept is not a list of repositories", () => {
-    localStorage.setItem("gitquiet.kept.repositories", "{oh no")
+    localStorage.setItem("gitace.kept.repositories", "{oh no")
 
     expect(keptRepositories()).toEqual([])
   })
 
   test("drops a row that is missing the one name that is an address", () => {
     localStorage.setItem(
-      "gitquiet.kept.repositories",
+      "gitace.kept.repositories",
       JSON.stringify([{ owner: "flazouh" }, { owner: "flazouh", repo: "octo-repo", name: "flazouh/octo-repo" }])
     )
 

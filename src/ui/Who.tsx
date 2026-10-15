@@ -42,7 +42,7 @@ const yearRead = (total: number): string =>
  *
  * A span made to behave like a block, rather than the paragraph this obviously
  * is. A tooltip is portalled to the end of the document, so it stands outside
- * `#gitquiet-root` and none of the reset that makes this interface's typography
+ * `#gitace-root` and none of the reset that makes this interface's typography
  * ours reaches it — and GitHub styles `p` on their pages: ten pixels of margin
  * under every line, and a font size that quietly beat `text-sm` on the name. A
  * span is a tag they have no opinion about.
@@ -228,7 +228,7 @@ export const Who = ({
       {/*
         Into a host of ours rather than the end of the document.
 
-        Radix portals to `document.body`, which is outside `#gitquiet-root` — and the tokens are
+        Radix portals to `document.body`, which is outside `#gitace-root` — and the tokens are
         inline custom properties on that root, so a card portalled there resolved the light
         defaults and painted white on a dark page. `outside.ts` keeps one marked host that the
         theme paints and the stylesheet resets.

@@ -147,7 +147,7 @@ export const paintTokens = (root: HTMLElement, tokens: ThemeTokens, scheme: Sche
  * name is nobody's but ours, so the only thing it can reach is the rules we
  * wrote for it.
  */
-export const FLOOR = "--gitquiet-floor"
+export const FLOOR = "--gitace-floor"
 
 /**
  * Our canvas, under their page.
@@ -155,7 +155,7 @@ export const FLOOR = "--gitquiet-floor"
  * The floor used to stay GitHub's, and the argument was that a slab of our dark
  * under their header reads as a panel bolted over the site. Our own bar took
  * that header's place — `gates.bar.css` hides `header.GlobalNav` the moment
- * `#gitquiet-bar` exists — so there is no longer a seam between their chrome and
+ * `#gitace-bar` exists — so there is no longer a seam between their chrome and
  * our column, and the last thing on the page that was not ours was the colour
  * behind it.
  *

@@ -242,11 +242,11 @@ const Naming = ({
         if (Option.isSome(meant)) onName(meant.value)
       }}
     >
-      <label className="sr-only" htmlFor="gitquiet-duplicate">
+      <label className="sr-only" htmlFor="gitace-duplicate">
         Which issue is this a duplicate of
       </label>
       <input
-        id="gitquiet-duplicate"
+        id="gitace-duplicate"
         autoFocus
         value={said}
         onChange={(event) => setSaid(event.target.value)}

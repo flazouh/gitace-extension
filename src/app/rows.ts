@@ -41,7 +41,7 @@
 
 import { type IssueRef, type ListedIssue, nameOf } from "../domain/issues"
 
-type World = Window & { gitquietRows?: ReadonlyArray<ListedIssue> }
+type World = Window & { gitaceRows?: ReadonlyArray<ListedIssue> }
 
 /**
  * What a list has on the screen now, in place of whatever the last one had.
@@ -52,7 +52,7 @@ type World = Window & { gitquietRows?: ReadonlyArray<ListedIssue> }
  * first. That is a title from a search the reader ran twenty minutes ago.
  */
 export const drawingIssues = (target: Window, rows: ReadonlyArray<ListedIssue>): void => {
-  ;(target as World).gitquietRows = rows
+  ;(target as World).gitaceRows = rows
 }
 
 /**
@@ -69,5 +69,5 @@ export const drawingIssues = (target: Window, rows: ReadonlyArray<ListedIssue>):
 export const issueDrawn = (target: Window, reference: IssueRef): ListedIssue | undefined => {
   const wanted = nameOf(reference)
 
-  return (target as World).gitquietRows?.find((one) => nameOf(one.reference) === wanted)
+  return (target as World).gitaceRows?.find((one) => nameOf(one.reference) === wanted)
 }

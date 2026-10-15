@@ -14,7 +14,7 @@
  * The two builds cannot both be installed. Chrome derives an unpacked
  * extension's id from the absolute path it was loaded from, so `.output/chrome-mv3`
  * and `.output/chrome-mv3-dev` are two different extensions to it, both matching
- * github.com, both mounting a #gitquiet-root into the same page. The id is a
+ * github.com, both mounting a #gitace-root into the same page. The id is a
  * hash of the path and nothing else, so it can be worked out here rather than
  * remembered, and the other build uninstalled by name before this one goes in.
  *
@@ -37,7 +37,7 @@ const idFor = (path) =>
     .map((nibble) => String.fromCharCode(97 + parseInt(nibble, 16)))
     .join("")
 
-const task = await useOrCreateTaskSpace("develop gitquiet against a real PR")
+const task = await useOrCreateTaskSpace("develop GitAce Extension against a real PR")
 await takeOverTaskSpace(task.id)
 
 try {
@@ -63,15 +63,15 @@ await gotoAndWait(here.startsWith("https://github.com/") ? here : START, {
 // takes a moment to have its content script registered, and a fixed three seconds
 // reported an empty page often enough to look like a failure when it was a race.
 try {
-  await waitForElement("#gitquiet-root", { timeout: 20 })
+  await waitForElement("#gitace-root", { timeout: 20 })
 } catch {
-  cliLog("no #gitquiet-root after 20s — see the page's console")
+  cliLog("no #gitace-root after 20s — see the page's console")
 }
 
 cliLog(
   JSON.stringify(
     await js(String.raw`(() => {
-      const roots = document.querySelectorAll("#gitquiet-root")
+      const roots = document.querySelectorAll("#gitace-root")
       return {
         url: location.pathname,
         roots: roots.length,

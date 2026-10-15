@@ -12,7 +12,7 @@ import { Footer, HELD, Nav, Source, STORE_AT } from "./Shell"
 import "./index.css"
 import "@/ui/onboarding.css"
 
-const LIGHT = { [SETTINGS]: { theme: { appearance: "light", pack: "gitquiet" } } }
+const LIGHT = { [SETTINGS]: { theme: { appearance: "light", pack: "gitace" } } }
 const THEIR_PULLS = "https://github.com/pulls"
 
 const Screen = ({ shot }: { readonly shot: Shot }) => {

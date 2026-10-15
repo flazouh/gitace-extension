@@ -135,7 +135,7 @@ const relay = <A>(work: { readonly kind: string }, instead: A): Effect.Effect<un
 
 const askTheLedger = (ask: { readonly path: string; readonly text: string; readonly key?: string; readonly question: unknown }): Effect.Effect<unknown> =>
   Effect.gen(function* () {
-    if (!(yield* ensureOffscreen)) return { kind: "gitquiet/ledger-answer", why: "no offscreen API" }
+    if (!(yield* ensureOffscreen)) return { kind: "gitace/ledger-answer", why: "no offscreen API" }
 
     return yield* Effect.promise(() =>
       browser.runtime.sendMessage({
@@ -148,7 +148,7 @@ const askTheLedger = (ask: { readonly path: string; readonly text: string; reado
     )
   }).pipe(
     Effect.catch((cause) =>
-      Effect.succeed({ kind: "gitquiet/ledger-answer", why: String(cause) })
+      Effect.succeed({ kind: "gitace/ledger-answer", why: String(cause) })
     )
   )
 

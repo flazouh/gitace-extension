@@ -2,7 +2,7 @@
 // Configuration is local: .tmp/perf-observers/trace-config.json.
 const fs = await import('node:fs/promises')
 const path = await import('node:path')
-const root = globalThis.GITQUIET_PROBE_ROOT
+const root = globalThis.GITACE_PROBE_ROOT
 if (!root) throw new Error('Run bun scripts/performance/launch-traces.ts')
 const config = JSON.parse(await fs.readFile(path.join(root, '.tmp/perf-observers/trace-config.json'), 'utf8'))
 const output = path.join(root, '.tmp', config.outputName ?? 'performance-traces')
@@ -13,7 +13,7 @@ const page = task.page(config.measurePage)
 const browser = await task.cdp('Target.attachToBrowserTarget')
 const inventory = () => control.evaluate(() => new Promise(resolve => {
   chrome.developerPrivate.getExtensionsInfo({ includeDisabled: true }, items =>
-    resolve(items.filter(item => /gitquiet/i.test(item.name)).map(item => ({ id: item.id, state: item.state, path: item.path }))))
+    resolve(items.filter(item => /gitace/i.test(item.name)).map(item => ({ id: item.id, state: item.state, path: item.path }))))
 }))
 const enable = (id, enabled) => control.evaluate(({ id, enabled }) => new Promise((resolve, reject) => {
   chrome.management.setEnabled(id, enabled, () => {
@@ -28,7 +28,7 @@ const results = []
 const pageState = () => page.evaluate(() => ({
   ...__probe, timeOrigin: performance.timeOrigin,
   visibility: document.visibilityState, focused: document.hasFocus(),
-  nodes: document.querySelectorAll('*').length, roots: document.querySelectorAll('#gitquiet-root').length,
+  nodes: document.querySelectorAll('*').length, roots: document.querySelectorAll('#gitace-root').length,
   navigation: performance.getEntriesByType('navigation').map(e => ({
     responseStart: e.responseStart, responseEnd: e.responseEnd, domContentLoaded: e.domContentLoadedEventEnd
   }))
@@ -69,14 +69,14 @@ window.__probe = { rootAt:null, diffAt:null, lcp:[], shifts:[], longFrames:[], e
 for(const type of ['largest-contentful-paint','layout-shift','long-animation-frame','event']) {
  if(!PerformanceObserver.supportedEntryTypes.includes(type)) continue;
  new PerformanceObserver(list=>{for(const e of list.getEntries()) {
-  if(type==='largest-contentful-paint') __probe.lcp.push({at:e.startTime,size:e.size,tag:e.element?.tagName,owned:!!document.getElementById('gitquiet-root')?.contains(e.element)});
+  if(type==='largest-contentful-paint') __probe.lcp.push({at:e.startTime,size:e.size,tag:e.element?.tagName,owned:!!document.getElementById('gitace-root')?.contains(e.element)});
   if(type==='layout-shift'&&!e.hadRecentInput) __probe.shifts.push({at:e.startTime,value:e.value});
   if(type==='long-animation-frame') __probe.longFrames.push({at:e.startTime,duration:e.duration,blocking:e.blockingDuration,scripts:e.scripts.map(s=>({url:s.sourceURL,function:s.sourceFunctionName,duration:s.duration}))});
   if(type==='event') __probe.events.push({name:e.name,at:e.startTime,duration:e.duration,processing:e.processingEnd-e.processingStart});
  }}).observe({type,buffered:true,durationThreshold:16});
 }
 const timer=setInterval(()=>{
- const root=document.getElementById('gitquiet-root');
+ const root=document.getElementById('gitace-root');
  if(root&&__probe.rootAt===null) __probe.rootAt=performance.now();
  const diff=root?.querySelector('diffs-container')?.shadowRoot?.querySelector('pre');
  if(diff?.textContent?.length&&root.querySelector('file-tree-container')) {
@@ -89,7 +89,7 @@ await (async () => {
   await page.cdp('Emulation.setDeviceMetricsOverride', { width: 1600, height: 900, deviceScaleFactor: 1, mobile: false })
   await page.cdp('Network.enable')
   await page.cdp('Network.setCacheDisabled', { cacheDisabled: true })
-  // Calibration measures the browser's frame delivery without GitHub or GitQuiet.
+  // Calibration measures the browser's frame delivery without GitHub or GitAce Extension.
   for (const blocked of config.captureTrace === false ? [] : [false, true]) {
     await page.goto('about:blank')
     await page.cdp('Page.bringToFront')
@@ -116,7 +116,7 @@ await (async () => {
       const previousOrigin = await page.evaluate(() => performance.timeOrigin)
       await enable(build.id, true)
       const active = (await inventory()).filter(item => item.state === 'ENABLED')
-      if (active.length !== 1 || active[0].id !== build.id) throw new Error('Expected exactly one enabled GitQuiet copy')
+      if (active.length !== 1 || active[0].id !== build.id) throw new Error('Expected exactly one enabled GitAce Extension copy')
       const name = `${scenario.name}-${repeat}-${build.name}`
       const result = await trace(name, async () => {
         await page.goto(scenario.url, { waitUntil: 'domcontentloaded', timeout: 30000 })
@@ -174,7 +174,7 @@ await (async () => {
           await page.cdp('Input.synthesizeScrollGesture', {...diffPoint,yDistance:1000,speed:800,gestureSourceType:'mouse'})
           await page.evaluate(() => performance.mark('diff-scroll:end'))
           const nextPoint = await page.evaluate(() => {
-            const root=document.getElementById('gitquiet-root')
+            const root=document.getElementById('gitace-root')
             const button=root.querySelector('button[aria-label="Next file"]')
             if (!button || button.disabled) throw new Error('Selection probe needs at least two files')
             window.__selection=[]

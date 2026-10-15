@@ -17,9 +17,9 @@ import { inShort, useStars } from "./stars"
  */
 
 export const STORE_AT =
-  "https://chromewebstore.google.com/detail/gitquiet/ichobjnihnofjkpoegikjhefmoekaahe"
+  "https://chromewebstore.google.com/detail/gitace-extension/ichobjnihnofjkpoegikjhefmoekaahe"
 
-export const SOURCE_AT = "https://github.com/flazouh/gitquiet"
+export const SOURCE_AT = "https://github.com/flazouh/gitace-extension"
 
 
 /** Control corner: 8px, matching Luminar `--radius`. */
@@ -54,8 +54,8 @@ export const Source = ({ dark = false }: { readonly dark?: boolean }) => {
       href={SOURCE_AT}
       aria-label={
         many === undefined
-          ? "GitQuiet source on GitHub"
-          : `GitQuiet source on GitHub, ${many} ${many === 1 ? "star" : "stars"}`
+          ? "GitAce Extension source on GitHub"
+          : `GitAce Extension source on GitHub, ${many} ${many === 1 ? "star" : "stars"}`
       }
       className={`inline-flex ${word} gap-1.5`}
     >
@@ -187,7 +187,7 @@ export const Nav = ({
         dark ? "px-5 pt-5 text-white/85 sm:px-9 sm:pt-6" : "py-7"
       }`}
     >
-      <a href="/" className="flex items-center gap-2.5" aria-label="GitQuiet">
+      <a href="/" className="flex items-center gap-2.5" aria-label="GitAce Extension">
         <Mark size={dark ? 24 : 28} color={mark} />
         <span className={`hidden min-[360px]:inline ${dark ? "" : ""}`}>
           <Wordmark size={dark ? 18 : 20} color={mark} />
@@ -206,7 +206,7 @@ export const Footer = ({ dark = false }: { readonly dark?: boolean }) => (
   >
     <div className="flex items-center gap-2.5">
       <Mark size={22} color={dark ? "rgba(242,242,238,0.4)" : MUTED} />
-      <span>gitquiet</span>
+      <span>GitAce Extension</span>
     </div>
 
     <div className="flex flex-wrap items-center gap-6">

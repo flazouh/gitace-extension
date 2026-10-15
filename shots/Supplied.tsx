@@ -163,12 +163,12 @@ const nobody = {
  * Defaults alone are `appearance: "system"` and `pack: "match"`. On a light
  * machine that paints light tokens onto the dark floor `main.tsx` set first —
  * white cards on grey, which is what the hand-driven shots looked like. Force
- * dark Gitquiet so interactive viewing matches store captures.
+ * dark GitAce Extension so interactive viewing matches store captures.
  */
 const STAGE_CHOSEN: Record<string, unknown> = {
   [SETTINGS]: {
     ...DEFAULTS,
-    theme: { ...DEFAULTS.theme, appearance: "dark", pack: "gitquiet", art: "gitquiet" }
+    theme: { ...DEFAULTS.theme, appearance: "dark", pack: "gitace", art: "gitace" }
   }
 }
 

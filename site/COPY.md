@@ -5,14 +5,14 @@ composed PR panel (no PNGs), new prose throughout.
 
 ## Product truths (kept)
 
-- Name: GitQuiet
+- Name: GitAce Extension
 - Line: A faster, quieter GitHub.
 - Not an AI reviewer.
 - Chrome / Firefox / Safari / Mac install destinations stay; wording is new.
 
 ## Hero
 
-**Nav:** gitquiet · Source · Install · Install for Chrome
+**Nav:** GitAce Extension · Source · Install · Install for Chrome
 
 **Headline:** A faster, quieter GitHub.
 
@@ -30,7 +30,7 @@ Job links (PR inbox, review queue) and the shared footer.
 
 ## Footer
 
-gitquiet · Install · Source · AGPL-3.0 · Not affiliated with GitHub.
+GitAce Extension · Install · Source · AGPL-3.0 · Not affiliated with GitHub.
 
 ## Banned
 

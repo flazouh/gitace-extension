@@ -606,7 +606,7 @@ describe("reading one page of a repository's pull requests", () => {
 })
 
 /**
- * The dashboard search is eventually consistent, and gitquiet used to believe it.
+ * The dashboard search is eventually consistent, and GitAce Extension used to believe it.
  *
  * `/pulls?q=repo:owner/name` answers a question it cannot yet serve with an
  * ordinary two-hundred and no rows — so a repository full of open pull requests

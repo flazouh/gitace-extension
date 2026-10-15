@@ -17,7 +17,7 @@ const nothing: ReadonlyArray<Sitting> = [
   { court: "settled", count: 0, piles: [], issues: [] }
 ]
 
-const wait = (): HTMLElement | null => document.querySelector("[data-gitquiet-loading]")
+const wait = (): HTMLElement | null => document.querySelector("[data-gitace-loading]")
 
 /** Waits for it to appear, since it is held back until a wait is worth drawing. */
 const drawn = async (): Promise<HTMLElement> => {

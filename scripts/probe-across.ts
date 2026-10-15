@@ -7,7 +7,7 @@
  * read. A run that stops at the press never sees which, so this one waits and
  * reports the sequence.
  *
- *     bun run build && GITQUIET_CDP_PROFILE=... bun scripts/probe-across.ts --page ... --word ... --written ...
+ *     bun run build && GITACE_CDP_PROFILE=... bun scripts/probe-across.ts --page ... --word ... --written ...
  */
 import { withExtension } from "./chrome"
 

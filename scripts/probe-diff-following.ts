@@ -12,7 +12,7 @@
  * So this needs a browser that is signed in, which means a profile that has been
  * signed in once and kept:
  *
- *     GITQUIET_CDP_PROFILE=~/.gitquiet-qa bun scripts/probe-diff-following.ts \
+ *     GITACE_CDP_PROFILE=~/.gitace-qa bun scripts/probe-diff-following.ts \
  *       --page 'https://github.com/OWNER/REPO/pull/N/files' \
  *       --names 'readBodyWithinLimit@12,AsyncResult@1,BodyReadFailure@5'
  *
@@ -31,7 +31,7 @@ const argued = (flag: string): string | undefined => {
   return at === -1 ? undefined : Bun.argv[at + 1]
 }
 
-const PAGE = argued("--page") ?? "https://github.com/flazouh/gitquiet/pull/82/files"
+const PAGE = argued("--page") ?? "https://github.com/flazouh/gitace-extension/pull/82/files"
 
 /** `name@line` a few times over, which is what a reader would press. */
 const NAMES = (argued("--names") ?? "Secret@11").split(",").map((one) => {

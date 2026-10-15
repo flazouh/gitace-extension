@@ -16,7 +16,7 @@ const AT = 'https://github.com/fluentai-pro/fluentai'
  * product cannot quietly replace the instrument under a run. Made by adding
  * `src/ui/mark.ts` and its callers, building, and copying the result here.
  */
-const BUILD = '/tmp/gitquiet-marked'
+const BUILD = '/tmp/gitace-marked'
 
 const task = await useOrCreateTaskSpace('honest switch audit')
 await takeOverTaskSpace(task.id)
@@ -30,7 +30,7 @@ const install = async () =>
   window.__audit = a
   window.addEventListener('click', () => { if (a.click === null) a.click = performance.now() }, true)
   new MutationObserver(() => {
-    const root = document.getElementById('gitquiet-root')
+    const root = document.getElementById('gitace-root')
     if (a.click === null || root === null) return
     const now = performance.now()
     a.moved += 1
@@ -45,7 +45,7 @@ const zero = async () =>
   js(String.raw`(() => {
   const a = window.__audit
   a.click = null; a.drawn = null; a.first = null; a.last = null; a.moved = 0
-  document.documentElement.setAttribute('data-gitquiet-marks', '')
+  document.documentElement.setAttribute('data-gitace-marks', '')
   return 'zeroed'
 })()`)
 
@@ -56,7 +56,7 @@ const readMarks = async () =>
   const at = a.click
   if (at === null) return { missed: true }
   const since = (x) => x === null ? null : Math.round(x - at)
-  const marks = (document.documentElement.getAttribute('data-gitquiet-marks') || '').split(' ').filter((x) => x !== '')
+  const marks = (document.documentElement.getAttribute('data-gitace-marks') || '').split(' ').filter((x) => x !== '')
   const named = marks.map((one) => {
     const cut = one.lastIndexOf('@')
     return { what: one.slice(0, cut), at: Math.round(Number(one.slice(cut + 1)) - at) }
@@ -117,7 +117,7 @@ const leg = async (label, selectors, { settle = 8 } = {}) => {
 
 const back = async (label, { settle = 8 } = {}) => {
   const fresh = await install()
-  await js(String.raw`(() => { window.__audit.click = performance.now(); document.documentElement.setAttribute('data-gitquiet-marks', ''); window.__audit.drawn = null; window.__audit.last = null; window.__audit.first = null; window.__audit.moved = 0; history.back(); return 'went' })()`)
+  await js(String.raw`(() => { window.__audit.click = performance.now(); document.documentElement.setAttribute('data-gitace-marks', ''); window.__audit.drawn = null; window.__audit.last = null; window.__audit.first = null; window.__audit.moved = 0; history.back(); return 'went' })()`)
   await wait(settle)
   const got = await install().then(readMarks)
   rows.push({ leg: label, reloaded: fresh === 'fresh' && rows.length > 0, ...got })
@@ -126,17 +126,17 @@ const back = async (label, { settle = 8 } = {}) => {
 await gotoAndWait(AT, { timeout: 45, settle: 8 })
 await wait(6)
 
-await leg('repo home -> pulls', ['#gitquiet-bar a[href$="/pulls"]'])
-await leg('pulls -> a pull request', ['#gitquiet-root a[href*="/pull/"]'])
+await leg('repo home -> pulls', ['#gitace-bar a[href$="/pulls"]'])
+await leg('pulls -> a pull request', ['#gitace-root a[href*="/pull/"]'])
 await back('back to pulls')
-await leg('pulls -> repo issues', ['#gitquiet-bar a[href$="/issues"]', '#gitquiet-bar a[href*="/issues"]'])
+await leg('pulls -> repo issues', ['#gitace-bar a[href$="/issues"]', '#gitace-bar a[href*="/issues"]'])
 await leg('issues -> an issue', [
-  '#gitquiet-root a[href*="/issues/"]:not([href$="/new"]):not([href*="/new?"])'
+  '#gitace-root a[href*="/issues/"]:not([href$="/new"]):not([href*="/new?"])'
 ])
 await back('back to issues')
-await leg('issues -> notifications', ['#gitquiet-bar a[href*="/notifications"]'])
-await leg('notifications -> working set', ['#gitquiet-bar a[href="/pulls"]', '#gitquiet-bar a[href="/"]'])
-await leg('working set -> a pull request', ['#gitquiet-root a[href*="/pull/"]'])
+await leg('issues -> notifications', ['#gitace-bar a[href*="/notifications"]'])
+await leg('notifications -> working set', ['#gitace-bar a[href="/pulls"]', '#gitace-bar a[href="/"]'])
+await leg('working set -> a pull request', ['#gitace-root a[href*="/pull/"]'])
 
 cliLog('')
 cliLog('leg                              addr  stood  taken  drawn  quiet  reqs  joined  slowest')

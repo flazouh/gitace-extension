@@ -3,7 +3,7 @@ import { isOpenTab, OPEN_TAB } from "./openTab"
 
 describe("an ask to open a tab", () => {
   test("is the kind and a url", () => {
-    expect(isOpenTab({ kind: OPEN_TAB, url: "https://github.com/flazouh/gitquiet/issues" })).toBe(
+    expect(isOpenTab({ kind: OPEN_TAB, url: "https://github.com/flazouh/gitace-extension/issues" })).toBe(
       true
     )
   })

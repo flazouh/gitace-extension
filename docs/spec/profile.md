@@ -323,7 +323,7 @@ pull request... That is the whole of it". The four words above go in the
 vocabulary at the same time.
 
 The research this stands on is
-`research/profile-pages-pain-points.md` in `flazouh/gitquiet-notes`, with the
+`research/profile-pages-pain-points.md` in `flazouh/gitace-extension-notes`, with the
 fetched pages and their index in `.research/profile-page/`.
 
 Two things are still unknown and both are cheap to settle. Whether the anonymous

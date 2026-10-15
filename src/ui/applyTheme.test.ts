@@ -11,7 +11,7 @@ describe("painting a theme onto a root", () => {
     const root = document.createElement("div")
     document.body.append(root)
 
-    paintTheme(root, "dark", "gitquiet", false)
+    paintTheme(root, "dark", "gitace", false)
 
     expect(root.style.getPropertyValue("--color-canvas")).toBe("#171717")
     expect(root.style.getPropertyValue("--control")).toBe("#ffffff0f")

@@ -6,7 +6,7 @@ import { ROOT_ID } from "./mount"
 
 afterEach(cleanup)
 
-const AT = "data-gitquiet-at"
+const AT = "data-gitace-at"
 const drawn = () => document.documentElement.getAttribute(AT)
 
 const Screen = ({ at }: { readonly at: string | null }) => {
@@ -136,7 +136,7 @@ describe("what a claim says about the route", () => {
   const standing = (route: string): HTMLElement => {
     const root = document.createElement("div")
     root.id = ROOT_ID
-    root.setAttribute("data-gitquiet-route", route)
+    root.setAttribute("data-gitace-route", route)
     document.body.append(root)
     return root
   }
@@ -158,7 +158,7 @@ describe("what a claim says about the route", () => {
     render(<Screen at="/owner/repo/pulls" />)
 
     expect(drawn()).toBe("/owner/repo/pulls")
-    expect(root.getAttribute("data-gitquiet-route")).toBe("/owner/repo/pulls?q=is%3Aopen")
+    expect(root.getAttribute("data-gitace-route")).toBe("/owner/repo/pulls?q=is%3Aopen")
   })
 
   test("moves the route where the claim is the whole address, as one pull request opening another", () => {
@@ -167,6 +167,6 @@ describe("what a claim says about the route", () => {
 
     render(<Screen at="/owner/repo/pull/13" />)
 
-    expect(root.getAttribute("data-gitquiet-route")).toBe("/owner/repo/pull/13")
+    expect(root.getAttribute("data-gitace-route")).toBe("/owner/repo/pull/13")
   })
 })

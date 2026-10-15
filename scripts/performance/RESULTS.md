@@ -16,7 +16,7 @@ Zero dropped frames is not verified. The observer fixes reduce some panel work, 
 
 The baseline is `a5d71df`. The candidate is `fdd1f28`, which contains the combined observer fixes. This is not a release 0.12.0 comparison. Both snapshots used production builds and the same dependencies.
 
-The browser reported Chrome 152 through Ego Lite on macOS. The viewport was 1600 by 900 at device scale 1. These were authenticated GitHub PR pages. The runner disabled page HTTP cache and alternated build order. It did not set an explicit CPU or network throttle. Each run used a fresh document and exactly one enabled GitQuiet copy. No build, test, or trace-analysis job ran during recording. Other machine activity was not controlled.
+The browser reported Chrome 152 through Ego Lite on macOS. The viewport was 1600 by 900 at device scale 1. These were authenticated GitHub PR pages. The runner disabled page HTTP cache and alternated build order. It did not set an explicit CPU or network throttle. Each run used a fresh document and exactly one enabled GitAce Extension copy. No build, test, or trace-analysis job ran during recording. Other machine activity was not controlled.
 
 The main matrix has five runs per build per PR, 20 runs total. The table excludes each PR's first visit and uses four repeat runs. Extension storage stays warm within a build. The small PR has 23 changed files, with 20 in the code filter. The large PR has 159 changed files. The full config records the URLs and shell bundle hashes locally.
 
@@ -44,7 +44,7 @@ The second small-PR switch took 330.7, 341.0, and 343.9 ms. Other switches range
 
 The large selection phases had no usable presented/dropped frame telemetry. The analyzer reports null rates for those phases. Zero observed reports must not be read as zero dropped frames.
 
-Tree search did not open through the current page's `f` shortcut. Search performance was not measured. End-of-run heap size and DOM counts were captured, but allocation growth and memory leaks were not tested. There is no extension-specific field telemetry in this report. GitHub origin metrics cannot isolate GitQuiet.
+Tree search did not open through the current page's `f` shortcut. Search performance was not measured. End-of-run heap size and DOM counts were captured, but allocation growth and memory leaks were not tested. There is no extension-specific field telemetry in this report. GitHub origin metrics cannot isolate GitAce Extension.
 
 ## Trace causes and rejected experiment
 
@@ -152,7 +152,7 @@ Results are in `.tmp/perf-observers-stable-surface/results.json`. The probe spac
 
 ## Comparison with the published 0.12.0 release
 
-Twelve recordings compared GitHub's published `gitquiet-0.12.0-chrome.zip` with merged commit `80692a9`, built with `RELEASE_VERSION=0.12.1`. Each PR had three alternating pairs. The config records the downloaded ZIP hash and every JavaScript file hash in both builds. The candidate version identifies a test build; no release was published by this measurement.
+Twelve recordings compared GitHub's published `gitace-extension-0.12.0-chrome.zip` with merged commit `80692a9`, built with `RELEASE_VERSION=0.12.1`. Each PR had three alternating pairs. The config records the downloaded ZIP hash and every JavaScript file hash in both builds. The candidate version identifies a test build; no release was published by this measurement.
 
 | Metric, median | Small before | Small after | Large before | Large after |
 | --- | ---: | ---: | ---: | ---: |
@@ -168,7 +168,7 @@ The worst file switch fell from 419.0 to 390.6 ms on the small PR and from 582.9
 
 Blank-page calibration delivered about 29 presented frames per second and reported 75.7% dropped outcomes even without the injected blocking task. Those readings cannot certify zero dropped frames on a foreground desktop. Task-budget overruns also remain in the application traces.
 
-A follow-up reading of `large-2-after` assigns about 366 ms of sampled time to the tree viewport refresh called from `deselectPath`. GitQuiet clears the old selection before selecting the new file, so the tree refreshes an intermediate empty selection. The controller already offers a single-selection operation internally. The atomic selection comparison below tests that change.
+A follow-up reading of `large-2-after` assigns about 366 ms of sampled time to the tree viewport refresh called from `deselectPath`. GitAce Extension clears the old selection before selecting the new file, so the tree refreshes an intermediate empty selection. The controller already offers a single-selection operation internally. The atomic selection comparison below tests that change.
 
 Raw evidence is in `.tmp/performance-release-0.12.0`. Extension restoration was verified, task space 6 closed, and no build or test ran during recording.
 
@@ -196,21 +196,21 @@ Evidence is in `.tmp/performance-atomic-tree` and `.tmp/performance-atomic-tree-
 
 Release `v0.12.1` points to merged commit `30b5b17`. Its CI and every release job passed. Published extension ZIPs contain version 0.12.1 and the atomic selection method. The published source archive contains 693 files; its patch, package metadata, and lockfile match the source. Chrome and Firefox submission jobs passed. Firefox reported zero errors and 44 warnings. Store submission does not establish store approval.
 
-The latest atomic-selection trace still records substantial style work. In `large-0-after` from the retry, settings used 302.4 ms of `UpdateLayoutTree` time. Individual updates visited about 5,700 elements. Selection used 202.7 ms of style updates. CPU samples place expensive reads under the tree viewport refresh and Radix style reads. Sampled stacks identify where work is requested, not which stylesheet causes it. The local sampler groups Ego's own extension with GitQuiet; its combined extension total must not be presented as GitQuiet CPU.
+The latest atomic-selection trace still records substantial style work. In `large-0-after` from the retry, settings used 302.4 ms of `UpdateLayoutTree` time. Individual updates visited about 5,700 elements. Selection used 202.7 ms of style updates. CPU samples place expensive reads under the tree viewport refresh and Radix style reads. Sampled stacks identify where work is requested, not which stylesheet causes it. The local sampler groups Ego's own extension with GitAce Extension; its combined extension total must not be presented as GitAce Extension CPU.
 
-A follow-up browser probe used frozen candidate `585c1b4` on the same large PR URL. Exactly one GitQuiet copy was enabled. The document contained 118,477 elements. Each sample appended an empty span to the root, forced a computed-style read, removed the span, and forced another read. These synchronous samples exclude observer delivery and represent synthetic style work, not interaction latency or FPS. No build or test ran during measurement.
+A follow-up browser probe used frozen candidate `585c1b4` on the same large PR URL. Exactly one GitAce Extension copy was enabled. The document contained 118,477 elements. Each sample appended an empty span to the root, forced a computed-style read, removed the span, and forced another read. These synchronous samples exclude observer delivery and represent synthetic style work, not interaction latency or FPS. No build or test ran during measurement.
 
 | Temporary intervention | Baseline median per cycle | Intervention median per cycle |
 | --- | ---: | ---: |
 | Disable 56 GitHub stylesheet links, pair 1 | 32.6 ms | 33.8 ms |
 | Disable 56 GitHub stylesheet links, pair 2 | 31.9 ms | 32.6 ms |
 | Disable 56 GitHub stylesheet links, pair 3 | 33.7 ms | 33.8 ms |
-| Disable GitQuiet's linked stylesheet, pair 1 | 40.8 ms | 31.9 ms |
-| Disable GitQuiet's linked stylesheet, pair 2 | 37.4 ms | 31.8 ms |
-| Move root into shadow DOM with copied GitQuiet stylesheet, pair 1 | 33.5 ms | 20.8 ms |
-| Move root into shadow DOM with copied GitQuiet stylesheet, pair 2 | 52.8 ms | 26.6 ms |
+| Disable GitAce Extension's linked stylesheet, pair 1 | 40.8 ms | 31.9 ms |
+| Disable GitAce Extension's linked stylesheet, pair 2 | 37.4 ms | 31.8 ms |
+| Move root into shadow DOM with copied GitAce Extension stylesheet, pair 1 | 33.5 ms | 20.8 ms |
+| Move root into shadow DOM with copied GitAce Extension stylesheet, pair 2 | 52.8 ms | 26.6 ms |
 
-The first intervention did not improve the probe. The stylesheet inventory changed later as more native sheets loaded. These results do not isolate every native rule or extension-injected stylesheet. Disabling GitQuiet's sheet changes layout and removes styles users need. Moving the root changes style matching and custom-element connection state. Although root width remained 1,262 pixels in both isolation pairs, that does not establish equal rendering. The second baseline also slowed substantially. No intervention is ready to ship from this evidence.
+The first intervention did not improve the probe. The stylesheet inventory changed later as more native sheets loaded. These results do not isolate every native rule or extension-injected stylesheet. Disabling GitAce Extension's sheet changes layout and removes styles users need. Moving the root changes style matching and custom-element connection state. Although root width remained 1,262 pixels in both isolation pairs, that does not establish equal rendering. The second baseline also slowed substantially. No intervention is ready to ship from this evidence.
 
 The next check should attribute style invalidation with a trace and establish a fixture that preserves the real rendering. A shadow-root migration must preserve portals, delegated events, native HTML styling, navigation queries, and screen recovery. Tests and an equivalent interaction comparison must precede any claim of a user-visible improvement.
 
@@ -219,9 +219,9 @@ Raw probe results are in `.tmp/perf-observers/restyle-native-sheets.json`, `rest
 
 ## Home gate invalidation fix, browser comparison incomplete
 
-The invalidation trace identifies the generated home `body:has(#dashboard.dashboard)` rules in a body-subtree invalidation after an empty span is inserted into GitQuiet. Replacing only that CSS condition in a diagnostic build removed that invalidation in a fresh trace. Its sampled cycle took 1.53 ms versus 28.70 ms in the baseline trace. Separate repeated synthetic comparisons were mixed, so these isolated times establish a cause to investigate rather than an interaction speedup.
+The invalidation trace identifies the generated home `body:has(#dashboard.dashboard)` rules in a body-subtree invalidation after an empty span is inserted into GitAce Extension. Replacing only that CSS condition in a diagnostic build removed that invalidation in a fresh trace. Its sampled cycle took 1.53 ms versus 28.70 ms in the baseline trace. Separate repeated synthetic comparisons were mixed, so these isolated times establish a cause to investigate rather than an interaction speedup.
 
-Commit `45870ab` preserves the native region selector and replaces its CSS condition with `body[data-gitquiet-home]`. The shell maintains that marker from the dashboard's ID, class, and body membership. It removes the marker on body replacement or cleanup. Generated CSS retains the initial body cover and waits for the marker during soft navigation. The canary manifest keeps both the native proof and the marked stage.
+Commit `45870ab` preserves the native region selector and replaces its CSS condition with `body[data-gitace-home]`. The shell maintains that marker from the dashboard's ID, class, and body membership. It removes the marker on body replacement or cleanup. Generated CSS retains the initial body cover and waits for the marker during soft navigation. The canary manifest keeps both the native proof and the marked stage.
 
 Four initial tests failed before implementation. A further descendant test failed before correcting the body-self case. The final focused run passed 128 tests. `bun run gates` passed 4,782 tests, lint, and both typechecks. `RELEASE_VERSION=0.12.2 bun run build` passed. Code-quality review found and fixed a canary weakness in the initial stage choice. No remaining code blocker was found. Browser validation remains required.
 
@@ -264,7 +264,7 @@ A regression test then proved a separate selection defect: after a linked file o
 
 The final browser check used `65bbf76` and the real large PR. Five named Next clicks opened these expected files in order: `packages/frontend/utils/fetch-internal-api.test.ts`, `packages/frontend/utils/fetch-internal-api.ts`, `packages/frontend/bun-test-preload.ts`, `packages/helpers/url.ts`, and `packages/providers/get-provider-info.ts`. This verifies continued navigation after the correction. It does not provide an updated performance comparison for that commit.
 
-Live home/feed checks passed with the home-gate candidate. Direct home navigation set the marker and showed GitQuiet. The feed had no home marker and remained visible. A dashboard-switch dialog intercepted the first Home click. After closing it, the native Home link opened the correct page. That link loaded a new document, so this flow does not claim a measured soft-navigation paint boundary; the DOM tests cover the soft gate's arrival and removal conditions.
+Live home/feed checks passed with the home-gate candidate. Direct home navigation set the marker and showed GitAce Extension. The feed had no home marker and remained visible. A dashboard-switch dialog intercepted the first Home click. After closing it, the native Home link opened the correct page. That link loaded a new document, so this flow does not claim a measured soft-navigation paint boundary; the DOM tests cover the soft gate's arrival and removal conditions.
 
 Final checks passed: 4,787 tests, lint, both typechecks, and the 0.12.2 candidate build. The whole-change quality review found no code blocker. The home-gate packages also passed archive checks before the file-request correction; final packages were rebuilt after that correction.
 
@@ -300,9 +300,9 @@ its total work is similar or higher.
 Attributed self time from `FunctionCall`, `Layout`, `Paint` and `UpdateLayoutTree`
 in the scroll window. Extension script is split by extension id, because two other
 extensions were also loaded in this profile and one of them injects a script that runs
-during the scroll. Only the id the runner loaded is counted as GitQuiet.
+during the scroll. Only the id the runner loaded is counted as GitAce Extension.
 
-| Pair | Build | GitQuiet | Other extension | GitHub | Browser layout or paint |
+| Pair | Build | GitAce Extension | Other extension | GitHub | Browser layout or paint |
 | --- | --- | ---: | ---: | ---: | ---: |
 | 0 | before | 195 ms | 102 ms | 221 ms | 590 ms |
 | 0 | after | 201 ms | 121 ms | 233 ms | 704 ms |
@@ -311,9 +311,9 @@ during the scroll. Only the id the runner loaded is counted as GitQuiet.
 | 2 | before | 273 ms | 115 ms | 213 ms | 778 ms |
 | 2 | after | 210 ms | 117 ms | 205 ms | 770 ms |
 
-Browser layout and paint dominate every run. GitQuiet's own script time is 193 to 273 ms
+Browser layout and paint dominate every run. GitAce Extension's own script time is 193 to 273 ms
 before and 201 to 210 ms after. The page's own long-animation-frame observer recorded no
-GitQuiet script inside any long frame after the 7 second mark; all of that script time
+GitAce Extension script inside any long frame after the 7 second mark; all of that script time
 belongs to GitHub's bundles. The remaining over-budget frames during tree scroll are
 GitHub's work plus browser layout and paint.
 

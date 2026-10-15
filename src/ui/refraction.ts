@@ -18,9 +18,9 @@
 import { OUTSIDE } from "./mount"
 
 /** The name the stylesheet asks for. See `glass.css`. */
-export const REFRACTION_ID = "gitquiet-refraction"
+export const REFRACTION_ID = "gitace-refraction"
 
-const HOST_ID = "gitquiet-glass"
+const HOST_ID = "gitace-glass"
 
 /*
  * Noise rather than a map drawn to the pane's shape.

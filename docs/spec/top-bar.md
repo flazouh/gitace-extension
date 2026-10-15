@@ -170,12 +170,12 @@ half of it too — a takeover that throws comes down exactly as one that finds n
 Two things had to be added before that rule was true on a real page, and both were found by
 pressing one. The screens do not share memory: each is built as its own bundle, so the leaving
 screen's bar was never told the page had moved, the move having happened in another program
-entirely. The telling goes through the document now, as `gitquiet:screen-moved`.
+entirely. The telling goes through the document now, as `gitace:screen-moved`.
 
 And a bar that stops the instant it loses the page leaves the slot empty for the eighty
 milliseconds the arriving tree needs to render, which is not a smaller bar but no bar: the page
 moves up by its height and back down, under the reader's pointer. So the leaving bar holds until
-the arriving one says it is up (`gitquiet:bar-standing`), capped at four hundred milliseconds for
+the arriving one says it is up (`gitace:bar-standing`), capped at four hundred milliseconds for
 the reader who left for a page of GitHub's, where none is coming. They overlap for a frame or two,
 and `glass.css` shows the last one only, so an overlap can never be seen as two.
 

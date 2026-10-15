@@ -31,7 +31,7 @@
 
 import { Effect } from "effect"
 
-const FLIGHTS = "__gitquietFlights"
+const FLIGHTS = "__gitaceFlights"
 
 type World = { [FLIGHTS]?: Map<string, PromiseLike<unknown>> }
 

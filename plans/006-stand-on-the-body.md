@@ -13,7 +13,7 @@ screen on `document.body`, hide by position, delete the bands and the guard syst
 them. Home crossed over and proved the shape (`e8ea371`). Then the second page was read
 live, and the premise turned out to be half true.
 
-GitQuiet is two kinds of screen, and only one of them replaces the whole page.
+GitAce Extension is two kinds of screen, and only one of them replaces the whole page.
 
 ## The two kinds
 
@@ -48,7 +48,7 @@ react-app[app-name="pull-requests"]        child of div.repository-content (4 ch
 The header is inside the app; the tab strip is outside it. The two things a conversation
 hides live at two different depths, so no single stand takes both. The bands are
 irreducible: they are the price of coexisting with GitHub's chrome instead of replacing
-it, and GitQuiet chose that coexistence deliberately.
+it, and GitAce Extension chose that coexistence deliberately.
 
 ## The settled architecture
 
@@ -68,13 +68,13 @@ it, and GitQuiet chose that coexistence deliberately.
 
 The guard system built on 2026-08-31 is therefore **not scaffolding to delete**. It is
 the permanent net for the one class of page that cannot be made deterministic, because
-GitQuiet lives inside GitHub's chrome there rather than over it. `bun run drift` guards
+GitAce Extension lives inside GitHub's chrome there rather than over it. `bun run drift` guards
 the wire contract; these guard the presentation contract that remains.
 
 ## Done
 
 - Home stands on `body:has(#dashboard.dashboard)`, bands deleted (`e8ea371`).
-- `hideTheirs` and the sheets exempt `data-gitquiet-outside`, so a body-standing screen
+- `hideTheirs` and the sheets exempt `data-gitace-outside`, so a body-standing screen
   never hides its own bar or hover hosts.
 - Canary extended to the nested band pages with durable URLs.
 

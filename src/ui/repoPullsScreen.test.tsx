@@ -180,7 +180,7 @@ describe("a repository's pull request list", () => {
   test("hands the filter up as it mounts, for the one the list remembered", async () => {
     // A remembered `is:merged` narrows an open fetch to nothing with no keystroke
     // ever typed. The screen above can only answer an ask it hears.
-    localStorage.setItem("gitquiet:filter:vercel/next.js", "is:merged")
+    localStorage.setItem("gitace:filter:vercel/next.js", "is:merged")
     const heard: Array<string> = []
 
     showing(() => Effect.succeed(listed([involved(1)])), { onQuery: (query) => heard.push(query) })
@@ -222,9 +222,9 @@ describe("a repository's pull request list", () => {
  * a working press into a document load. See `useDrawnAt`.
  */
 describe("which address this list claims to have drawn", () => {
-  const drawn = () => document.documentElement.getAttribute("data-gitquiet-at")
+  const drawn = () => document.documentElement.getAttribute("data-gitace-at")
 
-  afterEach(() => document.documentElement.removeAttribute("data-gitquiet-at"))
+  afterEach(() => document.documentElement.removeAttribute("data-gitace-at"))
 
   test("claims the pathname it stands for once rows are drawn", async () => {
     showing((partly) => {

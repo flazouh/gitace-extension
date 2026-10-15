@@ -438,7 +438,7 @@ const SAMPLES: Record<string, (choice: string) => ReactNode> = {
   ),
   appearance: (choice) => {
     const scheme: Scheme = choice === "light" ? "light" : "dark"
-    const tokens = tokensOf("gitquiet", scheme)
+    const tokens = tokensOf("gitace", scheme)
     return (
       // The one outline left in this file, and it is not ours: this is a swatch of
       // another pack, painted in that pack's canvas. On a light appearance that
@@ -472,7 +472,7 @@ const SAMPLES: Record<string, (choice: string) => ReactNode> = {
       choice === "match"
         ? [
             [tokensOf("github", "light"), "On their page"],
-            [tokensOf("gitquiet", "light"), "In a window"]
+            [tokensOf("gitace", "light"), "In a window"]
           ]
         : [
             [tokensOf(choice as Pack, "light"), "Light"],

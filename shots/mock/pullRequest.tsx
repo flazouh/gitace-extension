@@ -860,6 +860,6 @@ export const PULL_REQUEST_PEEK_VIEW: View = {
   caption:
     "A Peek under a changed line, so a reviewer reads what a name does without leaving the diff",
   ...STORE,
-  ready: "[data-gitquiet-peek]",
+  ready: "[data-gitace-peek]",
   draw: () => drawPullRequest({ initialPeeked: INITIAL_PEEKED })
 }

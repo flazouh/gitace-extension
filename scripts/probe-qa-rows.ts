@@ -19,14 +19,14 @@ const note = (row: string, says: string) => {
   console.log(`${says.startsWith("FAIL") ? "FAIL" : says.startsWith("open") ? "open" : "ok  "}  ${row}: ${says}`)
 }
 
-const session = await withExtension("https://github.com/flazouh/gitquiet/issues", EXTENSION)
+const session = await withExtension("https://github.com/flazouh/gitace-extension/issues", EXTENSION)
 
 /** What the interface has drawn, as text, once it has drawn anything. */
 const drawn = async (within = 25_000): Promise<string> => {
   for (let waited = 0; waited < within; waited += 500) {
     const text = await session.evaluate<string>(`
       (() => {
-        const root = document.getElementById("gitquiet-host");
+        const root = document.getElementById("gitace-host");
         const inner = root && root.shadowRoot;
         return inner ? (inner.textContent || "") : "";
       })()
@@ -40,9 +40,9 @@ const drawn = async (within = 25_000): Promise<string> => {
 const screenFor = () =>
   session.evaluate<string | null>(`
     (() => {
-      const root = document.getElementById("gitquiet-host");
-      const inner = root && root.shadowRoot && root.shadowRoot.querySelector("#gitquiet-root");
-      return inner ? inner.getAttribute("data-gitquiet-for") : null;
+      const root = document.getElementById("gitace-host");
+      const inner = root && root.shadowRoot && root.shadowRoot.querySelector("#gitace-root");
+      return inner ? inner.getAttribute("data-gitace-for") : null;
     })()
   `)
 
@@ -61,7 +61,7 @@ try {
   const box = await session.evaluate<boolean>(`
     (() => {
       ${PANES}
-      const root = document.getElementById("gitquiet-host");
+      const root = document.getElementById("gitace-host");
       const found = root && root.shadowRoot ? root.shadowRoot.querySelector("input") : null;
       if (!found) return false;
       found.focus();
@@ -81,7 +81,7 @@ try {
     // E5 — a filter nothing can match says so, rather than drawing an empty frame.
     await session.evaluate(`
       (() => {
-        const root = document.getElementById("gitquiet-host");
+        const root = document.getElementById("gitace-host");
         const input = root.shadowRoot.querySelector("input");
         input.focus();
         input.select();

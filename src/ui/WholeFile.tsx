@@ -65,7 +65,7 @@ export type WholeFileProps = {
 const NO_NOTES: ReadonlyArray<Note> = []
 
 /** The one row this component hangs itself, told apart from a caller's by its key. */
-const PEEK_KEY = "gitquiet/peek"
+const PEEK_KEY = "gitace/peek"
 
 /**
  * The Peek as a node: where it is written, and the lines it is written on.

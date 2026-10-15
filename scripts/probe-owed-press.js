@@ -11,11 +11,11 @@
 
 const REPO = "https://github.com/flazouh/ghpro-scratch/pull"
 
-const task = await useOrCreateTaskSpace("test gitquiet extension on real PR")
+const task = await useOrCreateTaskSpace("test GitAce Extension on real PR")
 await takeOverTaskSpace(task.id)
 
 const owed = String.raw`(() => {
-  const root = document.getElementById("gitquiet-root")
+  const root = document.getElementById("gitace-root")
   const shadow = root?.shadowRoot ?? root
   return [...(shadow?.querySelectorAll("section") ?? [])].find(
     (one) => one.querySelector("h2")?.textContent === "What is owed"
@@ -58,7 +58,7 @@ await wait(3)
 cliLog(
   `\n### pressing the delta row (${pressed})\n${
     await js(String.raw`(() => {
-      const root = document.getElementById("gitquiet-root")
+      const root = document.getElementById("gitace-root")
       const shadow = root?.shadowRoot ?? root
       // Whatever the reading pane came to show, said as its own heading.
       const heads = [...(shadow?.querySelectorAll("h1, h2, h3") ?? [])]

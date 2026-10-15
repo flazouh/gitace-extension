@@ -20,7 +20,7 @@ import type { RawPayloads } from "./snapshot"
  * second one, and two tabs on the same pull request are one read as well.
  */
 
-const ASKING = "gitquiet:pull-request-payloads"
+const ASKING = "gitace:pull-request-payloads"
 
 export type Asked = {
   readonly what: typeof ASKING

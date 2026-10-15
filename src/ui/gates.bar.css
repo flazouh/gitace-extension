@@ -11,6 +11,6 @@
  */
 
 /* Their bar. Ours is inside the host now, so this is the only one left to hide. */
-html[data-gitquiet-bar-standing] header.GlobalNav {
+html[data-gitace-bar-standing] header.GlobalNav {
   display: none;
 }

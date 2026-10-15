@@ -13,7 +13,7 @@ Bun.serve({
   fetch(request) {
     const url = new URL(request.url)
     if (url.pathname === "/") return new Response(`<!doctype html>
-<title>GitQuiet observer probes</title><h1>GitQuiet observer probes</h1>
+<title>GitAce Extension observer probes</title><h1>GitAce Extension observer probes</h1>
 <p>The browser runner records results in .tmp/perf-observers.</p>
 <script type="module">
 import { runObserverProbe } from '/probe.js';

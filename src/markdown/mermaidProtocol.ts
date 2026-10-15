@@ -1,7 +1,7 @@
-export const MERMAID_REQUEST = "gitquiet:mermaid:request"
-export const MERMAID_WORK = "gitquiet:mermaid:work"
-export const MERMAID_ANSWER = "gitquiet:mermaid:answer"
-export const MERMAID_UNAVAILABLE = "gitquiet:mermaid:unavailable"
+export const MERMAID_REQUEST = "gitace:mermaid:request"
+export const MERMAID_WORK = "gitace:mermaid:work"
+export const MERMAID_ANSWER = "gitace:mermaid:answer"
+export const MERMAID_UNAVAILABLE = "gitace:mermaid:unavailable"
 
 export type MermaidRequest = {
   readonly kind: typeof MERMAID_REQUEST

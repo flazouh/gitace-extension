@@ -149,7 +149,7 @@ describe("their stylesheets are off only while the page is ours", () => {
     const real = globalThis.fetch
     globalThis.fetch = (async () => new Response(":root { color: blue }")) as unknown as typeof fetch
     const built = await Effect.runPromise(
-      theSheet("chrome-extension://gitquiet/styles.css").pipe(
+      theSheet("chrome-extension://gitace/styles.css").pipe(
         Effect.ensuring(
           Effect.sync(() => {
             globalThis.fetch = real
@@ -275,11 +275,11 @@ describe("our sheet inside the shadow root", () => {
     globalThis.fetch = (async () => new Response("@font-face { src: url(./inter.woff2) }")) as unknown as typeof fetch
     // @ts-expect-error: a query string is a fresh instance of the module, with no sheet built yet.
     const fresh = (await import("./theHost?own-base")) as typeof import("./theHost")
-    const shared = (globalThis as Record<symbol, { sheet: CSSStyleSheet | null }>)[Symbol.for("gitquiet.theHost")]!
+    const shared = (globalThis as Record<symbol, { sheet: CSSStyleSheet | null }>)[Symbol.for("gitace.theHost")]!
     const had = shared.sheet
     shared.sheet = null
     await Effect.runPromise(
-      fresh.theSheet("chrome-extension://gitquiet/screens/styles.css").pipe(
+      fresh.theSheet("chrome-extension://gitace/screens/styles.css").pipe(
         Effect.ensuring(
           Effect.sync(() => {
             globalThis.CSSStyleSheet = Real
@@ -290,7 +290,7 @@ describe("our sheet inside the shadow root", () => {
       )
     )
 
-    expect(made).toEqual([{ baseURL: "chrome-extension://gitquiet/screens/styles.css" }])
+    expect(made).toEqual([{ baseURL: "chrome-extension://gitace/screens/styles.css" }])
   })
 })
 

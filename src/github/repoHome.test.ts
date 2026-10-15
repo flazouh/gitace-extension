@@ -309,7 +309,7 @@ describe("a repository address resolved by GitHub", () => {
     // The document still holds the previous repository's payload after an
     // in-place switch — GitHub replaced nothing, because no page loaded. Read
     // for the new repository with no branch named, this stamped the new name
-    // onto the old tree: slackcli's address over gitquiet's files, kept into
+    // onto the old tree: slackcli's address over GitAce Extension's files, kept into
     // the memory and the store under the wrong name.
     const elsewhere = { owner: "flazouh", repo: "slackcli" }
 

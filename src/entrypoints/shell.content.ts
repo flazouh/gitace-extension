@@ -144,7 +144,7 @@ const LIKELY_NEXT: Partial<Record<Wanted, ReadonlyArray<Wanted>>> = {
 const GIVE_UP = 8_000;
 
 /** Set while a pull request is being navigated to and the interface is not up yet. */
-const GATING = "data-gitquiet-gating";
+const GATING = "data-gitace-gating";
 
 /**
  * Which of GitHub's pages each screen stands on, for the rules that hide it.
@@ -572,7 +572,7 @@ export default defineContentScript({
       (event) => {
         if (!(event.target instanceof Element)) return;
         const link = event.target.closest<HTMLAnchorElement>(
-          "a[data-gitquiet-owned-route]",
+          "a[data-gitace-owned-route]",
         );
         if (link === null || event.relatedTarget instanceof Node && link.contains(event.relatedTarget))
           return;
@@ -681,7 +681,7 @@ export default defineContentScript({
       // Leaving the gate alone here is the whole of it: a reader who has turned
       // this off never sees a frame of it. The screen is still started, because
       // it is what hands the page straight back and puts the way back on it: on
-      // a soft move to their list after "Leave GitQuiet", nothing started one,
+      // a soft move to their list after "Leave GitAce Extension", nothing started one,
       // and the choice was a door that only opened one way.
       if (view === "github") {
         if (!up.has(what)) fetchIt(what);
@@ -891,7 +891,7 @@ export default defineContentScript({
 
     const pressed = (event: Event): void => {
       // Their pages, by the reader's choice. Answering here cancels the click and then
-      // `open` does nothing, which left their own Actions tab dead after "Leave GitQuiet".
+      // `open` does nothing, which left their own Actions tab dead after "Leave GitAce Extension".
       if (view === "github") return;
 
       // A plain press only. Anything held down turns this into a new tab, a new

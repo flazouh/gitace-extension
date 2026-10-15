@@ -24,7 +24,7 @@ import { Effect } from "effect"
 export const reportError = (error: unknown): void => {
   // `console.error` rather than a throw, because every caller here has already decided
   // the failure is survivable. Throwing would turn a handled case into an unhandled one.
-  console.error("[gitquiet]", error)
+  console.error("[gitace]", error)
 }
 
 /**

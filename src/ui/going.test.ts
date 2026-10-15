@@ -334,7 +334,7 @@ describe("an address moved to a screen that is still arriving", () => {
     press(rowIn(page.screen))
     ;(page.window.location as { pathname: string }).pathname = "/owner/repo/pull/12"
 
-    page.window.document.documentElement.setAttribute("data-gitquiet-gating", "")
+    page.window.document.documentElement.setAttribute("data-gitace-gating", "")
     const rearmed = deadlinePasses(page)
 
     expect(page.recorded.replaced).toEqual([])
@@ -348,7 +348,7 @@ describe("an address moved to a screen that is still arriving", () => {
     ;(page.window.location as { pathname: string }).pathname = "/owner/repo/pull/12"
 
     const reading = page.window.document.createElement("div")
-    reading.setAttribute("data-gitquiet-loading", "")
+    reading.setAttribute("data-gitace-loading", "")
     page.screen.append(reading)
     deadlinePasses(page)
 
@@ -361,12 +361,12 @@ describe("an address moved to a screen that is still arriving", () => {
     press(rowIn(page.screen))
     ;(page.window.location as { pathname: string }).pathname = "/owner/repo/pull/12"
 
-    page.window.document.documentElement.setAttribute("data-gitquiet-gating", "")
+    page.window.document.documentElement.setAttribute("data-gitace-gating", "")
     deadlinePasses(page)
 
     // The takeover settled: the gate came down and the card stands where the
     // list was, which is what an arrival looks like from here.
-    page.window.document.documentElement.removeAttribute("data-gitquiet-gating")
+    page.window.document.documentElement.removeAttribute("data-gitace-gating")
     page.screen.remove()
     const card = page.window.document.createElement("div")
     card.id = ROOT_ID
@@ -382,9 +382,9 @@ describe("an address moved to a screen that is still arriving", () => {
     press(rowIn(page.screen))
     ;(page.window.location as { pathname: string }).pathname = "/owner/repo/pull/12"
 
-    page.window.document.documentElement.setAttribute("data-gitquiet-gating", "")
+    page.window.document.documentElement.setAttribute("data-gitace-gating", "")
     deadlinePasses(page)
-    page.window.document.documentElement.removeAttribute("data-gitquiet-gating")
+    page.window.document.documentElement.removeAttribute("data-gitace-gating")
     deadlinePasses(page)
     deadlinePasses(page)
 
@@ -422,7 +422,7 @@ describe("an address moved to a screen that is still arriving", () => {
 
     // A wedged read: the marker never comes down. The failsafe has to stay one.
     const reading = page.window.document.createElement("div")
-    reading.setAttribute("data-gitquiet-loading", "")
+    reading.setAttribute("data-gitace-loading", "")
     page.screen.append(reading)
 
     let deadlines = 0
@@ -839,7 +839,7 @@ describe("whether a press is ours to answer", () => {
   })
 
   test("answers for the bar, which stands outside the screen and is ours all the same", () => {
-    // The bug this was written for: the Home mark is in `#gitquiet-bar`, a child
+    // The bug this was written for: the Home mark is in `#gitace-bar`, a child
     // of `body`, so every handler attached to a screen's own container missed it.
     const page = aPageOfOurs()
 

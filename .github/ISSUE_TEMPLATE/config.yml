@@ -1,11 +1,11 @@
 blank_issues_enabled: true
 contact_links:
   - name: A security problem
-    url: https://github.com/flazouh/gitquiet/security/advisories/new
+    url: https://github.com/flazouh/gitace-extension/security/advisories/new
     about: Private between you and the maintainer until a fix is published. Do not open a public issue.
   - name: What each screen is for
-    url: https://github.com/flazouh/gitquiet/tree/main/docs/spec
+    url: https://github.com/flazouh/gitace-extension/tree/main/docs/spec
     about: Read the spec for the screen before reporting that it is wrong.
   - name: The words the code uses
-    url: https://github.com/flazouh/gitquiet/blob/main/CONTEXT.md
+    url: https://github.com/flazouh/gitace-extension/blob/main/CONTEXT.md
     about: Your Move, Waiting, Running and Settled, and everything else, defined exactly.

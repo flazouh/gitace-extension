@@ -54,11 +54,11 @@ const theirsIn = (page: Document) => page.querySelector(".js-updatable-content")
  * page keeps it.
  */
 const ourRoot = (page: Document): HTMLElement | null =>
-  (page.getElementById("gitquiet-host")?.shadowRoot ?? page).querySelector<HTMLElement>(`#${ROOT_ID}`)
+  (page.getElementById("gitace-host")?.shadowRoot ?? page).querySelector<HTMLElement>(`#${ROOT_ID}`)
 
 /** Every container of ours on the page, for the tests that count them. */
 const allRoots = (page: Document): ReadonlyArray<Element> => [
-  ...(page.getElementById("gitquiet-host")?.shadowRoot ?? page).querySelectorAll(`#${ROOT_ID}`)
+  ...(page.getElementById("gitace-host")?.shadowRoot ?? page).querySelectorAll(`#${ROOT_ID}`)
 ]
 
 describe("arriving after the document has finished, which is what a soft navigation is", () => {
@@ -87,7 +87,7 @@ describe("arriving after the document has finished, which is what a soft navigat
     await new Promise((wake) => setTimeout(wake, 20))
 
     expect(takeover!.container.isConnected).toBe(true)
-    expect(page.documentElement.hasAttribute("data-gitquiet-taken")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-taken")).toBe(true)
   })
 
   /*
@@ -104,10 +104,10 @@ describe("arriving after the document has finished, which is what a soft navigat
     await new Promise((wake) => setTimeout(wake, 20))
 
     expect(takeover!.container.isConnected).toBe(true)
-    expect(fresh.contains(page.getElementById("gitquiet-host"))).toBe(true)
+    expect(fresh.contains(page.getElementById("gitace-host"))).toBe(true)
 
     // And still watched from the new body, not the old one.
-    page.getElementById("gitquiet-host")!.remove()
+    page.getElementById("gitace-host")!.remove()
     await new Promise((wake) => setTimeout(wake, 20))
     expect(takeover!.container.isConnected).toBe(true)
   })
@@ -115,7 +115,7 @@ describe("arriving after the document has finished, which is what a soft navigat
 })
 
 /** The mark the shell writes while it holds a page back, before a screen is up. */
-const GATING = "data-gitquiet-gating"
+const GATING = "data-gitace-gating"
 
 describe("the two gates, which are not the same gate", () => {
   test("revealing does not lift the other script's gate", () => {
@@ -128,7 +128,7 @@ describe("the two gates, which are not the same gate", () => {
 
     reveal(page)
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(true)
     expect(page.documentElement.hasAttribute(GATING)).toBe(true)
   })
 
@@ -157,7 +157,7 @@ describe("the two gates, which are not the same gate", () => {
 
     gate(page)
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(false)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(false)
     expect(page.documentElement.hasAttribute(GATING)).toBe(true)
   })
 })
@@ -178,7 +178,7 @@ describe("one screen leaving while another arrives", () => {
 
     handBack(page)
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(false)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(false)
     expect(page.documentElement.hasAttribute(GATING)).toBe(true)
   })
 
@@ -190,7 +190,7 @@ describe("one screen leaving while another arrives", () => {
 
     handBack(page)
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(true)
   })
 
   test("a page handed back is shown, though it keeps its name", () => {
@@ -211,7 +211,7 @@ describe("one screen leaving while another arrives", () => {
     handBack(page)
 
     expect(theirPageHidden(page)).toBe(false)
-    expect(page.documentElement.getAttribute("data-gitquiet-page")).toBe("conversation")
+    expect(page.documentElement.getAttribute("data-gitace-page")).toBe("conversation")
   })
 
   test("stays hidden under a screen of ours, which reveals as it takes the page", () => {
@@ -221,7 +221,7 @@ describe("one screen leaving while another arrives", () => {
 
     takeOverSlot(page, interfaceContainer(page, CONVERSATION), CONVERSATION)
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(true)
     expect(theirPageHidden(page)).toBe(true)
   })
 
@@ -270,7 +270,7 @@ describe("one screen leaving while another arrives", () => {
 
     takeOverSlot(page)
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(true)
     expect(page.documentElement.hasAttribute(GATING)).toBe(false)
   })
 })
@@ -279,7 +279,7 @@ describe("keeping GitHub's own pull request off the screen until ours is up", ()
   test("the page starts gated, so their server-rendered conversation never paints", () => {
     const page = githubPage()
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(false)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(false)
   })
 
 
@@ -289,7 +289,7 @@ describe("keeping GitHub's own pull request off the screen until ours is up", ()
 
     await Effect.runPromise(takeOverSlotWhenReady(page, interfaceContainer(page), 10))
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(true)
   })
 
   test("says it is in charge, so the rule hiding their conversation applies", () => {
@@ -297,7 +297,7 @@ describe("keeping GitHub's own pull request off the screen until ours is up", ()
 
     takeOverSlot(page)
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-taken")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-taken")).toBe(true)
   })
 
 
@@ -307,7 +307,7 @@ describe("keeping GitHub's own pull request off the screen until ours is up", ()
 
     takeover!.stepAside()
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-taken")).toBe(false)
+    expect(page.documentElement.hasAttribute("data-gitace-taken")).toBe(false)
   })
 
   test("leaves the page revealed when it steps aside", () => {
@@ -316,7 +316,7 @@ describe("keeping GitHub's own pull request off the screen until ours is up", ()
 
     takeover!.stepAside()
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-revealed")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-revealed")).toBe(true)
     expect(theirsIn(page).hasAttribute("hidden")).toBe(false)
   })
 })
@@ -370,8 +370,8 @@ describe("handing the page from one interface to the next", () => {
 
     list.stepAside()
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-taken")).toBe(true)
-    expect(page.documentElement.getAttribute("data-gitquiet-shown")).toBe(CONVERSATION.name)
+    expect(page.documentElement.hasAttribute("data-gitace-taken")).toBe(true)
+    expect(page.documentElement.getAttribute("data-gitace-shown")).toBe(CONVERSATION.name)
   })
 
   test("says it is in charge again when GitHub restores a page's own marks over it", async () => {
@@ -383,13 +383,13 @@ describe("handing the page from one interface to the next", () => {
     const page = githubPage()
     const card = takeOverSlot(page, interfaceContainer(page, CONVERSATION), CONVERSATION)!
 
-    page.documentElement.removeAttribute("data-gitquiet-taken")
-    page.documentElement.removeAttribute("data-gitquiet-shown")
+    page.documentElement.removeAttribute("data-gitace-taken")
+    page.documentElement.removeAttribute("data-gitace-shown")
     await Promise.resolve()
 
     expect(card.container.isConnected).toBe(true)
-    expect(page.documentElement.hasAttribute("data-gitquiet-taken")).toBe(true)
-    expect(page.documentElement.getAttribute("data-gitquiet-shown")).toBe(CONVERSATION.name)
+    expect(page.documentElement.hasAttribute("data-gitace-taken")).toBe(true)
+    expect(page.documentElement.getAttribute("data-gitace-shown")).toBe(CONVERSATION.name)
     card.stepAside()
   })
 
@@ -425,7 +425,7 @@ describe("handing the page from one interface to the next", () => {
      * children wholesale on a navigation. So the interface being replaced can be
      * out of the document before the next one settles, and a search of the
      * document for it finds nothing: its tree stays mounted, reading GitHub for a
-     * page nobody is on, and its bar is still in `#gitquiet-bar` beside the new
+     * page nobody is on, and its bar is still in `#gitace-bar` beside the new
      * one.
      */
     const page = githubPage()
@@ -536,7 +536,7 @@ describe("stepping aside after another interface has taken over", () => {
 
     list.stepAside()
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-taken")).toBe(true)
+    expect(page.documentElement.hasAttribute("data-gitace-taken")).toBe(true)
   })
 
 
@@ -548,7 +548,7 @@ describe("stepping aside after another interface has taken over", () => {
 
     alone!.stepAside()
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-taken")).toBe(false)
+    expect(page.documentElement.hasAttribute("data-gitace-taken")).toBe(false)
     expect(theirsIn(page).hasAttribute("hidden")).toBe(false)
     expect(ourRoot(page)).toBeNull()
   })
@@ -571,7 +571,7 @@ describe("which screen is on the page, as against which page is being fetched", 
 
     takeOverSlot(page, interfaceContainer(page, HOME), HOME)
 
-    expect(page.documentElement.getAttribute("data-gitquiet-shown")).toBe("home")
+    expect(page.documentElement.getAttribute("data-gitace-shown")).toBe("home")
   })
 
   test("keeps that name while a press marks the page for the card being fetched", () => {
@@ -589,8 +589,8 @@ describe("which screen is on the page, as against which page is being fetched", 
 
     markPage(page, CONVERSATION)
 
-    expect(page.documentElement.getAttribute("data-gitquiet-page")).toBe("conversation")
-    expect(page.documentElement.getAttribute("data-gitquiet-shown")).toBe("home")
+    expect(page.documentElement.getAttribute("data-gitace-page")).toBe("conversation")
+    expect(page.documentElement.getAttribute("data-gitace-shown")).toBe("home")
   })
 
   test("hands the name to the interface that replaces this one", () => {
@@ -600,7 +600,7 @@ describe("which screen is on the page, as against which page is being fetched", 
     const card = takeOverSlot(page, interfaceContainer(page, CONVERSATION), CONVERSATION)
 
     expect(card).not.toBeNull()
-    expect(page.documentElement.getAttribute("data-gitquiet-shown")).toBe("conversation")
+    expect(page.documentElement.getAttribute("data-gitace-shown")).toBe("conversation")
   })
 
   test("takes it off when the page is handed back", () => {
@@ -609,7 +609,7 @@ describe("which screen is on the page, as against which page is being fetched", 
 
     alone!.stepAside()
 
-    expect(page.documentElement.hasAttribute("data-gitquiet-shown")).toBe(false)
+    expect(page.documentElement.hasAttribute("data-gitace-shown")).toBe(false)
   })
 })
 
@@ -654,11 +654,11 @@ describe("taking the page only once the address is ours", () => {
     letTheirStylesBack(document)
     document.body.innerHTML = ""
     for (const name of [
-      "data-gitquiet-taken",
-      "data-gitquiet-shown",
-      "data-gitquiet-revealed",
-      "data-gitquiet-gating",
-      "data-gitquiet-page"
+      "data-gitace-taken",
+      "data-gitace-shown",
+      "data-gitace-revealed",
+      "data-gitace-gating",
+      "data-gitace-page"
     ])
       document.documentElement.removeAttribute(name)
   }
@@ -673,7 +673,7 @@ describe("taking the page only once the address is ours", () => {
     await new Promise((done) => setTimeout(done, 60))
 
     expect(arriving.isConnected).toBe(false)
-    expect(document.documentElement.hasAttribute("data-gitquiet-taken")).toBe(false)
+    expect(document.documentElement.hasAttribute("data-gitace-taken")).toBe(false)
 
     history.pushState(null, "", ASKED)
     expect(await waiting).not.toBeNull()

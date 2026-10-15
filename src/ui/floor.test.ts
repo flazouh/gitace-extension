@@ -31,7 +31,7 @@ describe("our floor under their page", () => {
      * the set restyles their header, their footer and every page we do not draw.
      * One name of our own reaches only the rules we wrote for it.
      */
-    paintFloor(document, tokensOf("gitquiet", "dark"))
+    paintFloor(document, tokensOf("gitace", "dark"))
 
     const painted = document.documentElement.style
     expect(painted.getPropertyValue(FLOOR)).toBe("#171717")
@@ -58,7 +58,7 @@ describe("our floor under their page", () => {
     for (const rule of quiet().split("}")) {
       if (!rule.includes(FLOOR)) continue
       expect(
-        rule.includes("[data-gitquiet-taken]") || rule.includes("[data-gitquiet-gating]")
+        rule.includes("[data-gitace-taken]") || rule.includes("[data-gitace-gating]")
       ).toBe(true)
     }
   })
@@ -77,7 +77,7 @@ describe("our floor under their page", () => {
       .split("}")
       .find((rule) => rule.includes(FLOOR) && rule.includes("body"))
 
-    expect(body).toContain("html[data-gitquiet-gating] body")
+    expect(body).toContain("html[data-gitace-gating] body")
   })
 
   test("falls back to their colour for the moment before ours is known", () => {
@@ -100,15 +100,15 @@ describe("our floor under their page", () => {
       .split("}")
       .find((rule) => rule.includes("footer"))
 
-    expect(footer).toContain("html[data-gitquiet-taken] footer")
-    expect(footer).toContain("html[data-gitquiet-gating] footer")
+    expect(footer).toContain("html[data-gitace-taken] footer")
+    expect(footer).toContain("html[data-gitace-gating] footer")
     expect(footer).toContain("display: none")
   })
 
   test("covers the two wrappers Home paints inside the body", () => {
     // Measured on the page: everything between the region and `body` is transparent
     // on a pull request, and Home nests its feed in two more filled layers.
-    expect(quiet()).toContain("div.feed-background[data-gitquiet-within]")
-    expect(quiet()).toContain("div.color-bg-default[data-gitquiet-within]")
+    expect(quiet()).toContain("div.feed-background[data-gitace-within]")
+    expect(quiet()).toContain("div.color-bg-default[data-gitace-within]")
   })
 })

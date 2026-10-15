@@ -92,9 +92,9 @@ const SETTLE_SECONDS = 30
 const look = () =>
   session.evaluate<Measured>(`
   (() => {
-    const root = document.querySelector("#gitquiet-root")
+    const root = document.querySelector("#gitace-root")
     const slot = document.querySelector('[class*="PageLayoutContent"]')
-    const courts = [...document.querySelectorAll("#gitquiet-root section[aria-label]")].map(
+    const courts = [...document.querySelectorAll("#gitace-root section[aria-label]")].map(
       (region) => region.getAttribute("aria-label") ?? "?"
     )
     const failed = (root?.textContent ?? "").startsWith("Something GitHub sends")
@@ -102,18 +102,18 @@ const look = () =>
       element === null ? null : getComputedStyle(element)[property]
     // The page itself is the fair comparison: whatever theme is on, a card of
     // ours has to be the colour GitHub paints a card.
-    const ourBox = document.querySelector("#gitquiet-root .Box")
+    const ourBox = document.querySelector("#gitace-root .Box")
 
     return {
       screen:
         root === null ? "absent" : courts.length > 0 ? "control-center" : failed ? "failure" : "loading",
       courts,
-      groups: document.querySelectorAll("#gitquiet-root details").length,
+      groups: document.querySelectorAll("#gitace-root details").length,
       mountedInTheirLayout: root !== null && slot !== null && slot.contains(root),
       theirHeaderStands: (document.querySelector(".header-wrapper")?.clientHeight ?? 0) > 40,
       theirPullRequestHeaderStands:
         (document.querySelector('[class*="PageLayout-Header"]')?.clientHeight ?? 0) > 40,
-      theirConversationHidden: document.querySelectorAll("[data-gitquiet-hidden]").length,
+      theirConversationHidden: document.querySelectorAll("[data-gitace-hidden]").length,
       theirStylesheets: document.querySelectorAll('link[rel="stylesheet"]').length,
       ourFont: read(root, "fontFamily"),
       theirFont: getComputedStyle(document.body).fontFamily,
@@ -121,8 +121,8 @@ const look = () =>
       theirSurface: getComputedStyle(document.body).backgroundColor,
       ourBorder: read(ourBox, "borderTopColor"),
       theirBorder: getComputedStyle(document.documentElement).getPropertyValue("--borderColor-default").trim(),
-      octicons: document.querySelectorAll("#gitquiet-root svg.octicon").length,
-      glyphs: document.querySelectorAll("#gitquiet-root svg").length,
+      octicons: document.querySelectorAll("#gitace-root svg.octicon").length,
+      glyphs: document.querySelectorAll("#gitace-root svg").length,
       ourHeight: Math.round(root?.getBoundingClientRect().height ?? 0),
       viewportHeight: window.innerHeight
     }

@@ -228,7 +228,7 @@ export default defineContentScript({
      * rather than a second reader of the address somewhere else.
      */
     /** The mark `gistEditing.css` hangs on, and nothing else. */
-    const EDITING = "data-gitquiet-gist-editing"
+    const EDITING = "data-gitace-gist-editing"
 
     const show = (): void => {
       const path = window.location.pathname

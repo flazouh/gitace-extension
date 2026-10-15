@@ -34,7 +34,7 @@ const PULLS = "/microsoft/vscode/pulls"
 const EXTENSION = `${import.meta.dir}/../.output/chrome-mv3`
 
 /** Cold means cold: the same profile twice is a service worker already warm. */
-const PROFILE = "/tmp/gitquiet-csp-profile"
+const PROFILE = "/tmp/gitace-csp-profile"
 
 /**
  * Long enough to see every deadline in the chain speak: the repair's first
@@ -47,9 +47,9 @@ type Sample = {
   /** Whether the document of the press is still the document. */
   readonly sameDocument: boolean
   readonly path: string
-  /** Which screen has the page, off `data-gitquiet-shown`. */
+  /** Which screen has the page, off `data-gitace-shown`. */
   readonly shown: string | null
-  /** Which address that screen has drawn, off `data-gitquiet-at`. */
+  /** Which address that screen has drawn, off `data-gitace-at`. */
   readonly at: string | null
   /** Whether a takeover is still on its way. */
   readonly gating: boolean
@@ -63,7 +63,7 @@ await rm(PROFILE, { recursive: true, force: true })
 const session = await withExtension(REPO, EXTENSION)
 
 const arrived = await session.evaluate<boolean>(`
-  document.querySelector("#gitquiet-root a[href]") !== null
+  document.querySelector("#gitace-root a[href]") !== null
 `)
 if (!arrived) {
   console.error("The repository screen never stood, so there is nothing to press.")
@@ -100,8 +100,8 @@ await session.tab.send("Emulation.setCPUThrottlingRate", { rate: 14 })
 await session.evaluate("window.__probeBackLive = true")
 
 const pressed = await session.evaluate<boolean>(`(() => {
-  const ours = document.querySelector("#gitquiet-root, #gitquiet-bar")
-  const link = [...document.querySelectorAll("#gitquiet-root a, #gitquiet-bar a")]
+  const ours = document.querySelector("#gitace-root, #gitace-bar")
+  const link = [...document.querySelectorAll("#gitace-root a, #gitace-bar a")]
     .find((a) => a.pathname === ${JSON.stringify(PULLS)})
   if (ours === null || link === undefined) return false
 
@@ -133,10 +133,10 @@ const readTheDocument = (): Promise<Sample> =>
       return JSON.stringify({
         sameDocument: window.__probeBackLive === true,
         path: location.pathname,
-        shown: document.documentElement.getAttribute("data-gitquiet-shown"),
-        at: document.documentElement.getAttribute("data-gitquiet-at"),
-        gating: document.documentElement.hasAttribute("data-gitquiet-gating"),
-        loading: document.querySelector("#gitquiet-root [data-gitquiet-loading]") !== null
+        shown: document.documentElement.getAttribute("data-gitace-shown"),
+        at: document.documentElement.getAttribute("data-gitace-at"),
+        gating: document.documentElement.hasAttribute("data-gitace-gating"),
+        loading: document.querySelector("#gitace-root [data-gitace-loading]") !== null
       })
     } catch {
       return JSON.stringify({

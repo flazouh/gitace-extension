@@ -1,4 +1,4 @@
-# gitquiet
+# GitAce Extension
 
 ## Vision
 

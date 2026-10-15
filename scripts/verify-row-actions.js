@@ -20,7 +20,7 @@ await gotoUrl("https://github.com/");
 
 for (let attempt = 0; attempt < 40; attempt += 1) {
   const there = await js(
-    String.raw`document.querySelectorAll('#gitquiet-root [data-row]').length > 0`
+    String.raw`document.querySelectorAll('#gitace-root [data-row]').length > 0`
   ).catch(() => false);
   if (there === true) break;
   await new Promise((wake) => setTimeout(wake, 500));
@@ -29,7 +29,7 @@ await new Promise((wake) => setTimeout(wake, 3000));
 
 cliLog(
   await js(String.raw`(() => {
-    const root = document.querySelector('#gitquiet-root')
+    const root = document.querySelector('#gitace-root')
     const kebabs = [...root.querySelectorAll('[aria-label^="What to do with"]')]
     const opacities = kebabs.map((one) => Number(getComputedStyle(one).opacity))
     const fold = [...root.querySelectorAll('button')]

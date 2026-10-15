@@ -21,7 +21,7 @@
  * The extension's own stylesheet, because the screens on this page are the
  * extension's own components rather than pictures of them.
  *
- * Every rule it carries is scoped to `:is(#gitquiet-root, [data-gitquiet-outside])`,
+ * Every rule it carries is scoped to `:is(#gitace-root, [data-gitace-outside])`,
  * so importing it here cannot reach this page's own type or spacing. `Live.tsx` puts
  * that attribute on each screen's wrapper, which is the repeatable half of the pair:
  * an id can only be in a document once and there are twelve screens.
@@ -41,7 +41,7 @@
  *
  * `primer.css` establishes four inherited things at the top of the interface's own
  * subtree — the spacing unit, the colour, the family and the base size — in a rule
- * scoped to `#gitquiet-root`. A live screen cannot carry that id: there are twelve of
+ * scoped to `#gitace-root`. A live screen cannot carry that id: there are twelve of
  * them and an id belongs to one element.
  *
  * Without them this page's `body` colour and its 16px flowed straight in, because an
@@ -49,7 +49,7 @@
  * theme paints on the way. The filter row's buttons were the visible half: near-black
  * text at 16px on the interface's dark canvas, which is to say invisible.
  *
- * Said here rather than by widening that rule to `[data-gitquiet-outside]`, which is
+ * Said here rather than by widening that rule to `[data-gitace-outside]`, which is
  * the shape the rest of the interface uses. That attribute is also on the toast host
  * and on the bar's own slot, and the rule it opens goes on to set `width: 100%` and
  * `flex: 1 1 auto` — right for a screen filling the region we replaced, wrong for a
@@ -67,7 +67,7 @@
 /**
  * The frame the screen stands in, which is the same problem a second time.
  *
- * `widths.css` puts it on `html[data-gitquiet-taken] #gitquiet-root`, and a live screen
+ * `widths.css` puts it on `html[data-gitace-taken] #gitace-root`, and a live screen
  * matches neither half: this page takes no page of GitHub's over, and it cannot carry
  * that id twelve times. The variable itself is on `:root` and arrives fine, 32px on a
  * wide window, so the bar read it and every card under the bar did not — the exact fault
@@ -75,13 +75,13 @@
  *
  * On the screen and not on `[data-live]`, which was the first attempt and was wrong by
  * the same 32px in the other direction. `widths.css` says why in its own words: the bar
- * is deliberately not inside `#gitquiet-root`, so a value on the interface cannot reach
+ * is deliberately not inside `#gitace-root`, so a value on the interface cannot reach
  * it. Here the bar's slot is a child of `[data-live]`, so a gutter there is one the bar
  * pays twice — inset 64 above cards inset 32.
  */
 [data-screen] {
   min-width: 0;
-  padding-inline: var(--gitquiet-gutter);
+  padding-inline: var(--gitace-gutter);
 }
 
 /*
@@ -112,7 +112,7 @@
   /*
    * The interface's motion scale, said again because this page cannot reach it.
    *
-   * `src/ui/motion.css` declares all of it on `#gitquiet-root, [data-gitquiet-outside]`,
+   * `src/ui/motion.css` declares all of it on `#gitace-root, [data-gitace-outside]`,
    * and it says in its own comment why: a `:root` block there would rename duration and
    * easing across the whole of github.com. The consequence here is that the twelve
    * screens on this page carry the scale and the page around them carries nothing, so

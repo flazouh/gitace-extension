@@ -17,8 +17,8 @@ const reading = () =>
       const style = getComputedStyle(node)
       return [label, { bg: style.backgroundColor, ink: style.color }]
     }
-    const root = document.getElementById('gitquiet-root')
-    const bar = document.getElementById('gitquiet-bar')
+    const root = document.getElementById('gitace-root')
+    const bar = document.getElementById('gitace-bar')
     return JSON.stringify(Object.fromEntries([
       ['mode', document.documentElement.getAttribute('data-color-mode')],
       look(bar?.querySelector('header'), 'bar'),

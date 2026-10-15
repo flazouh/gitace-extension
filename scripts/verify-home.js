@@ -41,7 +41,7 @@ const SAMPLER = String.raw`
   }
   window.__home = { token: Math.round(Math.random() * 1e9), samples: [] }
   window.__home.stop = setInterval(() => {
-    const root = document.getElementById('gitquiet-root')
+    const root = document.getElementById('gitace-root')
     window.__home.samples.push({
       at: Math.round(performance.now()),
       path: location.pathname,
@@ -61,7 +61,7 @@ const drawn = async () => {
   for (let attempt = 0; attempt < 30; attempt += 1) {
     await new Promise((wake) => setTimeout(wake, 1000));
     const ready = await js(String.raw`(() => {
-      const root = document.getElementById('gitquiet-root')
+      const root = document.getElementById('gitace-root')
       return root !== null && root.querySelectorAll('a[aria-label]').length > 0
     })()`);
     if (ready === true) return true;
@@ -71,7 +71,7 @@ const drawn = async () => {
 
 const state = () =>
   js(String.raw`
-    const root = document.getElementById('gitquiet-root')
+    const root = document.getElementById('gitace-root')
     const seen = (element) => {
       if (element === null || element === undefined) return false
       for (let at = element; at !== null; at = at.parentElement) {
@@ -84,8 +84,8 @@ const state = () =>
 
     return JSON.stringify({
       path: location.pathname,
-      page: document.documentElement.getAttribute('data-gitquiet-page'),
-      gating: document.documentElement.hasAttribute('data-gitquiet-gating'),
+      page: document.documentElement.getAttribute('data-gitace-page'),
+      gating: document.documentElement.hasAttribute('data-gitace-gating'),
       mounted: root !== null,
       // Which of GitHub's regions ours is standing in, named as the places name them.
       standingIn: root === null
@@ -95,7 +95,7 @@ const state = () =>
           : root.closest('[data-testid="pulls-dashboard-surface-layout"]') !== null
             ? 'dashboard'
             : (root.parentElement?.tagName.toLowerCase() ?? 'nowhere'),
-      belongsTo: root?.getAttribute('data-gitquiet-belongs-to') ?? null,
+      belongsTo: root?.getAttribute('data-gitace-belongs-to') ?? null,
       rows: root?.querySelectorAll('a[aria-label]').length ?? 0,
       courts: [...(root?.querySelectorAll('section') ?? [])]
         .map((region) => (region.querySelector('h2')?.textContent ?? '').trim())
@@ -262,9 +262,9 @@ const feedAtRest = await js(String.raw`(() => {
   const aside = document.querySelector('aside.feed-left-sidebar')
   return JSON.stringify({
     token: window.__home?.token ?? null,
-    page: document.documentElement.getAttribute('data-gitquiet-page'),
+    page: document.documentElement.getAttribute('data-gitace-page'),
     sidebar: aside !== null && getComputedStyle(aside).display !== 'none' && !aside.hasAttribute('hidden'),
-    ours: document.getElementById('gitquiet-root') !== null
+    ours: document.getElementById('gitace-root') !== null
   })
 })()`).then(JSON.parse);
 cliLog(`the feed at rest: ${JSON.stringify(feedAtRest)}`);

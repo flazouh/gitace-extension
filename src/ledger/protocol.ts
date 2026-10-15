@@ -12,19 +12,19 @@ import type { Place } from "./ledger"
 import type { Found } from "./uses"
 import type { Borrowed, Use } from "./writings"
 
-export const LEDGER_ASK = "gitquiet/ledger-ask" as const
-export const LEDGER_READY = "gitquiet/ledger-ready" as const
-export const LEDGER_READY_WORK = "gitquiet/ledger-ready-work" as const
-export const LEDGER_WARM = "gitquiet/ledger-warm" as const
-export const LEDGER_WARM_WORK = "gitquiet/ledger-warm-work" as const
-export const LEDGER_NAMES = "gitquiet/ledger-names" as const
-export const LEDGER_NAMES_WORK = "gitquiet/ledger-names-work" as const
-export const LEDGER_ACROSS = "gitquiet/ledger-across" as const
-export const LEDGER_ACROSS_WORK = "gitquiet/ledger-across-work" as const
-export const LEDGER_BEYOND = "gitquiet/ledger-beyond" as const
-export const LEDGER_BEYOND_WORK = "gitquiet/ledger-beyond-work" as const
-export const LEDGER_WORK = "gitquiet/ledger-work" as const
-export const LEDGER_ANSWER = "gitquiet/ledger-answer" as const
+export const LEDGER_ASK = "gitace/ledger-ask" as const
+export const LEDGER_READY = "gitace/ledger-ready" as const
+export const LEDGER_READY_WORK = "gitace/ledger-ready-work" as const
+export const LEDGER_WARM = "gitace/ledger-warm" as const
+export const LEDGER_WARM_WORK = "gitace/ledger-warm-work" as const
+export const LEDGER_NAMES = "gitace/ledger-names" as const
+export const LEDGER_NAMES_WORK = "gitace/ledger-names-work" as const
+export const LEDGER_ACROSS = "gitace/ledger-across" as const
+export const LEDGER_ACROSS_WORK = "gitace/ledger-across-work" as const
+export const LEDGER_BEYOND = "gitace/ledger-beyond" as const
+export const LEDGER_BEYOND_WORK = "gitace/ledger-beyond-work" as const
+export const LEDGER_WORK = "gitace/ledger-work" as const
+export const LEDGER_ANSWER = "gitace/ledger-answer" as const
 
 /** Which of the three questions is being asked. */
 export type Question =

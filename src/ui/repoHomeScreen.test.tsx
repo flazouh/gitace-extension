@@ -385,7 +385,7 @@ describe("a repository's front page", () => {
     expect(await screen.findByText(/Show GitHub's page/)).toBeTruthy()
   })
 
-  test("keeps Leave GitQuiet in the bar, even when this page has loaded", async () => {
+  test("keeps Leave GitAce Extension in the bar, even when this page has loaded", async () => {
     // In the bar rather than only on the failure card. The pane replaces their
     // file toolbar, and a reader who still wants something on their page had
     // no way to reach it once ours had drawn.
@@ -396,7 +396,7 @@ describe("a repository's front page", () => {
       }
     })
 
-    const away = await screen.findByRole("button", { name: "Leave GitQuiet" })
+    const away = await screen.findByRole("button", { name: "Leave GitAce Extension" })
     await userEvent.click(away)
 
     expect(handed).toBe(1)
@@ -405,9 +405,9 @@ describe("a repository's front page", () => {
 
 /* The same mark every screen publishes now. See `repoPullsScreen.test.tsx` for why. */
 describe("which address this page claims to have drawn", () => {
-  const drawn = () => document.documentElement.getAttribute("data-gitquiet-at")
+  const drawn = () => document.documentElement.getAttribute("data-gitace-at")
 
-  afterEach(() => document.documentElement.removeAttribute("data-gitquiet-at"))
+  afterEach(() => document.documentElement.removeAttribute("data-gitace-at"))
 
   test("claims the pathname it stands for once the front is drawn", async () => {
     showing(() => Effect.succeed(front("caller")), { at: "/flowline-labs/flowline" })

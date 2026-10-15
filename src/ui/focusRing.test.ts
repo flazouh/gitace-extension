@@ -20,7 +20,7 @@ const sheetAt = (path: string) => readFileSync(path, "utf8")
 /** The declarations of the rule that draws the ring, by the sheet it is written in. */
 const ringRule = (path: string): string => {
   const sheet = sheetAt(path)
-  const at = sheet.indexOf("#gitquiet-root :focus-visible {")
+  const at = sheet.indexOf("#gitace-root :focus-visible {")
   return at === -1 ? "" : sheet.slice(at, sheet.indexOf("}", at))
 }
 

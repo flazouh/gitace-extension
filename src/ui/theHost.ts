@@ -24,7 +24,7 @@
 import { Effect } from "effect"
 import { HIDING_MARKS, OUTSIDE, PAGE, theirPageHidden } from "./mount"
 
-export const HOST_ID = "gitquiet-host"
+export const HOST_ID = "gitace-host"
 
 /**
  * What every copy of this module has to agree on, kept on the isolated world's global.
@@ -46,7 +46,7 @@ export const HOST_ID = "gitquiet-host"
  * GitHub replaced `body`, it stood a new host up with nothing to adopt: a commit drawn
  * with no styles at all, measured on a press from a repository's front page.
  */
-const SHARED = Symbol.for("gitquiet.theHost")
+const SHARED = Symbol.for("gitace.theHost")
 type Shared = {
   sheet: CSSStyleSheet | null
   readonly hosts: WeakMap<Document, HTMLElement>
@@ -156,7 +156,7 @@ export const theHost = (target: Document): { host: HTMLElement; shadow: ShadowRo
   return { host, shadow }
 }
 
-export const STAGE_ID = "gitquiet-stage"
+export const STAGE_ID = "gitace-stage"
 
 /**
  * The element every screen stands on, inside the shadow root.

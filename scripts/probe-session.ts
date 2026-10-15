@@ -13,7 +13,7 @@ const argued = (flag: string): string | undefined => {
   return at === -1 ? undefined : Bun.argv[at + 1]
 }
 
-const PAGE = argued("--page") ?? "https://github.com/flazouh/gitquiet/pull/74/files"
+const PAGE = argued("--page") ?? "https://github.com/flazouh/gitace-extension/pull/74/files"
 const session = await withExtension(PAGE, `${import.meta.dir}/../.output/chrome-mv3`)
 
 const seen = await session.evaluate<unknown>(`(() => {

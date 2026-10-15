@@ -843,33 +843,33 @@ export const FileBrowser = ({
   //
   // The attribute lives on this Files host so a marketing Held mount is not
   // polluted via `<html>` / body scroll-lock. On a real GitHub page (no
-  // `data-gitquiet-outside` ancestor) we still mark `<html>` and lock body —
+  // `data-gitace-outside` ancestor) we still mark `<html>` and lock body —
   // the bar is portaled to `body`, and `quiet.css` keys the extension path off
-  // `html[data-gitquiet-reviewing]`.
+  // `html[data-gitace-reviewing]`.
   useEffect(() => {
     if (review?.active !== true) return;
 
     const panel = host.current;
     if (panel === null) return;
 
-    panel.setAttribute("data-gitquiet-reviewing", "");
+    panel.setAttribute("data-gitace-reviewing", "");
 
-    const outside = panel.closest("[data-gitquiet-outside]");
+    const outside = panel.closest("[data-gitace-outside]");
     if (outside !== null) {
       return () => {
-        panel.removeAttribute("data-gitquiet-reviewing");
+        panel.removeAttribute("data-gitace-reviewing");
       };
     }
 
     const before = document.body.style.overflow;
     const left = window.scrollX;
     const top = window.scrollY;
-    document.documentElement.setAttribute("data-gitquiet-reviewing", "");
+    document.documentElement.setAttribute("data-gitace-reviewing", "");
     document.body.style.overflow = "hidden";
 
     return () => {
-      panel.removeAttribute("data-gitquiet-reviewing");
-      document.documentElement.removeAttribute("data-gitquiet-reviewing");
+      panel.removeAttribute("data-gitace-reviewing");
+      document.documentElement.removeAttribute("data-gitace-reviewing");
       document.body.style.overflow = before;
       window.scrollTo(left, top);
     };
@@ -1137,7 +1137,7 @@ export const FileBrowser = ({
             edge while being inset from both sides, so a card with one file in
             it read as a row that had slipped out of its frame. */}
         <div
-          data-gitquiet-activation="files-tree"
+          data-gitace-activation="files-tree"
           className={`${tree.width} flex min-h-0 shrink-0 flex-col overflow-hidden rounded-md bg-canvas pt-1`}
         >
           {/* Above the rows, inside the rail's own subcard: what this asks is
@@ -1179,7 +1179,7 @@ export const FileBrowser = ({
             is open is a fact about this subcard, and it was already pinned to
             the top of the scroll while the code moved under it. */}
         <div
-          data-gitquiet-activation="files-content"
+          data-gitace-activation="files-content"
           className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-md bg-canvas"
         >
           {prepareThrough < 2 || file === undefined ? null : (

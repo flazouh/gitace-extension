@@ -11,8 +11,8 @@
  * the picture is the product.
  *
  * Every value that has a name elsewhere is read through a fallback —
- * `var(--duration-fast, 250ms)`. The motion scale is declared on `#gitquiet-root` and
- * on `[data-gitquiet-outside]`, which the window and the extension have and a plain
+ * `var(--duration-fast, 250ms)`. The motion scale is declared on `#gitace-root` and
+ * on `[data-gitace-outside]`, which the window and the extension have and a plain
  * page of ours does not, so the fallbacks are that scale's own numbers rather than
  * new ones. See `motion.css`.
  *
@@ -312,7 +312,7 @@
 
 /*
  * The ink button and the quiet one, which are the site's install button and the site's
- * quiet link. A reader pressed the first of those a minute ago on gitquiet.com.
+ * quiet link. A reader pressed the first of those a minute ago on gitace.dev.
  *
  * Twenty-eight pixels tall, at the interface's own eight-pixel radius. This is a
  * control in a panel, not a call to action on a landing page: the buttons in the rest

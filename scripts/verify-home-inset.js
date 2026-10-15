@@ -16,7 +16,7 @@ await new Promise((wake) => setTimeout(wake, 7000))
 
 // Onto the Working Set, which is the Destination whose filter row sat low.
 await js(String.raw`
-  const rail = document.querySelector('#gitquiet-root .t-rail')
+  const rail = document.querySelector('#gitace-root .t-rail')
   const going = [...(rail?.querySelectorAll('a, button') ?? [])].find((one) =>
     (one.textContent ?? '').includes('Working Set')
   )
@@ -27,7 +27,7 @@ await js(String.raw`
 await new Promise((wake) => setTimeout(wake, 3000))
 
 const edges = await js(String.raw`
-  const root = document.getElementById('gitquiet-root')
+  const root = document.getElementById('gitace-root')
   const box = (node) => {
     if (!node) return null
     const at = node.getBoundingClientRect()

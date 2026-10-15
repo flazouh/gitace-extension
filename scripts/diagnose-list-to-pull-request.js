@@ -33,15 +33,15 @@ const state = () =>
     // throws. That moment is a real reading — the page is empty because it is
     // being replaced — rather than an error worth stopping for.
     if (html === null) return { path: location.pathname, replacing: true }
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     return {
       path: location.pathname,
       root: root !== null,
       attached: root === null ? false : root.isConnected,
       height: root === null ? 0 : Math.round(root.getBoundingClientRect().height),
-      gating: html.hasAttribute("data-gitquiet-gating"),
-      taken: html.hasAttribute("data-gitquiet-taken"),
-      revealed: html.hasAttribute("data-gitquiet-revealed"),
+      gating: html.hasAttribute("data-gitace-gating"),
+      taken: html.hasAttribute("data-gitace-taken"),
+      revealed: html.hasAttribute("data-gitace-revealed"),
       says: (root?.textContent ?? "").trim().slice(0, 50)
     }
   })()`);
@@ -49,7 +49,7 @@ const state = () =>
 /** The numbers on our own list, which is the only list a reader can press. */
 const ours = () =>
   js(String.raw`(() => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     const seen = new Set()
     for (const link of root?.querySelectorAll('a[href*="/pull/"]') ?? []) {
       const found = (link.getAttribute("href") || "").match(/\/pull\/(\d+)$/)
@@ -64,7 +64,7 @@ const open = async (number, settled) => {
 
   // Ours, and the scope matters: GitHub's own list is hidden rather than removed,
   // so an unscoped selector finds their row first and presses something invisible.
-  await click(`#gitquiet-root a[href$="/pull/${number}"]`, { label: `open ${number}` });
+  await click(`#gitace-root a[href$="/pull/${number}"]`, { label: `open ${number}` });
 
   const seen = [];
   for (let reading = 0; reading < READINGS; reading += 1) {

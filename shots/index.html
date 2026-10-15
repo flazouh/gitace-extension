@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>gitquiet views</title>
+    <title>GitAce Extension views</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       /*
@@ -19,9 +19,9 @@
   </head>
   <body>
     <!--
-      `gitquiet-root`, and not `stage`, because that id is load-bearing rather than
+      `gitace-root`, and not `stage`, because that id is load-bearing rather than
       decorative. Every rule in `motion.css`, `primer.css` and `quiet.css` is scoped
-      to `:is(#gitquiet-root, [data-gitquiet-outside])` so that nothing of ours
+      to `:is(#gitace-root, [data-gitace-outside])` so that nothing of ours
       reaches GitHub's own page — and under any other id those rules simply do not
       apply. The first captures were taken that way: a button held every word it can
       say side by side, because the rule that hides all but the one being said had
@@ -30,7 +30,7 @@
       The capture script clips `[data-view]`, which `main.tsx` sets here, so this id
       belongs to the interface and the clip belongs to the stage.
     -->
-    <div id="gitquiet-root"></div>
+    <div id="gitace-root"></div>
     <script type="module" src="/main.tsx"></script>
   </body>
 </html>

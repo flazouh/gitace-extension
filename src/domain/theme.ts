@@ -5,7 +5,7 @@
  * file is the only place those names get real colours. Both shells call
  * `tokensOf` and paint the result onto their root.
  *
- * Gitquiet literals are taken from `desktop/src/view/style.css` so the default
+ * GitAce Extension literals are taken from `desktop/src/view/style.css` so the default
  * pack is the desktop window, not an approximation of it.
  */
 
@@ -131,7 +131,7 @@ const face = (one: Face): ThemeTokens => ({
 })
 
 /** Desktop Fluid Functionalism — the product default. */
-const GITQUIET: Record<Scheme, Face> = {
+const GITACE: Record<Scheme, Face> = {
   light: {
     canvas: "#FAFAFA",
     inset: "#FAFAFA",
@@ -1025,7 +1025,7 @@ const ZINC = pair(
 )
 
 const PACKS: Record<Pack, Record<Scheme, Face>> = {
-  gitquiet: GITQUIET,
+  gitace: GITACE,
   anthropic: ANTHROPIC,
   cursor: CURSOR,
   github: GITHUB,

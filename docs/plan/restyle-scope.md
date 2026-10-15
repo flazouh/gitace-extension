@@ -67,7 +67,7 @@ half cost more than the right half saved.
 **The bar never had to move.** The prototype hid it and read that as proof it
 belonged inside the host. The rule it was tested against was written by hand and
 said `body > *:not(#gq-host)`; the real generated rule has always said
-`:not([data-gitquiet-outside])` as well, and the bar has always carried that
+`:not([data-gitace-outside])` as well, and the bar has always carried that
 mark. Moving it in — with the overlay hosts — broke a hundred tests and bought
 nothing. Both are back in `body`.
 

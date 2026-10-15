@@ -7,8 +7,8 @@ const at = (path: string) => `https://github.com${path}`
 
 describe("reading a comparison out of an address", () => {
   test("reads the two refs either side of their range", () => {
-    expect(parsed(at("/flazouh/gitquiet/compare/main...claude/gist-screen"))).toEqual({
-      repo: { owner: "flazouh", repo: "gitquiet" },
+    expect(parsed(at("/flazouh/gitace-extension/compare/main...claude/gist-screen"))).toEqual({
+      repo: { owner: "flazouh", repo: "gitace-extension" },
       base: "main",
       head: "claude/gist-screen"
     })
@@ -53,10 +53,10 @@ describe("reading a comparison out of an address", () => {
   test("names the fragment their own page defers the file list to", () => {
     // The document itself carries no file list at all. Reading the page instead of the
     // fragment is reading a shell.
-    const comparing = parsed(at("/flazouh/gitquiet/compare/main...claude/gist-screen"))!
+    const comparing = parsed(at("/flazouh/gitace-extension/compare/main...claude/gist-screen"))!
 
     expect(fileListRoute(comparing)).toBe(
-      "/flazouh/gitquiet/compare/file-list?range=main...claude%2Fgist-screen"
+      "/flazouh/gitace-extension/compare/file-list?range=main...claude%2Fgist-screen"
     )
   })
 })

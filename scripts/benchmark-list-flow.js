@@ -62,10 +62,10 @@ const install = () =>
       const since = () => Math.round(performance.now() - t0)
       const timer = setInterval(() => {
         const marks = window.__marks
-        if (marks.gate === null && document.documentElement.hasAttribute("data-gitquiet-gating")) {
+        if (marks.gate === null && document.documentElement.hasAttribute("data-gitace-gating")) {
           marks.gate = since()
         }
-        const root = document.getElementById("gitquiet-root")
+        const root = document.getElementById("gitace-root")
         const rows = root === null ? 0 : root.querySelectorAll('a[href*="/pull/"]').length
         if (rows === 0) return
         if (marks.rows === null) marks.rows = since()

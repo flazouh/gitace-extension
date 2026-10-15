@@ -25,7 +25,7 @@ await cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
 await cdp("Page.bringToFront");
 await wait(3);
 
-const scope = SIDE === "ours" ? "#gitquiet-root " : "";
+const scope = SIDE === "ours" ? "#gitace-root " : "";
 const number = await js(String.raw`(() => {
   const within = ` + JSON.stringify(scope.trim()) + String.raw`
   const root = within === "" ? document : document.querySelector(within)

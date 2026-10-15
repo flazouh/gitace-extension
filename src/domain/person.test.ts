@@ -37,7 +37,7 @@ describe("reading a person's page from its address", () => {
   test("is not a repository", () => {
     // Two segments is a repository, including when the second one is a word this
     // parser would otherwise want.
-    expect(read("https://github.com/flazouh/gitquiet")).toEqual(Option.none())
+    expect(read("https://github.com/flazouh/gitace-extension")).toEqual(Option.none())
     expect(read("https://github.com/flazouh/repositories")).toEqual(Option.none())
   })
 

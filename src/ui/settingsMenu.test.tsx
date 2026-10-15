@@ -17,7 +17,7 @@ afterEach(cleanup)
  * near-black text, on a dark page. `outside.ts` was written for that failure,
  * having been paid for once by the bar.
  *
- * It used to say "inside `#gitquiet-root`", and that was one painted place rather
+ * It used to say "inside `#gitace-root`", and that was one painted place rather
  * than the property. The interface has since moved into a shadow root, where the
  * root is out of reach of a lookup on `document`, and an overlay has to escape
  * whatever its row is clipped by — which is the one thing a panel standing inside

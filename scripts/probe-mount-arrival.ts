@@ -10,7 +10,7 @@ import { findChrome, withExtension } from "./chrome"
  * ```
  *
  * Written for one question and it answers it in one line: how many parents does
- * `#gitquiet-root` have over the life of an arrival. One is the whole of the
+ * `#gitace-root` have over the life of an arrival. One is the whole of the
  * claim. Two means the element was moved after it was drawn, and a move is a
  * remove and an insert — which restarts every CSS animation under it and shows
  * the reader the page arriving twice.
@@ -57,7 +57,7 @@ const RECORDER = `
   const started = performance.now()
   const at = () => Math.round(performance.now() - started)
   const tape = []
-  window.__gitquietArrival = tape
+  window.__gitaceArrival = tape
 
   /** A parent said the way a person reads one: the tag, its id, its first class. */
   const nameOf = (element) => {
@@ -70,7 +70,7 @@ const RECORDER = `
 
   let parent = undefined
   const look = () => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     const now = root === null ? null : root.parentElement
     if (now === parent) return
     parent = now
@@ -95,13 +95,13 @@ const RECORDER = `
   }
 
   const MARKS = [
-    "data-gitquiet-page",
-    "data-gitquiet-gating",
-    "data-gitquiet-revealed",
-    "data-gitquiet-taken",
-    "data-gitquiet-shown",
-    "data-gitquiet-bar-standing",
-    "data-gitquiet-arrived"
+    "data-gitace-page",
+    "data-gitace-gating",
+    "data-gitace-revealed",
+    "data-gitace-taken",
+    "data-gitace-shown",
+    "data-gitace-bar-standing",
+    "data-gitace-arrived"
   ]
   const marks = new Map()
   const readMarks = () => {
@@ -155,7 +155,7 @@ const main = async (): Promise<void> => {
   const session = await withExtension(AT, EXTENSION, { before: RECORDER })
   await new Promise((resolve) => setTimeout(resolve, WATCH))
 
-  const tape = await session.evaluate<ReadonlyArray<Event>>("window.__gitquietArrival ?? []")
+  const tape = await session.evaluate<ReadonlyArray<Event>>("window.__gitaceArrival ?? []")
 
   /*
    * What of GitHub's is still on the screen once ours has settled.
@@ -170,11 +170,11 @@ const main = async (): Promise<void> => {
     readonly showing: ReadonlyArray<string>
   }>(`
     (() => {
-      const root = document.getElementById("gitquiet-root")
+      const root = document.getElementById("gitace-root")
       const showing = []
       for (const child of document.body.children) {
         if (child === root) continue
-        if (child.hasAttribute("data-gitquiet-outside")) continue
+        if (child.hasAttribute("data-gitace-outside")) continue
         if (child.tagName === "SCRIPT" || child.tagName === "TEMPLATE" || child.tagName === "STYLE") continue
         const box = child.getBoundingClientRect()
         if (box.width === 0 && box.height === 0) continue

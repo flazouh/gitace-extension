@@ -26,7 +26,7 @@ await wait(4);
 const said = await js(
   String.raw`
   (async () => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     const rows = root === null
       ? null
       : [...root.querySelectorAll("p, li")].map((one) => one.textContent.trim()).filter(Boolean)

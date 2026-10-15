@@ -1,11 +1,11 @@
 name: Something is missing
-description: A page GitQuiet should draw, or a thing it should let you do.
+description: A page GitAce Extension should draw, or a thing it should let you do.
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
-        GitQuiet groups everything by who acts next: Your Move, Waiting, Running,
+        GitAce Extension groups everything by who acts next: Your Move, Waiting, Running,
         Settled. Those four are the product's vocabulary and a new idea usually
         has to fit inside them. [`CONTEXT.md`](../../CONTEXT.md) is the glossary
         and [`docs/spec/`](../../docs/spec) says what each screen is for.

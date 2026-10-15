@@ -17,16 +17,16 @@
 type Preparing = (path: string) => void
 
 type World = Window & {
-  gitquietOpening?: string
-  gitquietPreparing?: Set<Preparing>
+  gitaceOpening?: string
+  gitacePreparing?: Set<Preparing>
 }
 
 export const intendTo = (target: Window, path: string): void => {
-  ;(target as World).gitquietOpening = path
+  ;(target as World).gitaceOpening = path
 }
 
 export const intendedPath = (target: Window): string | null =>
-  (target as World).gitquietOpening ?? null
+  (target as World).gitaceOpening ?? null
 
 /**
  * Offers one route to a screen that is already standing.
@@ -35,16 +35,16 @@ export const intendedPath = (target: Window): string | null =>
  * detached screen, but only a press is permission to change the address.
  */
 export const prepareTo = (target: Window, path: string): void => {
-  for (const prepare of (target as World).gitquietPreparing ?? []) prepare(path)
+  for (const prepare of (target as World).gitacePreparing ?? []) prepare(path)
 }
 
 /** Listens for routes that are worth building before the press. */
 export const whenPreparing = (target: Window, prepare: Preparing): (() => void) => {
   const world = target as World
-  world.gitquietPreparing ??= new Set()
-  world.gitquietPreparing.add(prepare)
+  world.gitacePreparing ??= new Set()
+  world.gitacePreparing.add(prepare)
 
-  return () => world.gitquietPreparing?.delete(prepare)
+  return () => world.gitacePreparing?.delete(prepare)
 }
 
 /**
@@ -52,5 +52,5 @@ export const whenPreparing = (target: Window, prepare: Preparing): (() => void) 
  * stale one would send a later arrival to the wrong pull request.
  */
 export const forgetIntent = (target: Window): void => {
-  delete (target as World).gitquietOpening
+  delete (target as World).gitaceOpening
 }

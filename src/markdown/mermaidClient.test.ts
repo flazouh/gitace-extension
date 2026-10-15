@@ -9,8 +9,8 @@ describe("drawing Mermaid outside the page", () => {
     const drawn = await Effect.runPromise(
       drawUsing(
         {
-          getURL: (path) => `chrome-extension://gitquiet${path}`,
-          sendMessage: async () => ({ kind: "gitquiet:mermaid:answer", svg: "<svg>remote</svg>" })
+          getURL: (path) => `chrome-extension://gitace${path}`,
+          sendMessage: async () => ({ kind: "gitace:mermaid:answer", svg: "<svg>remote</svg>" })
         },
         Effect.sync(() => {
           localLoads += 1
@@ -28,8 +28,8 @@ describe("drawing Mermaid outside the page", () => {
     const drawn = await Effect.runPromise(
       drawUsing(
         {
-          getURL: (path) => `moz-extension://gitquiet${path}`,
-          sendMessage: async () => ({ kind: "gitquiet:mermaid:unavailable" })
+          getURL: (path) => `moz-extension://gitace${path}`,
+          sendMessage: async () => ({ kind: "gitace:mermaid:unavailable" })
         },
         Effect.succeed(() => Effect.succeed("<svg>local</svg>")),
         "flowchart LR; A --> B"

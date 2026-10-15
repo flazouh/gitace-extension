@@ -59,7 +59,7 @@ await wait(3)
 // once before measuring anything.
 await captureScreenshot()
 
-const within = `(document.getElementById("gitquiet-root").shadowRoot ?? document.getElementById("gitquiet-root"))`
+const within = `(document.getElementById("gitace-root").shadowRoot ?? document.getElementById("gitace-root"))`
 const strip = `${within}.querySelector('section[aria-label="Proposed stack"]')`
 
 /** What each row of the strip is called, cut down to the one word that names it. */

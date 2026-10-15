@@ -1,25 +1,25 @@
 import { OUTSIDE } from "./outside"
 
 /** Where our bar stands. Named here because `theirNav` has to rule it out when reading theirs. */
-export const BAR_ID = "gitquiet-bar"
+export const BAR_ID = "gitace-bar"
 
 /**
  * The same thing said as an attribute, for the bars that are not the page's.
  *
  * There is one bar on GitHub and it can have an id. There are twelve on the landing
  * page, each inside its own screen, and an id cannot be in a document twice. So the
- * stylesheets key off `:is(#gitquiet-bar, [data-gitquiet-bar])`, the way every other
- * rule of ours already keys off `:is(#gitquiet-root, [data-gitquiet-outside])`. The
+ * stylesheets key off `:is(#gitace-bar, [data-gitace-bar])`, the way every other
+ * rule of ours already keys off `:is(#gitace-root, [data-gitace-outside])`. The
  * `:is()` matters beyond being shorter: it takes the specificity of its most specific
  * argument, so the attribute half still weighs an id and still beats GitHub's own
  * unlayered element rules.
  */
-export const BAR_MARK = "data-gitquiet-bar"
+export const BAR_MARK = "data-gitace-bar"
 
 /**
  * The same fact written on the document, for the rules that hide GitHub's bar.
  *
- * `gates.bar.css` and `glass.css` used to ask `html:has(#gitquiet-bar)`, which is
+ * `gates.bar.css` and `glass.css` used to ask `html:has(#gitace-bar)`, which is
  * true and expensive: a `:has()` whose subject is `html` marks the whole document
  * as affected, and every change anywhere in it then restyles everything. The
  * attribute says the same thing for the price of a lookup — see `WITHIN` in
@@ -29,7 +29,7 @@ export const BAR_MARK = "data-gitquiet-bar"
  * element itself is: the rules key on there being somewhere for a bar to stand,
  * so that the page is never left with neither bar.
  */
-export const BAR_ON_PAGE = "data-gitquiet-bar-standing"
+export const BAR_ON_PAGE = "data-gitace-bar-standing"
 
 /**
  * How `glass.css` and `quiet.css` open every rule about the bar.
@@ -68,7 +68,7 @@ export const BAR_AT = `:is(#${BAR_ID}, [${BAR_MARK}])`
  * press from a repository to one of its commits: two slots, then three, and GitHub's React
  * stuck committing under them. So the slot is remembered and put back, as the host is.
  */
-const SLOTS = Symbol.for("gitquiet.barSlots")
+const SLOTS = Symbol.for("gitace.barSlots")
 const slots: WeakMap<Document, HTMLElement> = ((globalThis as { [SLOTS]?: WeakMap<Document, HTMLElement> })[
   SLOTS
 ] ??= new WeakMap())
@@ -91,7 +91,7 @@ export const theBarSlot = (page: Document, within?: HTMLElement | undefined): HT
   /*
    * The id only for the page's own bar.
    *
-   * `gates.bar.css` hides GitHub's nav on `html[data-gitquiet-bar-standing]`, and `theirNav`
+   * `gates.bar.css` hides GitHub's nav on `html[data-gitace-bar-standing]`, and `theirNav`
    * rules the bar out by this name when it reads theirs. Both are statements about
    * the one bar standing on a page of GitHub's. A screen mounted inside another page —
    * the landing page draws twelve — must not claim either, and cannot repeat an id
@@ -155,7 +155,7 @@ const HANDOVER = 400
  * arriving tells the one leaving that the page has a bar again. See {@link SCREEN_MOVED}
  * in `mount.ts`, which is the same arrangement for the same reason.
  */
-export const BAR_STANDING = "gitquiet:bar-standing"
+export const BAR_STANDING = "gitace:bar-standing"
 
 /** Said by {@link TheBar} on every render where it is the bar the page is showing. */
 export const theBarStands = (page: Document): void => {
@@ -257,7 +257,7 @@ export const keepTheBarSlot = (
  * Gives GitHub its own bar back, for a page handed over to them.
  *
  * {@link BAR_ON_PAGE} is what hides their header, so it cannot outlive our bar. Measured on
- * a pull request: after "Leave GitQuiet" their header stayed hidden and an empty slot of ours
+ * a pull request: after "Leave GitAce Extension" their header stayed hidden and an empty slot of ours
  * sat at the top of their page. The slot goes only when nothing of ours is in it: a bar still
  * drawn there is a bar a screen is still using.
  */

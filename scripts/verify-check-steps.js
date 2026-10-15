@@ -10,20 +10,20 @@
  */
 
 const PULL = "https://github.com/octo-org/octo-repo/pull/1555"
-const SHOT = "/tmp/gitquiet-check-steps.png"
+const SHOT = "/tmp/gitace-check-steps.png"
 
 await useOrCreateTaskSpace("verify check steps")
 await openOrReuseTab(PULL, { wait: true, timeout: 60 })
 await wait(4)
 
-const mounted = await js(String.raw`document.getElementById("gitquiet-root") !== null`)
+const mounted = await js(String.raw`document.getElementById("gitace-root") !== null`)
 cliLog(`Ours on the page: ${mounted}`)
 
 // The red check, by the colour our own rows wear. A green run has none, in which
 // case the first row will do — the timeline is the same either way.
 const opened = await js(String.raw`
   (() => {
-    const root = document.getElementById("gitquiet-root")
+    const root = document.getElementById("gitace-root")
     if (root === null) return 'no root'
     const rows = [...root.querySelectorAll('button')]
       .filter((one) => /^ci \/ |^[a-z-]+ \(/.test((one.textContent ?? '').trim()))

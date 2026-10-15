@@ -315,7 +315,7 @@ export const WorkingSetScreen = ({
        * No inset here. It was on this row once, on both columns at once, so that the Rail and
        * whatever stood beside it started on the same line — and it made this the only screen
        * with a frame while the five others ran flush to the window edge. The shell owns it
-       * now: `#gitquiet-root` on GitHub's page, `.page` in the window, one number for every
+       * now: `#gitace-root` on GitHub's page, `.page` in the window, one number for every
        * screen either of them draws.
        *
        * The Rail is handed no Participant. It can draw one, and did while it was the only

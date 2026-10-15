@@ -1,6 +1,6 @@
-export const OWNED_TRAVERSAL = "gitquiet:owned-traversal"
-export const PREPARED_TRAVERSAL_ROUTE = "data-gitquiet-prepared-traversal-route"
-const PREPARED_TRAVERSAL_OFFER = "data-gitquiet-prepared-traversal-offer"
+export const OWNED_TRAVERSAL = "gitace:owned-traversal"
+export const PREPARED_TRAVERSAL_ROUTE = "data-gitace-prepared-traversal-route"
+const PREPARED_TRAVERSAL_OFFER = "data-gitace-prepared-traversal-offer"
 
 const preparedMarker = (target: Document): HTMLMetaElement | null =>
   target.querySelector(`meta[name="${PREPARED_TRAVERSAL_ROUTE}"]`)

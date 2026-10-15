@@ -21,7 +21,7 @@ className="t-modal m-auto h-[34rem] … rounded-lg border border-line bg-canvas 
 
 ```css
 /* src/ui/motion.css:845 — current: in only */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-modal {
+:is(#gitace-root, [data-gitace-outside]) .t-modal {
   animation: t-modal-in var(--modal-dur) var(--modal-ease) both;
 }
 ```
@@ -37,7 +37,7 @@ and a menu leave at the same speed.
 
 ```css
 /* target — append to the `.t-modal` block in src/ui/motion.css */
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-modal[data-leaving] {
+:is(#gitace-root, [data-gitace-outside]) .t-modal[data-leaving] {
   animation: none;
   opacity: 0;
   transform: scale(var(--scale-medium));
@@ -46,7 +46,7 @@ and a menu leave at the same speed.
     transform var(--menu-close-dur) var(--menu-ease);
 }
 
-:is(#gitquiet-root, [data-gitquiet-outside]) .t-modal[data-leaving]::backdrop {
+:is(#gitace-root, [data-gitace-outside]) .t-modal[data-leaving]::backdrop {
   opacity: 0;
   transition: opacity var(--menu-close-dur) var(--menu-ease);
 }

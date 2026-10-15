@@ -157,7 +157,7 @@ describe("the link the pointer is heading for", () => {
 
   test("keeps finding a warmed route while its native address is inert", () => {
     const link = document.createElement("a")
-    link.setAttribute("data-gitquiet-owned-route", "/flazouh")
+    link.setAttribute("data-gitace-owned-route", "/flazouh")
 
     expect(linkNear(AT, () => link)?.link).toBe(link)
   })

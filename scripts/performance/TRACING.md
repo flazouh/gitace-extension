@@ -28,7 +28,7 @@ Create one Ego task space with a control page at `chrome://extensions/` and a me
 Replace every example value with the actual build and task information. Preserve any previous `.tmp/performance-traces` directory before starting another run.
 
 1. Run `bun scripts/performance/launch-traces.ts`. Do not run builds, tests, or trace analysis during recording.
-2. Verify that only the original GitQuiet copy is enabled after the runner exits.
+2. Verify that only the original GitAce Extension copy is enabled after the runner exits.
 3. Run `bun scripts/performance/analyze-traces.ts`.
 4. Close the task space when no further browser checks remain. Do not close unrelated spaces.
 
@@ -40,13 +40,13 @@ Each run starts from `about:blank`. This forces a new document even when the tar
 
 The viewport is 1600 by 900. Page HTTP cache is disabled. Build order reverses each repeat. Each extension starts with empty storage; later visits retain its storage. Treat the first visit to each PR separately from repeat visits. General extension state can carry over from the small PR to the large PR.
 
-Exactly one GitQuiet copy must be enabled for each run. The runner disables original copies, loads both test builds, and switches between them. Cleanup attempts all disable, uninstall, and restore operations, then reports any errors.
+Exactly one GitAce Extension copy must be enabled for each run. The runner disables original copies, loads both test builds, and switches between them. Cleanup attempts all disable, uninstall, and restore operations, then reports any errors.
 
 The load marker means the first diff has text and the file tree exists. It is sampled every 50 ms. It does not prove that the diff has painted. Navigation time includes the server response wait. Report time to first byte and response-to-diff time separately.
 
 Frame outcomes come from Chromium `PipelineReporter` events. They do not come from `requestAnimationFrame`. The analyzer pairs reused async IDs in timestamp order and excludes other renderer processes. Unknown or incomplete frame outcomes invalidate rates. Frame completion gaps are diagnostic values, not a direct display capture.
 
-The control uses a two-second CSS animation on a blank page. The negative control adds a 180 ms main-thread block. Report both beside the app results. Ego can throttle frame delivery even when the page reports visible and focused. Its raw dropped-frame rate must not be attributed entirely to GitQuiet.
+The control uses a two-second CSS animation on a blank page. The negative control adds a 180 ms main-thread block. Report both beside the app results. Ego can throttle frame delivery even when the page reports visible and focused. Its raw dropped-frame rate must not be attributed entirely to GitAce Extension.
 
 A phase can contain idle time. The small tree can reach its scroll limit before a gesture ends. Panel phases include pauses between actions. The full-phase presented FPS is not continuous animation FPS.
 

@@ -68,7 +68,7 @@ describe("a press on a row", () => {
 
 describe("pinning from a row", () => {
   const pinnable = (held: boolean, toggle: () => void) => [
-    { name: "flazouh/gitquiet", where: "/flazouh/gitquiet", pin: { held, toggle } }
+    { name: "flazouh/gitace-extension", where: "/flazouh/gitace-extension", pin: { held, toggle } }
   ]
 
   test("offers the pin beside the row, and pressing it does not close or navigate", async () => {
@@ -83,7 +83,7 @@ describe("pinning from a row", () => {
       />
     )
 
-    await userEvent.click(screen.getByRole("button", { name: "Pin flazouh/gitquiet" }))
+    await userEvent.click(screen.getByRole("button", { name: "Pin flazouh/gitace-extension" }))
 
     expect(toggled).toBe(1)
     expect(shut).toBe(0)
@@ -105,7 +105,7 @@ describe("pinning from a row", () => {
     )
 
     await act(async () =>
-      pressFromShadow(within(stage).getByRole("button", { name: "Pin flazouh/gitquiet" }), "pointerdown")
+      pressFromShadow(within(stage).getByRole("button", { name: "Pin flazouh/gitace-extension" }), "pointerdown")
     )
 
     expect(shut).toBe(0)
@@ -122,7 +122,7 @@ describe("pinning from a row", () => {
       />
     )
 
-    expect(screen.getByRole("button", { name: "Unpin flazouh/gitquiet" })).toBeDefined()
+    expect(screen.getByRole("button", { name: "Unpin flazouh/gitace-extension" })).toBeDefined()
   })
 })
 

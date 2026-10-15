@@ -147,7 +147,7 @@ export const GistEditScreen = ({
     <>
       <TheBar where={{ kind: "home" }} />
       {/*
-        No frame of its own; the shell puts one inset on `#gitquiet-root` for every screen
+        No frame of its own; the shell puts one inset on `#gitace-root` for every screen
         at once. Everything below is as wide as that leaves it, which is the first half of
         what was asked for.
       */}

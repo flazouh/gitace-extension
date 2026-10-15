@@ -766,7 +766,7 @@ describe("a name this file borrowed from another", () => {
     const read: Array<string> = []
     const across: Across = {
       paths: new Set(["cmd/main.go", "whole/two.go", "whole/other.go"]),
-      repo: { owner: "flazouh", repo: "gitquiet" },
+      repo: { owner: "flazouh", repo: "gitace-extension" },
       sha: "abc",
       read: (path) =>
         Effect.sync(() => {
@@ -992,7 +992,7 @@ describe("peeking, which is the question asked without leaving", () => {
     })
 
     // The row is filled by the pane, from the file it is reading.
-    const filled = stage.request?.fillNote?.("gitquiet/peek")
+    const filled = stage.request?.fillNote?.("gitace/peek")
     expect(filled?.textContent).toContain("const shape = () => 1")
     expect(filled?.textContent).toContain("line 2")
   })
@@ -1255,7 +1255,7 @@ describe("a press on a name written on a line the diff folded away", () => {
       const [rows] = stage.shown.slice(-1)
       expect(rows?.some((note) => note.line === name.line)).toBe(true)
     })
-    const filled = stage.request?.fillNote?.("gitquiet/peek")
+    const filled = stage.request?.fillNote?.("gitace/peek")
     expect(filled?.textContent).toContain("const shape = () => 1")
   })
 
@@ -1272,7 +1272,7 @@ describe("a press on a name written on a line the diff folded away", () => {
 
     expect(row.scrolled()).toBe(1)
     // A reader who can see the line is taken there and shown nothing else.
-    expect(stage.shown.at(-1)?.some((note) => note.key === "gitquiet/peek") ?? false).toBe(false)
+    expect(stage.shown.at(-1)?.some((note) => note.key === "gitace/peek") ?? false).toBe(false)
   })
 })
 

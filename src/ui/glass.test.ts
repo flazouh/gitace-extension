@@ -54,7 +54,7 @@ describe("the bar as glass", () => {
      * gap; a margin on the pane would let the page slide up underneath it.
      */
     const rule = glass().slice(glass().indexOf(`${BAR_AT} {`))
-    expect(rule).toContain("padding: 8px var(--gitquiet-gutter) 0")
+    expect(rule).toContain("padding: 8px var(--gitace-gutter) 0")
   })
 
   test("takes the frame across and not above, height being the scarce one", () => {
@@ -73,10 +73,10 @@ describe("the bar as glass", () => {
      * twelve, twenty-four and sixteen, and a reader saw a bar at one left edge with a Rail
      * at another twenty-eight pixels in.
      */
-    expect(readFileSync("src/ui/widths.css", "utf8")).toContain("--gitquiet-gutter: 16px")
+    expect(readFileSync("src/ui/widths.css", "utf8")).toContain("--gitace-gutter: 16px")
     expect(readFileSync("src/ui/widths.css", "utf8")).toContain("padding-inline: 0")
     expect(readFileSync("src/ui/widths.css", "utf8")).toContain(
-      "padding-inline: var(--gitquiet-gutter)"
+      "padding-inline: var(--gitace-gutter)"
     )
   })
 
@@ -89,7 +89,7 @@ describe("the bar as glass", () => {
      * we cannot restate — the frame follows it rather than fighting it.
      */
     const frame = readFileSync("src/ui/widths.css", "utf8")
-    const steps = [...frame.matchAll(/--gitquiet-gutter: (\d+)px/g)].map(([, one]) => one)
+    const steps = [...frame.matchAll(/--gitace-gutter: (\d+)px/g)].map(([, one]) => one)
     const breaks = [...frame.matchAll(/@media \(min-width: (\d+)px\)/g)].map(([, one]) => one)
 
     expect(steps).toEqual(["16", "24", "32"])
@@ -234,8 +234,8 @@ describe("the bar as glass", () => {
      */
     const sheet = readFileSync("src/ui/glass.css", "utf8")
 
-    expect(sheet).toContain("html[data-gitquiet-bar-standing] [data-sonner-toaster]")
-    expect(sheet).toContain("--offset-right: var(--gitquiet-gutter) !important")
-    expect(sheet).toContain("--offset-bottom: var(--gitquiet-gutter) !important")
+    expect(sheet).toContain("html[data-gitace-bar-standing] [data-sonner-toaster]")
+    expect(sheet).toContain("--offset-right: var(--gitace-gutter) !important")
+    expect(sheet).toContain("--offset-bottom: var(--gitace-gutter) !important")
   })
 })

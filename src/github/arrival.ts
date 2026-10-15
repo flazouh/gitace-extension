@@ -19,7 +19,7 @@ import { STILL_GOOD } from "./onTheWay"
  * `data-` attribute: this window belongs to the extension, and GitHub's page cannot
  * read it or write it.
  */
-type World = Window & { gitquietArrival?: { readonly at: number; readonly path: string } }
+type World = Window & { gitaceArrival?: { readonly at: number; readonly path: string } }
 
 /**
  * Notes the address, where this document is one the browser is still fetching.
@@ -30,7 +30,7 @@ type World = Window & { gitquietArrival?: { readonly at: number; readonly path: 
  */
 export const noteArrival = (target: Window, page: Document): void => {
   if (page.readyState !== "loading") return
-  ;(target as World).gitquietArrival = { at: Date.now(), path: page.location.pathname }
+  ;(target as World).gitaceArrival = { at: Date.now(), path: page.location.pathname }
 }
 
 /**
@@ -52,18 +52,18 @@ export const noteArrival = (target: Window, page: Document): void => {
  * before the payloads it points at stop being held.
  */
 export const claimArrival = (target: Window, reference: PullRequestRef): boolean => {
-  const noted = (target as World).gitquietArrival
+  const noted = (target as World).gitaceArrival
   if (noted === undefined) return false
   if (Date.now() - noted.at >= STILL_GOOD) return false
 
   const there = fromPathname(noted.path)
   if (Option.isNone(there) || !sameReference(there.value, reference)) return false
 
-  delete (target as World).gitquietArrival
+  delete (target as World).gitaceArrival
   return true
 }
 
 /** Drops the note, for a test standing two arrivals up in one window. */
 export const forgetArrival = (target: Window): void => {
-  delete (target as World).gitquietArrival
+  delete (target as World).gitaceArrival
 }

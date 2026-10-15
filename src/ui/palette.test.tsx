@@ -22,7 +22,7 @@ const repository = (nameWithOwner: string): Repository => {
 
 const REPOSITORIES = [
   repository("flowline-labs/flowline"),
-  repository("flazouh/gitquiet"),
+  repository("flazouh/gitace-extension"),
   repository("flazouh/ego-browser")
 ]
 
@@ -103,9 +103,9 @@ describe("the palette", () => {
     showing()
     const went = answering()
 
-    await userEvent.type(screen.getByRole("combobox"), "gitquiet{Enter}")
+    await userEvent.type(screen.getByRole("combobox"), "gitace{Enter}")
 
-    expect(went).toEqual(["/flazouh/gitquiet/pulls"])
+    expect(went).toEqual(["/flazouh/gitace-extension/pulls"])
   })
 
   test("walks the answers with the arrows", async () => {
@@ -125,7 +125,7 @@ describe("the palette", () => {
     await userEvent.type(screen.getByRole("combobox"), "flazouh")
     await userEvent.keyboard("{ArrowUp}{ArrowUp}{Enter}")
 
-    expect(went).toEqual(["/flazouh/gitquiet/pulls"])
+    expect(went).toEqual(["/flazouh/gitace-extension/pulls"])
   })
 
   test("says which one Enter would take, rather than leaving it to be guessed", async () => {

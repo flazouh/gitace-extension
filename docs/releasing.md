@@ -64,7 +64,7 @@ as the one being looked at.
 
 The first review finished with v0.3.0, so
 [the public listing](https://addons.mozilla.org/firefox/addon/gitquiet/) answers
-now, and gitquiet.com links it.
+now, and gitace.dev links it.
 
 ## What gets built
 

@@ -332,11 +332,11 @@ describe("the panes beside each other", () => {
     const column = () => section("Merge").closest<HTMLElement>(".t-panels")
     expect(column()?.style.width).toBe("26rem")
     expect(column()?.className).not.toContain("flex-1")
-    expect(document.querySelector('[data-gitquiet-activation="files-panel"]')).not.toBeNull()
+    expect(document.querySelector('[data-gitace-activation="files-panel"]')).not.toBeNull()
 
     await userEvent.click(screen.getByRole("button", { name: "Hide files" }))
 
-    expect(document.querySelector('[data-gitquiet-activation="files-panel"]')).toBeNull()
+    expect(document.querySelector('[data-gitace-activation="files-panel"]')).toBeNull()
     expect(column()?.className).toContain("flex-1")
     expect(column()?.style.width).toBe("")
     expect(section("Merge")).toBeDefined()
@@ -349,7 +349,7 @@ describe("the panes beside each other", () => {
     await userEvent.click(screen.getByRole("button", { name: "Hide details" }))
 
     expect(screen.queryByRole("region", { name: "Merge" })).toBeNull()
-    expect(document.querySelector('[data-gitquiet-activation="files-panel"]')).not.toBeNull()
+    expect(document.querySelector('[data-gitace-activation="files-panel"]')).not.toBeNull()
   })
 
   test("answers ⌘B and ⌘⇧B for the two pane toggles", async () => {
@@ -358,13 +358,13 @@ describe("the panes beside each other", () => {
 
     await userEvent.keyboard("{Meta>}b{/Meta}")
     expect(screen.queryByRole("region", { name: "Merge" })).toBeNull()
-    expect(document.querySelector('[data-gitquiet-activation="files-panel"]')).not.toBeNull()
+    expect(document.querySelector('[data-gitace-activation="files-panel"]')).not.toBeNull()
 
     await userEvent.keyboard("{Meta>}b{/Meta}")
     expect(section("Merge")).toBeDefined()
 
     await userEvent.keyboard("{Meta>}{Shift>}b{/Shift}{/Meta}")
-    expect(document.querySelector('[data-gitquiet-activation="files-panel"]')).toBeNull()
+    expect(document.querySelector('[data-gitace-activation="files-panel"]')).toBeNull()
     expect(section("Merge").closest(".t-panels")?.className).toContain("flex-1")
   })
 })
@@ -391,7 +391,7 @@ describe("the handle between the two parts", () => {
     showing(aPullRequest())
     await awaitPage()
 
-    const files = document.querySelector('[data-gitquiet-activation="files-panel"]')
+    const files = document.querySelector('[data-gitace-activation="files-panel"]')
     const between = handle()
     expect(column()?.compareDocumentPosition(between as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
     expect(between?.compareDocumentPosition(files as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
@@ -993,16 +993,16 @@ describe("the files, as one thing", () => {
 
     expect(section("Files")).toBe(files)
     expect(files.className).toContain("fixed")
-    // Extension path: Files host + `<html>` (no `data-gitquiet-outside` ancestor).
-    expect(files.hasAttribute("data-gitquiet-reviewing")).toBe(true)
-    expect(document.documentElement.hasAttribute("data-gitquiet-reviewing")).toBe(true)
+    // Extension path: Files host + `<html>` (no `data-gitace-outside` ancestor).
+    expect(files.hasAttribute("data-gitace-reviewing")).toBe(true)
+    expect(document.documentElement.hasAttribute("data-gitace-reviewing")).toBe(true)
 
     await userEvent.keyboard("{Escape}")
 
     expect(section("Files")).toBe(files)
     expect(files.className).not.toContain("fixed")
-    expect(files.hasAttribute("data-gitquiet-reviewing")).toBe(false)
-    expect(document.documentElement.hasAttribute("data-gitquiet-reviewing")).toBe(false)
+    expect(files.hasAttribute("data-gitace-reviewing")).toBe(false)
+    expect(document.documentElement.hasAttribute("data-gitace-reviewing")).toBe(false)
   })
 
   test("opens in review mode when seeded with initialReviewing", async () => {
@@ -1012,18 +1012,18 @@ describe("the files, as one thing", () => {
     const files = section("Files")
     expect(files.className).toContain("fixed")
     expect(within(files).getByRole("button", { name: "Exit review" })).toBeDefined()
-    expect(files.hasAttribute("data-gitquiet-reviewing")).toBe(true)
-    expect(document.documentElement.hasAttribute("data-gitquiet-reviewing")).toBe(true)
+    expect(files.hasAttribute("data-gitace-reviewing")).toBe(true)
+    expect(document.documentElement.hasAttribute("data-gitace-reviewing")).toBe(true)
   })
 
-  test("scopes reviewing to the Files host under data-gitquiet-outside", async () => {
+  test("scopes reviewing to the Files host under data-gitace-outside", async () => {
     const snapshot = aPullRequest()
     const layers = layerFromSnapshots([snapshot])
     const reference = snapshot.reference
     standAt(reference)
 
     render(
-      <div data-gitquiet-outside>
+      <div data-gitace-outside>
         <PullRequestScreen
           reference={reference}
           load={() => loadPullRequest(reference).pipe(Effect.provide(layers))}
@@ -1037,9 +1037,9 @@ describe("the files, as one thing", () => {
 
     const files = section("Files")
     expect(files.className).toContain("fixed")
-    expect(files.hasAttribute("data-gitquiet-reviewing")).toBe(true)
+    expect(files.hasAttribute("data-gitace-reviewing")).toBe(true)
     // Marketing / Held path: do not mark `<html>` or lock body scroll.
-    expect(document.documentElement.hasAttribute("data-gitquiet-reviewing")).toBe(false)
+    expect(document.documentElement.hasAttribute("data-gitace-reviewing")).toBe(false)
     expect(document.body.style.overflow).not.toBe("hidden")
   })
 
@@ -1112,10 +1112,10 @@ describe("the page lands once", () => {
   test("says so shortly after arriving, where the stylesheet can read it", async () => {
     showing(aSnapshot({}))
 
-    expect(document.querySelector("[data-gitquiet-landed]")).toBeNull()
+    expect(document.querySelector("[data-gitace-landed]")).toBeNull()
     await waitFor(
       () => {
-        expect(document.querySelector("[data-gitquiet-landed]")).not.toBeNull()
+        expect(document.querySelector("[data-gitace-landed]")).not.toBeNull()
       },
       { timeout: 3000 }
     )
@@ -1138,7 +1138,7 @@ describe("the page lands once", () => {
     const first = showing(aSnapshot({}))
     await waitFor(
       () => {
-        expect(document.querySelector("[data-gitquiet-landed]")).not.toBeNull()
+        expect(document.querySelector("[data-gitace-landed]")).not.toBeNull()
       },
       { timeout: 3000 }
     )
@@ -1147,6 +1147,6 @@ describe("the page lands once", () => {
     showing(aSnapshot({}))
 
     // Now, rather than after the entrance it has no reason to run.
-    expect(document.querySelector("[data-gitquiet-landed]")).not.toBeNull()
+    expect(document.querySelector("[data-gitace-landed]")).not.toBeNull()
   })
 })

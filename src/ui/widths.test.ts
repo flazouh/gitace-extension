@@ -12,13 +12,13 @@ describe("the measures GitHub's own layout would otherwise hold", () => {
     /*
      * Three answers were tried and only the third is right.
      *
-     * `data-gitquiet-page` is the page the document is *about*, and a press moves it a
+     * `data-gitace-page` is the page the document is *about*, and a press moves it a
      * second before the address does — deliberately, because the rules that hold their
      * conversation back have to be the incoming page's rules from the instant of the
      * press. A measure keyed on it is lifted at that instant, while the list that was
      * measured is still the page.
      *
-     * `data-gitquiet-shown` named the screen that took the region, which is right until
+     * `data-gitace-shown` named the screen that took the region, which is right until
      * two screens share a surface — and they do, on every press this extension answers
      * itself. A pull request pressed on the Working Set stands where the list stood,
      * inside their dashboard, and the mark flips to `conversation` the moment it lands:
@@ -26,12 +26,12 @@ describe("the measures GitHub's own layout would otherwise hold", () => {
      * `main { display: none }` that holds their feed until a partial loads. Measured on
      * a live page: the card at 0 pixels, the reader looking at an empty panel.
      *
-     * The surface is what the measure was ever about. `#gitquiet-root` is in exactly one
+     * The surface is what the measure was ever about. `#gitace-root` is in exactly one
      * place at a time and it is the place that must not be narrowed, whichever of the
      * screens is drawing into it.
      */
-    expect(widths()).not.toContain("data-gitquiet-page")
-    expect(widths()).not.toContain("data-gitquiet-shown")
+    expect(widths()).not.toContain("data-gitace-page")
+    expect(widths()).not.toContain("data-gitace-shown")
   })
 
   test("say so on every rule that answers one of GitHub's", () => {
@@ -45,13 +45,13 @@ describe("the measures GitHub's own layout would otherwise hold", () => {
      *
      * Either the id or the mark the takeover writes on every box between the root and the
      * document: a rule about an ancestor says so with the mark, because asking the ancestor
-     * `:has(#gitquiet-root)` restyled the whole interface on every change inside it. See
+     * `:has(#gitace-root)` restyled the whole interface on every change inside it. See
      * `WITHIN` in `mount.ts`.
      */
     for (const [selector] of widths().matchAll(/^html\[[^{]+/gm)) {
-      expect(selector).toContain("[data-gitquiet-taken]")
+      expect(selector).toContain("[data-gitace-taken]")
       expect(
-        selector.includes("#gitquiet-root") || selector.includes("[data-gitquiet-within]")
+        selector.includes("#gitace-root") || selector.includes("[data-gitace-within]")
       ).toBe(true)
     }
   })
@@ -66,8 +66,8 @@ describe("the measures GitHub's own layout would otherwise hold", () => {
      * The container is the one element every screen has, so the frame is one rule on it
      * rather than a number each screen remembers to repeat.
      */
-    expect(widths()).toContain("html[data-gitquiet-taken] #gitquiet-root")
-    expect(widths()).toContain("padding-inline: var(--gitquiet-gutter)")
+    expect(widths()).toContain("html[data-gitace-taken] #gitace-root")
+    expect(widths()).toContain("padding-inline: var(--gitace-gutter)")
   })
 
   test("leave the frame to the shell, no screen carrying one of its own", () => {
@@ -89,7 +89,7 @@ describe("the measures GitHub's own layout would otherwise hold", () => {
     const bodies = ["WorkingSet", "History"]
     const screens = [...new Bun.Glob("src/ui/*Screen.tsx").scanSync()]
 
-    for (const path of screens) expect(readFileSync(path, "utf8")).not.toContain("--gitquiet-gutter")
+    for (const path of screens) expect(readFileSync(path, "utf8")).not.toContain("--gitace-gutter")
 
     for (const path of [...screens, ...bodies.map((one) => `src/ui/${one}.tsx`)]) {
       const written = readFileSync(path, "utf8")

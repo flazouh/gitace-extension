@@ -11,7 +11,7 @@
  */
 
 /** The mark saying this document has already watched the interface arrive once. */
-const LANDED_BEFORE = "data-gitquiet-arrived"
+const LANDED_BEFORE = "data-gitace-arrived"
 
 /**
  * Whether the reader has already seen one of our screens land in this document.

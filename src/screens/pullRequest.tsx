@@ -474,7 +474,7 @@ export const start = (): void => {
    * does before the first of these functions is called.
    */
   let view: View = "ours"
-  // Kept current, because another screen can change it: "Leave GitQuiet" on a pull
+  // Kept current, because another screen can change it: "Leave GitAce Extension" on a pull
   // request, then their own link to a list, drew our list over a page the reader left.
   store.watch((changed) => {
     view = changed.page.view

@@ -295,7 +295,7 @@ describe("parsing markdown into a document", () => {
   test("reads a relative image as a file in the repository the markdown belongs to", () => {
     const doc = parseMarkdown("![The working set](site/public/store/working-set.png)", {
       owner: "flazouh",
-      repo: "gitquiet"
+      repo: "gitace-extension"
     })
 
     expect(doc.blocks).toMatchObject([
@@ -304,7 +304,7 @@ describe("parsing markdown into a document", () => {
         children: [
           {
             type: "image",
-            src: "https://raw.githubusercontent.com/flazouh/gitquiet/HEAD/site/public/store/working-set.png"
+            src: "https://raw.githubusercontent.com/flazouh/gitace-extension/HEAD/site/public/store/working-set.png"
           }
         ]
       }
@@ -314,14 +314,14 @@ describe("parsing markdown into a document", () => {
   test("reads a relative image written as html the same way", () => {
     const doc = parseMarkdown('<img src="./docs/shot.png" alt="A shot">', {
       owner: "flazouh",
-      repo: "gitquiet"
+      repo: "gitace-extension"
     })
 
     expect(doc.blocks).toMatchObject([
       {
         type: "html",
         tag: "img",
-        attrs: { src: "https://raw.githubusercontent.com/flazouh/gitquiet/HEAD/docs/shot.png" }
+        attrs: { src: "https://raw.githubusercontent.com/flazouh/gitace-extension/HEAD/docs/shot.png" }
       }
     ])
   })
@@ -329,7 +329,7 @@ describe("parsing markdown into a document", () => {
   test("reads it from the branch it was given, where it was given one", () => {
     const doc = parseMarkdown("![A shot](docs/shot.png)", {
       owner: "flazouh",
-      repo: "gitquiet",
+      repo: "gitace-extension",
       branch: "next"
     })
 
@@ -339,7 +339,7 @@ describe("parsing markdown into a document", () => {
         children: [
           {
             type: "image",
-            src: "https://raw.githubusercontent.com/flazouh/gitquiet/next/docs/shot.png"
+            src: "https://raw.githubusercontent.com/flazouh/gitace-extension/next/docs/shot.png"
           }
         ]
       }
@@ -349,7 +349,7 @@ describe("parsing markdown into a document", () => {
   test("reads an address written in a file as beside that file", () => {
     const doc = parseMarkdown("![A shot](images/one.png)", {
       owner: "flazouh",
-      repo: "gitquiet",
+      repo: "gitace-extension",
       at: "docs/guide.md"
     })
 
@@ -359,7 +359,7 @@ describe("parsing markdown into a document", () => {
         children: [
           {
             type: "image",
-            src: "https://raw.githubusercontent.com/flazouh/gitquiet/HEAD/docs/images/one.png"
+            src: "https://raw.githubusercontent.com/flazouh/gitace-extension/HEAD/docs/images/one.png"
           }
         ]
       }
@@ -369,7 +369,7 @@ describe("parsing markdown into a document", () => {
   test("steps back out of that directory where the address says to", () => {
     const doc = parseMarkdown("![A shot](../site/one.png)", {
       owner: "flazouh",
-      repo: "gitquiet",
+      repo: "gitace-extension",
       at: "docs/guide.md"
     })
 
@@ -379,7 +379,7 @@ describe("parsing markdown into a document", () => {
         children: [
           {
             type: "image",
-            src: "https://raw.githubusercontent.com/flazouh/gitquiet/HEAD/site/one.png"
+            src: "https://raw.githubusercontent.com/flazouh/gitace-extension/HEAD/site/one.png"
           }
         ]
       }
@@ -388,14 +388,14 @@ describe("parsing markdown into a document", () => {
 
   /*
    * A link inside a link is two anchors on one spot, and the inner one takes the press.
-   * Measured on flazouh/gitquiet#100, whose body links `[#99](…/pull/99)`: the `#99`
+   * Measured on flazouh/gitace-extension#100, whose body links `[#99](…/pull/99)`: the `#99`
    * inside was made an issue link to `/issues/99`, so the press went to an issue page
    * for a pull request and drew "This issue could not be read".
    */
   test("does not make a reference or a mention inside a link into a link of its own", () => {
-    const doc = parseMarkdown("see [#99 by @octocat](https://github.com/flazouh/gitquiet/pull/99)", {
+    const doc = parseMarkdown("see [#99 by @octocat](https://github.com/flazouh/gitace-extension/pull/99)", {
       owner: "flazouh",
-      repo: "gitquiet"
+      repo: "gitace-extension"
     })
 
     expect(doc.blocks).toMatchObject([
@@ -405,7 +405,7 @@ describe("parsing markdown into a document", () => {
           { type: "text", text: "see " },
           {
             type: "link",
-            href: "https://github.com/flazouh/gitquiet/pull/99",
+            href: "https://github.com/flazouh/gitace-extension/pull/99",
             children: [{ type: "text", text: "#99 by @octocat" }]
           }
         ]
@@ -419,7 +419,7 @@ describe("parsing markdown into a document", () => {
     <source media="(prefers-color-scheme: dark)" srcset="site/dark.svg 1x, site/dark@2x.svg 2x">
     <img src="site/light.svg" alt="Open">
   </picture>`,
-      { owner: "flazouh", repo: "gitquiet" }
+      { owner: "flazouh", repo: "gitace-extension" }
     )
 
     expect(doc.blocks).toMatchObject([
@@ -431,12 +431,12 @@ describe("parsing markdown into a document", () => {
             tag: "source",
             attrs: {
               srcset:
-                "https://raw.githubusercontent.com/flazouh/gitquiet/HEAD/site/dark.svg 1x, https://raw.githubusercontent.com/flazouh/gitquiet/HEAD/site/dark@2x.svg 2x"
+                "https://raw.githubusercontent.com/flazouh/gitace-extension/HEAD/site/dark.svg 1x, https://raw.githubusercontent.com/flazouh/gitace-extension/HEAD/site/dark@2x.svg 2x"
             }
           },
           {
             tag: "img",
-            attrs: { src: "https://raw.githubusercontent.com/flazouh/gitquiet/HEAD/site/light.svg" }
+            attrs: { src: "https://raw.githubusercontent.com/flazouh/gitace-extension/HEAD/site/light.svg" }
           }
         ]
       }
@@ -456,7 +456,7 @@ describe("parsing markdown into a document", () => {
   test("leaves an address that already says where it is", () => {
     const doc = parseMarkdown("![A shot](https://example.com/shot.png)", {
       owner: "flazouh",
-      repo: "gitquiet"
+      repo: "gitace-extension"
     })
 
     expect(doc.blocks).toMatchObject([
@@ -492,7 +492,7 @@ describe("parsing markdown into a document", () => {
   test("reads a relative link from the branch and the file it was given", () => {
     const doc = parseMarkdown("[a guide](../guide.md)", {
       owner: "flazouh",
-      repo: "gitquiet",
+      repo: "gitace-extension",
       branch: "next",
       at: "docs/reading.md"
     })
@@ -501,14 +501,14 @@ describe("parsing markdown into a document", () => {
       {
         type: "paragraph",
         children: [
-          { type: "link", href: "https://github.com/flazouh/gitquiet/blob/next/guide.md" }
+          { type: "link", href: "https://github.com/flazouh/gitace-extension/blob/next/guide.md" }
         ]
       }
     ])
   })
 
   test("leaves a fragment link alone, since it is an anchor in this rendering", () => {
-    const doc = parseMarkdown("[usage](#usage)", { owner: "flazouh", repo: "gitquiet" })
+    const doc = parseMarkdown("[usage](#usage)", { owner: "flazouh", repo: "gitace-extension" })
 
     expect(doc.blocks).toMatchObject([
       { type: "paragraph", children: [{ type: "link", href: "#usage" }] }
@@ -518,7 +518,7 @@ describe("parsing markdown into a document", () => {
   test("leaves a rooted or schemed link alone, as a picture's is", () => {
     const doc = parseMarkdown("[home](https://example.com) and [root](/octo/repo)", {
       owner: "flazouh",
-      repo: "gitquiet"
+      repo: "gitace-extension"
     })
 
     expect(doc.blocks).toMatchObject([

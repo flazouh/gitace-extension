@@ -29,7 +29,7 @@ import type { Stop } from "./navigation"
  * reader is going; it never says how.
  */
 
-type World = Window & { gitquietOwnRows?: true }
+type World = Window & { gitaceOwnRows?: true }
 
 /**
  * How long the screen being gone to has to appear before the repair starts
@@ -97,12 +97,12 @@ const STILL_ARRIVING_CHECKS = 5
  * every content script of this extension shares — GitHub's own page cannot see it.
  */
 export const drawingOurOwnRows = (target: Window, ours: boolean): void => {
-  if (ours) (target as World).gitquietOwnRows = true
-  else delete (target as World).gitquietOwnRows
+  if (ours) (target as World).gitaceOwnRows = true
+  else delete (target as World).gitaceOwnRows
 }
 
 export const ourOwnRowsDrawn = (target: Window): boolean =>
-  (target as World).gitquietOwnRows === true
+  (target as World).gitaceOwnRows === true
 
 /**
  * Keeps the current surface while one screen redraws for a browser traversal.

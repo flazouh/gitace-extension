@@ -98,6 +98,6 @@ describe("naming the file above its diff", () => {
 
     mountSprite(page)
 
-    expect(page.getElementById("gitquiet-material-sprite")).not.toBeNull()
+    expect(page.getElementById("gitace-material-sprite")).not.toBeNull()
   })
 })

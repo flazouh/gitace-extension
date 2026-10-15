@@ -141,7 +141,7 @@ describe("choosing how the interface looks", () => {
     const pack = THEME_KNOBS.find((one) => one.key === "pack")
     expect(pack?.choices.map((choice) => choice.value)).toEqual([
       "match",
-      "gitquiet",
+      "gitace",
       "anthropic",
       "cursor",
       "github",

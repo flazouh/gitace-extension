@@ -163,10 +163,10 @@ export const THEME_KNOBS = [
     "pack",
     "Theme",
     "Which colour pack paints the interface",
-    "Which colour pack paints the screens. Match is the default and means the place: GitHub's own colours on GitHub's page, where this interface stands under their header and inside their tab, and Gitquiet — this product's own look — in a window of its own. The rest are familiar editor and terminal packs, Dracula, Gruvbox, Tokyo Night, One Dark and others, each with its own light and dark face, and each of them holds everywhere once it is asked for by name.",
+    "Which colour pack paints the screens. Match is the default and means the place: GitHub's own colours on GitHub's page, where this interface stands under their header and inside their tab, and GitAce Extension — this product's own look — in a window of its own. The rest are familiar editor and terminal packs, Dracula, Gruvbox, Tokyo Night, One Dark and others, each with its own light and dark face, and each of them holds everywhere once it is asked for by name.",
     [
       { value: "match", label: "Match the page" },
-      { value: "gitquiet", label: "Gitquiet" },
+      { value: "gitace", label: "GitAce Extension" },
       { value: "anthropic", label: "Anthropic" },
       { value: "cursor", label: "Cursor" },
       { value: "github", label: "GitHub" },
@@ -203,7 +203,7 @@ export const THEME_KNOBS = [
     [
       { value: "match", label: "Match the page" },
       { value: "github", label: "GitHub" },
-      { value: "gitquiet", label: "Gitquiet" }
+      { value: "gitace", label: "GitAce Extension" }
     ],
     "match"
   )

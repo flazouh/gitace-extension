@@ -93,7 +93,7 @@ describe("reading their repository nav", () => {
     const page = theirRow(tab("Code", "/o/r"))
     page.body.insertAdjacentHTML(
       "afterbegin",
-      `<div id="gitquiet-bar"><nav aria-label="Repository"><a href="/somewhere">Ours</a></nav></div>`
+      `<div id="gitace-bar"><nav aria-label="Repository"><a href="/somewhere">Ours</a></nav></div>`
     )
 
     expect(repositoryTabs(page).map((one) => one.name)).toEqual(["Code"])

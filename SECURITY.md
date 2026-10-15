@@ -1,6 +1,6 @@
 # Security
 
-GitQuiet runs inside github.com with the session you are already signed in
+GitAce Extension runs inside github.com with the session you are already signed in
 with, and it reads and writes your repositories through GitHub's own routes and
 API. A flaw here reaches whatever your GitHub account reaches, so reports are
 taken seriously.
@@ -9,7 +9,7 @@ taken seriously.
 
 Use GitHub's private vulnerability reporting:
 
-**[Report a vulnerability](https://github.com/flazouh/gitquiet/security/advisories/new)**
+**[Report a vulnerability](https://github.com/flazouh/gitace-extension/security/advisories/new)**
 
 That form is private between you and the maintainer until a fix is published.
 Please do not open a public issue for a security problem.
@@ -36,7 +36,7 @@ maintained older branches.
 | The permissions in `wxt.config.ts` | Anything that needs an already compromised machine |
 | Data leaving the browser when it should not | Social engineering of the maintainer or of users |
 
-## What GitQuiet does with your data
+## What GitAce Extension does with your data
 
 There is no account and no server of ours. Your code, reviews and tokens stay
 in the browser. Every write goes back through GitHub.

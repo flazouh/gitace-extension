@@ -17,16 +17,16 @@ Both shells use the same theme model: **Appearance × Pack × Art**.
 | Axis | Values | Default |
 | --- | --- | --- |
 | Appearance | `system` \| `light` \| `dark` | `system` |
-| Pack | `match`, `gitquiet`, `github`, `cursor`, and other editor/terminal packs — see `THEME_KNOBS` | `match` |
-| Art | `match` \| `github` \| `gitquiet` | `match` |
+| Pack | `match`, `gitace`, `github`, `cursor`, and other editor/terminal packs — see `THEME_KNOBS` | `match` |
+| Art | `match` \| `github` \| `gitace` | `match` |
 
 - **System** means the OS preference (`prefers-color-scheme`), in both shells.
 - **Match** means the place rather than the reader. On GitHub's page it resolves to
   the `github` pack and to Octicons; in the desktop window it resolves to the
-  `gitquiet` pack and to Hugeicons. `packOf` and `setOf` do the resolving, and each
+  `gitace` pack and to Hugeicons. `packOf` and `setOf` do the resolving, and each
   shell hands its own answer down as `here` — `Theme here="github"` and
   `ArtProvider here={OCTICONS}` in the extension, ours in the window.
-- **Gitquiet** is the desktop app's own look, and the window's answer to `match`.
+- **GitAce Extension** is the desktop app's own look, and the window's answer to `match`.
 - **GitHub** is a static Primer-like light/dark pack, not live page variables.
 - **Art** is which set every glyph is drawn from, whole rather than per glyph: a
   screen drawn half in one set and half in another shows the seam.
@@ -34,7 +34,7 @@ Both shells use the same theme model: **Appearance × Pack × Art**.
 - Settings stores stay **independent** per shell; same defaults, no sync in v1.
 
 `match` is why a reader who never opens the settings sees an extension that looks
-like GitHub and a window that looks like Gitquiet, from one settings object with
+like GitHub and a window that looks like GitAce Extension, from one settings object with
 one set of defaults.
 
 GitHub's own chrome (site header, repo nav, PR title and tabs) is unchanged. Only
@@ -55,7 +55,7 @@ values, fallbacks for unknown stored data, menu built from the declarations.
 
 ```ts
 settings.theme.appearance // "system" | "light" | "dark"
-settings.theme.pack       // "gitquiet" | "anthropic" | "cursor" | "github" | … (see THEME_KNOBS)
+settings.theme.pack       // "gitace" | "anthropic" | "cursor" | "github" | … (see THEME_KNOBS)
 ```
 
 Shown in Settings as an **Appearance** section: Appearance row, Theme (pack) row.
@@ -80,7 +80,7 @@ Shown in Settings as an **Appearance** section: Appearance row, Theme (pack) row
 
 ## Acceptance
 
-1. Fresh install (both shells): pack Gitquiet, appearance System; UI matches today's
+1. Fresh install (both shells): pack GitAce Extension, appearance System; UI matches today's
    desktop look under the OS scheme.
 2. Changing Appearance or Pack in Settings updates the UI without reload.
 3. Each shipped pack has a distinct light and dark surface/ink pair.

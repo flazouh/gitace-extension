@@ -32,7 +32,7 @@ describe("remembering what a list was filtered to", () => {
     expect(rememberedFilter("working-set")).toBe("")
     // Cleared rather than left as an empty string, so a reader who never filters
     // does not carry a key around for the rest of the installation.
-    expect(localStorage.getItem("gitquiet:filter:working-set")).toBeNull()
+    expect(localStorage.getItem("gitace:filter:working-set")).toBeNull()
   })
 
   test("says nothing was filtered when the page has no storage to read", () => {

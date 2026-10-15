@@ -427,13 +427,13 @@ jobs:
       # extension once its app has been moved there and opened once.
       - name: Package a disk image
         run: |
-          echo "DMG=GitQuiet-$RELEASE_VERSION-safari.dmg" >> "$GITHUB_ENV"
+          echo "DMG=GitAce-Extension-$RELEASE_VERSION-safari.dmg" >> "$GITHUB_ENV"
           staging="$RUNNER_TEMP/safari-dmg"
           mkdir -p "$staging"
           cp -R "$RUNNER_TEMP/safari-export/$APP.app" "$staging/"
           ln -s /Applications "$staging/Applications"
           hdiutil create -volname "$APP" -srcfolder "$staging" \
-            -ov -format ULFO "GitQuiet-$RELEASE_VERSION-safari.dmg"
+            -ov -format ULFO "GitAce-Extension-$RELEASE_VERSION-safari.dmg"
 
       # Apple has to see the image before Gatekeeper will open what is inside it,
       # and `stapler` writes that answer into the file so a reader who is offline
@@ -464,8 +464,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.gate.outputs.tag }}
         run: |
-          cp "$DMG" GitQuiet-safari.dmg
-          gh release upload "$RELEASE_TAG" "$DMG" GitQuiet-safari.dmg --clobber
+          cp "$DMG" GitAce-Extension-safari.dmg
+          gh release upload "$RELEASE_TAG" "$DMG" GitAce-Extension-safari.dmg --clobber
 
       # What follows sends the same archive to the Mac App Store, which is where a
       # Safari reader looks for an extension and the only place Safari before 18.4

@@ -182,7 +182,7 @@ export const TheBar = ({
   useEffect(() => {
     const say = () =>
       document.documentElement.style.setProperty(
-        "--gitquiet-bar-h",
+        "--gitace-bar-h",
         `${Math.round(slot.getBoundingClientRect().height)}px`,
       );
     say();
@@ -485,13 +485,13 @@ export const TheBar = ({
 /**
  * The slot, wearing what the page's one Theme resolved.
  *
- * The tokens are inline custom properties on `#gitquiet-root`, and the slot is
+ * The tokens are inline custom properties on `#gitace-root`, and the slot is
  * deliberately not inside it — a bar has to stand above a page, not within the
  * region of it we replaced. Nothing inherits across that gap, so unpainted it
  * resolves the stylesheet's light defaults and reads white over a dark page.
  *
  * It used to carry a Theme of its own here, which was a second resolver: with
- * the pack on "match" it answered `gitquiet` where the screen's answered
+ * the pack on "match" it answered `gitace` where the screen's answered
  * `github`, and both wrote their answer into the early-paint keys — so the pack
  * the next page's first frame wore depended on whose store read landed last,
  * and the theme changed between the pages. A surface takes the resolution from
