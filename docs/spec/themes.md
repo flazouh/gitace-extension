@@ -1,6 +1,7 @@
 # Spec: Themes
 
-Status: agreed
+Status: agreed. The desktop app was removed in ENG-636, so the extension is the
+only shell left; what this spec says about the window is history.
 
 ## Problem
 
@@ -92,7 +93,6 @@ Shown in Settings as an **Appearance** section: Appearance row, Theme (pack) row
 ## Related
 
 - Current Primer bridge: `src/ui/primer.css`
-- Desktop tokens: `desktop/src/view/style.css`
 - Settings knobs: `src/domain/Settings.ts`
 - Prior delivery decision (Primer-on-page): `docs/spec/pull-request-review.md`
   (superseded for UI colour/type only; delivery and data decisions stand)

@@ -19,7 +19,6 @@ const DELETE_FILES = new Set([
   "CODE_OF_CONDUCT.md",
   "SECURITY.md",
   ".github/PULL_REQUEST_TEMPLATE.md",
-  "desktop/README.md",
 ])
 
 const DELETE_GLOBS = [

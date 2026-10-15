@@ -203,8 +203,7 @@ export default defineConfig({
    * Firefox asks for the sources next to the package, because a reviewer has to
    * rebuild a bundle to see what is in it. What they need is this extension:
    * `src`, the scripts `bun run build` runs, and the lockfile. What they were
-   * getting was the whole repository — the desktop app's build folder alone
-   * carries a 63 MB `bun` binary, and the zip came to 72 MB of which almost
+   * getting was the whole repository, and the zip came to 72 MB of which almost
    * none was readable source.
    *
    * WXT already leaves out `node_modules`, dotfiles, tests and `.output`. These
@@ -232,20 +231,8 @@ export default defineConfig({
      * The prose stays in. Mozilla asks a reviewer to rebuild the extension from
      * this archive, and refuses one that arrives without instructions, so the
      * README that carries them is the last thing to drop for size.
-     *
-     * `desktop/*\/**` is every file in every folder under `desktop`, and no file
-     * sitting directly in it. Not `desktop/**`, because an exclusion beats an
-     * inclusion and `desktop/package.json` has to survive: the root package.json
-     * calls `desktop` a workspace, and bun refuses to install a workspace it
-     * cannot find. Six small config files stay. 154 MB goes, including the 63 MB
-     * `bun` binary under `build`.
-     *
-     * One pattern rather than a folder each, so a folder added to the desktop app
-     * next year is dropped by default instead of shipping until somebody notices
-     * the archive is large again.
      */
     excludeSources: [
-      "desktop/*/**",
       "site/**",
       "video/**",
       "shots/**",

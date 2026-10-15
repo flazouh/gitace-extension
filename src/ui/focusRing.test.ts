@@ -71,8 +71,7 @@ const everyFace = function* (): Generator<readonly [Pack, Scheme, ThemeTokens]> 
 }
 
 describe.each([
-  ["on GitHub's page", "src/ui/primer.css"],
-  ["in a window of our own", "desktop/src/view/style.css"]
+  ["on GitHub's page", "src/ui/primer.css"]
 ])("the ring the keyboard leaves %s", (_where, path) => {
   test("is drawn outside the control, where its own fill cannot reach it", () => {
     // A negative offset pulls the ring inside the border box and paints it on

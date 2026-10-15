@@ -37,7 +37,7 @@ on:
   # `targets` because the reason to come back to a published tag is that one store
   # did not take it, and sending it to the others again is not harmless: a store
   # refuses a version it already holds, so the run would go red on a release that
-  # worked, and both mac jobs would notarise for an hour to attach what is already
+  # worked, and the Safari job would notarise for an hour to attach what is already
   # attached.
   workflow_dispatch:
     inputs:
@@ -49,7 +49,7 @@ on:
         description: Which targets to submit
         default: all
         type: choice
-        options: [all, chrome, firefox, desktop, safari]
+        options: [all, chrome, firefox, safari]
       # Off here, because a dispatch comes back to a page that is already filled,
       # and replacing an asset would swap the exact bytes a store is reviewing for
       # a fresh build of the same commit. The two are not promised to be identical.
@@ -74,7 +74,6 @@ jobs:
       tag: ${{ steps.which.outputs.tag }}
       chrome: ${{ steps.which.outputs.chrome }}
       firefox: ${{ steps.which.outputs.firefox }}
-      desktop: ${{ steps.which.outputs.desktop }}
       safari: ${{ steps.which.outputs.safari }}
       store: ${{ steps.which.outputs.store }}
     steps:
@@ -94,9 +93,9 @@ jobs:
           # turn a skipped job into a failed release.
           CHROME: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
           FIREFOX: ${{ secrets.FIREFOX_JWT_SECRET }}
-          # Apple takes two, because both mac jobs sign and then notarize, and
+          # Apple takes two, because the Safari job signs and then notarizes, and
           # an unnotarised build is one Gatekeeper refuses. With the certificate
-          # alone they would start and die at `notarytool`.
+          # alone it would start and die at `notarytool`.
           APPLE_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           APPLE_NOTARY: ${{ secrets.APPLE_ID_PASSWORD }}
           # The Mac App Store takes more again: one certificate signs the app,
@@ -118,9 +117,8 @@ jobs:
             exit 1
           fi
           # Yes when this run asked for the target and every credential it needs
-          # is set. Both mac jobs answer to the same two, and are asked
-          # separately because a store that refused a tag is asked for it again
-          # on its own.
+          # is set. Each target is asked separately, because a store that refused
+          # a tag is asked for it again on its own.
           ready() {
             target=$1
             shift
@@ -139,7 +137,6 @@ jobs:
             echo "tag=$tag"
             echo "chrome=$(ready chrome "$CHROME")"
             echo "firefox=$(ready firefox "$FIREFOX")"
-            echo "desktop=$(ready desktop "$APPLE_CERTIFICATE" "$APPLE_NOTARY")"
             echo "safari=$(ready safari "$APPLE_CERTIFICATE" "$APPLE_NOTARY")"
             # The safari credentials as well as the store ones, because the store
             # steps live in that job: without them the job never starts, and a
@@ -317,167 +314,6 @@ jobs:
             --firefox-zip .output/*-firefox.zip \
             --firefox-sources-zip .output/*-sources.zip
 
-  desktop:
-    name: macOS app
-    needs: [gate, package]
-    # Gatekeeper refuses an unsigned app that arrived over the network, so a DMG
-    # nobody can open is worse than no DMG at all.
-    if: needs.gate.outputs.desktop == 'yes'
-    # An Apple app can only be signed and notarised on a Mac, and `hdiutil`,
-    # `codesign` and `notarytool` are all only here.
-    runs-on: macos-latest
-    # Notarisation is a queue at Apple. Ten minutes is normal, an hour happens.
-    timeout-minutes: 90
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ needs.gate.outputs.tag }}
-
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
-        with:
-          bun-version-file: .bun-version
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
-
-      - name: Set the release version
-        env:
-          RELEASE_TAG: ${{ needs.gate.outputs.tag }}
-        run: echo "RELEASE_VERSION=$(bun scripts/release-version.ts "$RELEASE_TAG")" >> "$GITHUB_ENV"
-
-      # The window builds the same screens the extension does, so it goes through
-      # the same rolldown, which reads `.wxt/tsconfig.json`. `--ignore-scripts`
-      # above skips the hook that would have written it, and the failure names a
-      # missing tsconfig rather than a missing step.
-      - name: Generate WXT types
-        run: bun run types
-
-      - uses: ./.github/actions/apple-keychain
-        with:
-          certificate: ${{ secrets.MACOS_CERTIFICATE }}
-          password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-
-      # Said out loud, because a build with no OAuth app offers no way in and the
-      # panel is the only place that would ever mention it.
-      #
-      # A warning rather than a failure. This job is also what attaches the disk
-      # image the site's download link resolves to, so refusing to build would
-      # take that link down for everyone who is already signed in — a worse fault
-      # than a sign-in panel that says what is missing.
-      - name: Say if this build has no OAuth app
-        env:
-          OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
-          OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
-        run: |
-          [ -n "$OAUTH_CLIENT_ID" ] ||
-            echo "::warning::No OAUTH_CLIENT_ID: this build can sign nobody in. Set it in the repository secrets."
-          [ -n "$OAUTH_CLIENT_SECRET" ] ||
-            echo "::warning::No OAUTH_CLIENT_SECRET: this build offers the device flow only, not the browser sign-in."
-
-      # `ELECTROBUN_DEVELOPER_ID` is what turns signing on: see
-      # desktop/electrobun.config.ts, which reads it to decide.
-      #
-      # The OAuth app is read here, while the bundle is being built, and not by
-      # the app at launch: an app opened from Finder inherits launchd's
-      # environment and would find nothing. The secrets are named without the
-      # `GITHUB_` prefix because GitHub refuses to store a secret under one, and
-      # they are mapped to the names the build reads.
-      - name: Build, sign and notarise
-        working-directory: desktop
-        env:
-          ELECTROBUN_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
-          ELECTROBUN_APPLEID: ${{ secrets.APPLE_ID }}
-          ELECTROBUN_APPLEIDPASS: ${{ secrets.APPLE_ID_PASSWORD }}
-          ELECTROBUN_TEAMID: ${{ secrets.APPLE_TEAM_ID }}
-          GITHUB_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
-          GITHUB_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
-        run: bun run build:stable
-
-      # Read out of the built bundle, not out of the environment.
-      #
-      # The step above sets two environment variables and trusts that they end up
-      # inside the app. What puts them there is `define` in
-      # `desktop/electrobun.config.ts`, and every way that can quietly stop
-      # working — an Electrobun release that reads the config differently, a
-      # renamed key, a bundler that no longer substitutes — leaves the secrets
-      # perfectly well set and the app unable to sign anybody in. That is the
-      # exact release this whole change exists to stop shipping, so the check is
-      # on the artifact.
-      #
-      # The tarball under `artifacts`, which is the app. What a finished build
-      # leaves under `build` is a small app that carries that tarball and unpacks
-      # it on the first launch, so nothing there holds a readable copy of a line
-      # the bundler wrote — the first version of this check searched `build` and
-      # failed a build whose client id was in fact where it belongs.
-      #
-      # Unpacked with Electrobun's own zstd, which the step above downloaded and
-      # which is therefore the one version that agrees with the file.
-      #
-      # Skipped rather than failed where there is no secret to look for, which is
-      # a fork building an app it knows has no OAuth app.
-      - name: Make sure the OAuth app reached the bundle
-        env:
-          OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
-        run: |
-          if [ -z "$OAUTH_CLIENT_ID" ]; then
-            echo "No OAUTH_CLIENT_ID to look for. Nothing to check."
-            exit 0
-          fi
-          node_modules/electrobun/dist-macos-arm64/zig-zstd decompress \
-            -i desktop/artifacts/stable-macos-arm64-GitQuiet.app.tar.zst \
-            -o "$RUNNER_TEMP/GitQuiet.app.tar"
-          if grep -qF "$OAUTH_CLIENT_ID" "$RUNNER_TEMP/GitQuiet.app.tar"; then
-            echo "The client id is in the bundle."
-          else
-            echo "::error::The client id never reached the bundle. Read the define block in desktop/electrobun.config.ts."
-            exit 1
-          fi
-          rm "$RUNNER_TEMP/GitQuiet.app.tar"
-
-      # Renamed on the way up. Electrobun names an artifact for the build it came
-      # from, which reads as nothing at all in somebody's downloads folder.
-      - name: Name the disk image for what it is
-        run: |
-          echo "DMG=GitQuiet-$RELEASE_VERSION-macos-arm64.dmg" >> "$GITHUB_ENV"
-          mv desktop/artifacts/*-GitQuiet.dmg "GitQuiet-$RELEASE_VERSION-macos-arm64.dmg"
-
-      - uses: ./.github/actions/gatekeeper
-        with:
-          dmg: ${{ env.DMG }}
-
-      # Twice, under two names.
-      #
-      # The versioned one is what somebody ends up with in their downloads
-      # folder, where `GitQuiet.dmg` says nothing about which build it is. The
-      # second is a fixed name, because `releases/latest/download/NAME` is the
-      # only link to a release asset that survives the next release, and it
-      # resolves a name and not a pattern. That link is the download button on
-      # gitquiet.com, so without it the site has to be edited on every release
-      # and is wrong in between.
-      - name: Attach the app to the GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ needs.gate.outputs.tag }}
-        run: |
-          cp "$DMG" GitQuiet-macos-arm64.dmg
-          gh release upload "$RELEASE_TAG" "$DMG" GitQuiet-macos-arm64.dmg --clobber
-
-      # What the app already installed reads to find this one.
-      #
-      # Every build writes these beside the disk image and no release has ever
-      # carried them, which is why the updater in every shipped build has been
-      # asking for a file that was not there. The names are Electrobun's own and
-      # are what a bundle asks for by name — `stable-macos-arm64-update.json`
-      # holds the hash to compare, the tarball beside it is the app itself — so
-      # they go up as they are rather than being renamed for a downloads folder.
-      # The step above moved the disk image out of that folder, so whatever is
-      # left is the updater's, including a patch file if one was generated.
-      - name: Attach what the updater reads
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ needs.gate.outputs.tag }}
-        run: gh release upload "$RELEASE_TAG" desktop/artifacts/* --clobber
-
   safari:
     name: Safari app
     needs: [gate, package]
@@ -534,11 +370,6 @@ jobs:
       # identifier", and the disagreement is silent until then. `GitQuiet` with
       # `dev.gitquiet.safari` failed this way, and so did `GitQuiet for Safari`
       # with `dev.gitquiet.GitQuiet`.
-      #
-      # Named apart from the desktop app, which is also GitQuiet and also lands in
-      # Applications. Two files of that name cannot both sit there, so installing
-      # the second used to replace the first, and Spotlight offered two identical
-      # answers up to the moment it did.
       - name: Wrap the extension in an Xcode project
         run: |
           xcrun safari-web-extension-converter .output/safari-mv3 \
@@ -625,9 +456,9 @@ jobs:
           dmg: ${{ env.DMG }}
           app: ${{ env.APP }}.app
 
-      # Under a fixed second name as well, for the same reason as the macOS app
-      # above: the site's download link has to outlive the release it was written
-      # against.
+      # Under a fixed second name as well, because `releases/latest/download/NAME`
+      # is the only link to a release asset that survives the next release: the
+      # site's download link has to outlive the release it was written against.
       - name: Attach the Safari app to the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

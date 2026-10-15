@@ -6,7 +6,7 @@
     <title>GitQuiet privacy policy</title>
     <meta
       name="description"
-      content="Privacy policy for the GitQuiet browser extension and the GitQuiet app for macOS."
+      content="Privacy policy for the GitQuiet browser extension."
     />
     <link rel="canonical" href="https://gitquiet.com/privacy" />
     <link rel="icon" type="image/png" href="/store/icon-128.png" />
@@ -52,8 +52,8 @@
       <p>Last updated: 16 August 2026</p>
       <p>
         GitQuiet improves GitHub pull request, issue and Actions pages. It comes as an
-        extension for Chrome, Firefox and Safari, and as an app for macOS. This policy
-        covers both. There is no GitQuiet account and no GitQuiet server.
+        extension for Chrome, Firefox and Safari. This policy covers each of them.
+        There is no GitQuiet account and no GitQuiet server.
       </p>
 
       <h2>What we process</h2>
@@ -64,32 +64,6 @@
       <p>
         The extension stores display settings and a local cache of GitHub payloads in
         your browser's extension storage, on your device, so pages open quickly.
-      </p>
-      <p>
-        The app reads the same GitHub API with your token, and keeps the same kind of
-        cache on your machine.
-      </p>
-
-      <h2>Signing in, in the app</h2>
-      <p>
-        The app signs you in through GitHub's own page, opened in the browser you
-        already use. GitHub hands the app a token afterwards.
-      </p>
-      <p>
-        That token is kept in your macOS keychain. It goes to GitHub and nowhere else.
-        Signing out removes it from the keychain.
-      </p>
-      <p>
-        Before you sign in, the app can use a <code>GITHUB_TOKEN</code> you exported
-        yourself, or the token the GitHub CLI already holds if you are signed in there.
-        It reads those; it never writes to them.
-      </p>
-
-      <h2>Checking for a new version, in the app</h2>
-      <p>
-        On launch the app asks the GitHub release page whether a newer version exists.
-        That request tells GitHub your IP address and which version you run, the same as
-        downloading the app by hand would.
       </p>
 
       <h2>What we do not do</h2>

@@ -74,7 +74,6 @@ tag.yml                     release.yml
   write the tag               package   chrome zip, firefox zip, sources zip
   open the release            chrome    Chrome Web Store
                               firefox   Firefox Add-ons, listed
-                              desktop   signed, notarised .dmg
                               safari    Xcode wrapper -> .dmg, and the App Store
 ```
 
@@ -133,10 +132,10 @@ Then three secrets:
 | `FIREFOX_JWT_ISSUER`   | [Manage API keys](https://addons.mozilla.org/developers/addon/api/key/), JWT issuer |
 | `FIREFOX_JWT_SECRET`   | The same page, JWT secret. Shown once                                               |
 
-### macOS and Safari
+### Safari
 
-Both Apple jobs share one certificate, so these six turn on both at once. They
-need a paid Apple Developer Program membership.
+These six turn on the Safari job. They need a paid Apple Developer Program
+membership.
 
 | Secret                       | Where it comes from                                                                                                      |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -189,6 +188,3 @@ privacy answers, and the trader status the EU asks for.
 Edge takes the Chrome zip unchanged. It needs a Partner Center product, three
 secrets, and a job in `release.yml` shaped like the Chrome one, with
 `--edge-zip`, `--edge-product-id`, `--edge-client-id` and `--edge-api-key`.
-
-An Intel Mac build is `targets` in `desktop/electrobun.config.ts`, set to
-`macos-arm64,macos-x64`.

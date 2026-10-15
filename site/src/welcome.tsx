@@ -71,7 +71,7 @@ const Welcome = () => {
                 : {
                     title: "Install for Chrome.",
                     says: [
-                      "It works on the pages you already use. Firefox, Safari, and a Mac app too."
+                      "It works on the pages you already use. Firefox and Safari too."
                     ],
                     act: (
                       <a className="tour-press" href={STORE_AT}>

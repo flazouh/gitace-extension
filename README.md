@@ -151,10 +151,7 @@ goes to the browser's own console and nowhere else. See
 | Tests | `bun test`, `effect/testing`, Testing Library, happy-dom |
 
 The domain, the ports and the screens do not know what they are running inside.
-That is what lets [`desktop/`](./desktop) import the same `src/domain`, `src/app`,
-`src/ports` and `src/ui` and draw them in an Electrobun window instead of on
-GitHub's page, reaching GitHub through the documented API with a token rather
-than through page routes with a cookie.
+A screen reads ports, and what is behind a port is decided at the edge.
 
 Effect v4 differs from v3 in ways worth knowing before writing code: `Either` is
 `Result`, `Effect.catchAll` and `Effect.orElse` are gone in favour of
@@ -215,7 +212,7 @@ gitignored.
 - [`CONTEXT.md`](./CONTEXT.md) — the glossary. The code uses these terms exactly.
 - [`docs/spec/`](./docs/spec) — what each screen is for.
 - [`src/ui/place.ts`](./src/ui/place.ts) — how a page is taken over.
-- [`site/`](./site) — the landing page. [`desktop/`](./desktop) — the macOS app.
+- [`site/`](./site) — the landing page.
 
 ## Release
 
