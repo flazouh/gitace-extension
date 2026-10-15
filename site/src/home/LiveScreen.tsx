@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import type { HeroLiveScene } from "../HeroStage"
+import { drawFacesIn } from "./drawnFaces"
 import { Skeleton } from "./Skeleton"
 
 const HeroStage = lazy(() => import("../HeroStage"))
@@ -8,7 +9,8 @@ const HeroStage = lazy(() => import("../HeroStage"))
  * One of the extension's own screens, running from fixtures inside a frame.
  *
  * Not a picture of the product: `HeroStage` mounts the real interface over a mock
- * repository. Until it has painted, the frame shows the code-drawn `Skeleton`.
+ * repository. Until it has painted, the frame shows the code-drawn `Skeleton`, and the
+ * avatars it would fetch from github.com are drawn in code instead (`drawnFaces.ts`).
  *
  * The screen is decoration on this page, so it is `inert`: a keyboard never tabs into
  * a pretend pull request, and a screen reader hears the one sentence in `label`
@@ -25,9 +27,15 @@ export const LiveScreen = ({
   readonly eager?: boolean
 }) => {
   const frame = useRef<HTMLDivElement>(null)
+  const screen = useRef<HTMLDivElement>(null)
   const [near, setNear] = useState(eager)
   const [ready, setReady] = useState(false)
   const painted = useCallback(() => setReady(true), [])
+
+  useEffect(() => {
+    const at = screen.current
+    return at === null ? undefined : drawFacesIn(at)
+  }, [])
 
   useEffect(() => {
     if (near) return
@@ -52,7 +60,7 @@ export const LiveScreen = ({
       <div className={`ace-live-under${ready ? " gone" : ""}`}>
         <Skeleton />
       </div>
-      <div inert className="ace-live-screen">
+      <div ref={screen} inert className="ace-live-screen">
         {near ? (
           <Suspense fallback={null}>
             <HeroStage scene={scene} onReady={painted} />

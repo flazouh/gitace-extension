@@ -89,13 +89,19 @@
   color: var(--white);
 }
 
-:is(.ace-bar, .ace-nav, .ace-page, .ace-foot) a:focus-visible {
+:is(.ace, .ace-bar, .ace-nav, .ace-foot) a:focus-visible,
+a.ace-btn:focus-visible {
   outline: 2px solid var(--violet);
   outline-offset: 3px;
 }
 
 :is(.ace-hero, .ace-band, .ace-nav.night) a:focus-visible {
   outline-color: var(--lilac);
+}
+
+/* The bar is violet itself, so its ring is white. */
+.ace-bar a:focus-visible {
+  outline-color: var(--white);
 }
 
 .ace-up {

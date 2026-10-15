@@ -56,6 +56,7 @@ export const PAIRS: ReadonlyArray<Pair> = [
   ["paper on the ink button, hovered", paper, violetInk, TEXT],
   ["white on violet (bar, legend, spec row)", white, violet, TEXT],
   ["card border on paper", edge, paper, EDGE],
+  ["white focus ring on the violet bar", white, violet, EDGE],
   ["focus ring on paper", violet, paper, EDGE],
   ["focus ring on the second paper", violet, paper2, EDGE],
   ["cream headline and nav on the hero", cream, hero, TEXT],
