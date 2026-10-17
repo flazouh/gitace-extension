@@ -47,11 +47,9 @@ export const over = (top: string, under: string): string => {
  * the field.
  */
 export const grained = (field: string, opacity: number): string => {
-  const lit = channels(field).map((c) => {
-    const blended = c <= 0.5 ? 2 * c : 1
-    return c + opacity * (blended - c)
-  }) as unknown as Rgb
-  return toHex(lit)
+  const lift = (c: number): number => c + opacity * ((c <= 0.5 ? 2 * c : 1) - c)
+  const [r, g, b] = channels(field)
+  return toHex([lift(r), lift(g), lift(b)])
 }
 
 /** WCAG 2.2 AA: 4.5 for text, 3 for large text and for the edges of controls. */

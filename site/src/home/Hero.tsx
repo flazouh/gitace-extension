@@ -1,6 +1,6 @@
 import { Atmosphere } from "../Atmosphere"
-import { Install, useTheirStore } from "../Shell"
-import { alsoOn } from "../stores"
+import { Install } from "../Shell"
+import { alsoOn, theirStore } from "../stores"
 import { LiveScreen } from "./LiveScreen"
 
 const CHIPS = ["No account", "No server", "Open source", "Not an AI reviewer"] as const
@@ -10,7 +10,7 @@ const CHIPS = ["No account", "No server", "Open source", "Not an AI reviewer"] a
  * the inbox running in a window tilted back the way Ace's session window is.
  */
 export const Hero = () => {
-  const store = useTheirStore()
+  const store = theirStore()
 
   return (
     <section id="top" className="ace-hero">

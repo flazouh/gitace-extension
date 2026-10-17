@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
 import { Lockup } from "./Lockup"
 import { inShort, useStars } from "./stars"
-import { STORES, theirStore, type Store } from "./stores"
+import { STORES, theirStore } from "./stores"
 
 /**
  * What every page of the site shares: the bar, the nav, the install button and the
@@ -20,19 +20,13 @@ export const ACE_AT = "https://useace.dev"
 /** Inner column for the simple pages (jobs, compare, welcome). */
 export const HELD = "mx-auto w-full max-w-6xl px-6"
 
-/** The reader's store, read once: a browser does not change under a page. */
-export const useTheirStore = (): Store => {
-  const [store] = useState(theirStore)
-  return store
-}
-
 /**
  * The install button, pointed at the store for the reader's browser.
  *
  * Cream on the dark hero and band, ink on paper, as Ace's download button is.
  */
 export const Install = ({ tone = "ink" }: { readonly tone?: "cream" | "ink" }) => {
-  const store = useTheirStore()
+  const store = theirStore()
   return (
     <a className={`ace-btn ${tone === "cream" ? "ace-btn-cream" : "ace-btn-ink"}`} href={store.at}>
       {store.press}
@@ -139,7 +133,7 @@ const useOverNight = (heroId: string | undefined): boolean => {
  */
 export const Masthead = ({ over }: { readonly over?: string }) => {
   const night = useOverNight(over)
-  const store = useTheirStore()
+  const store = theirStore()
 
   return (
     <>

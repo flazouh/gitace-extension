@@ -1,9 +1,10 @@
+import { MARK_PATH } from "@/ui/Mark"
 import { ACE_AT } from "../Shell"
 
-/** Ace's mark, unchanged (`Mark` in `src/ui/Mark.tsx` draws the same path). */
+/** Ace's mark, in its own 120 x 82 box, for a product tile. */
 const AceMark = ({ fill }: { readonly fill: string }) => (
   <svg viewBox="0 0 120 82" aria-hidden="true">
-    <path fill={fill} d="M43.7 81.4H0L85.7 0H120v81.4H76.9L61.6 64.7 43.7 81.4Zm29.2-32.2h24.4V24.6L72.9 49.2Z" />
+    <path fill={fill} d={MARK_PATH} />
   </svg>
 )
 
