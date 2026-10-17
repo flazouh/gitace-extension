@@ -1,16 +1,7 @@
 import "@fontsource-variable/inter"
 import { COMPARED } from "./compare/pages"
 import { mount } from "./mount"
-import {
-  Above,
-  AddToChrome,
-  Footer,
-  HELD,
-  Nav,
-  Quietly,
-  SkipTo,
-  Source
-} from "./Shell"
+import { Above, Footer, HELD, Install, Masthead, Quietly, SkipTo } from "./Shell"
 import "./index.css"
 
 const PULLWATCH_AT =
@@ -20,12 +11,9 @@ const ReviewQueue = () => (
   <>
     <SkipTo id="job" says="Skip to the job" />
 
-    <Above>
-      <Nav>
-        <Source />
-        <AddToChrome />
-      </Nav>
+    <Masthead />
 
+    <Above>
       <div className="pb-16 pt-10 sm:pt-16">
         <p className="eyebrow m-0">GitHub review queue</p>
         <h1 className="m-0 mt-4 max-w-3xl text-balance text-[clamp(2.1rem,5.5vw,3.4rem)] font-semibold leading-[1.05] tracking-[-0.04em]">
@@ -35,7 +23,7 @@ const ReviewQueue = () => (
           A queue you drain. Next review, not recency—on the GitHub session you already have.
         </p>
         <div className="mt-10">
-          <AddToChrome big />
+          <Install />
         </div>
       </div>
     </Above>
@@ -94,14 +82,12 @@ const ReviewQueue = () => (
           A faster, quieter GitHub.
         </h2>
         <div className="mt-10">
-          <AddToChrome big />
+          <Install />
         </div>
       </section>
     </main>
 
-    <div className={HELD}>
-      <Footer />
-    </div>
+    <Footer />
   </>
 )
 

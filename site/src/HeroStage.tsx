@@ -4,7 +4,7 @@ import { Supplied } from "../../shots/Supplied"
 import type { View } from "../../shots/view"
 
 /**
- * Live product mount for the home hero — same fixture path as `/welcome`
+ * Live product mount for the home page's frames — same fixture path as `/welcome`
  * (`Held` + `Supplied` + one `View`), without welcome light theme override.
  *
  * Dark stage pack comes from `Supplied` default STAGE_CHOSEN. Each scene's
@@ -71,7 +71,7 @@ const Screen = ({
     if (gate === undefined) {
       /*
        * Held hides until the room is measured; one frame later scale is on and the
-       * PNG underneath can leave. Working Set has no late ready selector.
+       * code-drawn skeleton underneath can leave. Working Set has no late ready selector.
        */
       const id = window.requestAnimationFrame(() => done())
       return () => {
@@ -119,7 +119,7 @@ const Screen = ({
 }
 
 /**
- * One active fixture scene, scaled into the hero frame. Parent keeps the PNG up
+ * One active fixture scene, scaled into its frame. The parent keeps its skeleton up
  * until `onReady` so Held pre-measure hide never flashes unscaled UI.
  */
 export const HeroStage = ({

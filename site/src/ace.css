@@ -1,0 +1,850 @@
+/**
+ * The Ace family's look, ported from useace.dev's own stylesheet.
+ *
+ * GitAce Extension is one of Ace's products, so its site wears Ace's paper, ink, type
+ * and parts: the bar, the sticky nav, the dark hero with a tilted window in it, the
+ * split, the layers, the spec table, the band and the debossed footer. The rules are
+ * copied here rather than linked, so a change on useace.dev never reaches this page
+ * unannounced.
+ *
+ * Every class carries `ace-`. The extension's own screens are mounted live inside this
+ * page, and Ace's short names (`bar`, `chip`, `btn`, `size`, `stack`, `wrap`) are words
+ * the interface's markup uses too. A prefix keeps these rules off those screens.
+ *
+ * Two changes from Ace, both about contrast. Ace's accent is clay; this page's is
+ * GitAce violet, in three strengths: `--violet` fills a surface under white text,
+ * `--violet-ink` is violet text on paper, and `--lilac` is violet text on the dark
+ * hero and band. And Ace's `--ink-3` (#8b867f, 3.0:1 on paper) is darkened until small
+ * text passes. `contrast.test.ts` reads the values below and fails under WCAG's
+ * thresholds.
+ */
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 200 500;
+  font-display: swap;
+  src: url(/fonts/archivo-latin.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Archivo Narrow";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url(/fonts/archivo-narrow-latin.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: Geist;
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url(/fonts/geist-latin.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url(/fonts/geist-mono-latin.woff2) format("woff2");
+}
+
+:root {
+  --paper: #ecebe7;
+  --paper-2: #e2e0db;
+  --ink: #0b0a09;
+  --ink-2: #4c4843;
+  --ink-3: #66615a;
+  --line: #0b0a0929;
+  --edge: #7d7871;
+  --night: #120d0b;
+  --cream: #f3e6da;
+  --chip: #cfdcf0;
+  --hush: #cbbfb3;
+  --violet: #6d28d9;
+  --violet-ink: #5b21b6;
+  --lilac: #c4b5fd;
+  --white: #ffffff;
+
+  --ace-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ace-sans: Archivo, "Helvetica Neue", Arial, system-ui, sans-serif;
+  --ace-narrow: "Archivo Narrow", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
+  --ace-ui: Geist, ui-sans-serif, system-ui, sans-serif;
+  --ace-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+/* The page itself, on the home page and around the shared parts of the others. */
+.ace {
+  font-family: var(--ace-sans);
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.ace ::selection {
+  background: var(--violet);
+  color: var(--white);
+}
+
+:is(.ace, .ace-bar, .ace-nav, .ace-foot) a:focus-visible,
+a.ace-btn:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 3px;
+}
+
+:is(.ace-hero, .ace-band, .ace-nav.night) a:focus-visible {
+  outline-color: var(--lilac);
+}
+
+/* The bar is violet itself, so its ring is white. */
+.ace-bar a:focus-visible {
+  outline-color: var(--white);
+}
+
+.ace-up {
+  font: 400 14px/1 var(--ace-narrow);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.ace-wrap {
+  width: min(1260px, 100% - 120px);
+  margin: 0 auto;
+}
+
+.ace-display {
+  font-family: var(--ace-sans);
+  font-size: clamp(42px, 4.5vw, 66px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+}
+
+/* Buttons and chips. */
+
+.ace-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  height: 48px;
+  padding: 0 20px;
+  font: 400 20px/1 var(--ace-narrow);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s var(--ace-ease),
+    color 0.2s var(--ace-ease);
+}
+
+.ace-btn-ink {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.ace-btn-ink:hover {
+  background: var(--violet-ink);
+}
+
+.ace-btn-cream {
+  background: var(--cream);
+  color: var(--night);
+}
+
+.ace-btn-cream:hover {
+  background: var(--white);
+}
+
+.ace-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid;
+  font: 400 13.5px/1 var(--ace-narrow);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The bar above the nav. */
+
+.ace-bar {
+  position: relative;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 6px 16px;
+  background: var(--violet);
+  color: var(--white);
+  text-align: center;
+}
+
+.ace-bar a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The nav: cream over the hero, ink on paper once the reader is past it. */
+
+.ace-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 60px;
+  padding: 0 30px;
+  color: var(--ink);
+  background: #ecebe7d1;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition:
+    background-color 0.4s var(--ace-ease),
+    color 0.4s var(--ace-ease);
+}
+
+.ace-nav.night {
+  color: var(--cream);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.ace-nav .ace-l {
+  display: flex;
+  gap: 18px;
+}
+
+.ace-nav .ace-r {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 22px;
+}
+
+.ace-nav .ace-install {
+  color: var(--violet-ink);
+}
+
+.ace-nav.night .ace-install {
+  color: var(--lilac);
+}
+
+.ace-nav a {
+  transition: opacity 0.2s var(--ace-ease);
+}
+
+.ace-nav a:hover {
+  opacity: 0.75;
+}
+
+.ace-word {
+  display: flex;
+  align-items: center;
+}
+
+.ace-word svg {
+  display: block;
+  width: auto;
+  height: 22px;
+}
+
+.ace-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The hero. */
+
+.ace-hero {
+  position: relative;
+  isolation: isolate;
+  margin-top: -60px;
+  padding-top: 150px;
+  color: var(--cream);
+}
+
+.ace-hero-text {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.ace-hero-text h1 {
+  max-width: 14ch;
+  font-size: clamp(38px, 4.2vw, 62px);
+  font-weight: 300;
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.ace-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+  color: var(--chip);
+}
+
+.ace-buy {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.ace-size {
+  font: 300 36px/1 var(--ace-sans);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.ace-size small {
+  display: block;
+  margin-top: 8px;
+  font: 400 13px/1 var(--ace-narrow);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--hush);
+}
+
+.ace-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.ace-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--lilac);
+  border-bottom: 0;
+  color: var(--lilac);
+  font: 400 15px/1.1 var(--ace-narrow);
+}
+
+/* Where the hero's cream horizon rises: under the window, never under the words. */
+.ace-horizon {
+  top: calc(100% - 300px);
+}
+
+/* The window the live product stands in, tilted back the way Ace's is. */
+
+.ace-object {
+  position: relative;
+  z-index: 2;
+  width: min(1240px, 100% - 80px);
+  margin: 70px auto -280px;
+  perspective: 1800px;
+}
+
+.ace-win {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #141413;
+  transform: rotateX(6deg);
+  transform-origin: 50% 100%;
+  box-shadow:
+    0 70px 140px -40px #000000a6,
+    0 -24px 90px -30px #e9b79c73;
+}
+
+/* The split: words on the left, a plate with a live screen on the right. */
+
+.ace-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 80px;
+  padding: 450px 0 170px;
+}
+
+.ace-lede {
+  max-width: 500px;
+  margin-top: 28px;
+  color: var(--ink-2);
+  font-size: 19px;
+  line-height: 1.6;
+  letter-spacing: -0.02em;
+}
+
+.ace-split .ace-btn {
+  margin-top: 38px;
+}
+
+.ace-plate {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ace-plate .ace-shot {
+  position: absolute;
+  top: 20%;
+  inset-inline-start: 10%;
+  width: 120%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #141413;
+  box-shadow: 0 40px 80px -20px #000000b3;
+}
+
+/* The layers, held still: three tilted plates and the legend that names them. */
+
+.ace-layers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 110px 0 150px;
+  overflow: hidden;
+  background-image:
+    linear-gradient(#5b8def21 1px, transparent 1px),
+    linear-gradient(90deg, #5b8def21 1px, transparent 1px);
+  background-position: 50%;
+  background-size: 60px 60px;
+}
+
+.ace-pin-row {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+}
+
+.ace-scene {
+  position: relative;
+  width: 520px;
+  height: 420px;
+  perspective: 1600px;
+}
+
+.ace-plane {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 340px;
+  height: 230px;
+  margin: -115px 0 0 -170px;
+  overflow: hidden;
+  border: 1px solid #0b0a098c;
+  background: #ecebe799;
+  transform-style: preserve-3d;
+  transform: rotateX(58deg) rotateZ(-38deg);
+}
+
+/* Painted in this order rather than the markup's, since the scene is flat. */
+.ace-plane.ace-top {
+  z-index: 3;
+  border-color: #0b0a09e6;
+  background: #141413;
+  transform: rotateX(58deg) rotateZ(-38deg) translateZ(150px);
+}
+
+.ace-plane.ace-session {
+  z-index: 2;
+  background:
+    repeating-linear-gradient(90deg, #0b0a091f 0 1px, transparent 1px 12px),
+    #e2e0dbd9;
+  transform: rotateX(58deg) rotateZ(-38deg) translateZ(60px);
+}
+
+.ace-plane.ace-github {
+  background: linear-gradient(135deg, #cfccc5, #f1efea 45%, #bdb9b1);
+  transform: rotateX(58deg) rotateZ(-38deg) translateZ(-30px);
+}
+
+.ace-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ace-legend li {
+  display: flex;
+  align-items: stretch;
+}
+
+.ace-legend b,
+.ace-legend span {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  font: 400 15px/1.1 var(--ace-narrow);
+}
+
+.ace-legend b {
+  border: 1px solid var(--violet);
+  background: var(--violet);
+  color: var(--white);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ace-legend span {
+  border: 1px solid var(--ink);
+  border-inline-start: 0;
+  background: var(--paper);
+  font-family: var(--ace-sans);
+  font-size: 14.5px;
+  letter-spacing: -0.02em;
+}
+
+.ace-caption {
+  margin-top: 40px;
+  padding: 0 20px;
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  text-align: center;
+}
+
+/* The spec table, and the family of products under it. */
+
+.ace-specs {
+  padding: 60px 0 170px;
+}
+
+.ace-specs .ace-display {
+  margin-bottom: 50px;
+}
+
+.ace-spec {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  border: 1px solid var(--ink);
+  border-bottom: 0;
+}
+
+.ace-spec:last-child {
+  border-bottom: 1px solid var(--ink);
+}
+
+.ace-spec dt {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 18px;
+  border-inline-end: 1px solid var(--ink);
+  font: 400 17px/1.1 var(--ace-narrow);
+  text-transform: uppercase;
+  transition:
+    background-color 0.2s var(--ace-ease),
+    color 0.2s var(--ace-ease);
+}
+
+.ace-spec dd {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 10px 22px;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.ace-spec:hover dt {
+  background: var(--violet);
+  color: var(--white);
+}
+
+.ace-family {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ace-prod {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 230px;
+  padding: 26px 26px 22px;
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--ink);
+  transition: background-color 0.2s var(--ace-ease);
+}
+
+a.ace-prod:hover {
+  background: var(--paper-2);
+}
+
+.ace-prod.ace-here {
+  border-color: var(--line);
+  background: var(--paper-2);
+}
+
+.ace-prod .ace-mk {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+}
+
+.ace-prod .ace-mk svg {
+  width: 26px;
+}
+
+.ace-prod h3 {
+  margin: 6px 0 0;
+  font: 600 26px/1.05 var(--ace-sans);
+  letter-spacing: -0.03em;
+}
+
+.ace-prod p {
+  margin: 0;
+  color: var(--ink-2);
+  font: 400 15px/1.45 var(--ace-ui);
+}
+
+.ace-prod .ace-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  color: var(--ink-3);
+  font: 400 12px/1 var(--ace-narrow);
+  text-transform: uppercase;
+}
+
+.ace-prod .ace-go {
+  color: var(--violet-ink);
+}
+
+/* The band: one line and the install button, on the atmosphere again. */
+
+.ace-band {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 26px;
+  height: 420px;
+  padding: 0 60px;
+  overflow: hidden;
+  color: var(--cream);
+}
+
+.ace-band h2 {
+  font-size: 34px;
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.ace-field-band {
+  background: var(--band-wide);
+}
+
+@media (width <= 900px) {
+  .ace-field-band {
+    background: var(--band-narrow);
+  }
+}
+
+/* The footer: links, the lockup pressed into the paper, the small print. */
+
+.ace-foot {
+  position: relative;
+  overflow: hidden;
+  padding: 40px 60px 26px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.ace-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 30px;
+  color: var(--ink-2);
+}
+
+.ace-links a:hover {
+  color: var(--ink);
+}
+
+.ace-deboss {
+  display: block;
+  width: 86%;
+  margin: 70px auto 0;
+  color: #dfddd8;
+}
+
+.ace-deboss svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(2px 2px 1px #fffffff2) drop-shadow(-1.5px -1.5px 1.5px #0b0a0933);
+}
+
+.ace-copy {
+  display: flex;
+  justify-content: flex-end;
+  gap: 30px;
+  margin-top: 20px;
+  color: var(--ink-3);
+  font: 400 13px/1 var(--ace-narrow);
+  text-transform: uppercase;
+}
+
+@media (width <= 900px) {
+  .ace-nav {
+    padding: 0 16px;
+  }
+
+  .ace-nav .ace-l {
+    display: none;
+  }
+
+  .ace-nav {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ace-nav .ace-r {
+    gap: 16px;
+  }
+
+  .ace-wrap {
+    width: calc(100% - 40px);
+  }
+
+  .ace-hero {
+    padding-top: 120px;
+  }
+
+  .ace-hero-text {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ace-buy {
+    flex-wrap: wrap;
+    gap: 18px;
+    width: 100%;
+  }
+
+  .ace-stack {
+    width: 100%;
+  }
+
+  .ace-stack .ace-btn {
+    height: auto;
+    min-height: 48px;
+    padding: 12px 20px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .ace-object {
+    width: calc(100% - 24px);
+    margin: 48px auto -120px;
+  }
+
+  .ace-horizon {
+    top: calc(100% - 150px);
+  }
+
+  .ace-split {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 200px 0 110px;
+  }
+
+  .ace-pin-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ace-scene {
+    width: 340px;
+    height: 300px;
+    transform: scale(0.72);
+  }
+
+  .ace-legend {
+    max-width: calc(100vw - 40px);
+  }
+
+  .ace-legend span {
+    flex: 1;
+    min-width: 0;
+    padding-block: 6px;
+  }
+
+  .ace-caption {
+    font-size: 24px;
+  }
+
+  .ace-spec {
+    grid-template-columns: 130px 1fr;
+  }
+
+  .ace-spec dt {
+    font-size: 15px;
+  }
+
+  .ace-spec dd {
+    font-size: 16px;
+  }
+
+  .ace-family {
+    grid-template-columns: 1fr;
+  }
+
+  .ace-band {
+    justify-content: flex-start;
+    padding: 64px 20px 0;
+  }
+
+  .ace-foot {
+    padding: 30px 20px 20px;
+  }
+
+  .ace-links {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 18px;
+  }
+
+  .ace-copy {
+    justify-content: flex-start;
+  }
+}
+
+
+/*
+ * Nothing on this page moves on its own, so all that is left to stop is the colour
+ * easing on the nav and the buttons. Colour is not travel, and `index.css` keeps it for
+ * that reason; the transform-free nav and buttons here have nothing else.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .ace-nav,
+  .ace-btn,
+  .ace-spec dt,
+  .ace-prod {
+    transition-duration: 0s;
+  }
+}

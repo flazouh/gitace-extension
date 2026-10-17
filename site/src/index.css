@@ -28,6 +28,10 @@
  */
 @import "../../src/ui/styles.css";
 
+/* The Ace family's look: tokens, fonts and the shared parts. See its own header. */
+@import "./ace.css";
+@import "./home/screens.css";
+
 /*
  * Tailwind 4 generates a utility only when it finds the class name in a file it
  * scanned, and it decides what to scan from where the stylesheet lives. Left alone it
@@ -92,10 +96,11 @@
  */
 @theme {
   --radius: 8px;
-  --color-paper: #f2f2ee;
-  --color-ink: #141416;
-  --color-muted: #6c7878;
-  --color-rule: rgba(20, 20, 22, 0.12);
+  /* Ace's paper, ink and second ink (`ace.css`), so the simple pages match the home page. */
+  --color-paper: #ecebe7;
+  --color-ink: #0b0a09;
+  --color-muted: #4c4843;
+  --color-rule: #0b0a0929;
 
   /*
    * One family, and no monospace.

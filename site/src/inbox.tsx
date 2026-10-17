@@ -1,16 +1,7 @@
 import "@fontsource-variable/inter"
 import { COMPARED } from "./compare/pages"
 import { mount } from "./mount"
-import {
-  Above,
-  AddToChrome,
-  Footer,
-  HELD,
-  Nav,
-  Quietly,
-  SkipTo,
-  Source
-} from "./Shell"
+import { Above, Footer, HELD, Install, Masthead, Quietly, SkipTo } from "./Shell"
 import "./index.css"
 
 const GITHUB_INBOX_AT =
@@ -23,12 +14,9 @@ const Inbox = () => (
   <>
     <SkipTo id="job" says="Skip to the job" />
 
-    <Above>
-      <Nav>
-        <Source />
-        <AddToChrome />
-      </Nav>
+    <Masthead />
 
+    <Above>
       <div className="pb-16 pt-10 sm:pt-16">
         <p className="eyebrow m-0">GitHub PR inbox</p>
         <h1 className="m-0 mt-4 max-w-3xl text-balance text-[clamp(2.1rem,5.5vw,3.4rem)] font-semibold leading-[1.05] tracking-[-0.04em]">
@@ -38,7 +26,7 @@ const Inbox = () => (
           One list of pull requests that need you—on the GitHub session you already have.
         </p>
         <div className="mt-10">
-          <AddToChrome big />
+          <Install />
         </div>
       </div>
     </Above>
@@ -103,14 +91,12 @@ const Inbox = () => (
           A faster, quieter GitHub.
         </h2>
         <div className="mt-10">
-          <AddToChrome big />
+          <Install />
         </div>
       </section>
     </main>
 
-    <div className={HELD}>
-      <Footer />
-    </div>
+    <Footer />
   </>
 )
 
