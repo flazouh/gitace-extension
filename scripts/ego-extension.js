@@ -22,8 +22,8 @@
  * Run it again after a rebuild and the new build takes over.
  */
 
-const EXTENSION = "/Users/alex/Documents/githubpro/.output/chrome-mv3"
-const START = "https://github.com/pulls"
+const EXTENSION = "/Users/alex/Projects/gitquiet/.output/chrome-mv3"
+const START = "https://github.com/"
 
 const task = await useOrCreateTaskSpace("test GitAce Extension on real PR")
 await takeOverTaskSpace(task.id)

@@ -521,6 +521,25 @@ export const Bar = ({
 
       <Ours here={where.kind === "home"} onHome={onHome} />
 
+      {where.kind === "home" ? (
+        <div className="flex min-w-0 items-center gap-1.5 text-[15px] font-medium">
+          <span className="shrink-0 text-ink">Working Set</span>
+          <span aria-hidden="true" className="text-ink-muted font-normal opacity-60">
+            /
+          </span>
+          <span className="truncate font-normal text-ink-muted">
+            Every pull request you are in, grouped by who acts next
+          </span>
+        </div>
+      ) : null}
+
+      {where.kind === "repository" ? (
+        <span aria-hidden="true" className="flex items-center gap-1.5 text-ink-muted">
+          <span className="text-[15px]">Git</span>
+          <span className="opacity-60">/</span>
+        </span>
+      ) : null}
+
       {/*
        * Their name, on somebody else's pages, and no chevron beside it.
        *

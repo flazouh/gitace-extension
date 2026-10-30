@@ -323,7 +323,7 @@ export const WorkingSetScreen = ({
        * keeps it and where a hand already goes for it. Two of the same menu on one screen is
        * a reader wondering which of them is the real one.
        */}
-      <div className="flex items-start gap-1 py-3">
+      <div className="flex items-stretch gap-1 py-1">
         <Rail
           destination={destination}
           onDestination={onDestination ?? (() => undefined)}
@@ -337,7 +337,7 @@ export const WorkingSetScreen = ({
           onStepAside={onStepAside}
           keys={keys}
         />
-        <div className="min-w-0 flex-1">{showing}</div>
+        <div className="min-w-0 flex-1 rounded-lg bg-surface p-1">{showing}</div>
       </div>
     </>
   );
