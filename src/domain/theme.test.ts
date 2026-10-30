@@ -26,15 +26,16 @@ describe("resolving appearance", () => {
 })
 
 describe("the colour packs", () => {
-  it("gives GitAce Extension dark the desktop window's canvas", () => {
-    // Literals from desktop/src/view/style.css (.dark --surface-1 / --foreground).
-    expect(tokensOf("gitace", "dark")["--color-canvas"]).toBe("#171717")
-    expect(tokensOf("gitace", "dark")["--color-ink"]).toBe("#f5f5f5")
+  it("gives GitAce Extension dark Ace's warm dark canvas and ink", () => {
+    expect(tokensOf("gitace", "dark")["--color-canvas"]).toBe("#141413")
+    expect(tokensOf("gitace", "dark")["--color-surface"]).toBe("#1C1C1A")
+    expect(tokensOf("gitace", "dark")["--color-ink"]).toBe("#F0EEE6")
   })
 
-  it("gives GitAce Extension light the desktop window's canvas", () => {
-    expect(tokensOf("gitace", "light")["--color-canvas"]).toBe("#FAFAFA")
-    expect(tokensOf("gitace", "light")["--color-ink"]).toBe("#171717")
+  it("gives GitAce Extension light Ace's warm light canvas and ink", () => {
+    expect(tokensOf("gitace", "light")["--color-canvas"]).toBe("#F0EEE6")
+    expect(tokensOf("gitace", "light")["--color-surface"]).toBe("#EAE7DC")
+    expect(tokensOf("gitace", "light")["--color-ink"]).toBe("#141413")
   })
 
   it("matches Cursor Dark Anysphere and Cursor Light", () => {

@@ -63,7 +63,7 @@ export type ThemeTokens = {
   readonly "--font-sans": string
 }
 
-const INTER = '"Inter Variable", Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
+const GEIST = '"Geist", "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
 
 type Face = {
   readonly canvas: string
@@ -127,64 +127,64 @@ const face = (one: Face): ThemeTokens => ({
   "--bgColor-default": one.canvas,
   "--bgColor-muted": one.surface,
   "--bgColor-inset": one.inset,
-  "--font-sans": INTER
+  "--font-sans": GEIST
 })
 
-/** Desktop Fluid Functionalism — the product default. */
+/** Ace Warm — the product default (crates/ui/assets/themes/ace-light.json and ace-dark.json). */
 const GITACE: Record<Scheme, Face> = {
   light: {
-    canvas: "#FAFAFA",
-    inset: "#FAFAFA",
-    surface: "#FFFFFF",
-    raised: "#FFFFFF",
-    hover: "#0000000a",
-    active: "#00000012",
-    ink: "#171717",
-    muted: "#737373",
-    accent: "#0969da",
-    onEmphasis: "#ffffff",
-    pass: "#1a7f37",
-    fail: "#d1242f",
-    busy: "#9a6700",
-    done: "#8250df",
-    accentFill: "#0969da",
-    passFill: "#1f883d",
-    failFill: "#cf222e",
-    doneFill: "#8250df",
-    passMuted: "#1f883d26",
-    failMuted: "#cf222e26",
-    accentMuted: "#0969da26",
-    attentionMuted: "#9a670026",
-    doneMuted: "#8250df26",
-    line: "#1717171f",
-    lineMuted: "#17171712"
+    canvas: "#F0EEE6",
+    inset: "#EAE7DC",
+    surface: "#EAE7DC",
+    raised: "#E1DDCF",
+    hover: "#1414130f",
+    active: "#1414131a",
+    ink: "#141413",
+    muted: "#63605A",
+    accent: "#536B89",
+    onEmphasis: "#FFFFFF",
+    pass: "#4C735E",
+    fail: "#865C5B",
+    busy: "#865404",
+    done: "#5B21B6",
+    accentFill: "#0883FD",
+    passFill: "#4C735E",
+    failFill: "#865C5B",
+    doneFill: "#7C3AED",
+    passMuted: "#4C735E26",
+    failMuted: "#865C5B26",
+    accentMuted: "#536B8926",
+    attentionMuted: "#F9A82526",
+    doneMuted: "#7C3AED26",
+    line: "#14141314",
+    lineMuted: "#1414130d"
   },
   dark: {
-    canvas: "#171717",
-    inset: "#171717",
-    surface: "#252525",
-    raised: "#2C2C2C",
-    hover: "#ffffff0f",
-    active: "#ffffff1a",
-    ink: "#f5f5f5",
-    muted: "#a3a3a3",
-    accent: "#6b97ff",
-    onEmphasis: "#ffffff",
-    pass: "#3fb950",
-    fail: "#f87171",
-    busy: "#d29922",
-    done: "#a371f7",
-    accentFill: "#1f6feb",
+    canvas: "#141413",
+    inset: "#181818",
+    surface: "#1C1C1A",
+    raised: "#242320",
+    hover: "#F0EEE617",
+    active: "#F0EEE624",
+    ink: "#F0EEE6",
+    muted: "#8A867C",
+    accent: "#8EA7C7",
+    onEmphasis: "#FFFFFF",
+    pass: "#87B099",
+    fail: "#C59895",
+    busy: "#F9A825",
+    done: "#A371F7",
+    accentFill: "#0883FD",
     passFill: "#238636",
-    failFill: "#da3633",
-    doneFill: "#8957e5",
-    passMuted: "#3fb95026",
-    failMuted: "#f8517126",
-    accentMuted: "#388bfd26",
-    attentionMuted: "#d2992226",
-    doneMuted: "#a371f726",
-    line: "#f5f5f51f",
-    lineMuted: "#f5f5f512"
+    failFill: "#DA3633",
+    doneFill: "#8957E5",
+    passMuted: "#87B09926",
+    failMuted: "#C5989526",
+    accentMuted: "#8EA7C726",
+    attentionMuted: "#F9A82526",
+    doneMuted: "#A371F726",
+    line: "#F0EEE60D",
+    lineMuted: "#F0EEE608"
   }
 }
 

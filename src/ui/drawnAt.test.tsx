@@ -2,7 +2,8 @@ import { afterEach, describe, expect, test } from "bun:test"
 import { cleanup, render } from "@testing-library/react"
 import { DrawnAt, useDrawnAt } from "./drawnAt"
 import { ScreenActivityProvider } from "./screenActivity"
-import { ROOT_ID } from "./mount"
+import { forgetOurContainer, ROOT_ID } from "./mount"
+import { HOST_ID } from "./theHost"
 
 afterEach(cleanup)
 
@@ -134,6 +135,9 @@ describe("a screen that is mounted but does not have the page", () => {
  */
 describe("what a claim says about the route", () => {
   const standing = (route: string): HTMLElement => {
+    forgetOurContainer()
+    document.getElementById(HOST_ID)?.remove()
+    for (const old of document.querySelectorAll(`#${ROOT_ID}`)) old.remove()
     const root = document.createElement("div")
     root.id = ROOT_ID
     root.setAttribute("data-gitace-route", route)
@@ -147,7 +151,9 @@ describe("what a claim says about the route", () => {
   }
 
   afterEach(() => {
-    document.getElementById(ROOT_ID)?.remove()
+    forgetOurContainer()
+    document.getElementById(HOST_ID)?.remove()
+    for (const root of document.querySelectorAll(`#${ROOT_ID}`)) root.remove()
     at("/", "")
   })
 

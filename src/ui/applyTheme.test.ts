@@ -13,8 +13,8 @@ describe("painting a theme onto a root", () => {
 
     paintTheme(root, "dark", "gitace", false)
 
-    expect(root.style.getPropertyValue("--color-canvas")).toBe("#171717")
-    expect(root.style.getPropertyValue("--control")).toBe("#ffffff0f")
+    expect(root.style.getPropertyValue("--color-canvas")).toBe("#141413")
+    expect(root.style.getPropertyValue("--control")).toBe("#F0EEE617")
     expect(root.classList.contains("dark")).toBe(true)
   })
 

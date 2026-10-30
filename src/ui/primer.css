@@ -11,39 +11,39 @@
  */
 
 @theme {
-  --color-canvas: #fafafa;
-  --color-inset: #fafafa;
-  --color-surface: #ffffff;
-  --color-raised: #ffffff;
-  --color-hover: #0000000a;
-  --color-active: #00000012;
+  --color-canvas: #F0EEE6;
+  --color-inset: #EAE7DC;
+  --color-surface: #EAE7DC;
+  --color-raised: #E1DDCF;
+  --color-hover: #1414130f;
+  --color-active: #1414131a;
 
-  --color-ink: #171717;
-  --color-ink-muted: #737373;
-  --color-ink-accent: #0969da;
+  --color-ink: #141413;
+  --color-ink-muted: #63605A;
+  --color-ink-accent: #536B89;
   --color-ink-on-emphasis: #ffffff;
 
-  --color-pass: #1a7f37;
-  --color-fail: #d1242f;
-  --color-busy: #9a6700;
-  --color-done: #8250df;
+  --color-pass: #4C735E;
+  --color-fail: #865C5B;
+  --color-busy: #865404;
+  --color-done: #5B21B6;
 
-  --color-accent-emphasis: #0969da;
-  --color-pass-emphasis: #1f883d;
-  --color-fail-emphasis: #cf222e;
-  --color-done-emphasis: #8250df;
-  --color-pass-muted: #1f883d26;
-  --color-fail-muted: #cf222e26;
-  --color-accent-muted: #0969da26;
-  --color-attention-muted: #9a670026;
-  --color-done-muted: #8250df26;
+  --color-accent-emphasis: #0883FD;
+  --color-pass-emphasis: #4C735E;
+  --color-fail-emphasis: #865C5B;
+  --color-done-emphasis: #7C3AED;
+  --color-pass-muted: #4C735E26;
+  --color-fail-muted: #865C5B26;
+  --color-accent-muted: #536B8926;
+  --color-attention-muted: #F9A82526;
+  --color-done-muted: #7C3AED26;
 
-  --color-line: #1717171f;
-  --color-line-muted: #17171712;
-  --color-line-accent: #0969da;
+  --color-line: #14141314;
+  --color-line-muted: #1414130d;
+  --color-line-accent: #536B89;
 
-  --font-sans: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "Geist", "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --text-xs: 12px;
   --text-xs--line-height: 1.3333;
