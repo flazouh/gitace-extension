@@ -487,13 +487,13 @@ export const TheBar = ({
         sidebar={
           props.where.kind === "home"
             ? {
-                open: settings.home.rail !== "narrow",
+                open: settings.home.sidebar === "shown",
                 toggle: () =>
                   change((current) => ({
                     ...current,
                     home: {
                       ...current.home,
-                      rail: current.home.rail === "narrow" ? "wide" : "narrow",
+                      sidebar: current.home.sidebar === "shown" ? "hidden" : "shown",
                     },
                   })),
               }

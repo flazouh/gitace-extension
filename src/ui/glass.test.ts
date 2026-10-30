@@ -88,6 +88,12 @@ describe("the bar as glass", () => {
     expect(frame).toContain("padding-inline: 0 !important")
   })
 
+  test("takes the browser's own margin off the body, so the panel starts four pixels from the rail", () => {
+    expect(readFileSync("src/ui/widths.css", "utf8")).toContain(
+      "html[data-gitace-taken] body {\n  margin: 0;\n}"
+    )
+  })
+
   test("mixes its fill from the pack, so twenty-odd packs each get their own glass", () => {
     // A literal rgba here would be one pack's glass on every other pack's bar, which is
     // the fault `theme.ts` exists to prevent.

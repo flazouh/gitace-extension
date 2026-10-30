@@ -536,15 +536,15 @@ export const HOME_KNOBS = [
     "working-set"
   ),
   knob(
-    "rail",
-    "Rail",
-    "The Rail starts wide or narrow",
-    "Whether the strip down the left of Home starts wide or narrow. Narrow keeps every count and every face and drops the words, which is enough to answer whether anything is yours; wide names each Destination and each repository.",
+    "sidebar",
+    "Sidebar",
+    "Home's left column shown or hidden",
+    "Whether Home keeps its left column: the three Destinations, the repositories you pinned and the ones your work is in. Hidden gives the Working Set the whole width; the rail at the left edge still reaches every Destination, and its sidebar control brings the column back.",
     [
-      { value: "wide", label: "Wide" },
-      { value: "narrow", label: "Narrow" }
+      { value: "shown", label: "Shown" },
+      { value: "hidden", label: "Hidden" }
     ],
-    "wide"
+    "shown"
   ),
   knob(
     "issues",

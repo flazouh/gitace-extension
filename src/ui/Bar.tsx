@@ -736,7 +736,8 @@ export const Bar = ({
 
       <span className="d-sp" />
 
-      {onSearch === undefined ? null : where.kind === "home" ? (
+      {/* A glyph rather than a pill, the pill in this header being the list's own filter. */}
+      {onSearch === undefined ? null : (
         <button
           type="button"
           onClick={onSearch}
@@ -745,12 +746,6 @@ export const Bar = ({
           className="d-hn"
         >
           <Search size={16} />
-        </button>
-      ) : (
-        <button type="button" onClick={onSearch} className="d-search">
-          <Search size={13} />
-          <span className="truncate">Search anything you have</span>
-          <span className="d-kbd">⌘K</span>
         </button>
       )}
 

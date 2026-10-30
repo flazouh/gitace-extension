@@ -103,7 +103,7 @@ export const Home = ({
       home
       destination={settings.home.destination}
       onDestination={goTo}
-      collapsed={settings.home.rail === "narrow"}
+      collapsed={settings.home.sidebar === "hidden"}
       pinned={settings.pinned}
       onPinned={pin}
       participant={participant}

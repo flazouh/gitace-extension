@@ -9,10 +9,10 @@ import { SettingsProvider } from "./settings"
 
 afterEach(cleanup)
 
-const storeWithNarrowRail: Store = {
+const storeWithSidebarHidden: Store = {
   read: Effect.succeed({
     ...DEFAULTS,
-    home: { ...DEFAULTS.home, rail: "narrow" }
+    home: { ...DEFAULTS.home, sidebar: "hidden" }
   }),
   write: () => Effect.void,
   watch: () => () => {}
@@ -20,7 +20,7 @@ const storeWithNarrowRail: Store = {
 
 const showingHome = () =>
   render(
-    <SettingsProvider store={storeWithNarrowRail}>
+    <SettingsProvider store={storeWithSidebarHidden}>
       <Home
         load={() => Effect.succeed(sittingsIn([], () => Option.none()))}
         repositories={() => Effect.succeed([])}

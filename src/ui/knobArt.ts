@@ -63,7 +63,7 @@ export const KNOB_ART: Readonly<Record<KnobKey, ArtName>> = {
   // answers for.
   view: "pull-request",
   destination: "home",
-  rail: "columns",
+  sidebar: "narrow",
   issues: "issue",
   byItself: "sign-out"
 }
