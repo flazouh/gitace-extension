@@ -76,9 +76,8 @@ export type WorkingSetScreenProps = {
    */
   readonly destination?: Destination;
   readonly onDestination?: (destination: Destination) => void;
-  /** Whether the Rail starts narrow, and how to remember that it was. */
+  /** Whether the reader has put the left column away, from the global rail. */
   readonly collapsed?: boolean;
-  readonly onCollapsed?: (collapsed: boolean) => void;
   /** Who the reader is, for the Rail's menu. */
   readonly participant?: {
     readonly login: string;
@@ -137,7 +136,6 @@ export const WorkingSetScreen = ({
   destination = "working-set",
   onDestination,
   collapsed,
-  onCollapsed,
   participant,
   repositories,
   recallRepositories,
@@ -225,6 +223,7 @@ export const WorkingSetScreen = ({
       recall={recallRepositories}
       owed={owed}
       onStepAside={onStepAside}
+      needsYou={needsYou}
     />
   );
 
@@ -311,33 +310,20 @@ export const WorkingSetScreen = ({
   return (
     <>
       {bar}
-      {/*
-       * No inset here. It was on this row once, on both columns at once, so that the Rail and
-       * whatever stood beside it started on the same line — and it made this the only screen
-       * with a frame while the five others ran flush to the window edge. The shell owns it
-       * now: `#gitace-root` on GitHub's page, `.page` in the window, one number for every
-       * screen either of them draws.
-       *
-       * The Rail is handed no Participant. It can draw one, and did while it was the only
-       * thing on this screen that could, but the bar above now keeps the face where GitHub
-       * keeps it and where a hand already goes for it. Two of the same menu on one screen is
-       * a reader wondering which of them is the real one.
-       */}
-      <div className="flex items-stretch gap-1 py-1">
-        <Rail
-          destination={destination}
-          onDestination={onDestination ?? (() => undefined)}
-          atWork={atWork}
-          needsYou={needsYou}
-          repositories={repositories}
-          collapsed={collapsed}
-          onCollapsed={onCollapsed}
-          pinned={pinned}
-          onPinned={onPinned}
-          onStepAside={onStepAside}
-          keys={keys}
-        />
-        <div className="min-w-0 flex-1 rounded-lg bg-surface p-1">{showing}</div>
+      <div className="d-gsplit">
+        {collapsed ? null : (
+          <Rail
+            destination={destination}
+            onDestination={onDestination ?? (() => undefined)}
+            atWork={atWork}
+            needsYou={needsYou}
+            repositories={repositories}
+            pinned={pinned}
+            onPinned={onPinned}
+            keys={keys}
+          />
+        )}
+        <section className="d-gmain">{showing}</section>
       </div>
     </>
   );

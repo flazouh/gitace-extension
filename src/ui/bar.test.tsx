@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Option } from "effect"
 import { Bar } from "./Bar"
@@ -57,11 +57,11 @@ describe("the bar, on Home", () => {
     render(<Bar where={{ kind: "home" }} />)
 
     expect(screen.getByRole("banner").textContent).not.toContain("Repositories")
-    expect(screen.getByLabelText("Home")).toBeDefined()
-    // Not filled with the accent while standing on Home. It is the leftmost thing in the bar
-    // and the only mark of ours up there, and a coloured square in that corner reads as a
-    // badge for the extension rather than as a way back to the Working Set.
-    expect(screen.getByLabelText("Home").className).not.toContain("bg-accent")
+    const home = screen.getByRole("link", { name: "Working Set" })
+    expect(home.getAttribute("aria-current")).toBe("page")
+    // Words rather than a filled mark: the rail beside the bar already wears the mark, and a
+    // coloured square in that corner reads as a badge for the extension.
+    expect(home.className).not.toContain("bg-accent")
   })
 
   test("draws none of their repository tabs, there being no repository", () => {
@@ -278,7 +278,7 @@ describe("the bar, in a repository", () => {
     // anywhere but deeper into the repository.
     render(<Bar where={inFlowline} tabs={THEIR_TABS} />)
 
-    expect(screen.getByRole("link", { name: "Home" }).getAttribute("href")).toBe("/")
+    expect(screen.getByRole("link", { name: "Git" }).getAttribute("href")).toBe("/")
   })
 
   test("gives every tab in the strip a glyph as well as its name", () => {
@@ -562,105 +562,16 @@ describe("the repository's name, which is where the Code tab's mark goes", () =>
   })
 })
 
-describe("what the bar keeps of GitHub's", () => {
-  test("the inbox, saying whether rather than how many, because whether is all they know", () => {
-    // `/notifications/indicator` answers `{"mode":"global"}`, so a count here would be
-    // a figure this extension invented. The tray is drawn in its unread state instead.
-    render(<Bar where={{ kind: "home" }} unread />)
-
-    const inbox = screen.getByRole("link", { name: "Notifications, something is waiting" })
-    expect(inbox.getAttribute("href")).toBe("/notifications")
-    expect(inbox.textContent).not.toMatch(/\d/)
-  })
-
-  test("the inbox says nothing is waiting when nothing is", () => {
-    render(<Bar where={{ kind: "home" }} />)
-
-    expect(screen.getByRole("link", { name: "Notifications" })).toBeDefined()
-  })
-
-  test("the way back to GitHub, in the corner rather than on the screen below", async () => {
-    // It was a control on the pull request card, which is one of the four
-    // screens this extension draws: on the other three the way out was a row
-    // inside the account menu, and a reader looking for it had to know which
-    // this page was. The bar is on all four.
-    let handedBack = 0
-    render(<Bar where={{ kind: "home" }} onStepAside={() => (handedBack += 1)} />)
-
-    await userEvent.click(screen.getByRole("button", { name: "Leave GitAce Extension" }))
-
-    expect(handedBack).toBe(1)
-  })
-
-  test("stands last in the row, at the corner of the page", async () => {
-    // The far corner is where a reader looks for the control that leaves, and it
-    // is the one place in this row that a login running long cannot push along.
+describe("what the bar leaves to the rail beside it", () => {
+  test("draws no inbox, account or way out of its own, the rail having one of each", () => {
     render(
-      <Bar
-        where={{ kind: "home" }}
-        participant={someone}
-        onStepAside={() => undefined}
-      />
+      <Bar where={{ kind: "home" }} unread participant={someone} onStepAside={() => undefined} />
     )
 
-    const controls = screen.getByRole("banner").querySelectorAll("a, button")
-    const last = controls[controls.length - 1]
-    expect(last?.getAttribute("aria-label")).toBe("Leave GitAce Extension")
-  })
-
-  test("offers no way out where nothing is holding a page to go back to", () => {
-    // A window that is not GitHub's page has nothing to hand anything back to,
-    // and a button that presses into nothing is the mistake this bar undoes.
-    render(<Bar where={{ kind: "home" }} />)
-
-    expect(screen.queryByRole("button", { name: "Leave GitAce Extension" })).toBeNull()
-  })
-
-  test("offers a bug report that opens the GitAce Extension issues board", () => {
-    render(<Bar where={{ kind: "home" }} />)
-
-    const report = screen.getByRole("link", { name: "Report a problem on GitAce Extension" })
-    expect(report.getAttribute("href")).toBe("https://github.com/flazouh/gitace-extension/issues")
-    expect(report.getAttribute("target")).toBe("_blank")
-  })
-
-  test("opens the bug report in a new tab on press", async () => {
-    const asked: Array<unknown> = []
-    const prior = (globalThis as unknown as { browser?: unknown }).browser
-    ;(globalThis as unknown as { browser: unknown }).browser = {
-      runtime: {
-        sendMessage: (message: unknown) => {
-          asked.push(message)
-          return Promise.resolve()
-        }
-      }
-    }
-    render(<Bar where={{ kind: "home" }} />)
-    await userEvent.click(screen.getByRole("link", { name: "Report a problem on GitAce Extension" }))
-    ;(globalThis as unknown as { browser?: unknown }).browser = prior
-    expect(asked).toEqual([
-      { kind: "gitace/open-tab", url: "https://github.com/flazouh/gitace-extension/issues" }
-    ])
-  })
-
-  test("the Participant, with the same three rows the Rail offers", async () => {
-    // The way back to GitHub was a fourth row here, a hundred pixels from the
-    // button in this same bar that does it. Two ways to one place, one of them
-    // behind a menu.
-    render(
-      <Bar
-        where={{ kind: "home" }}
-        participant={someone}
-        onStepAside={() => undefined}
-      />
-    )
-
-    await userEvent.click(screen.getByRole("button", { name: /flazouh/ }))
-    expect(screen.getAllByRole("menuitem").map((one) => one.textContent)).toEqual([
-      "Your profile",
-      "Settings",
-      "Sign out"
-    ])
+    const bar = screen.getByRole("banner")
+    expect(within(bar).queryByRole("link", { name: /Notifications/ })).toBeNull()
+    expect(within(bar).queryByRole("button", { name: /your account/ })).toBeNull()
+    expect(within(bar).queryByRole("button", { name: "Leave GitAce Extension" })).toBeNull()
   })
 })
 
@@ -715,7 +626,7 @@ describe("the way back and the way forward", () => {
     render(<Bar where={REPOSITORY} onBack={() => undefined} />)
 
     const back = screen.getByRole("button", { name: "Back" })
-    const home = screen.getByLabelText("Home")
+    const home = screen.getByRole("link", { name: "Git" })
 
     expect(screen.getByRole("banner").firstElementChild?.contains(back)).toBe(true)
     expect(back.compareDocumentPosition(home) & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0)
@@ -731,19 +642,9 @@ describe("the way back and the way forward", () => {
       0
     )
     expect(
-      forward.compareDocumentPosition(screen.getByLabelText("Home")) &
+      forward.compareDocumentPosition(screen.getByRole("link", { name: "Git" })) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeGreaterThan(0)
-  })
-
-  test("is not the way out, which keeps the other corner", () => {
-    render(<Bar where={REPOSITORY} onBack={() => undefined} onStepAside={() => undefined} />)
-
-    const back = screen.getByRole("button", { name: "Back" })
-    const out = screen.getByRole("button", { name: "Leave GitAce Extension" })
-
-    expect(back).not.toBe(out)
-    expect(back.compareDocumentPosition(out) & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0)
   })
 
   /*
@@ -760,14 +661,14 @@ describe("the way back and the way forward", () => {
   })
 
   /*
-   * A tab opened straight onto this address has nothing behind it, and a pair of
-   * arrows that press into nothing is the fault this bar exists to undo.
+   * A tab opened straight onto this address has nothing behind it. The pair stays where it
+   * always is, so the crumb beside it does not jump, and says it presses into nothing.
    */
-  test("draws neither where there is nothing behind the page", () => {
+  test("keeps both, disabled, where there is nothing behind the page", () => {
     render(<Bar where={REPOSITORY} />)
 
-    expect(screen.queryByRole("button", { name: "Back" })).toBeNull()
-    expect(screen.queryByRole("button", { name: "Forward" })).toBeNull()
+    expect((screen.getByRole("button", { name: "Back" }) as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole("button", { name: "Forward" }) as HTMLButtonElement).disabled).toBe(true)
   })
 
   test("hands each press to whoever knows how to move", async () => {
@@ -886,7 +787,7 @@ describe("the bar, in a window rather than in a tab", () => {
     let went = 0
     render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }} onHome={() => (went += 1)} />)
 
-    const home = screen.getByLabelText("Home")
+    const home = screen.getByRole("button", { name: "Git" })
     expect(home.tagName).toBe("BUTTON")
     expect(home.getAttribute("href")).toBeNull()
 
@@ -897,7 +798,7 @@ describe("the bar, in a window rather than in a tab", () => {
   test("keeps the address where nothing says otherwise, which is every page", () => {
     render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }} />)
 
-    expect(screen.getByLabelText("Home").getAttribute("href")).toBe("/")
+    expect(screen.getByRole("link", { name: "Git" }).getAttribute("href")).toBe("/")
   })
 
   test("presses the tab that lists pull requests, since that list is a screen in here", async () => {
@@ -944,20 +845,17 @@ describe("the bar, in a window rather than in a tab", () => {
 
   test("holds the window's own controls past everything about the page", () => {
     // The update and the account, which stood in a strip of their own above this one
-    // until that strip became this row. Last in the tray, where a window keeps them.
+    // until that strip became this row. Last in the row, where a window keeps them.
     render(
       <Bar
         where={{ kind: "home" }}
-        onStepAside={() => undefined}
+        onSearch={() => undefined}
         tray={<button type="button">Signed in as flazouh</button>}
       />
     )
 
-    const tray = screen.getByRole("button", { name: "Signed in as flazouh" })
-    expect(tray).toBeDefined()
-    expect(
-      tray.compareDocumentPosition(screen.getByRole("button", { name: "Leave GitAce Extension" })) &
-        Node.DOCUMENT_POSITION_PRECEDING
-    ).toBeGreaterThan(0)
+    const controls = screen.getByRole("banner").querySelectorAll("a, button")
+    expect(controls[controls.length - 1]?.textContent).toBe("Signed in as flazouh")
   })
+
 })

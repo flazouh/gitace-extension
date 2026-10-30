@@ -8,7 +8,7 @@ import {
   nameOf,
   pageOf
 } from "../domain/issues"
-import type { PullRequestState } from "../domain/PullRequest"
+import type { CheckState, PullRequestState } from "../domain/PullRequest"
 import type { PullRequestRef } from "../domain/PullRequestRef"
 import { asked, sieveOf, termsIn, undecided } from "../domain/sieve"
 import { stepping } from "../domain/stepping"
@@ -22,25 +22,24 @@ import {
   walkThrough,
   walkThroughCourts
 } from "../domain/sittings"
-import type { CheckRollup, Court, InvolvedPullRequest, Size } from "../domain/workingSet"
+import type { CheckRollup, Court, InvolvedPullRequest, Opinion, Size } from "../domain/workingSet"
 import type { Keys } from "../keys/commands"
-import { type ArtName, checkName, issueName, pullRequestName, useArt } from "./art"
-import { COURT_ART, COURT_NAME, COURT_TONE } from "./courts"
+import { type ArtName, issueName, pullRequestName, useArt } from "./art"
+import { COURT_ART, COURT_NAME } from "./courts"
 import { toneOf } from "./labelTone"
 import { type Asking, Doings } from "./Doings"
 import { Filters } from "./Filters"
 import { Keying } from "./useLetters"
-import { CHECK_TONE, OPINION_TONE, OPINION_WORDS, rollupArtState } from "./Icon"
+import { OPINION_WORDS, rollupArtState } from "./Icon"
 import { StillReading } from "./Waiting"
 import { rememberFilter, rememberedFilter } from "./remembered"
-import { CARD } from "./dress"
-import { Section } from "./Section"
 import { useKeyboard } from "./useKeyboard"
 import { useKeys } from "./useKeys"
 import { useSettings } from "./useSettings"
 import { loginOnPage } from "./viewer"
 import { ageOf, momentOf } from "./when"
-import { Owner } from "./Owner"
+import { IntoTheBar } from "./barTools"
+import { RepoTile } from "./Face"
 import { Who } from "./Who"
 
 /**
@@ -53,11 +52,27 @@ import { Who } from "./Who"
 type Tint = "plain" | "bad" | "busy" | "good"
 
 const TINT: Record<Tint, string> = {
-  plain: "bg-surface text-ink-muted",
-  bad: "bg-fail-muted text-fail",
-  busy: "bg-attention-muted text-busy",
-  good: "bg-pass-muted text-pass"
+  plain: "d-key",
+  bad: "d-pill d-bad",
+  busy: "d-pill d-busy",
+  good: "d-pill d-good"
 }
+
+const OPINION_PILL: Record<Opinion, string> = {
+  approved: "d-pill d-good",
+  "changes-requested": "d-pill d-bad",
+  "review-required": "d-pill d-busy"
+}
+
+const CHECK_PILL: Partial<Record<CheckState, string>> = {
+  succeeded: "d-good",
+  failed: "d-bad",
+  running: "d-busy",
+  queued: "d-busy"
+}
+
+/** An age as the row's last column says it: `2h`, not `2h ago`. */
+const shortAge = (iso: string): string => ageOf(iso).replace(/ ago$/, "")
 
 /**
  * The chip a row wears when it is not in the Court over it, in the tints above.
@@ -124,20 +139,13 @@ const addressOfIssue = (reference: IssueRef): string => `issue ${nameOf(referenc
  * A count rather than names, and only when something is outstanding: "12 of 12"
  * on a green pull request is a row spending its width to say nothing.
  */
-const Checks = ({ rollup }: { readonly rollup: CheckRollup }) => {
-  const art = rollupArtState(rollup.state)
-  const Art = useArt()[checkName(art)]
-  const tone = CHECK_TONE[art]
-
-  return (
-    <span className={`flex items-center gap-1 text-xs ${tone}`}>
-      <Art size={12} />
-      {rollup.passed < rollup.total ? (
-        <span className="tabular-nums">{`${rollup.passed} of ${rollup.total}`}</span>
-      ) : null}
-    </span>
-  )
-}
+const Checks = ({ rollup }: { readonly rollup: CheckRollup }) => (
+  <span className={`d-key ${CHECK_PILL[rollupArtState(rollup.state)] ?? ""}`}>
+    {rollup.passed === rollup.total
+      ? `${rollup.passed}/${rollup.total}`
+      : `${rollup.passed} of ${rollup.total}`}
+  </span>
+)
 
 /**
  * How wide each of a row's columns is, in the order a row draws them.
@@ -155,11 +163,16 @@ const Checks = ({ rollup }: { readonly rollup: CheckRollup }) => {
  * whatever is left, because it is the one part worth the width.
  */
 const TRACK = {
-  face: "1rem",
-  state: "0.875rem",
-  number: "2.75rem",
-  title: "minmax(160px,1fr)",
-  age: "minmax(0,3.5rem)"
+  face: "20px",
+  state: "16px",
+  number: "54px",
+  title: "minmax(180px,1fr)",
+  repo: "var(--d-t-repo, 110px)",
+  standing: "130px",
+  checks: "70px",
+  comments: "var(--d-t-comments, 44px)",
+  size: "var(--d-t-size, 76px)",
+  age: "52px"
 } as const
 
 type TrackFit = {
@@ -192,10 +205,9 @@ const wider = (current: TrackFit, candidate: TrackFit): TrackFit =>
     ? current
     : candidate
 
-const fittedTrack = (fit: TrackFit): string => {
-  if (fit.fixedRem === 0 && fit.characters === 0) return "0rem"
-  return `minmax(0,calc(${fit.fixedRem}rem + ${fit.characters}ch))`
-}
+/** The track's own width, or none where no row in the list has the fact. */
+const heldTrack = (fit: TrackFit, width: string): string =>
+  fit.fixedRem === 0 && fit.characters === 0 ? "0px" : width
 
 const checkFit = (rollup: Option.Option<CheckRollup>): TrackFit =>
   Option.match(rollup, {
@@ -378,11 +390,11 @@ const tracksOf = (columns: Columns): string =>
     TRACK.state,
     TRACK.number,
     TRACK.title,
-    ...(columns.repo ? [fittedTrack(columns.fits.repo)] : []),
-    ...(columns.standing ? [fittedTrack(columns.fits.standing)] : []),
-    fittedTrack(columns.fits.checks),
-    fittedTrack(columns.fits.comments),
-    fittedTrack(columns.fits.size),
+    ...(columns.repo ? [TRACK.repo] : []),
+    ...(columns.standing ? [TRACK.standing] : []),
+    heldTrack(columns.fits.checks, TRACK.checks),
+    heldTrack(columns.fits.comments, TRACK.comments),
+    heldTrack(columns.fits.size, TRACK.size),
     TRACK.age
   ].join(" ")
 
@@ -400,14 +412,11 @@ const Sized = ({ size }: { readonly size: Option.Option<Size> }) =>
     // The track is the row's, not this cell's, so the space is held whether or
     // not the read has landed: a list does not rearrange itself under the
     // pointer a second after it was drawn.
-    onNone: () => <span aria-hidden="true" />,
+    onNone: () => <span aria-hidden="true" className="d-col-size" />,
     onSome: (found) => (
-      <span
-        aria-label={`${found.added} added, ${found.deleted} removed`}
-        className="flex justify-end gap-1 overflow-hidden font-mono text-xs tabular-nums"
-      >
-        <span className="text-pass">{`+${found.added}`}</span>
-        <span className="text-fail">{`−${found.deleted}`}</span>
+      <span aria-label={`${found.added} added, ${found.deleted} removed`} className="d-key d-col-size">
+        <span className="d-plus">{`+${found.added}`}</span>{" "}
+        <span className="d-minus">{`−${found.deleted}`}</span>
       </span>
     )
   })
@@ -477,15 +486,9 @@ const Row = ({
       // Named, because two stylesheets have to reach the thing that lights under
       // the pointer and it is no longer the anchor.
       data-row=""
-      className={`group grid items-center rounded-md pr-1 hover:bg-hover ${chosen ? "bg-hover" : ""} ${
-        at === undefined ? "" : "t-row-in"
-      }`}
-      style={
-        {
-          gridTemplateColumns: "minmax(0,1fr) auto",
-          ...(at === undefined ? {} : { "--row-at": String(at) })
-        } as React.CSSProperties
-      }
+      data-chosen={chosen ? "" : undefined}
+      className={`group d-ws-row ${at === undefined ? "" : "t-row-in"}`}
+      style={(at === undefined ? {} : { "--row-at": String(at) }) as React.CSSProperties}
     >
       <a
         href={linkOf(one.reference)}
@@ -514,7 +517,7 @@ const Row = ({
          * the way a link behaves, which is how an extension avoids being an
          * obstacle.
          */
-        className="grid min-w-0 items-center gap-2 px-3 py-1.5 no-underline"
+        className={`d-ws-line ${one.readByViewer ? "" : "d-unread"}`}
         style={{
           gridTemplateColumns: `${stackPosition === undefined ? "" : "1.25rem "}${tracksOf(columns)}`
         }}
@@ -523,7 +526,7 @@ const Row = ({
           <span
             data-stack-position=""
             aria-hidden="true"
-            className="justify-self-center whitespace-nowrap text-center font-mono text-[10px] text-ink-muted tabular-nums"
+            className="d-key whitespace-nowrap text-center"
           >
             #{stackPosition.at}
           </span>
@@ -534,12 +537,12 @@ const Row = ({
          * list for their own work was crossing the whole width of every row to find
          * it. English reads left to right and this is the first question it asks.
          */}
-        <Who login={one.author.login} src={Option.getOrUndefined(one.author.faceUrl)} />
+        <Who login={one.author.login} src={Option.getOrUndefined(one.author.faceUrl)} size={18} />
 
         {/* Named only when queued: the Court heading already says Running,
             and the glyph is the one thing on the row that says why. */}
         <Art
-          size={14}
+          size={15}
           aria-label={inQueue ? "Queued" : undefined}
           className={`shrink-0 ${glyphTone(one.state, inQueue)}`}
         />
@@ -557,15 +560,9 @@ const Row = ({
          * Then the context is already established and the address on every line is
          * a column of identical text taking width from the titles beside it.
          */}
-        <span className="justify-self-end font-mono text-xs text-ink-muted tabular-nums">
-          {`#${one.reference.number}`}
-        </span>
+        <span className="d-key">{`#${one.reference.number}`}</span>
 
-        <span
-          className={`truncate text-sm ${one.readByViewer ? "text-ink" : "font-semibold text-ink"}`}
-        >
-          {one.title}
-        </span>
+        <span className="d-tt">{one.title}</span>
 
         {/*
          * Which repository, as the owner's picture and the repository's own name —
@@ -579,12 +576,9 @@ const Row = ({
          * taken from the titles.
          */}
         {columns.repo ? (
-          <span
-            title={`${one.reference.owner}/${one.reference.repo}`}
-            className="flex min-w-0 items-center gap-1.5"
-          >
-            <Owner owner={one.reference.owner} />
-            <span className="truncate font-mono text-xs text-ink-muted">{one.reference.repo}</span>
+          <span title={`${one.reference.owner}/${one.reference.repo}`} className="d-repo-cell">
+            <RepoTile name={one.reference.repo} />
+            <span className="truncate">{one.reference.repo}</span>
           </span>
         ) : null}
 
@@ -611,26 +605,20 @@ const Row = ({
              * still asking.
              */}
             {heading !== undefined && court !== heading ? (
-              <span className={`rounded-full px-2 py-0.5 text-xs ${TINT[COURT_TINT[court]]}`}>
-                {COURT_NAME[court]}
-              </span>
+              <span className={TINT[COURT_TINT[court]]}>{COURT_NAME[court]}</span>
             ) : Option.match(one.why, {
               onNone: () =>
                 Option.match(one.reviewed, {
                   onNone: () => null,
                   onSome: (opinion) =>
                     opinion === "review-required" && Option.isNone(one.shelf) ? null : (
-                      <span className={`text-xs ${OPINION_TONE[opinion]}`}>
-                        {OPINION_WORDS[opinion]}
-                      </span>
+                      <span className={OPINION_PILL[opinion]}>{OPINION_WORDS[opinion]}</span>
                     )
                 }),
               onSome: (reason) => {
                 const read = reasonRead(reason)
                 return (
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${TINT[read.tint]}`}>
-                    {read.words}
-                  </span>
+                  <span className={TINT[read.tint]}>{read.words}</span>
                 )
               }
             })}
@@ -651,29 +639,19 @@ const Row = ({
           })}
         </span>
 
-        <span className="flex items-center gap-1 text-xs text-ink-muted">
-          {one.comments > 0 ? (
-            <>
-              <art.comment size={12} />
-              <span className="tabular-nums">{one.comments}</span>
-            </>
-          ) : null}
-        </span>
+        <span className="d-key d-col-comments">{one.comments > 0 ? one.comments : ""}</span>
 
         <Sized size={one.size} />
 
-        <span
-          title={momentOf(one.changedAt)}
-          className="text-right text-xs text-ink-muted tabular-nums"
-        >
-          {ageOf(one.changedAt)}
+        <span title={momentOf(one.changedAt)} className="d-key d-end">
+          {shortAge(one.changedAt)}
         </span>
       </a>
 
-      {asking === undefined ? (
-        <span aria-hidden="true" />
-      ) : (
-        <Doings one={one} asking={asking} chosen={chosen} />
+      {asking === undefined ? null : (
+        <span className="d-doings">
+          <Doings one={one} asking={asking} chosen={chosen} />
+        </span>
       )}
     </div>
   )
@@ -730,15 +708,9 @@ export const IssueRow = ({
     // it rather than something absent from the interface.
     <div
       data-row=""
-      className={`group grid items-center rounded-md pr-1 hover:bg-hover ${chosen ? "bg-hover" : ""} ${
-        at === undefined ? "" : "t-row-in"
-      }`}
-      style={
-        {
-          gridTemplateColumns: "minmax(0,1fr) auto",
-          ...(at === undefined ? {} : { "--row-at": String(at) })
-        } as React.CSSProperties
-      }
+      data-chosen={chosen ? "" : undefined}
+      className={`group d-ws-row ${at === undefined ? "" : "t-row-in"}`}
+      style={(at === undefined ? {} : { "--row-at": String(at) }) as React.CSSProperties}
     >
       <a
         href={pageOf(one.reference)}
@@ -758,29 +730,24 @@ export const IssueRow = ({
           here ? `#${one.reference.number}` : nameOf(one.reference)
         }.${court === undefined ? "" : ` ${COURT_NAME[court]}`}`}
         aria-current={chosen ? "true" : undefined}
-        className="grid min-w-0 items-center gap-2 px-3 py-1.5 no-underline"
+        className="d-ws-line"
         style={{ gridTemplateColumns: tracksOf(columns) }}
       >
-        <Who login={one.author.login} src={Option.getOrUndefined(one.author.faceUrl)} />
+        <Who login={one.author.login} src={Option.getOrUndefined(one.author.faceUrl)} size={18} />
 
         <Art
-          size={14}
+          size={15}
           className={`shrink-0 ${one.state === "open" ? "text-pass" : "text-ink-muted"}`}
         />
 
-        <span className="justify-self-end font-mono text-xs text-ink-muted tabular-nums">
-          {`#${one.reference.number}`}
-        </span>
+        <span className="d-key">{`#${one.reference.number}`}</span>
 
-        <span className="truncate text-sm text-ink">{one.title}</span>
+        <span className="d-tt">{one.title}</span>
 
         {columns.repo ? (
-          <span
-            title={`${one.reference.owner}/${one.reference.repo}`}
-            className="flex min-w-0 items-center gap-1.5"
-          >
-            <Owner owner={one.reference.owner} />
-            <span className="truncate font-mono text-xs text-ink-muted">{one.reference.repo}</span>
+          <span title={`${one.reference.owner}/${one.reference.repo}`} className="d-repo-cell">
+            <RepoTile name={one.reference.repo} />
+            <span className="truncate">{one.reference.repo}</span>
           </span>
         ) : null}
 
@@ -857,13 +824,11 @@ export const IssueRow = ({
         <time
           dateTime={one.raisedAt}
           title={`Raised ${momentOf(one.raisedAt)}`}
-          className="text-right text-xs text-ink-muted tabular-nums"
+          className="d-key d-end"
         >
-          {ageOf(one.raisedAt)}
+          {shortAge(one.raisedAt)}
         </time>
       </a>
-
-      <span aria-hidden="true" />
     </div>
   )
 }
@@ -909,11 +874,12 @@ const Seam = ({
   const Mark = art[name]
 
   return (
-    <div className="flex items-center gap-2 px-3 pt-2.5 pb-1.5 text-ink-muted">
-      <Mark size={12} className="shrink-0 opacity-80" aria-hidden="true" />
-      <span className="text-[11px] font-medium uppercase tracking-[0.08em]">{words}</span>
-      <span className="h-px flex-1 bg-line-muted" />
-      <span className="text-[11px] tabular-nums">{many}</span>
+    <div className="d-court-sub">
+      <span className="flex items-center gap-1.5">
+        <Mark size={12} className="shrink-0" aria-hidden="true" />
+        <span>{words}</span>
+      </span>
+      <span className="d-n">{many}</span>
     </div>
   )
 }
@@ -992,7 +958,7 @@ const Issues = ({
         <button
           type="button"
           onClick={() => showAll(true)}
-          className="group/fold flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-ink-muted hover:bg-hover hover:text-ink"
+          className="group/fold d-court-sub w-full rounded-md text-left hover:bg-hover hover:text-ink"
         >
           {/* The chevron turns as the fold opens, which is the one thing on this control that
               says which way it goes. Down is more; there is no up, because nothing here folds
@@ -1006,6 +972,37 @@ const Issues = ({
         </button>
       ) : null}
     </>
+  )
+}
+
+/** A Court's glyph on Home, where Running reads as the merge it is heading for rather than a job. */
+const WELL_ART: Record<Court, ArtName> = { ...COURT_ART, running: "merge-commit" }
+
+/** One Court: a well on the main card, headed by its glyph, its name and how many it holds. */
+const CourtWell = ({
+  name,
+  art: mark,
+  many,
+  needs = false,
+  children
+}: {
+  readonly name: string
+  readonly art: ArtName
+  readonly many: number
+  readonly needs?: boolean
+  readonly children: React.ReactNode
+}) => {
+  const Mark = useArt()[mark]
+
+  return (
+    <section aria-label={name} className="d-court">
+      <div className={`d-court-head ${needs ? "d-needs" : ""}`}>
+        <Mark size={16} aria-hidden="true" />
+        <h2 className="min-w-0 truncate">{name}</h2>
+        <span className="d-n">{many}</span>
+      </div>
+      {children}
+    </section>
   )
 }
 
@@ -1052,16 +1049,13 @@ const Pile = ({
   const rows = flattenPile(pile)
 
   return (
-    <section
-      data-stack=""
-      className={`m-1 overflow-hidden ${CARD}`}
-    >
-      <div className="flex items-center justify-between border-b border-line-muted bg-hover px-3 py-1 text-xs text-ink-muted">
+    <section data-stack="" className="d-stack">
+      <div className="d-court-sub">
         <span data-stack-label="" className="flex items-center gap-1.5">
-          <StackIcon size={12} aria-hidden="true" className="text-ink-accent" />
+          <StackIcon size={12} aria-hidden="true" />
           <span>Stack</span>
         </span>
-        <span className="tabular-nums">{`${rows.length} pull requests`}</span>
+        <span className="d-n">{`${rows.length} pull requests`}</span>
       </div>
       <div>
         {rows.map((row, at) => (
@@ -1501,16 +1495,18 @@ export const WorkingSet = ({
         /* Four pixels between the filter row and the Courts, and between the Courts themselves.
            Each Court is its own filled card, so the fill is what separates them; the twelve
            pixels of canvas this started at was a gutter doing a border's job twice over. */
-        className={`t-panels flex flex-col gap-1 ${bare ? "" : "py-3"}`}
+        className={`t-panels flex flex-col ${bare ? "" : "py-3"}`}
       >
-        <Filters
-          query={query}
-          authors={authors}
-          repos={repos}
-          viewer={viewer}
-          what={what}
-          onQuery={ask}
-        />
+        <IntoTheBar>
+          <Filters
+            query={query}
+            authors={authors}
+            repos={repos}
+            viewer={viewer}
+            what={what}
+            onQuery={ask}
+          />
+        </IntoTheBar>
 
         {!anything ? (
           <p className="px-3 py-2 text-sm text-ink-muted">
@@ -1528,11 +1524,11 @@ export const WorkingSet = ({
                 data-gitace-activation="list-section"
                 className="contents"
               >
-                <Section
+                <CourtWell
                   name={COURT_NAME[sitting.court]}
-                  tone={COURT_TONE[sitting.court]}
-                  art={COURT_ART[sitting.court]}
-                  summary={<span className="tabular-nums">{sitting.count}</span>}
+                  needs={sitting.court === "needs-you"}
+                  art={WELL_ART[sitting.court]}
+                  many={sitting.count}
                 >
                   <div>
                     {/* Both bands or neither: a Court holding one kind needs no line telling it
@@ -1575,7 +1571,7 @@ export const WorkingSet = ({
                       />
                     )}
                   </div>
-                </Section>
+                </CourtWell>
               </div>
             ))}
 
@@ -1591,11 +1587,7 @@ export const WorkingSet = ({
              */}
             {arranged.loose.length === 0 ? null : (
               <div data-gitace-activation="list-section" className="contents">
-                <Section
-                  name="Involved Issues"
-                  art="issue"
-                  summary={<span className="tabular-nums">{arranged.loose.length}</span>}
-                >
+                <CourtWell name="Involved Issues" art="issue" many={arranged.loose.length}>
                   <div>
                     {arranged.loose.map((one) => (
                       <IssueRow
@@ -1609,7 +1601,7 @@ export const WorkingSet = ({
                       />
                     ))}
                   </div>
-                </Section>
+                </CourtWell>
               </div>
             )}
           </>

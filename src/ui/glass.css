@@ -35,7 +35,7 @@
  * card.
  */
 :is(#gitace-bar, [data-gitace-bar]) {
-  padding: 8px var(--gitace-gutter) 0;
+  padding: 4px var(--gitace-gutter) 0;
   padding-inline-start: calc(var(--gitace-rail-w, 36px) + var(--gitace-gutter));
 }
 

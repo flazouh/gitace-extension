@@ -56,12 +56,12 @@ export const TheBar = ({
   participant,
   preparedRoot,
   onPrepareRoute,
+  needsYou,
   ...props
 }: Omit<
   BarProps,
   | "tabs"
   | "onSearch"
-  | "corner"
   | "onBack"
   | "onPrepareBack"
   | "onForward"
@@ -86,6 +86,8 @@ export const TheBar = ({
   readonly recall?: () => Effect.Effect<
     Option.Option<ReadonlyArray<Repository>>
   >;
+  /** How much of the Working Set is waiting on the reader, for the dot on its rail item. */
+  readonly needsYou?: number;
   /** A detached route root whose bar is being built before navigation. */
   readonly preparedRoot?: Element;
   /** Builds an exact history route before the reader presses Back or Forward. */
@@ -459,7 +461,6 @@ export const TheBar = ({
             press: () => goBackTo(window, step),
           })),
         )}
-        corner={<SettingsDialog settings={settings} onChange={change} />}
         /*
          * The two things the surroundings know and this does not: what Home means where
          * it is not an address, and what they keep past everything about the page. Both
@@ -473,6 +474,7 @@ export const TheBar = ({
       <GlobalRail
         where={props.where}
         unread={props.unread}
+        needsYou={needsYou}
         repositories={findable}
         pinned={settings.pinned}
         destination={settings.home.destination}
@@ -481,6 +483,25 @@ export const TheBar = ({
         }
         onHome={around.home}
         onStepAside={props.onStepAside}
+        participant={reader}
+        sidebar={
+          props.where.kind === "home"
+            ? {
+                open: settings.home.rail !== "narrow",
+                toggle: () =>
+                  change((current) => ({
+                    ...current,
+                    home: {
+                      ...current.home,
+                      rail: current.home.rail === "narrow" ? "wide" : "narrow",
+                    },
+                  })),
+              }
+            : undefined
+        }
+        settings={(trigger) => (
+          <SettingsDialog settings={settings} onChange={change} trigger={trigger} />
+        )}
       />
       {finding ? (
         <Palette

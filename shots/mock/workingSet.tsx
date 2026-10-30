@@ -8,6 +8,10 @@ import type {
   Shelf,
   Size
 } from "../../src/domain/workingSet"
+import type { Repository } from "../../src/domain/repositories"
+import { DEFAULTS } from "../../src/domain/Settings"
+import { Home } from "../../src/ui/Home"
+import { SETTINGS } from "../../src/ui/keeping"
 import { WorkingSetScreen } from "../../src/ui/WorkingSetScreen"
 import { alreadyKnown, nothingRemembered, settled, STORE, type View } from "../view"
 import { faceOf, MOCK_VIEWER } from "./faces"
@@ -473,6 +477,45 @@ export const WORKING_SET = sittingsIn(involved, branchesOf)
 
 export const PARTICIPANT = { login: VIEWER, faceUrl: faceOf(VIEWER) }
 
+const REPOSITORIES: ReadonlyArray<Repository> = [
+  ...new Map(ROWS.map((row) => [`${row.owner}/${row.repo}`, row])).values()
+].map((row) => ({
+  owner: row.owner,
+  repo: row.repo,
+  nameWithOwner: `${row.owner}/${row.repo}`,
+  faceUrl: Option.none(),
+  ofAnOrganisation: true,
+  isPrivate: false,
+  isEmpty: false
+}))
+
+export const HOME_VIEW: View = {
+  name: "home",
+  caption: "Home: the rail, the Working Set and the repositories you pinned, in one frame",
+  width: 1440,
+  height: 900,
+  chosen: {
+    [SETTINGS]: {
+      ...DEFAULTS,
+      theme: { ...DEFAULTS.theme, appearance: "dark", pack: "gitace", art: "gitace" },
+      pinned: ["oven-sh/bun", "vercel/next.js"]
+    }
+  },
+  draw: () => (
+    <Home
+      load={settled(WORKING_SET)}
+      preload={alreadyKnown(WORKING_SET)}
+      repositories={settled(REPOSITORIES)}
+      rememberedRepositories={alreadyKnown(REPOSITORIES)}
+      activity={settled([])}
+      participant={PARTICIPANT}
+      onOpen={() => {}}
+      onStepAside={() => {}}
+      ask={() => Effect.void}
+    />
+  )
+}
+
 export const WORKING_SET_VIEW: View = {
   name: "working-set",
   caption:
@@ -490,4 +533,13 @@ export const WORKING_SET_VIEW: View = {
       ask={() => Effect.void}
     />
   )
+}
+
+/** The same Home on a 1024px window, where the main card drops the columns it can spare. */
+export const HOME_NARROW_VIEW: View = {
+  ...HOME_VIEW,
+  name: "home-narrow",
+  caption: "Home at 1024px: no row wraps and nothing runs off the side",
+  width: 1024,
+  height: 768
 }

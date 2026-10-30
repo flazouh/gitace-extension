@@ -3,16 +3,13 @@ import { Option } from "effect";
 import { listsPullRequests, THE_HOME } from "../domain/pages";
 import { switchable, type Repository } from "../domain/repositories";
 import { useArt } from "./art";
-import { Cap } from "./Cap";
-import { HERE, INSIDE, PRESSABLE, TINT } from "./dress";
-import { Face } from "./Face";
+import { BarTools } from "./barTools";
+import { HERE, INSIDE, TINT } from "./dress";
 import { Menu, type Row } from "./Menu";
 import { Owner } from "./Owner";
-import { participantRows } from "./participant";
 import { tabMark } from "./tabMarks";
 import type { Tab } from "./theirNav";
 import { isViewer } from "./viewer";
-import { openTab } from "../app/openTab";
 
 /**
  * The strip across the top, ours instead of theirs.
@@ -173,17 +170,6 @@ export type BarProps = {
   readonly behind?: ReadonlyArray<Row>;
   readonly onStepAside?: () => void;
   /**
-   * The way into the reader's own choices, which stands beside the inbox.
-   *
-   * A slot rather than the control itself, because the strip is drawn from what it is handed and
-   * a settings sheet needs a store, a schema and somewhere to write. `TheBar` has all three and
-   * this has none of them, which is the only reason the two are separate components.
-   *
-   * Filled on both hosts, unlike {@link tray}, which is what the surroundings add and a page
-   * leaves empty.
-   */
-  readonly corner?: ReactNode;
-  /**
    * Home as a press, from a host where Home is not an address.
    *
    * Left out and the mark is the link it has always been, which is right on a page: the
@@ -305,22 +291,18 @@ const NOTHING: ReadonlyArray<never> = [];
 export const Bar = ({
   where,
   tabs = [],
-  unread = false,
   repositories = NOTHING,
   pinned = NOTHING,
   lately = NOTHING,
   onPin,
   atTheCode = false,
   at = window.location.pathname,
-  participant,
   onSearch,
   onBack,
   onPrepareBack,
   onForward,
   onPrepareForward,
   behind = NOTHING,
-  onStepAside,
-  corner,
   onHome,
   tray,
 }: BarProps) => {
@@ -331,11 +313,6 @@ export const Bar = ({
   const Forward = art.forward;
   const backButton = useRef<HTMLButtonElement>(null);
   const forwardButton = useRef<HTMLButtonElement>(null);
-  // The tray says which state it is in, so the two are named rather than one
-  // glyph with something drawn over it.
-  const Inbox = unread ? art["notifications-unread"] : art.notifications;
-  const Leave = art["sign-out"];
-  const Bug = art.bug;
   const More = art.more;
   const [opened, setOpened] = useState<
     "account" | "repositories" | "tabs" | "behind" | undefined
@@ -408,7 +385,8 @@ export const Bar = ({
        * applied to the inside of the pane as well as the outside of it. The controls are twenty-
        * eight pixels in a forty pixel strip, so the room they need is vertical and already there.
        */
-      className="flex h-10 items-center gap-2 bg-surface px-2 text-sm text-ink"
+      data-desk-head=""
+      className="flex items-center text-sm text-ink"
     >
       {/*
        * The way back and the way forward, first in the strip, before the mark for
@@ -434,76 +412,32 @@ export const Bar = ({
        * Wordless like the tray at the other end. The mark says the direction and
        * the name says the destination, for a pointer and for anyone being read to.
        */}
-      {onBack === undefined ? null : (
-        <div className="relative flex shrink-0 items-center">
-          {/*
-           * One chip, two presses, which is the shape the repository's name takes
-           * a few pixels to the right: the arrow goes back a page and the chevron
-           * asks which page. The alternative was Chrome's, where the list is
-           * behind a long press on the same arrow — a gesture nothing in this
-           * interface uses and nothing on the strip could advertise.
-           */}
-          <div
-            className={`flex items-center overflow-hidden rounded-md ${TINT}`}
+      <div className="relative d-hnav">
+        <button
+          ref={backButton}
+          type="button"
+          onClick={onBack}
+          onFocus={onPrepareBack}
+          aria-label="Back"
+          title="Back"
+          disabled={onBack === undefined}
+          className="d-hn"
+        >
+          <Back size={16} />
+        </button>
+        {behind.length < 2 ? null : (
+          <button
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={opened === "behind"}
+            aria-label="Where you have been"
+            title="Where you have been"
+            onClick={() => setOpened(opened === "behind" ? undefined : "behind")}
+            className="d-hn !w-5"
           >
-            <button
-              ref={backButton}
-              type="button"
-              onClick={onBack}
-              onFocus={onPrepareBack}
-              aria-label="Back"
-              title="Back"
-              className="grid size-7 shrink-0 place-items-center text-ink-muted hover:bg-active hover:text-ink"
-            >
-              <Back size={16} />
-            </button>
-            {/*
-             * Two or more, and the second is the reason: a menu whose only row is
-             * the page the arrow beside it already goes to is a second button for
-             * the first one.
-             */}
-            {behind.length < 2 ? null : (
-              <button
-                type="button"
-                aria-haspopup="menu"
-                aria-expanded={opened === "behind"}
-                aria-label="Where you have been"
-                title="Where you have been"
-                onClick={() => setOpened(opened === "behind" ? undefined : "behind")}
-                /* Twenty across against the name's twenty-eight, and the same line
-                   down its left. This half opens a menu beside a half that goes
-                   somewhere, and the pair has to stay narrower than the two tabs
-                   it pushes along. */
-                className="grid h-7 w-5 shrink-0 place-items-center border-l border-line-muted text-ink-muted hover:bg-active hover:text-ink"
-              >
-                <Chevron
-                  size={10}
-                  className={`t-turn ${opened === "behind" ? "is-turned" : ""}`}
-                />
-              </button>
-            )}
-          </div>
-          <Menu
-            name="Where you have been"
-            origin="top-left"
-            wide="w-72"
-            open={opened === "behind"}
-            onShut={() => setOpened(undefined)}
-            rows={behind}
-          />
-        </div>
-      )}
-
-      {/*
-       * Forward keeps its slot whether or not there is anywhere ahead.
-       *
-       * Everything else in this strip is drawn only where it does something, and
-       * this is the exception the gesture forces: Back is pressed twice as often
-       * as once, and a control that appeared between the two presses would catch
-       * the second one and undo the first. Said as disabled rather than painted
-       * as absent, so a reader being read to hears why it does nothing.
-       */}
-      {onBack === undefined ? null : (
+            <Chevron size={10} className={`t-turn ${opened === "behind" ? "is-turned" : ""}`} />
+          </button>
+        )}
         <button
           ref={forwardButton}
           type="button"
@@ -513,32 +447,36 @@ export const Bar = ({
           title="Forward"
           aria-disabled={onForward === undefined}
           disabled={onForward === undefined}
-          className="grid size-7 shrink-0 place-items-center rounded-md text-ink-muted enabled:hover:bg-hover enabled:hover:text-ink disabled:opacity-40"
+          className="d-hn"
         >
           <Forward size={16} />
         </button>
-      )}
-
-      <Ours here={where.kind === "home"} onHome={onHome} />
+        <Menu
+          name="Where you have been"
+          origin="top-left"
+          wide="w-72"
+          open={opened === "behind"}
+          onShut={() => setOpened(undefined)}
+          rows={behind}
+        />
+      </div>
 
       {where.kind === "home" ? (
-        <div className="flex min-w-0 items-center gap-1.5 text-[15px] font-medium">
-          <span className="shrink-0 text-ink">Working Set</span>
-          <span aria-hidden="true" className="text-ink-muted font-normal opacity-60">
+        <div className="d-h1">
+          <Ours here onHome={onHome} />
+          <span aria-hidden="true" className="d-crumb-sep">
             /
           </span>
-          <span className="truncate font-normal text-ink-muted">
-            Every pull request you are in, grouped by who acts next
+          <span className="d-crumb-at d-t">Every pull request you are in, grouped by who acts next</span>
+        </div>
+      ) : (
+        <div className="d-h1">
+          <Ours here={false} onHome={onHome} />
+          <span aria-hidden="true" className="d-crumb-sep">
+            /
           </span>
         </div>
-      ) : null}
-
-      {where.kind === "repository" ? (
-        <span aria-hidden="true" className="flex items-center gap-1.5 text-ink-muted">
-          <span className="text-[15px]">Git</span>
-          <span className="opacity-60">/</span>
-        </span>
-      ) : null}
+      )}
 
       {/*
        * Their name, on somebody else's pages, and no chevron beside it.
@@ -796,153 +734,29 @@ export const Bar = ({
         </nav>
       )}
 
-      {onSearch === undefined ? null : (
+      <span className="d-sp" />
+
+      {onSearch === undefined ? null : where.kind === "home" ? (
         <button
           type="button"
           onClick={onSearch}
-          /*
-           * Over the reading column rather than pinned to the far right, where theirs sits at
-           * x=1355 on a 1920-wide window: a reader looking for a repository is looking at the
-           * left of the page, which is where the Rail's own filter is.
-           */
-          /*
-           * Eighteen rem, which is a control rather than a column.
-           *
-           * It was capped at the palette's own 576 on the argument that a trigger the width of
-           * the dialog reads as the same thing twice. True of the dialog, wrong about the strip:
-           * at 576 this was the largest object in the bar — 37% of the width on a 1024 window —
-           * for a button whose whole content is four words and a key. The reader is not aiming
-           * at it anyway, they are pressing ⌘K, and the cap on the right says so.
-           *
-           * `flex-1` under the cap, so a narrow window shrinks it instead of pushing the tray
-           * off the end.
-           */
-          /*
-           * Two steps of the ladder down rather than one, and the hover is in the ink.
-           *
-           * At `bg-hover` — the tint every chip in the interface wears — a field eight
-           * pixels tall and thirty-six rem wide was the faintest thing in the strip: the
-           * one control here a reader has to find without being told where it is. `bg-active`
-           * is the deepest fill the pack has, and it is the same in every pack, which is why
-           * this is a tint rather than `bg-canvas`: on GitHub's own pack the canvas is
-           * lighter than the surface it would be sunk into.
-           */
-          className="flex h-7 min-w-0 max-w-[18rem] flex-1 items-center gap-2 rounded-md bg-active px-2.5 text-ink-muted hover:text-ink"
+          aria-label="Search anything you have"
+          title="Search anything you have (⌘K)"
+          className="d-hn"
         >
-          <Search size={14} />
+          <Search size={16} />
+        </button>
+      ) : (
+        <button type="button" onClick={onSearch} className="d-search">
+          <Search size={13} />
           <span className="truncate">Search anything you have</span>
-          {/* The same cap every other key in this interface wears, rather than a badge
-              of this button's own: two spellings of one key is how a reader stops
-              believing either of them. */}
-          <span className="ml-auto flex shrink-0">
-            <Cap chord="⌘K" />
-          </span>
+          <span className="d-kbd">⌘K</span>
         </button>
       )}
 
-      <div className="ml-auto flex items-center gap-1">
-        {/* Ahead of the inbox and the Participant, so the two controls that go
-            somewhere stay together at the corner and the one that opens a sheet
-            of ours does not sit between them. */}
-        {corner}
+      <BarTools />
 
-        <a
-          href="/notifications"
-          aria-label={
-            unread ? "Notifications, something is waiting" : "Notifications"
-          }
-          onClick={(event) => {
-            // Full document load. Soft-nav left no region to stand in (and claiming
-            // the press let the duplicate-navigation guard cancel a later assign).
-            event.preventDefault()
-            window.location.assign("/notifications")
-          }}
-          className="relative grid size-7 place-items-center rounded-md text-ink-muted no-underline hover:bg-hover hover:text-ink"
-        >
-          {/*
-           * The glyph carries it, and never a number. Their own bar carries no count
-           * and `/notifications/indicator` answers `{"mode":"global"}` — so a number
-           * here would be a figure this extension invented.
-           *
-           * There was a dot drawn over the corner of the glyph as well. Two marks for
-           * one fact, once the tray started saying it itself: the state is in the
-           * drawing, and in the name on the link for anyone not looking at drawings.
-           */}
-          <Inbox size={16} />
-        </a>
-
-        {participant === undefined ? null : (
-          <div className="relative flex">
-            <button
-              type="button"
-              aria-haspopup="menu"
-              aria-expanded={opened === "account"}
-              onClick={() =>
-                setOpened(opened === "account" ? undefined : "account")
-              }
-              className={`flex items-center gap-1.5 px-2 py-1 ${PRESSABLE} text-ink-muted hover:bg-active hover:text-ink`}
-            >
-              <Face
-                faceUrl={participant.faceUrl}
-                name={participant.login}
-                big
-              />
-              <span className="max-w-32 truncate">{participant.login}</span>
-              <Chevron
-                size={12}
-                className={`t-turn ${opened === "account" ? "is-turned" : ""}`}
-              />
-            </button>
-            <Menu
-              name="Your account"
-              origin="top-right"
-              open={opened === "account"}
-              onShut={() => setOpened(undefined)}
-              rows={participantRows({ login: participant.login })}
-            />
-          </div>
-        )}
-
-        {/*
-         * The way out, in the strip rather than on the screen below it, and last
-         * in the row. Sign-out rather than GitHub's mark: the press leaves this
-         * interface; the destination is already in the name.
-         *
-         * The bug report sits just before it — filing a problem with GitAce Extension,
-         * not an issue in the repository being read.
-         */}
-        <a
-          href="https://github.com/flazouh/gitace-extension/issues"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Report a problem on GitAce Extension"
-          title="Report a problem on GitAce Extension"
-          onClick={(event) => {
-            // Background tabs.create — not window.open (popup-blocked) and not a
-            // same-tab Turbo walk of target=_blank on github.com.
-            event.preventDefault()
-            openTab("https://github.com/flazouh/gitace-extension/issues")
-          }}
-          className="grid size-7 place-items-center rounded-md text-ink-muted no-underline hover:bg-hover hover:text-ink"
-        >
-          <Bug size={16} />
-        </a>
-
-        {onStepAside === undefined ? null : (
-          <button
-            type="button"
-            onClick={onStepAside}
-            aria-label="Leave GitAce Extension"
-            title="Leave GitAce Extension"
-            className="grid size-7 place-items-center rounded-md text-ink-muted hover:bg-hover hover:text-ink"
-          >
-            <Leave size={16} />
-          </button>
-        )}
-
-        {/* And past all of it, whatever is around this bar: see {@link tray}. */}
-        {tray}
-      </div>
+      {tray}
     </header>
   );
 };
@@ -1006,44 +820,23 @@ const Ours = ({
   readonly here: boolean;
   readonly onHome?: (() => void) | undefined;
 }) => {
-  const art = useArt();
-  const Mark = art.home;
-  /*
-   * One drawing, two kinds of control, because the two hosts mean different things by
-   * Home. On a page it is an address and belongs in an anchor: a reader opens it in a
-   * new tab, copies it, middle-clicks it. In the window it is a screen this one becomes,
-   * there is no address to copy, and an anchor to `/` unloaded the app. See `around.ts`.
-   */
-  const shape =
-    "flex size-7 shrink-0 items-center justify-center rounded-md text-ink-muted no-underline hover:bg-hover hover:text-ink";
-  /*
-   * Said aloud but not painted.
-   *
-   * It wore the accent fill on Home, on the reasoning that the accent is this pack's own
-   * "you are here". Two things were wrong with that. The Rail is beside the list on Home
-   * and already says which Destination is showing, so the fill was the third place one
-   * fact was drawn; and this is the leftmost thing in the bar and the only mark of ours
-   * up there, so a coloured square in that corner reads as a badge for the extension
-   * rather than as the way back to the Working Set. `aria-current` still carries it for
-   * anyone being read to, which is where the fact was load-bearing.
-   */
   const said = {
-    "aria-label": "Home",
-    title: "Home",
-    className: shape,
+    title: "Working Set",
+    className: "d-crumb",
     ...(here ? { "aria-current": "page" as const } : {}),
   };
+  const word = here ? "Working Set" : "Git";
 
   if (onHome !== undefined)
     return (
       <button type="button" onClick={onHome} {...said}>
-        <Mark size={16} />
+        {word}
       </button>
     );
 
   return (
     <a href={THE_HOME} {...said}>
-      <Mark size={16} />
+      {word}
     </a>
   );
 };

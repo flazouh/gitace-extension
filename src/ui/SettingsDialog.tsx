@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { useEffect, useId, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import {
@@ -20,6 +21,8 @@ import { Slide } from "./Slide"
 export type SettingsDialogProps = {
   readonly settings: Settings
   readonly onChange: (settings: Settings) => void
+  /** The control that opens the sheet, where the caller draws its own. */
+  readonly trigger?: (open: () => void, opened: boolean) => ReactNode
 }
 
 /** A knob, what it is set to, and where a change to it is written. */
@@ -445,7 +448,7 @@ export const SettingsSheet = ({
  * dimmed page with nothing on it. `glass.css` states the constraint and the toaster and the hover
  * cards already answer it the same way, through `outsideHost`.
  */
-export const SettingsDialog = ({ settings, onChange }: SettingsDialogProps) => {
+export const SettingsDialog = ({ settings, onChange, trigger }: SettingsDialogProps) => {
   const art = useArt()
   const Diff = art.diff
   const [open, setOpen] = useState(false)
@@ -456,14 +459,18 @@ export const SettingsDialog = ({ settings, onChange }: SettingsDialogProps) => {
 
   return (
     <>
-      <button
-        type="button"
-        aria-label="Display settings"
-        onClick={() => setOpen(true)}
-        className="flex shrink-0 items-center rounded-md px-1.5 py-1 text-ink-muted hover:bg-hover hover:text-ink"
-      >
-        <Diff size={16} />
-      </button>
+      {trigger === undefined ? (
+        <button
+          type="button"
+          aria-label="Display settings"
+          onClick={() => setOpen(true)}
+          className="flex shrink-0 items-center rounded-md px-1.5 py-1 text-ink-muted hover:bg-hover hover:text-ink"
+        >
+          <Diff size={16} />
+        </button>
+      ) : (
+        trigger(() => setOpen(true), open)
+      )}
       {host === null || sheet === null ? sheet : createPortal(sheet, host)}
     </>
   )

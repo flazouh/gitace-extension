@@ -118,7 +118,7 @@ describe("the Working Set screen", () => {
     await waitFor(() => expect(screen.getByText(/price claude turns/)).toBeDefined())
   })
 
-  test("uses the Working Set gap between Home's Rail and content", async () => {
+  test("sets Home's Rail beside the list, the two as one split", async () => {
     render(
       <WorkingSetScreen
         load={() => Effect.succeed(listOf("price claude turns"))}
@@ -129,7 +129,8 @@ describe("the Working Set screen", () => {
     )
 
     const rail = await screen.findByRole("navigation", { name: "Rail" })
-    expect(rail.parentElement?.className.split(" ")).toContain("gap-1")
+    expect(rail.parentElement?.className).toBe("d-gsplit")
+    expect(rail.nextElementSibling?.className).toBe("d-gmain")
   })
 
   test("shows what was remembered before GitHub answers, and replaces it", async () => {

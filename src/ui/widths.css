@@ -37,44 +37,22 @@
  * numbers and they disagreed by twenty-eight pixels: twelve for the bar, and sixteen of ours on
  * top of twenty-four of theirs for the columns.
  *
- * GitHub's own three, rather than a number of ours. On a pull request the body of the page is
- * inset by their `container-xl`, which is sixteen pixels on a narrow window, twenty-four from
- * seven hundred and sixty-eight, and thirty-two from a thousand and twelve — measured on
- * `#diff-comparison-viewer-container` at eleven widths. That inset is the one a reader is
- * already looking at, and it is the only one on the page this extension cannot restate: it
- * wraps the region we draw into rather than anything of ours. So the frame follows it, and the
- * bar, the Courts and their body sit on one edge at every width instead of at three.
- *
- * A fixed eight was the earlier answer, which lined the bar up with nothing: their body stayed
- * at thirty-two, so a wide window showed a bar starting a full twenty-four pixels left of every
- * card under it.
+ * Four pixels: the gap between the rail and the panel, and between the panel and the window's
+ * edge, as the approved desk draws it. Ours alone, because wherever a screen of ours stands in
+ * a region of GitHub's that carries an inset, the rules below take that inset off — so there is
+ * no number of theirs for the frame to line up with, and nothing counted twice.
  *
  * Declared for the page rather than for the interface, because the bar is deliberately not
  * inside `#gitace-root` — it stands above the region we replaced — so a value on the root
  * could not reach it. Our own name, like `--gitace-floor`, so nothing of theirs reads it.
  *
  * The window does not declare this, and `WorkingSetScreen` falls back to the sixteen pixels it
- * always had there: a window has an edge of its own and its bar spans it, and sixteen is the
- * narrow end of this same scale.
+ * always had there: a window has an edge of its own and its bar spans it.
  */
 :root,
 :host {
-  --gitace-gutter: 16px;
+  --gitace-gutter: 4px;
   --gitace-rail-w: 36px;
-}
-
-@media (min-width: 768px) {
-  :root,
-  :host {
-    --gitace-gutter: 24px;
-  }
-}
-
-@media (min-width: 1012px) {
-  :root,
-  :host {
-    --gitace-gutter: 32px;
-  }
 }
 
 /**

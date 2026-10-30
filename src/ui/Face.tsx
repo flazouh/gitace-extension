@@ -23,6 +23,17 @@ const badgeColor = (name: string): string => {
   return BADGE_PALETTE[Math.abs(hash) % BADGE_PALETTE.length] ?? "#f9a825"
 }
 
+/** A repository as a letter on its own colour, the mark a row and the Rail give it. */
+export const RepoTile = ({ name, big = false }: { readonly name: string; readonly big?: boolean }) => (
+  <span
+    aria-hidden="true"
+    className={big ? "d-rbadge" : "d-sw"}
+    style={{ background: badgeColor(name) }}
+  >
+    {name.slice(0, 1).toUpperCase()}
+  </span>
+)
+
 export const Face = ({
   faceUrl,
   name,

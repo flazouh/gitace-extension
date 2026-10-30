@@ -142,7 +142,7 @@ describe("the Working Set", () => {
     // in eight more characters of monospace — and the address in full for a
     // pointer that rests on it and for anything reading the row aloud.
     expect(screen.getByText("octo-repo")).toBeDefined()
-    expect(within(screen.getByTitle("flazouh/octo-repo")).getByRole("img")).toBeDefined()
+    expect(screen.getByTitle("flazouh/octo-repo").textContent).toContain("octo-repo")
     expect(screen.getByRole("link", { name: /flazouh\/octo-repo#1457/ })).toBeDefined()
   })
 
@@ -173,27 +173,23 @@ describe("the Working Set", () => {
     expect(rows[0]?.childElementCount).toBe(rows[1]?.childElementCount)
   })
 
-  test("sizes shared fact columns from the values in this list", () => {
-    showing([
-      involved(1, {
-        reference: { owner: "openrouter", repo: "ori", number: 1 },
-        why: Option.some("READY_TO_MERGE"),
-        checks: Option.some({ state: "failing", passed: 1, total: 10 }),
-        comments: 1,
-        size: Option.some({ added: 77, deleted: 43 })
-      })
-    ])
+  test("keeps each fact column at one width whatever this list holds, so every list lines up", () => {
+    const tracksFor = (comments: number, added: number) => {
+      showing([
+        involved(1, {
+          reference: { owner: "openrouter", repo: "ori", number: 1 },
+          why: Option.some("READY_TO_MERGE"),
+          checks: Option.some({ state: "failing", passed: 1, total: 10 }),
+          comments,
+          size: Option.some({ added, deleted: 43 })
+        })
+      ])
+      const tracks = screen.getByRole("link", { name: /openrouter\/ori#1/ }).style.gridTemplateColumns
+      cleanup()
+      return tracks
+    }
 
-    const row = screen.getByRole("link", { name: /openrouter\/ori#1/ })
-    const tracks = row.style.gridTemplateColumns
-
-    expect(tracks).toContain("calc(1.25rem + 3ch)")
-    expect(tracks).toContain("calc(1rem + 14ch)")
-    expect(tracks).toContain("calc(1rem + 7ch)")
-    expect(tracks).toContain("calc(1rem + 1ch)")
-    expect(tracks).toContain("calc(0.25rem + 6ch)")
-    expect(tracks).not.toContain("8.5rem")
-    expect(tracks).not.toContain("5.5rem")
+    expect(tracksFor(1, 7)).toBe(tracksFor(1200, 70_000))
   })
 
   test("keeps no column for a fact no row in the list has", () => {
@@ -347,7 +343,7 @@ describe("Involved Issues in the Working Set", () => {
     expect(within(row).getByText("3")).toBeDefined()
     expect(within(row).getByText("bug")).toBeDefined()
     expect(within(row).getByText("flaky")).toBeDefined()
-    expect(within(row).getByText("2h ago")).toBeDefined()
+    expect(within(row).getByText("2h")).toBeDefined()
   })
 
   test("draws an issue in the tracks the pull requests use, with the rest left empty", () => {
@@ -783,7 +779,7 @@ describe("a stack in the Working Set", () => {
 
     const row = screen.getByRole("link", { name: /the foundation/ })
 
-    expect(row.style.gridTemplateColumns).toContain("minmax(160px,1fr)")
+    expect(row.style.gridTemplateColumns).toContain("minmax(180px,1fr)")
     expect(row.style.gridTemplateColumns).not.toContain("minmax(0,4rem)")
   })
 })

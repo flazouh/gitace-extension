@@ -695,7 +695,8 @@
 
 /* The Rail's own two menus, whose controls sit at the foot of a full-height strip and
    whose surfaces therefore open upwards over it. */
-:is(#gitace-root, [data-gitace-outside]) .t-menu[data-origin="bottom-left"] {
+:is(#gitace-root, [data-gitace-outside]) .t-menu[data-origin="bottom-left"],
+:is(#gitace-root, [data-gitace-outside]) .t-menu[data-origin="beside"] {
   transform-origin: bottom left;
 }
 
