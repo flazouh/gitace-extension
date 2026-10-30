@@ -9,7 +9,7 @@ import { browserSettings } from "../settings/browserStore";
 import { ArtProvider } from "../ui/art";
 import { PaintedMarkdown } from "../ui/PaintedMarkdown";
 import { RegistryProvider } from "../ui/atoms";
-import { OCTICONS } from "../ui/octicons";
+import { HUGEICONS } from "../ui/hugeicons";
 import { PortraitsProvider } from "../ui/portraits";
 import { ledgerThrough } from "../ledger/client";
 import { LedgerProvider } from "../ui/ledger";
@@ -148,16 +148,8 @@ export const Supplied = ({
   <ScreenActivityProvider active={active} root={root}>
   <RegistryProvider registry={registry()}>
     <SettingsProvider store={settings()}>
-      {/* Their colours too, for the same reason as their glyphs: this is drawn
-          inside their page, and a reader who never opened the settings should
-          not be told by the colour that half of it has been replaced. */}
-      <Theme element={root} here="github">
-        {/* GitHub's own glyphs, for a reader who never opened the settings: this
-            interface is standing on their page, under a header drawn in these,
-            and the same shape meaning the same thing above and below the fold is
-            worth more here than our own drawing style is. The reader can say
-            otherwise, and in a window of ours the default is the other way. */}
-        <ArtProvider here={OCTICONS}>
+      <Theme element={root} here="gitace">
+        <ArtProvider here={HUGEICONS}>
         <PortraitsProvider reads={onGitHub}>
           <RendererProvider load={loadDiffEngine}>
           <LedgerProvider ledger={ledger}>

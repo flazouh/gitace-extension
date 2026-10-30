@@ -36,6 +36,7 @@
  */
 :is(#gitace-bar, [data-gitace-bar]) {
   padding: 8px var(--gitace-gutter) 0;
+  padding-inline-start: calc(var(--gitace-rail-w, 36px) + var(--gitace-gutter));
 }
 
 /*
@@ -50,13 +51,23 @@
  * a tree that outlived its screen used to keep its bar here for good, and the worst that
  * can now do is nothing at all.
  */
-:is(#gitace-bar, [data-gitace-bar]) > header:not(:last-child) {
+:is(#gitace-bar, [data-gitace-bar]) > header:not(:last-of-type) {
   display: none;
 }
 
 /* A prepared bar uses a display-contents host until its route owns the page. */
-:is(#gitace-bar, [data-gitace-bar]) > :not(:last-child) {
+:is(#gitace-bar, [data-gitace-bar]) > :not(header, [data-gitace-global-rail], :last-child) {
   display: none !important;
+}
+
+/* Only the newest global rail in the slot shows during a screen handover. */
+:is(#gitace-bar, [data-gitace-bar]) > [data-gitace-global-rail]:not(:last-of-type) {
+  display: none;
+}
+
+/* When embedded inside a container (e.g. landing page preview), position the global rail inside it. */
+[data-gitace-bar]:not(#gitace-bar) > [data-gitace-global-rail] {
+  position: absolute;
 }
 
 /*

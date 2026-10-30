@@ -906,4 +906,17 @@ describe("the bar says how much sky it takes", () => {
 
     document.documentElement.style.removeProperty("--gitace-bar-h")
   })
+
+  test("mounts the persistent global Ace rail on every screen", async () => {
+    render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
+
+    await waitFor(() =>
+      expect(screen.getByRole("navigation", { name: "Global navigation" })).toBeDefined()
+    )
+    expect(
+      screen
+        .getByRole("navigation", { name: "Global navigation" })
+        .querySelector('[aria-label="Ace"]')
+    ).not.toBeNull()
+  })
 })

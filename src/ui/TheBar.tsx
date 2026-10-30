@@ -9,6 +9,7 @@ import { tokensOf } from "../domain/theme";
 import { keepTabs, keptTabs } from "../github/repoTabs";
 import { type ArtName } from "./art";
 import { Bar, type BarProps } from "./Bar";
+import { GlobalRail } from "./GlobalRail";
 import { useAround } from "./around";
 import { goBack, goBackTo, goForward, theTrail, watchTheTrail } from "./going";
 import { keepTheBarSlot, theBarSlot, theBarStands } from "./barSlot";
@@ -468,6 +469,18 @@ export const TheBar = ({
          */
         onHome={around.home}
         tray={around.tray}
+      />
+      <GlobalRail
+        where={props.where}
+        unread={props.unread}
+        repositories={findable}
+        pinned={settings.pinned}
+        destination={settings.home.destination}
+        onDestination={(which) =>
+          change((current) => ({ ...current, home: { ...current.home, destination: which } }))
+        }
+        onHome={around.home}
+        onStepAside={props.onStepAside}
       />
       {finding ? (
         <Palette

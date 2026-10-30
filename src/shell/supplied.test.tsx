@@ -43,7 +43,7 @@ const involved: InvolvedPullRequest = {
 }
 
 describe("the shell the extension mounts", () => {
-  test("draws the interface in GitHub's own glyphs, because it is drawn on their page", async () => {
+  test("draws the interface in GitAce's own glyphs and Ace theme by default", async () => {
     render(
       <Supplied>
         <WorkingSet sittings={sittingsIn([involved], () => Option.none())} onOpen={() => {}} />
@@ -52,8 +52,7 @@ describe("the shell the extension mounts", () => {
 
     await screen.findByText("a pull request")
 
-    // Octicons name themselves in the markup, which is what makes the question
-    // answerable without reaching for a path.
-    expect(document.querySelectorAll("svg.octicon").length).toBeGreaterThan(0)
+    expect(document.querySelectorAll("svg").length).toBeGreaterThan(0)
+    expect(document.querySelectorAll("svg.octicon").length).toBe(0)
   })
 })

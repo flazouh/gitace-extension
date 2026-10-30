@@ -238,4 +238,10 @@ describe("the bar as glass", () => {
     expect(sheet).toContain("--offset-right: var(--gitace-gutter) !important")
     expect(sheet).toContain("--offset-bottom: var(--gitace-gutter) !important")
   })
+
+  test("keeps the newest header visible when the global rail follows it in the slot", () => {
+    const rule = ruleFor(`${BAR_AT} > header:not(:last-of-type)`)
+    expect(rule).toContain("display: none")
+    expect(glass()).not.toContain("> header:not(:last-child)")
+  })
 })

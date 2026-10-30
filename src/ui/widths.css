@@ -57,18 +57,22 @@
  * always had there: a window has an edge of its own and its bar spans it, and sixteen is the
  * narrow end of this same scale.
  */
-:root {
+:root,
+:host {
   --gitace-gutter: 16px;
+  --gitace-rail-w: 36px;
 }
 
 @media (min-width: 768px) {
-  :root {
+  :root,
+  :host {
     --gitace-gutter: 24px;
   }
 }
 
 @media (min-width: 1012px) {
-  :root {
+  :root,
+  :host {
     --gitace-gutter: 32px;
   }
 }
@@ -98,6 +102,7 @@
  */
 #gitace-root {
   padding-inline: var(--gitace-gutter);
+  padding-inline-start: calc(var(--gitace-rail-w, 0px) + var(--gitace-gutter));
 }
 
 /**

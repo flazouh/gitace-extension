@@ -106,4 +106,9 @@ describe("the measures GitHub's own layout would otherwise hold", () => {
 
     expect(rule.slice(0, rule.indexOf("}"))).toContain("padding-inline: 0")
   })
+
+  test("gives the page room on the left for the persistent 32px Ace rail", () => {
+    expect(widths()).toContain("--gitace-rail-w: 36px")
+    expect(widths()).toContain("padding-inline-start: calc(var(--gitace-rail-w, 0px) + var(--gitace-gutter))")
+  })
 })
