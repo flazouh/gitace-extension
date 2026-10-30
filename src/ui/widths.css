@@ -85,7 +85,7 @@
  * pixels on it — so the panel started eight pixels right of the fixed rail and the frame read
  * as twelve where every other gap is four.
  */
-html[data-gitace-taken] body[data-gitace-within] {
+html[data-gitace-taken] body {
   margin: 0;
 }
 
