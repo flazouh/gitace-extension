@@ -477,91 +477,109 @@ export const Rail = ({
         narrow ? "w-14" : "w-60"
       }`}
     >
-      <ul className="flex list-none flex-col gap-0.5 p-0">
-        {RAIL_ITEMS.map((one) => {
-          const Glyph = art[one.art]
+      {narrow ? (
+        <ul className="flex list-none flex-col gap-0.5 p-0">
+          {RAIL_ITEMS.map((one) => {
+            const Glyph = art[one.art]
 
-          if (one.kind === "link") {
+            if (one.kind === "link") {
+              return (
+                <li key={one.href}>
+                  <a
+                    href={one.href}
+                    aria-label={one.name}
+                    className={`flex items-center gap-2 rounded-md text-left text-sm text-ink-muted no-underline hover:bg-hover hover:text-ink ${NARROW_CONTROL}`}
+                  >
+                    <span className="relative flex min-w-0 items-center gap-2">
+                      <Glyph size={16} className="shrink-0 opacity-80" />
+                      <span aria-hidden="true" className="t-rail-word truncate">
+                        {one.name}
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              )
+            }
+
+            const many = countFor(one.which)
+            const here = one.which === destination
+
             return (
-              <li key={one.href}>
-                <a
-                  href={one.href}
-                  aria-label={one.name}
-                  className={`flex items-center gap-2 rounded-md text-left text-sm text-ink-muted no-underline hover:bg-hover hover:text-ink ${
-                    narrow ? NARROW_CONTROL : "w-full justify-between px-2 py-1.5"
+              <li key={one.which}>
+                <button
+                  type="button"
+                  onClick={() => goTo(one.which)}
+                  aria-current={here ? "page" : undefined}
+                  aria-label={
+                    many === undefined ? one.name : `${one.name}, ${many}`
+                  }
+                  className={`flex items-center gap-2 rounded-md text-left text-sm ${NARROW_CONTROL} ${
+                    here ? `${HERE} font-medium` : "text-ink-muted hover:bg-hover hover:text-ink"
                   }`}
                 >
                   <span className="relative flex min-w-0 items-center gap-2">
-                    <Glyph size={16} className="shrink-0 opacity-80" />
+                    <Glyph size={16} className={`shrink-0 ${here ? "" : "opacity-80"}`} />
                     <span aria-hidden="true" className="t-rail-word truncate">
                       {one.name}
                     </span>
+                    {many !== undefined && one.which !== "repositories" ? (
+                      <span
+                        aria-hidden="true"
+                        className="absolute -right-2 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent-emphasis px-1 font-mono text-[9px] leading-none text-ink-on-emphasis tabular-nums"
+                      >
+                        {many}
+                      </span>
+                    ) : null}
                   </span>
-                </a>
+                </button>
               </li>
             )
-          }
-
-          const many = countFor(one.which)
-          const here = one.which === destination
-
-          return (
-            <li key={one.which}>
-              <button
-                type="button"
-                onClick={() => goTo(one.which)}
-                // `aria-current` rather than a pressed state: this is where the reader is,
-                // not a switch they have flipped.
-                aria-current={here ? "page" : undefined}
-                aria-label={
-                  many === undefined ? one.name : `${one.name}, ${many}`
-                }
-                className={`flex items-center gap-2 rounded-md text-left text-sm ${
-                  narrow ? NARROW_CONTROL : "w-full justify-between px-2 py-1.5"
-                } ${
-                  /*
-                   * Where the reader is, one step deeper than the hover the rows underneath
-                   * take when pointed at, and in full ink rather than in the accent. Two
-                   * fills of the same grey read as one strip; the accent tint read as a chip
-                   * from another product — see `HERE` in `dress.ts`.
-                   */
-                  here ? `${HERE} font-medium` : "text-ink-muted hover:bg-hover hover:text-ink"
-                }`}
-              >
-                <span className="relative flex min-w-0 items-center gap-2">
-                  {/*
-                   * The glyph is the row at 3.5rem and the mark beside the word at 15rem, so
-                   * narrowing takes the word away and moves nothing else: the strip's edge is
-                   * the only thing that travels.
-                   */}
-                  <Glyph size={16} className={`shrink-0 ${here ? "" : "opacity-80"}`} />
-                  <span aria-hidden="true" className="t-rail-word truncate">
-                    {one.name}
+          })}
+        </ul>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <div className="flex h-8 items-center gap-1">
+            {([
+              { which: "working-set" as const, name: "Working Set", short: "Working Set" },
+              { which: "repositories" as const, name: "Repositories", short: "Repos" },
+              { which: "activity" as const, name: "Activity", short: "Activity" }
+            ] as const).map((one) => {
+              const many = countFor(one.which)
+              const here = one.which === destination
+              return (
+                <button
+                  key={one.which}
+                  type="button"
+                  onClick={() => goTo(one.which)}
+                  aria-current={here ? "page" : undefined}
+                  aria-label={many === undefined ? one.name : `${one.name}, ${many}`}
+                  className={`flex h-7 items-center gap-1.5 rounded-md px-2 text-[13px] font-medium whitespace-nowrap ${
+                    here ? HERE : "text-ink-muted hover:bg-hover hover:text-ink"
+                  }`}
+                >
+                  <span aria-hidden="true" className="t-rail-word">
+                    {one.short}
                   </span>
-                  {/*
-                   * Narrow, the count rides the glyph's shoulder.
-                   *
-                   * Narrow is a working state and not a hidden one: a reader who put the words
-                   * away still needs the answer to "is anything mine?", which is the number. It
-                   * cannot stay on the row's right edge at this width, so it becomes a badge —
-                   * and the repositories' total is left off, being the one count that says how
-                   * long a list is rather than how much is owed.
-                   */}
-                  {narrow && many !== undefined && one.which !== "repositories" ? (
-                    <span
-                      aria-hidden="true"
-                      className="absolute -right-2 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent-emphasis px-1 font-mono text-[9px] leading-none text-ink-on-emphasis tabular-nums"
-                    >
-                      {many}
+                  {one.short !== one.name ? (
+                    <span aria-hidden="true" className="sr-only">
+                      {one.name}
                     </span>
                   ) : null}
-                </span>
-                {narrow || many === undefined ? null : <Count many={many} here={here} />}
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+                  {many === undefined ? null : <Count many={many} here={here} />}
+                </button>
+              )
+            })}
+          </div>
+          <div className="sr-only">
+            <a href="/issues" aria-label="Issues">
+              Issues
+            </a>
+            <a href="/notifications" aria-label="Notifications">
+              Notifications
+            </a>
+          </div>
+        </div>
+      )}
 
       {narrow || repositories.length === 0 ? null : (
         <div className="relative flex flex-col gap-1">

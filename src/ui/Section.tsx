@@ -33,7 +33,7 @@ const TITLE: Record<Tone, string> = {
  * colour and arrives in another is a flicker of colour where nothing changed.
  */
 export const painted = (tone: Tone): { readonly edge: string; readonly header: string; readonly title: string } => ({
-  edge: CARD,
+  edge: `${CARD} ${tone === "plain" ? "" : "!bg-canvas"}`,
   header: CARD_HEAD,
   title: TITLE[tone]
 })
@@ -97,7 +97,7 @@ export const Section = ({
     // github.com it meant a light pack drew light-theme ink onto GitHub's dark
     // page, and the description could not be read. A card carries its own
     // floor; the space between cards is still the site's.
-    className={`shrink-0 overflow-hidden ${CARD}`}
+    className={`shrink-0 overflow-hidden ${CARD} ${art !== undefined ? "!bg-canvas" : ""}`}
   >
     <div className={CARD_HEAD}>
       {art === undefined ? null : <Mark art={art} />}

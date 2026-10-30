@@ -44,14 +44,12 @@ const THEIRS = [
 ]
 
 describe("the bar, on Home", () => {
-  test("does not repeat the Destination, which the Rail beneath it already names", () => {
-    // It said "Working Set 4 yours" twenty pixels above a Rail row reading "Working Set 4".
-    // A crumb earns its place by saying where you are where nothing else does, and on Home
-    // something else does.
+  test("heads the panel with the Working Set crumb and tagline from the mockup", () => {
     render(<Bar where={{ kind: "home" }} />)
 
     const bar = screen.getByRole("banner")
-    expect(bar.textContent).not.toContain("Working Set")
+    expect(bar.textContent).toContain("Working Set")
+    expect(bar.textContent).toContain("Every pull request you are in, grouped by who acts next")
     expect(bar.textContent).not.toContain("4")
   })
 
