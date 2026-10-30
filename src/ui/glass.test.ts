@@ -90,7 +90,7 @@ describe("the bar as glass", () => {
 
   test("takes the browser's own margin off the body, so the panel starts four pixels from the rail", () => {
     expect(readFileSync("src/ui/widths.css", "utf8")).toContain(
-      "html[data-gitace-taken] body {\n  margin: 0;\n}"
+      "html[data-gitace-taken] body[data-gitace-within] {\n  margin: 0;\n}"
     )
   })
 
