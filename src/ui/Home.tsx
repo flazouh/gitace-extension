@@ -112,7 +112,7 @@ export const Home = ({
       home
       destination={settings.home.destination}
       onDestination={goTo}
-      collapsed={settings.home.rail === "narrow"}
+      collapsed={false}
       pinned={settings.pinned}
       onPinned={pin}
       onCollapsed={remember}
