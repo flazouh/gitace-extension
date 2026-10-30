@@ -334,6 +334,7 @@ export const WorkingSetScreen = ({
           onCollapsed={onCollapsed}
           pinned={pinned}
           onPinned={onPinned}
+          onStepAside={onStepAside}
           keys={keys}
         />
         <div className="min-w-0 flex-1">{showing}</div>

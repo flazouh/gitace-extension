@@ -89,12 +89,33 @@ const rail = () => screen.getByRole("navigation", { name: "Rail" });
  * the tests below are about what a reader can reach rather than about how it looks.
  */
 describe("the Rail", () => {
-  test("offers all three Destinations", () => {
+  test("offers all three Destinations and the links to Issues and Notifications", () => {
     showing();
 
     expect(within(rail()).getByRole("button", { name: /Working Set/ })).toBeDefined();
+    expect(within(rail()).getByRole("link", { name: "Issues" }).getAttribute("href")).toBe("/issues");
     expect(within(rail()).getByRole("button", { name: /Repositories/ })).toBeDefined();
     expect(within(rail()).getByRole("button", { name: /Activity/ })).toBeDefined();
+    expect(within(rail()).getByRole("link", { name: "Notifications" }).getAttribute("href")).toBe("/notifications");
+  });
+
+  test("offers a bottom-left control to leave GitAce Extension when onStepAside is given", async () => {
+    const person = userEvent.setup();
+    let steppedAside = 0;
+    render(
+      <Rail
+        destination="working-set"
+        onDestination={() => undefined}
+        atWork={[]}
+        needsYou={0}
+        onStepAside={() => {
+          steppedAside += 1;
+        }}
+      />,
+    );
+
+    await person.click(within(rail()).getByRole("button", { name: "Leave GitAce Extension" }));
+    expect(steppedAside).toBe(1);
   });
 
   test("says which Destination the reader is on", () => {

@@ -61,6 +61,8 @@ export type RailProps = {
   readonly onCollapsed?: (collapsed: boolean) => void
   /** Who the reader is, for the menu at the foot of the Rail. */
   readonly participant?: { readonly login: string; readonly faceUrl: Option.Option<string> }
+  /** Hands the page back to GitHub from the bottom-left of the Rail. */
+  readonly onStepAside?: () => void
   readonly keys?: Keys
 }
 
@@ -78,20 +80,30 @@ const NONE_PINNED: ReadonlyArray<string> = []
 const NARROW_CONTROL = "mx-auto size-8 flex-none justify-center p-0"
 
 /**
- * The three Destinations, in the order they are offered, each with its glyph.
- *
- * The glyph is what the narrow Rail shows. It used to show the first letter of the name,
- * which is a legend rather than navigation: three rows reading W, R, A tell a reader nothing
- * they were not already told by the wide Rail they have just closed.
+ * The five top-level items in the Rail (Option 1): the three Home Destinations
+ * plus the reader's own Issues (`/issues`) and Notifications (`/notifications`),
+ * each with its glyph for the narrow Rail.
  */
-const DESTINATIONS: ReadonlyArray<{
-  readonly which: Destination
-  readonly name: string
-  readonly art: ArtName
-}> = [
-  { which: "working-set", name: "Working Set", art: "working-set" },
-  { which: "repositories", name: "Repositories", art: "repositories" },
-  { which: "activity", name: "Activity", art: "activity" }
+type RailItem =
+  | {
+      readonly kind: "destination"
+      readonly which: Destination
+      readonly name: string
+      readonly art: ArtName
+    }
+  | {
+      readonly kind: "link"
+      readonly href: string
+      readonly name: string
+      readonly art: ArtName
+    }
+
+const RAIL_ITEMS: ReadonlyArray<RailItem> = [
+  { kind: "destination", which: "working-set", name: "Working Set", art: "pull-request" },
+  { kind: "link", href: "/issues", name: "Issues", art: "issue" },
+  { kind: "destination", which: "repositories", name: "Repositories", art: "repositories" },
+  { kind: "destination", which: "activity", name: "Activity", art: "clock" },
+  { kind: "link", href: "/notifications", name: "Notifications", art: "notifications" }
 ]
 
 /**
@@ -255,6 +267,7 @@ export const Rail = ({
   collapsed = false,
   onCollapsed,
   participant,
+  onStepAside,
   keys: given
 }: RailProps) => {
   const keys = useKeyboard(given)
@@ -465,10 +478,32 @@ export const Rail = ({
       }`}
     >
       <ul className="flex list-none flex-col gap-0.5 p-0">
-        {DESTINATIONS.map((one) => {
+        {RAIL_ITEMS.map((one) => {
+          const Glyph = art[one.art]
+
+          if (one.kind === "link") {
+            return (
+              <li key={one.href}>
+                <a
+                  href={one.href}
+                  aria-label={one.name}
+                  className={`flex items-center gap-2 rounded-md text-left text-sm text-ink-muted no-underline hover:bg-hover hover:text-ink ${
+                    narrow ? NARROW_CONTROL : "w-full justify-between px-2 py-1.5"
+                  }`}
+                >
+                  <span className="relative flex min-w-0 items-center gap-2">
+                    <Glyph size={16} className="shrink-0 opacity-80" />
+                    <span aria-hidden="true" className="t-rail-word truncate">
+                      {one.name}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            )
+          }
+
           const many = countFor(one.which)
           const here = one.which === destination
-          const Glyph = art[one.art]
 
           return (
             <li key={one.which}>
@@ -703,6 +738,23 @@ export const Rail = ({
             <art.narrow size={14} aria-hidden="true" />
           )}
         </button>
+
+        {onStepAside === undefined ? null : (
+          <button
+            type="button"
+            onClick={onStepAside}
+            aria-label="Leave GitAce Extension"
+            title="Leave GitAce Extension"
+            className={`flex items-center gap-2 rounded-md text-sm text-ink-muted hover:bg-hover hover:text-ink ${
+              narrow ? NARROW_CONTROL : "w-full justify-start px-2 py-1.5"
+            }`}
+          >
+            <art.github size={16} aria-hidden="true" className="shrink-0" />
+            <span aria-hidden="true" className="t-rail-word min-w-0 truncate">
+              GitHub interface
+            </span>
+          </button>
+        )}
       </div>
     </nav>
   )
