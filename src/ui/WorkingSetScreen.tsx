@@ -224,6 +224,7 @@ export const WorkingSetScreen = ({
       owed={owed}
       onStepAside={onStepAside}
       needsYou={needsYou}
+      aimAt={atWork[0]}
     />
   );
 

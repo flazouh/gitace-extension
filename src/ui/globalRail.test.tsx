@@ -81,6 +81,23 @@ describe("the persistent global Ace rail", () => {
  * issue and a pull request need a repository to be in, so they aim at the first one pinned.
  */
 describe("the create action", () => {
+  test("aims at the repository the reader is most at work in, before any pin", async () => {
+    const person = userEvent.setup()
+    render(
+      <GlobalRail
+        where={{ kind: "home" }}
+        pinned={["oven-sh/bun"]}
+        aimAt={{ owner: "flazouh", repo: "ace" }}
+      />
+    )
+
+    await person.click(within(rail()).getByRole("button", { name: "Create" }))
+
+    expect(screen.getByRole("menuitem", { name: "New issue in ace" }).getAttribute("href")).toBe(
+      "/flazouh/ace/issues/new"
+    )
+  })
+
   test("offers a repository, an issue and a pull request in the first pinned repository", async () => {
     const person = userEvent.setup()
     render(<GlobalRail where={{ kind: "home" }} pinned={["oven-sh/bun"]} />)

@@ -57,6 +57,7 @@ export const TheBar = ({
   preparedRoot,
   onPrepareRoute,
   needsYou,
+  aimAt,
   ...props
 }: Omit<
   BarProps,
@@ -88,6 +89,8 @@ export const TheBar = ({
   >;
   /** How much of the Working Set is waiting on the reader, for the dot on its rail item. */
   readonly needsYou?: number;
+  /** The repository the reader is most at work in, for the rail's Create menu. */
+  readonly aimAt?: { readonly owner: string; readonly repo: string };
   /** A detached route root whose bar is being built before navigation. */
   readonly preparedRoot?: Element;
   /** Builds an exact history route before the reader presses Back or Forward. */
@@ -475,6 +478,7 @@ export const TheBar = ({
         where={props.where}
         unread={props.unread}
         needsYou={needsYou}
+        aimAt={aimAt}
         repositories={findable}
         pinned={settings.pinned}
         destination={settings.home.destination}

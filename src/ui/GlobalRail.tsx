@@ -21,6 +21,8 @@ export type GlobalRailProps = {
   readonly onDestination?: (destination: Destination) => void
   readonly onHome?: () => void
   readonly onStepAside?: () => void
+  /** The repository the reader is most at work in, where a new issue or pull request lands. */
+  readonly aimAt?: { readonly owner: string; readonly repo: string }
   /** Who the reader is, for the avatar and its menu at the foot. */
   readonly participant?: { readonly login: string; readonly faceUrl: Option.Option<string> }
   /** Whether Home's left column is showing, and the press that shows or hides it. */
@@ -98,6 +100,7 @@ export const GlobalRail = ({
   onDestination,
   onHome,
   onStepAside,
+  aimAt,
   participant,
   sidebar,
   settings
@@ -133,11 +136,12 @@ export const GlobalRail = ({
     window.location.assign(THE_HOME)
   }
 
-  const aimed = pinned[0]?.split("/")
+  const [pinnedOwner, pinnedRepo] = pinned[0]?.split("/") ?? []
   const aimedAt =
-    aimed?.[0] !== undefined && aimed[1] !== undefined
-      ? { owner: aimed[0], repo: aimed[1] }
-      : repositories[0]
+    aimAt ??
+    (pinnedOwner !== undefined && pinnedRepo !== undefined
+      ? { owner: pinnedOwner, repo: pinnedRepo }
+      : repositories[0])
 
   return (
     <nav
