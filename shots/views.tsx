@@ -23,7 +23,7 @@ import { REPO_ISSUES_VIEW } from "./mock/repoIssues"
 import { REPO_PULLS_VIEW } from "./mock/repoPulls"
 import { RUN_VIEW } from "./mock/run"
 import { SIGN_ON_VIEW } from "./mock/signOn"
-import { HOME_NARROW_VIEW, HOME_VIEW, WORKING_SET_VIEW } from "./mock/workingSet"
+import { HOME_MANY_VIEW, HOME_NARROW_VIEW, HOME_VIEW, WORKING_SET_VIEW } from "./mock/workingSet"
 import type { View } from "./view"
 
 /**
@@ -44,6 +44,7 @@ export const VIEWS: ReadonlyArray<View> = [
   WORKING_SET_VIEW,
   HOME_VIEW,
   HOME_NARROW_VIEW,
+  HOME_MANY_VIEW,
   PULL_REQUEST_VIEW,
   PULL_REQUEST_REVIEW_VIEW,
   PULL_REQUEST_PEEK_VIEW,

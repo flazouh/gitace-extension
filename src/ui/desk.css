@@ -534,6 +534,8 @@
 
 :is(#gitace-root, [data-gitace-outside]) .d-rail-filter {
   width: auto;
+  min-width: 0;
+  flex: none;
   margin: 0 0 4px;
 }
 

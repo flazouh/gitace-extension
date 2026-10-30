@@ -489,6 +489,20 @@ const REPOSITORIES: ReadonlyArray<Repository> = [
   isEmpty: false
 }))
 
+/** Sixty of them, which is past the dozen a reader can scan. */
+const MANY_REPOSITORIES: ReadonlyArray<Repository> = [
+  ...REPOSITORIES,
+  ...Array.from({ length: 60 - REPOSITORIES.length }, (_, at) => ({
+    owner: "rmeadows",
+    repo: `tool-${at + 1}`,
+    nameWithOwner: `rmeadows/tool-${at + 1}`,
+    faceUrl: Option.none<string>(),
+    ofAnOrganisation: false,
+    isPrivate: false,
+    isEmpty: false
+  }))
+]
+
 export const HOME_VIEW: View = {
   name: "home",
   caption: "Home: the rail, the Working Set and the repositories you pinned, in one frame",
@@ -531,6 +545,25 @@ export const WORKING_SET_VIEW: View = {
       onOpen={() => {}}
       onStepAside={() => {}}
       ask={() => Effect.void}
+    />
+  )
+}
+
+/** Home for a reader with more repositories than the left column lists, so it offers its filter. */
+export const HOME_MANY_VIEW: View = {
+  ...HOME_VIEW,
+  name: "home-many",
+  caption: "Home with sixty repositories: the left column's filter above its lists",
+  draw: () => (
+    <Home
+      load={settled(WORKING_SET)}
+      preload={alreadyKnown(WORKING_SET)}
+      repositories={settled(MANY_REPOSITORIES)}
+      rememberedRepositories={alreadyKnown(MANY_REPOSITORIES)}
+      activity={settled([])}
+      participant={PARTICIPANT}
+      onOpen={() => {}}
+      onStepAside={() => {}}
     />
   )
 }
