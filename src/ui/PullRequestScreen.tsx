@@ -508,6 +508,7 @@ export const PullRequestScreen = ({
     return (
       <>
         <DrawnAt path={pathOf(reference)} />
+        <TheBar where={{ kind: "repository", owner: reference.owner, repo: reference.repo }} />
         <ReadFailed
           signedOut={!signedIn()}
           what="This pull request"

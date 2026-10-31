@@ -61,7 +61,14 @@ export type Where =
    * reader is on is drawn by the screen, one row below this bar and beside the counts it
    * belongs to, exactly as a repository's tabs are.
    */
-  | { readonly kind: "person"; readonly login: string };
+  | { readonly kind: "person"; readonly login: string }
+  /**
+   * A page of the reader's own that is neither Home nor a repository: Issues, Notifications, Gists.
+   *
+   * Its own kind rather than Home's. These said `home`, so the crumb on the inbox read "Every pull
+   * request you are in" and the Rail lit whichever Destination Home was last left on.
+   */
+  | { readonly kind: "place"; readonly name: string };
 
 export type BarProps = {
   readonly where: Where;
@@ -365,6 +372,18 @@ export const Bar = ({
         : "inside"
       : undefined;
 
+  /* What the crumb says after Ours. Nothing where a chip of its own follows: a repository, somebody else. */
+  const tail: { readonly words: string; readonly current: boolean } | undefined =
+    where.kind === "home"
+      ? narrowed === undefined
+        ? { words: "Every pull request you are in, grouped by who acts next", current: false }
+        : { words: narrowed.to, current: true }
+      : where.kind === "place"
+        ? { words: where.name, current: true }
+        : where.kind === "person" && isViewer(where.login)
+          ? { words: where.login, current: true }
+          : undefined;
+
   return (
     <header
       /*
@@ -502,15 +521,17 @@ export const Bar = ({
             Working Set
           </button>
         )}
-        <span aria-hidden="true" className="d-crumb-sep">
-          /
-        </span>
-        {where.kind !== "home" ? null : narrowed === undefined ? (
-          <span className="d-crumb-at d-t">Every pull request you are in, grouped by who acts next</span>
-        ) : (
-          <span aria-current="page" className="d-crumb-at">
-            {narrowed.to}
+        {tail === undefined && where.kind !== "repository" && where.kind !== "person" ? null : (
+          <span aria-hidden="true" className="d-crumb-sep">
+            /
           </span>
+        )}
+        {tail === undefined ? null : tail.current ? (
+          <span aria-current="page" className="d-crumb-at">
+            {tail.words}
+          </span>
+        ) : (
+          <span className="d-crumb-at d-t">{tail.words}</span>
         )}
       </div>
 

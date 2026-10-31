@@ -74,6 +74,7 @@ export const DiscussionsScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
+        <TheBar where={whereFor(list.home)} />
         <ReadFailed
           signedOut={!signedIn()}
           why={read.why}

@@ -123,17 +123,22 @@ export const GlobalRail = ({
   const onActivity = where.kind === "home" && destination === "activity"
   const onNotifications = at.startsWith("/notifications")
 
-  const goDestination = (which: Destination) => {
-    if (onDestination !== undefined) {
-      onDestination(which)
-      return
-    }
-    if (onHome !== undefined) {
+  /*
+   * A Destination is a link to Home, so from the inbox or a pull request it goes there the way any link
+   * does. It was a button that only changed the setting: on Issues, pressing Activity lit Activity and
+   * left the reader on Issues.
+   */
+  const toDestination = (which: Destination) => (event: React.MouseEvent) => {
+    if (!plainPress(event)) return
+    onDestination?.(which)
+    if (where.kind === "home" && onDestination !== undefined) event.preventDefault()
+    else if (onHome !== undefined) {
+      event.preventDefault()
       onHome()
-      return
     }
-    window.location.assign(THE_HOME)
   }
+
+  const inPlace = where.kind === "home" ? "" : undefined
 
   const [pinnedOwner, pinnedRepo] = pinned[0]?.split("/") ?? []
   const aimedAt =
@@ -163,15 +168,8 @@ export const GlobalRail = ({
         aria-label="Working Set"
         title="Working Set (g d)"
         aria-current={onWorkingSet ? "page" : undefined}
-        onClick={
-          onDestination === undefined
-            ? undefined
-            : (event) => {
-                if (!plainPress(event)) return
-                event.preventDefault()
-                onDestination("working-set")
-              }
-        }
+        onClick={toDestination("working-set")}
+        data-gitace-in-place={inPlace}
         className="d-nv"
       >
         <PullRequest size={16} />
@@ -188,27 +186,29 @@ export const GlobalRail = ({
         <Issue size={16} />
       </a>
 
-      <button
-        type="button"
-        onClick={() => goDestination("repositories")}
+      <a
+        href={THE_HOME}
+        onClick={toDestination("repositories")}
+        data-gitace-in-place={inPlace}
         aria-label="Repositories"
         title="Repositories (g r)"
         aria-current={onRepos ? "page" : undefined}
         className="d-nv"
       >
         <Repos size={16} />
-      </button>
+      </a>
 
-      <button
-        type="button"
-        onClick={() => goDestination("activity")}
+      <a
+        href={THE_HOME}
+        onClick={toDestination("activity")}
+        data-gitace-in-place={inPlace}
         aria-label="Activity"
         title="Activity (g f)"
         aria-current={onActivity ? "page" : undefined}
         className="d-nv"
       >
         <Clock size={16} />
-      </button>
+      </a>
 
       <a
         href="/notifications"

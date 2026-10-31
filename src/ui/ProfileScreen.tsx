@@ -294,6 +294,7 @@ export const ProfileScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
+        <TheBar where={{ kind: "person", login }} />
         <ReadFailed
           signedOut={!signedIn()}
           why={list.why}

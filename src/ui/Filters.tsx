@@ -124,7 +124,7 @@ const commentsTerm = (art: Set): Term => ({
 })
 
 const activityFacet = (art: Set): Facet => ({
-  name: "Activity",
+  name: "Attention",
   terms: [
     {
       term: "is:unread",
@@ -157,7 +157,7 @@ const issueStateFacet = (art: Set): Facet => ({
 })
 
 const issueActivityFacet = (art: Set): Facet => ({
-  name: "Activity",
+  name: "Attention",
   terms: [commentsTerm(art)]
 })
 
