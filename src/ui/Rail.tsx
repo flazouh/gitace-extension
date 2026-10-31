@@ -126,7 +126,7 @@ const List = ({
                   aria-pressed={held}
                   className="d-pin"
                 >
-                  <Pin size={13} />
+                  <Pin size={16} />
                 </button>
               )}
             </li>

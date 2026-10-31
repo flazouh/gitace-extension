@@ -1,8 +1,8 @@
 /*
  * The desk: one frame around every screen, the rail down its left edge and one panel
  * beside it holding the bar and the screen. Measurements are the approved mockup's
- * (`.desk`, `.rail`, `.panel`, `.phead`, `.gsplit`): a 4px frame and gap, a 32px control,
- * a 48px bar, a 14px panel corner, 6px for a card inside it and 4px for a well inside that.
+ * (`.desk`, `.rail`, `.panel`, `.phead`, `.gsplit`): a 4px frame and gap, a 32px rail,
+ * a 40px bar, a 14px panel corner, 6px for a card inside it and 4px for a well inside that.
  *
  * The bar and the screen are two elements on GitHub's page, so the panel is drawn in two
  * halves that meet under the bar: the bar is its top, `#gitace-root`'s first child the rest.
@@ -14,7 +14,11 @@
   --d-inset: 8px;
   --d-text: 16px;
   --d-gap: 4px;
-  --d-control: 32px;
+  /* Every control, and the icon inside one. One size each, so no control drifts on its own. */
+  --d-control: 24px;
+  --d-icon: 16px;
+  --d-rail: 32px;
+  --d-rail-gap: 8px;
   --d-bar: calc(var(--d-control) + 2 * var(--d-inset));
   --d-r: 14px;
   --d-r-in: 6px;
@@ -66,11 +70,11 @@
 /* The rail. */
 
 :is(#gitace-root, [data-gitace-outside]) .d-rail {
-  width: var(--d-control);
+  width: var(--d-rail);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--d-gap);
+  gap: var(--d-rail-gap);
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-nv {
@@ -88,9 +92,10 @@
     color var(--d-tint-t) var(--d-tint-e);
 }
 
-:is(#gitace-root, [data-gitace-outside]) .d-nv svg {
-  width: 18px;
-  height: 18px;
+:is(#gitace-root, [data-gitace-outside]) :is(.d-nv, .d-hn, .d-b, .d-search, .d-pin) svg {
+  width: var(--d-icon);
+  height: var(--d-icon);
+  flex: none;
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-nv:hover {
@@ -106,7 +111,8 @@
 
 :is(#gitace-root, [data-gitace-outside]) .d-nv.d-home {
   --g: 14px;
-  height: calc(2 * var(--g) + 18px * 82 / 120 - 8.3px - var(--d-pad) - var(--d-gap));
+  width: var(--d-rail);
+  height: calc(2 * var(--g) + 18px * 82 / 120 - 8.3px - var(--d-pad) - var(--d-rail-gap));
   padding-top: calc(var(--g) - var(--d-pad));
   place-items: start center;
   color: var(--d-ink);
@@ -143,14 +149,16 @@
   opacity: 1;
 }
 
+/* Out on the corner, ringed in the rail's own fill: inside a 24px button it covers the icon. */
 :is(#gitace-root, [data-gitace-outside]) .d-dot {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 6px;
-  height: 6px;
+  top: -2px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--d-accent);
+  box-shadow: 0 0 0 2px var(--d-frame);
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-rbadge {
@@ -164,8 +172,8 @@
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-avatar {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -259,7 +267,7 @@
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-search {
-  height: 28px;
+  height: var(--d-control);
   width: 280px;
   min-width: 180px;
   flex: 0 1 280px;
@@ -267,7 +275,7 @@
   align-items: center;
   gap: 7px;
   padding: 0 8px 0 10px;
-  border-radius: 7px;
+  border-radius: var(--d-r-in);
   background: var(--d-card);
   color: var(--d-muted);
   font: 400 12.5px/1 var(--font-sans);
@@ -280,9 +288,6 @@
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-search svg {
-  width: 13px;
-  height: 13px;
-  flex: none;
   color: var(--d-muted);
 }
 
@@ -326,13 +331,13 @@
 /* Buttons. */
 
 :is(#gitace-root, [data-gitace-outside]) .d-b {
-  height: 28px;
+  height: var(--d-control);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 0 10px;
-  border-radius: 7px;
+  padding: 0 8px;
+  border-radius: var(--d-r-in);
   font: 500 12px/1 var(--font-sans);
   white-space: nowrap;
   color: var(--d-ink);
@@ -363,11 +368,6 @@
 :is(#gitace-root, [data-gitace-outside]) .d-b.d-ghost[aria-expanded="true"] {
   background: var(--d-tint);
   color: var(--d-ink);
-}
-
-:is(#gitace-root, [data-gitace-outside]) .d-b svg {
-  width: 14px;
-  height: 14px;
 }
 
 /* The split: a left column and the main card, both cards on the panel. */
@@ -479,8 +479,8 @@
 :is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin {
   position: absolute;
   right: 34px;
-  width: 22px;
-  height: 22px;
+  width: var(--d-control);
+  height: var(--d-control);
   display: grid;
   place-items: center;
   border-radius: var(--d-r-well);

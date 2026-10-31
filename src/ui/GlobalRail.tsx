@@ -174,7 +174,7 @@ export const GlobalRail = ({
         }
         className="d-nv"
       >
-        <PullRequest size={18} />
+        <PullRequest size={16} />
         {needsYou > 0 ? <span aria-hidden="true" className="d-dot" /> : null}
       </a>
 
@@ -185,7 +185,7 @@ export const GlobalRail = ({
         aria-current={onIssues ? "page" : undefined}
         className="d-nv"
       >
-        <Issue size={18} />
+        <Issue size={16} />
       </a>
 
       <button
@@ -196,7 +196,7 @@ export const GlobalRail = ({
         aria-current={onRepos ? "page" : undefined}
         className="d-nv"
       >
-        <Repos size={18} />
+        <Repos size={16} />
       </button>
 
       <button
@@ -207,7 +207,7 @@ export const GlobalRail = ({
         aria-current={onActivity ? "page" : undefined}
         className="d-nv"
       >
-        <Clock size={18} />
+        <Clock size={16} />
       </button>
 
       <a
@@ -217,7 +217,7 @@ export const GlobalRail = ({
         aria-current={onNotifications ? "page" : undefined}
         className="d-nv"
       >
-        <Bell size={18} />
+        <Bell size={16} />
         {unread ? <span aria-hidden="true" className="d-dot" /> : null}
       </a>
 
@@ -233,7 +233,7 @@ export const GlobalRail = ({
           title="Create"
           className="d-nv"
         >
-          <Create size={18} />
+          <Create size={16} />
         </button>
         <Menu
           name="Create"
@@ -253,7 +253,7 @@ export const GlobalRail = ({
           title={sidebar.open ? "Hide the sidebar ([)" : "Show the sidebar ([)"}
           className="d-nv"
         >
-          <Sidebar size={18} />
+          <Sidebar size={16} />
         </button>
       )}
 
@@ -268,7 +268,7 @@ export const GlobalRail = ({
               aria-expanded={isOpen}
               className="d-nv"
             >
-              <Settings size={18} />
+              <Settings size={16} />
             </button>
           ))}
 
@@ -308,7 +308,7 @@ export const GlobalRail = ({
           title="GitHub interface"
           className="d-nv"
         >
-          <GitHub size={18} />
+          <GitHub size={16} />
         </button>
       )}
     </nav>
