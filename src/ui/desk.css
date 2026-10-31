@@ -2,7 +2,7 @@
  * The desk: one frame around every screen, the rail down its left edge and one panel
  * beside it holding the bar and the screen. Measurements are the approved mockup's
  * (`.desk`, `.rail`, `.panel`, `.phead`, `.gsplit`): a 4px frame and gap, a 32px rail,
- * a 40px bar, a 14px panel corner, 6px for a card inside it and 4px for a well inside that.
+ * a 44px bar, a 14px panel corner, 6px for a card inside it and 4px for a well inside that.
  *
  * The bar and the screen are two elements on GitHub's page, so the panel is drawn in two
  * halves that meet under the bar: the bar is its top, `#gitace-root`'s first child the rest.
@@ -15,10 +15,10 @@
   --d-text: 16px;
   --d-gap: 4px;
   /* Every control, and the icon inside one. One size each, so no control drifts on its own. */
-  --d-control: 24px;
+  --d-control: 28px;
   --d-icon: 16px;
   --d-rail: 32px;
-  --d-rail-gap: 8px;
+  --d-rail-gap: 6px;
   --d-bar: calc(var(--d-control) + 2 * var(--d-inset));
   --d-r: 14px;
   --d-r-in: 6px;
@@ -149,7 +149,7 @@
   opacity: 1;
 }
 
-/* Out on the corner, ringed in the rail's own fill: inside a 24px button it covers the icon. */
+/* Out on the corner, ringed in the rail's own fill: inside a small button it covers the icon. */
 :is(#gitace-root, [data-gitace-outside]) .d-dot {
   position: absolute;
   top: -2px;
@@ -172,8 +172,8 @@
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-avatar {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   display: grid;
   place-items: center;
   overflow: hidden;

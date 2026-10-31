@@ -529,7 +529,7 @@ export const Bar = ({
       {where.kind === "person" && !isViewer(where.login) ? (
         <a
           href={`/${where.login}`}
-          className={`flex h-6 shrink-0 items-center gap-1.5 rounded-md px-2 text-ink no-underline hover:bg-active ${TINT}`}
+          className={`flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-ink no-underline hover:bg-active ${TINT}`}
         >
           <Owner owner={where.login} size={16} />
           <span className="font-semibold">{where.login}</span>
@@ -580,7 +580,7 @@ export const Bar = ({
                * which half a hand was about to press, and the half that went somewhere was
                * the half nobody aimed at.
                */
-              className="flex h-6 items-center gap-1.5 px-2 text-ink no-underline hover:bg-active"
+              className="flex h-7 items-center gap-1.5 px-2 text-ink no-underline hover:bg-active"
             >
               {/* Their picture, asked for by name.
                   This drew `Face` with whatever the screen had handed down, and
@@ -618,7 +618,7 @@ export const Bar = ({
                  * It was twenty wide with no line: a target smaller than the comfortable
                  * minimum, inside a chip that gave no sign it had halves at all.
                  */
-                className="grid size-6 shrink-0 place-items-center border-l border-line-muted text-ink-muted hover:bg-active hover:text-ink"
+                className="grid size-7 shrink-0 place-items-center border-l border-line-muted text-ink-muted hover:bg-active hover:text-ink"
               >
                 <Chevron
                   size={16}
@@ -702,7 +702,7 @@ export const Bar = ({
                  * muted ones either side, and nothing filled, so the tab a reader is standing
                  * on stays the only one in this row wearing a fill. See `INSIDE`.
                  */
-                className={`flex h-6 items-center gap-1.5 rounded-md px-2 no-underline ${
+                className={`flex h-7 items-center gap-1.5 rounded-md px-2 no-underline ${
                   one.standing === "here"
                     ? `${HERE} font-semibold`
                     : one.standing === "inside"
@@ -750,7 +750,7 @@ export const Bar = ({
                 /* Nothing at rest, like the tabs it stands at the end of. A filled square
                    beside two unfilled words reads as the control that matters here, and the
                    six things behind it are the six a reader opens monthly. */
-                className="grid size-6 place-items-center rounded-md text-ink-muted hover:bg-hover hover:text-ink"
+                className="grid size-7 place-items-center rounded-md text-ink-muted hover:bg-hover hover:text-ink"
               >
                 <More size={16} />
               </button>
