@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useSyncExternalStore } from "react"
 import { createPortal } from "react-dom"
+import { useScreenActivity } from "./screenActivity"
 
 /**
  * The bar's tool slot: the place in the header where a screen's own controls stand.
@@ -34,9 +35,16 @@ export const BarTools = () => {
   return <div ref={keep} data-bar-tools="" className="d-tools" />
 }
 
-/** A screen's controls, standing in the bar when there is one and in place otherwise. */
+/**
+ * A screen's controls, standing in the bar when there is one and in place otherwise.
+ *
+ * Nothing at all from a screen kept behind the one showing: there is one slot, and a kept
+ * Home put its filter row into the bar of the repository page in front of it.
+ */
 export const IntoTheBar = ({ children }: { readonly children: ReactNode }) => {
   const into = useSyncExternalStore(subscribe, current, () => null)
+  const active = useScreenActivity()
 
+  if (!active) return null
   return into === null ? <>{children}</> : createPortal(children, into)
 }
