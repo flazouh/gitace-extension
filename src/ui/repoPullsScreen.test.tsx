@@ -74,6 +74,13 @@ describe("a repository's pull request list", () => {
     expect(await screen.findByText(/Reading this repository/)).toBeTruthy()
   })
 
+  test("says the repository has none open, rather than that nothing needs the reader", async () => {
+    showing(() => Effect.succeed(listed([])))
+
+    expect(await screen.findByText("No open pull requests in vercel/next.js.")).toBeTruthy()
+    expect(screen.queryByText(/Nothing needs you/)).toBeNull()
+  })
+
   test("shows a stage of the read while the rest of it is still going", async () => {
     // A repository's list takes four reads of GitHub and one of them is worth waiting
     // for; holding the rows back until the sixth round of branch reads is what made

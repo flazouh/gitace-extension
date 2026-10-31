@@ -1519,7 +1519,9 @@ export const WorkingSet = ({
 
         {!anything ? (
           <p className="px-3 py-2 text-sm text-ink-muted">
-            Nothing needs you. No pull request is waiting on you.
+            {within === undefined
+              ? "Nothing needs you. No pull request is waiting on you."
+              : `No open pull requests in ${within.owner}/${within.repo}.`}
           </p>
         ) : shown.length === 0 && waiting ? (
           <StillReading what="Still reading what this filter asks about." />
