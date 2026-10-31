@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { cleanup, render, screen, within } from "@testing-library/react"
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Option } from "effect"
 import { Bar } from "./Bar"
@@ -53,11 +53,22 @@ describe("the bar, on Home", () => {
     expect(bar.textContent).not.toContain("4")
   })
 
+  test("names the repository Home is narrowed to, the crumb being the way back to all", async () => {
+    let widened = 0
+    render(<Bar where={{ kind: "home" }} narrowed={{ to: "oven-sh/bun", widen: () => (widened += 1) }} />)
+
+    expect(screen.getByRole("banner").textContent).toContain("oven-sh/bun")
+    await userEvent.click(screen.getByRole("button", { name: "Working Set" }))
+    expect(widened).toBe(1)
+  })
+
   test("still stands for something, so the strip is ours rather than an empty rule", () => {
     render(<Bar where={{ kind: "home" }} />)
 
     expect(screen.getByRole("banner").textContent).not.toContain("Repositories")
-    const home = screen.getByRole("link", { name: "Working Set" })
+    // Not a link: it would go to the page already on the screen.
+    expect(screen.queryByRole("link", { name: "Working Set" })).toBeNull()
+    const home = screen.getByText("Working Set")
     expect(home.getAttribute("aria-current")).toBe("page")
     // Words rather than a filled mark: the rail beside the bar already wears the mark, and a
     // coloured square in that corner reads as a badge for the extension.
@@ -278,7 +289,7 @@ describe("the bar, in a repository", () => {
     // anywhere but deeper into the repository.
     render(<Bar where={inFlowline} tabs={THEIR_TABS} />)
 
-    expect(screen.getByRole("link", { name: "Git" }).getAttribute("href")).toBe("/")
+    expect(screen.getByRole("link", { name: "Working Set" }).getAttribute("href")).toBe("/")
   })
 
   test("gives every tab in the strip a glyph as well as its name", () => {
@@ -626,7 +637,7 @@ describe("the way back and the way forward", () => {
     render(<Bar where={REPOSITORY} onBack={() => undefined} />)
 
     const back = screen.getByRole("button", { name: "Back" })
-    const home = screen.getByRole("link", { name: "Git" })
+    const home = screen.getByRole("link", { name: "Working Set" })
 
     expect(screen.getByRole("banner").firstElementChild?.contains(back)).toBe(true)
     expect(back.compareDocumentPosition(home) & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0)
@@ -642,7 +653,7 @@ describe("the way back and the way forward", () => {
       0
     )
     expect(
-      forward.compareDocumentPosition(screen.getByRole("link", { name: "Git" })) &
+      forward.compareDocumentPosition(screen.getByRole("link", { name: "Working Set" })) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeGreaterThan(0)
   })
@@ -656,19 +667,18 @@ describe("the way back and the way forward", () => {
     render(<Bar where={REPOSITORY} onBack={() => undefined} />)
 
     const forward = screen.getByRole("button", { name: "Forward" })
-    expect(forward.getAttribute("aria-disabled")).toBe("true")
     expect((forward as HTMLButtonElement).disabled).toBe(true)
   })
 
   /*
-   * A tab opened straight onto this address has nothing behind it. The pair stays where it
-   * always is, so the crumb beside it does not jump, and says it presses into nothing.
+   * A tab opened straight onto this address has nothing behind it, which on Home is most of
+   * the time. Two disabled arrows in the first corner of the strip are two dead controls.
    */
-  test("keeps both, disabled, where there is nothing behind the page", () => {
+  test("draws neither where there is nothing behind the page or ahead of it", () => {
     render(<Bar where={REPOSITORY} />)
 
-    expect((screen.getByRole("button", { name: "Back" }) as HTMLButtonElement).disabled).toBe(true)
-    expect((screen.getByRole("button", { name: "Forward" }) as HTMLButtonElement).disabled).toBe(true)
+    expect(screen.queryByRole("button", { name: "Back" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Forward" })).toBeNull()
   })
 
   test("hands each press to whoever knows how to move", async () => {
@@ -704,10 +714,10 @@ describe("the way back and the way forward", () => {
     expect(warmed).toEqual(["back", "forward"])
   })
 
-  test("offers the places behind, nearest first, behind a chevron on the back half", async () => {
+  test("offers the places behind, nearest first, on a right-click of Back", async () => {
     render(<Bar where={REPOSITORY} onBack={() => undefined} behind={BEHIND} />)
 
-    await userEvent.click(screen.getByRole("button", { name: "Where you have been" }))
+    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Back" }) })
 
     const rows = screen.getAllByRole("menuitem")
     expect(rows.map((one) => one.textContent)).toEqual([
@@ -717,10 +727,27 @@ describe("the way back and the way forward", () => {
   })
 
   /* Real addresses, so a place in the trail can be opened in a new tab or copied. */
+  test("opens the same places when Back is held, as a browser's does, without going back", async () => {
+    let went = 0
+    render(<Bar where={REPOSITORY} onBack={() => (went += 1)} behind={BEHIND} />)
+
+    await userEvent.pointer({ keys: "[MouseLeft>]", target: screen.getByRole("button", { name: "Back" }) })
+    await waitFor(() => expect(screen.getAllByRole("menuitem")).toHaveLength(2))
+    await userEvent.pointer({ keys: "[/MouseLeft]", target: screen.getByRole("button", { name: "Back" }) })
+
+    expect(went).toBe(0)
+  })
+
+  test("draws no control of its own for the places behind, Back being the one", () => {
+    render(<Bar where={REPOSITORY} onBack={() => undefined} behind={BEHIND} />)
+
+    expect(screen.queryByRole("button", { name: "Where you have been" })).toBeNull()
+  })
+
   test("gives every place its own address as well as its press", async () => {
     render(<Bar where={REPOSITORY} onBack={() => undefined} behind={BEHIND} />)
 
-    await userEvent.click(screen.getByRole("button", { name: "Where you have been" }))
+    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Back" }) })
 
     expect(screen.getByRole("menuitem", { name: "Working Set" }).getAttribute("href")).toBe("/pulls")
   })
@@ -729,11 +756,12 @@ describe("the way back and the way forward", () => {
    * A column holding the one page the arrow beside it already goes to is a second
    * control for the first one.
    */
-  test("offers no menu for one place behind", () => {
+  test("offers no menu for one place behind", async () => {
     render(<Bar where={REPOSITORY} onBack={() => undefined} behind={[BEHIND[0]!]} />)
 
-    expect(screen.queryByRole("button", { name: "Where you have been" })).toBeNull()
-    expect(screen.getByRole("button", { name: "Back" })).toBeDefined()
+    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Back" }) })
+
+    expect(screen.queryByRole("menuitem")).toBeNull()
   })
 })
 
@@ -787,7 +815,7 @@ describe("the bar, in a window rather than in a tab", () => {
     let went = 0
     render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }} onHome={() => (went += 1)} />)
 
-    const home = screen.getByRole("button", { name: "Git" })
+    const home = screen.getByRole("button", { name: "Working Set" })
     expect(home.tagName).toBe("BUTTON")
     expect(home.getAttribute("href")).toBeNull()
 
@@ -798,7 +826,7 @@ describe("the bar, in a window rather than in a tab", () => {
   test("keeps the address where nothing says otherwise, which is every page", () => {
     render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }} />)
 
-    expect(screen.getByRole("link", { name: "Git" }).getAttribute("href")).toBe("/")
+    expect(screen.getByRole("link", { name: "Working Set" }).getAttribute("href")).toBe("/")
   })
 
   test("presses the tab that lists pull requests, since that list is a screen in here", async () => {

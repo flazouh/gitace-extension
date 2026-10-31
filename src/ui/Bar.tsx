@@ -188,7 +188,17 @@ export type BarProps = {
    * nothing in this strip can push along. See `around.ts`.
    */
   readonly tray?: ReactNode;
+  /**
+   * The repository Home's list is narrowed to, and the press that widens it again.
+   *
+   * Said in the crumb, where the mockup says it, so "Working Set" is a link only when it leads
+   * somewhere: back to every repository.
+   */
+  readonly narrowed?: { readonly to: string; readonly widen: () => void };
 };
+
+/** How long a press on Back is held before it opens the places behind, as a browser's does. */
+const LONG_PRESS = 450;
 
 /**
  * The tabs that stay in the strip.
@@ -304,6 +314,7 @@ export const Bar = ({
   onPrepareForward,
   behind = NOTHING,
   onHome,
+  narrowed,
   tray,
 }: BarProps) => {
   const art = useArt();
@@ -312,6 +323,8 @@ export const Bar = ({
   const Back = art.back;
   const Forward = art.forward;
   const backButton = useRef<HTMLButtonElement>(null);
+  const pressing = useRef<number | undefined>(undefined);
+  const longPressed = useRef(false);
   const forwardButton = useRef<HTMLButtonElement>(null);
   const More = art.more;
   const [opened, setOpened] = useState<
@@ -412,71 +425,94 @@ export const Bar = ({
        * Wordless like the tray at the other end. The mark says the direction and
        * the name says the destination, for a pointer and for anyone being read to.
        */}
-      <div className="relative d-hnav">
-        <button
-          ref={backButton}
-          type="button"
-          onClick={onBack}
-          onFocus={onPrepareBack}
-          aria-label="Back"
-          title="Back"
-          disabled={onBack === undefined}
-          className="d-hn"
-        >
-          <Back size={16} />
-        </button>
-        {behind.length < 2 ? null : (
+      {onBack === undefined && onForward === undefined ? null : (
+        <div className="relative d-hnav">
           <button
+            ref={backButton}
             type="button"
-            aria-haspopup="menu"
-            aria-expanded={opened === "behind"}
-            aria-label="Where you have been"
-            title="Where you have been"
-            onClick={() => setOpened(opened === "behind" ? undefined : "behind")}
-            className="d-hn !w-5"
+            onClick={() => {
+              if (longPressed.current) {
+                longPressed.current = false;
+                return;
+              }
+              onBack?.();
+            }}
+            onFocus={onPrepareBack}
+            onContextMenu={(event) => {
+              if (behind.length < 2) return;
+              event.preventDefault();
+              setOpened("behind");
+            }}
+            onPointerDown={(event) => {
+              if (behind.length < 2 || event.button !== 0) return;
+              window.clearTimeout(pressing.current);
+              pressing.current = window.setTimeout(() => {
+                longPressed.current = true;
+                setOpened("behind");
+              }, LONG_PRESS);
+            }}
+            onPointerUp={() => window.clearTimeout(pressing.current)}
+            onPointerLeave={() => window.clearTimeout(pressing.current)}
+            aria-label="Back"
+            aria-haspopup={behind.length < 2 ? undefined : "menu"}
+            aria-expanded={behind.length < 2 ? undefined : opened === "behind"}
+            title={behind.length < 2 ? "Back" : "Back (hold or right-click for where you have been)"}
+            disabled={onBack === undefined}
+            className="d-hn"
           >
-            <Chevron size={10} className={`t-turn ${opened === "behind" ? "is-turned" : ""}`} />
+            <Back size={16} />
           </button>
-        )}
-        <button
-          ref={forwardButton}
-          type="button"
-          onClick={onForward}
-          onFocus={onPrepareForward}
-          aria-label="Forward"
-          title="Forward"
-          aria-disabled={onForward === undefined}
-          disabled={onForward === undefined}
-          className="d-hn"
-        >
-          <Forward size={16} />
-        </button>
-        <Menu
-          name="Where you have been"
-          origin="top-left"
-          wide="w-72"
-          open={opened === "behind"}
-          onShut={() => setOpened(undefined)}
-          rows={behind}
-        />
-      </div>
-
-      {where.kind === "home" ? (
-        <div className="d-h1">
-          <Ours here onHome={onHome} />
-          <span aria-hidden="true" className="d-crumb-sep">
-            /
-          </span>
-          <span className="d-crumb-at d-t">Every pull request you are in, grouped by who acts next</span>
-        </div>
-      ) : (
-        <div className="d-h1">
-          <Ours here={false} onHome={onHome} />
-          <span aria-hidden="true" className="d-crumb-sep">
-            /
-          </span>
+          <button
+            ref={forwardButton}
+            type="button"
+            onClick={onForward}
+            onFocus={onPrepareForward}
+            aria-label="Forward"
+            title="Forward"
+            disabled={onForward === undefined}
+            className="d-hn"
+          >
+            <Forward size={16} />
+          </button>
+          <Menu
+            name="Where you have been"
+            origin="top-left"
+            wide="w-72"
+            open={opened === "behind"}
+            onShut={() => setOpened(undefined)}
+            rows={behind}
+          />
         </div>
       )}
+
+      <div className="d-h1">
+        {where.kind !== "home" ? (
+          <Ours onHome={onHome} />
+        ) : narrowed === undefined ? (
+          <span aria-current="page" className="d-crumb">
+            Working Set
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={narrowed.widen}
+            title="Show every repository"
+            className="d-crumb"
+          >
+            Working Set
+          </button>
+        )}
+        <span aria-hidden="true" className="d-crumb-sep">
+          /
+        </span>
+        {where.kind !== "home" ? null : narrowed === undefined ? (
+          <span className="d-crumb-at d-t">Every pull request you are in, grouped by who acts next</span>
+        ) : (
+          <span aria-current="page" className="d-crumb-at">
+            {narrowed.to}
+          </span>
+        )}
+      </div>
 
       {/*
        * Their name, on somebody else's pages, and no chevron beside it.
@@ -808,30 +844,19 @@ const Chip = ({
  * GitHub's own logo in a bar this extension hides. Home is where the Working Set is, and that
  * is the address a reader wants next more often than any other.
  */
-const Ours = ({
-  here,
-  onHome,
-}: {
-  readonly here: boolean;
-  readonly onHome?: (() => void) | undefined;
-}) => {
-  const said = {
-    title: "Working Set",
-    className: "d-crumb",
-    ...(here ? { "aria-current": "page" as const } : {}),
-  };
-  const word = here ? "Working Set" : "Git";
+const Ours = ({ onHome }: { readonly onHome?: (() => void) | undefined }) => {
+  const said = { title: "Working Set", className: "d-crumb" };
 
   if (onHome !== undefined)
     return (
       <button type="button" onClick={onHome} {...said}>
-        {word}
+        Working Set
       </button>
     );
 
   return (
     <a href={THE_HOME} {...said}>
-      {word}
+      Working Set
     </a>
   );
 };

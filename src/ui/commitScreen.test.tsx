@@ -145,7 +145,7 @@ describe("a commit on the page GitHub keeps for it", () => {
   test("has the display settings the rest of the interface has", async () => {
     render(screenOf())
 
-    await waitFor(() => expect(screen.getByLabelText("Display settings")).toBeDefined())
+    await waitFor(() => expect(screen.getByLabelText("GitAce settings")).toBeDefined())
     // And the menu at the end of the files band, which holds the same knobs. The
     // two are named apart on purpose: two buttons answering to one name are two
     // identical buttons to anybody listening to the page instead of looking at it.

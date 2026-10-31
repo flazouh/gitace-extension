@@ -25,8 +25,8 @@ Measured on a live signed-in window, 1920 wide, by `scripts/probe-header-dom.js`
   row carries the repository nav: Code, Issues 183, Pull requests 8, Discussions, Actions,
   Projects, Security and quality, Insights, Settings, with owner and repository crumbs and a
   Switch repository control on ⌥⇧R.
-- **`/` no longer belongs to their bar on Home.** Pressing it puts the caret in the Rail's
-  "Filter repositories" input and their dialog never opens, while their own button still reads
+- **`/` no longer belongs to their bar on Home.** Pressing it puts the caret in our list's
+  filter and their dialog never opens, while their own button still reads
   "Open quick search dialog, type / to search". The bar is advertising a shortcut we took.
 - **The crumb says "Dashboard"**, which is a name for one page where there are now three
   Destinations, and it never says which one the reader is on or what is owed on it.

@@ -59,7 +59,8 @@ describe("the repository pull requests view", () => {
     const shot = drawn()
     await shot.findByText(/Allow suppressing TypeScript plugin diagnostics/)
 
-    expect(shot.getByText(/14 of 2,136 pull requests/)).toBeTruthy()
+    // In the bar, which is portalled out of this render; the number is this view's alone.
+    expect(within(document.body).getByText(/14 of 2,136 pull requests/)).toBeTruthy()
   })
 
   /*

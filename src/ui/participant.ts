@@ -16,6 +16,6 @@ import type { Row } from "./Menu"
  */
 export const participantRows = ({ login }: { readonly login: string }): ReadonlyArray<Row> => [
   { name: "Your profile", where: `/${login}`, art: "person" },
-  { name: "Settings", where: "/settings/profile", art: "settings" },
+  { name: "GitHub settings", where: "/settings/profile", art: "settings" },
   { name: "Sign out", where: "/logout", art: "sign-out" }
 ]

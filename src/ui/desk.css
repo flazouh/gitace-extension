@@ -153,14 +153,6 @@
   background: var(--d-accent);
 }
 
-:is(#gitace-root, [data-gitace-outside]) .d-rsep {
-  width: 16px;
-  height: 1px;
-  flex: none;
-  margin: 2px 0;
-  background: var(--d-line);
-}
-
 :is(#gitace-root, [data-gitace-outside]) .d-rbadge {
   width: 22px;
   height: 22px;
@@ -406,29 +398,10 @@
   padding: 0 var(--d-inset);
 }
 
-:is(#gitace-root, [data-gitace-outside]) .d-gchip {
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 9px;
-  border-radius: var(--d-r-in);
-  color: var(--d-muted);
-  font: 500 13px/1 var(--font-sans);
-  white-space: nowrap;
-  transition:
-    background-color var(--d-tint-t) var(--d-tint-e),
-    color var(--d-tint-t) var(--d-tint-e);
-}
-
-:is(#gitace-root, [data-gitace-outside]) .d-gchip:hover {
-  background: var(--d-tint);
+:is(#gitace-root, [data-gitace-outside]) .d-lefth-title {
+  padding: 0 4px;
   color: var(--d-ink);
-}
-
-:is(#gitace-root, [data-gitace-outside]) .d-gchip[aria-current] {
-  background: var(--d-tint2);
-  color: var(--d-ink);
+  font: 600 13px/1 var(--font-sans);
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-n {
@@ -478,7 +451,7 @@
   background: var(--d-tint);
 }
 
-:is(#gitace-root, [data-gitace-outside]) .d-gpr[aria-current] {
+:is(#gitace-root, [data-gitace-outside]) .d-gpr.d-on {
   background: var(--d-page);
 }
 
@@ -530,13 +503,6 @@
 
 :is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin[aria-pressed="true"] {
   color: var(--d-accent);
-}
-
-:is(#gitace-root, [data-gitace-outside]) .d-rail-filter {
-  width: auto;
-  min-width: 0;
-  flex: none;
-  margin: 0 0 4px;
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-sw {
@@ -798,7 +764,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is(#gitace-root, [data-gitace-outside]) :is(.d-nv, .d-hn, .d-b, .d-gchip, .d-gpr, .d-ws-row, .d-doings) {
+  :is(#gitace-root, [data-gitace-outside]) :is(.d-nv, .d-hn, .d-b, .d-gpr, .d-ws-row, .d-doings) {
     transition: none;
   }
 }

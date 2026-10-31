@@ -128,7 +128,7 @@ describe("the Working Set screen", () => {
       />
     )
 
-    const rail = await screen.findByRole("navigation", { name: "Rail" })
+    const rail = await screen.findByRole("navigation", { name: "Your repositories" })
     expect(rail.parentElement?.className).toBe("d-gsplit")
     expect(rail.nextElementSibling?.className).toBe("d-gmain")
   })

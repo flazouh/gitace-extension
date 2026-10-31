@@ -84,9 +84,11 @@ the repository faces stay, and each Court keeps its count, so "is anything mine?
 answered at 3rem without expanding anything. This is the answer to two taps becoming one,
 and it is the reason a Participant never needs the back button to leave a pull request.
 
-Top to bottom: the three Destinations with live counts, pinned repositories, every other
-repository behind a filter that searches all of them, a create action, and the Participant
-at the bottom.
+Top to bottom: the three Destinations, Issues and Notifications, then a create action, the
+column toggle, settings and the Participant at the bottom. Home's left column beside it holds
+the pinned repositories and the ones with work in them; a press on one narrows Home to that
+repository in place, and a second press widens it again. The Destinations are the rail's alone
+and the searching is the header filter's and the palette's, so the column repeats neither.
 
 It replaces GitHub's hamburger drawer rather than sitting beside it. Their own Participants
 asked for exactly one of those two lists to die.
@@ -208,8 +210,8 @@ _Avoid_: feed, timeline, news
    it once.
 4. As a Participant, I want to pin any number of repositories, so that GitHub's limit of six
    stops being my limit.
-5. As a Participant, I want the Rail's repository filter to search every repository I have,
-   not the recent ones, so that finding a repository is typing rather than remembering.
+5. As a Participant, I want the palette to search every repository I have, not the recent
+   ones, so that finding a repository is typing rather than remembering.
 6. As a Participant, I want repositories ranked by my own work in them — open pull requests,
    running checks, my last push — so that the list answers where my work is rather than
    where I have been.
@@ -375,8 +377,8 @@ always rendered rather than revealed on hover.
 ### Keyboard
 
 `g d` stays the Working Set, because Participants already press it and said so. `g r` for
-Repositories, `g f` for Activity, `g h` for Home. The Rail's filter takes focus from `/`,
-and `cmd+K` opens the same filter as a palette over any repository or Involved item — worth
+Repositories, `g f` for Activity, `g h` for Home. The header's filter takes focus from `/`,
+and `cmd+K` opens a palette over any repository or Involved item — worth
 doing well, since GitHub is deprecating their command palette behind a feature preview and
 the complaint about it is listed at 405 in their own discussion search.
 
