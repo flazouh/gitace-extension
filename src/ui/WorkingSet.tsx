@@ -792,7 +792,7 @@ export const IssueRow = ({
             <span
               key={word}
               title={word}
-              className="flex max-w-32 shrink-0 items-center gap-1.5 rounded-full bg-hover pr-2 pl-1.5 py-0.5 text-[11px] text-ink-muted"
+              className="flex min-w-0 max-w-32 items-center gap-1.5 rounded-full bg-hover pr-2 pl-1.5 py-0.5 text-[11px] text-ink-muted"
             >
               {/* The word's own colour, worked out from the word — see `labelTone.ts`. Two
                   labels on a row are told apart before either is read, which a shared grey

@@ -8,7 +8,7 @@ import { useArt } from "./art"
 import { FileBrowser, type FileBrowserProps } from "./FileBrowser"
 import type { Across } from "./following"
 import { revealer } from "../app/revealing"
-import { GitHubHtml } from "./GitHubHtml"
+import { CommitMessage } from "./GitHubHtml"
 import { ageOf, momentOf } from "./when"
 import { Who } from "./Who"
 import { onward } from "../observability/report"
@@ -271,7 +271,7 @@ export const CommitView = ({
   const body =
     reading.step === "ready" && Option.isSome(reading.commit.bodyHtml) ? (
       <div className="max-h-32 overflow-y-auto px-3 py-2">
-        <GitHubHtml html={reading.commit.bodyHtml.value} />
+        <CommitMessage html={reading.commit.bodyHtml.value} />
       </div>
     ) : null
 

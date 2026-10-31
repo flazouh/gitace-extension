@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Option } from "effect";
 import { listsPullRequests, THE_HOME } from "../domain/pages";
+import type { Destination } from "../domain/Settings";
 import { switchable, type Repository } from "../domain/repositories";
 import { useArt } from "./art";
 import { BarTools } from "./barTools";
@@ -202,6 +203,15 @@ export type BarProps = {
    * somewhere: back to every repository.
    */
   readonly narrowed?: { readonly to: string; readonly widen: () => void };
+  /** Which of Home's Destinations is showing, which is what Home's crumb names. */
+  readonly destination?: Destination;
+};
+
+/** Home's crumb on each Destination: its name, and the line after it. */
+const DESTINATION: Readonly<Record<Destination, { readonly name: string; readonly line: string }>> = {
+  "working-set": { name: "Working Set", line: "Every pull request you are in, grouped by who acts next" },
+  repositories: { name: "Repositories", line: "Every repository you work in" },
+  activity: { name: "Activity", line: "What happened lately where you work" },
 };
 
 /** How long a press on Back is held before it opens the places behind, as a browser's does. */
@@ -322,6 +332,7 @@ export const Bar = ({
   behind = NOTHING,
   onHome,
   narrowed,
+  destination = "working-set",
   tray,
 }: BarProps) => {
   const art = useArt();
@@ -376,7 +387,7 @@ export const Bar = ({
   const tail: { readonly words: string; readonly current: boolean } | undefined =
     where.kind === "home"
       ? narrowed === undefined
-        ? { words: "Every pull request you are in, grouped by who acts next", current: false }
+        ? { words: DESTINATION[destination].line, current: false }
         : { words: narrowed.to, current: true }
       : where.kind === "place"
         ? { words: where.name, current: true }
@@ -509,7 +520,7 @@ export const Bar = ({
           <Ours onHome={onHome} />
         ) : narrowed === undefined ? (
           <span aria-current="page" className="d-crumb">
-            Working Set
+            {DESTINATION[destination].name}
           </span>
         ) : (
           <button

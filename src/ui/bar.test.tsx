@@ -53,6 +53,22 @@ describe("the bar, on Home", () => {
     expect(bar.textContent).not.toContain("4")
   })
 
+  test("names the Destination Home is on, not the Working Set's line over Activity", () => {
+    render(<Bar where={{ kind: "home" }} destination="activity" />)
+
+    const bar = screen.getByRole("banner")
+    expect(screen.getByText("Activity").getAttribute("aria-current")).toBe("page")
+    expect(bar.textContent).not.toContain("Every pull request you are in")
+  })
+
+  test("names each page of the reader's own after itself, and Home only as the way back", () => {
+    render(<Bar where={{ kind: "place", name: "Notifications" }} />)
+
+    const bar = screen.getByRole("banner")
+    expect(screen.getByText("Notifications").getAttribute("aria-current")).toBe("page")
+    expect(bar.textContent).not.toContain("Every pull request you are in")
+  })
+
   test("names the repository Home is narrowed to, the crumb being the way back to all", async () => {
     let widened = 0
     render(<Bar where={{ kind: "home" }} narrowed={{ to: "oven-sh/bun", widen: () => (widened += 1) }} />)
