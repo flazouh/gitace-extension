@@ -92,7 +92,8 @@ const List = ({
                 href={`/${address}/pulls`}
                 aria-label={one.count === 0 ? address : `${address}, ${one.count} open`}
                 aria-current={on ? "true" : undefined}
-                title={on ? `Show every repository` : `Show only ${address}`}
+                title={onChoose === undefined ? undefined : on ? "Show every repository" : `Show only ${address}`}
+                data-gitace-in-place={onChoose === undefined ? undefined : ""}
                 // Taken on the way down and stopped there: the screen's container answers
                 // presses on links to pages we draw, and this one is not a navigation.
                 onClickCapture={
