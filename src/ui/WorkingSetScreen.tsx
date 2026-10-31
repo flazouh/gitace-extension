@@ -11,6 +11,10 @@ import type { Keys } from "../keys/commands";
 import { Rail } from "./Rail";
 import { TheBar } from "./TheBar";
 import { useWaiting } from "./useWaiting";
+import { useKeyboard } from "./useKeyboard";
+import { useKeys } from "./useKeys";
+import { rememberFilter, rememberedFilter } from "./remembered";
+import { pickingRepo, reposAsked } from "../domain/sieve";
 import { Waiting } from "./Waiting";
 import { ReadFailed, viewerOnPage } from "./ReadFailed";
 import { DrawnAt } from "./drawnAt";
@@ -117,6 +121,9 @@ export type WorkingSetScreenProps = {
 
 const WORKING = "Reading your pull requests…";
 
+/** The name the Working Set's filter is remembered under. */
+const SCOPE = "working-set";
+
 /** One array rather than a new one per render, so the fold below is not redone hourly. */
 const EMPTY: ReadonlyArray<Sitting> = [];
 
@@ -142,6 +149,30 @@ export const WorkingSetScreen = ({
   elsewhere,
 }: WorkingSetScreenProps) => {
   const live = useLive(load, preload, where);
+  const [query, setQuery] = useState(() => rememberedFilter(SCOPE));
+  const chosen = reposAsked(query);
+  const narrow = (next: string) => {
+    setQuery(next);
+    rememberFilter(SCOPE, next);
+  };
+  const board = useKeyboard(keys);
+  const goTo = onDestination ?? (() => undefined);
+
+  /*
+   * `g d`, `g r` and `g f` are how a reader leaves a Destination, and must work on all three,
+   * with the left column shown or put away. Not animated: a chord pressed fifty times a day
+   * that waits for a page to slide reads as slower than the page it replaced.
+   */
+  useKeys(
+    board,
+    home
+      ? {
+          workingSet: () => goTo("working-set"),
+          repositories: () => goTo("repositories"),
+          activity: () => goTo("activity"),
+        }
+      : {},
+  );
   const { read, meanwhile } = live;
   const waiting = useWaiting(read.status);
   const [waitingOn, setWaitingOn] = useState<PullRequestRef | undefined>();
@@ -225,6 +256,9 @@ export const WorkingSetScreen = ({
       onStepAside={onStepAside}
       needsYou={needsYou}
       aimAt={atWork[0]}
+      {...(home && chosen.length === 1
+        ? { narrowed: { to: chosen[0]!, widen: () => narrow(pickingRepo(query, chosen[0]!)) } }
+        : {})}
     />
   );
 
@@ -255,8 +289,9 @@ export const WorkingSetScreen = ({
         <WorkingSet
           sittings={sittings}
           onOpen={onOpen}
-          scope="working-set"
+          scope={SCOPE}
           keys={keys}
+          {...(home ? { query, onQuery: setQuery } : {})}
           asking={asking}
           // On Home the padding belongs to the pair of columns below, not to this one alone.
           bare={home}
@@ -314,14 +349,14 @@ export const WorkingSetScreen = ({
       <div className="d-gsplit">
         {collapsed ? null : (
           <Rail
-            destination={destination}
-            onDestination={onDestination ?? (() => undefined)}
             atWork={atWork}
-            needsYou={needsYou}
-            repositories={repositories}
             pinned={pinned}
             onPinned={onPinned}
-            keys={keys}
+            chosen={chosen}
+            onChoose={(address) => {
+              narrow(pickingRepo(query, address));
+              if (destination !== "working-set") goTo("working-set");
+            }}
           />
         )}
         <section className="d-gmain">{showing}</section>

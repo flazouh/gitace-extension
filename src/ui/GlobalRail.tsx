@@ -5,7 +5,6 @@ import { THE_HOME } from "../domain/pages"
 import type { Repository } from "../domain/repositories"
 import { useArt } from "./art"
 import type { Where } from "./Bar"
-import { RepoTile } from "./Face"
 import { Menu, type Row } from "./Menu"
 import { participantRows } from "./participant"
 import { openTab } from "../app/openTab"
@@ -222,29 +221,6 @@ export const GlobalRail = ({
         {unread ? <span aria-hidden="true" className="d-dot" /> : null}
       </a>
 
-      {pinned.length === 0 ? null : (
-        <>
-          <span aria-hidden="true" className="d-rsep" />
-          {pinned.slice(0, 5).map((address) => {
-            const [owner = "", repo = ""] = address.split("/")
-            if (owner === "" || repo === "") return null
-            const activeRepo = where.kind === "repository" && where.owner === owner && where.repo === repo
-            return (
-              <a
-                key={address}
-                href={`/${owner}/${repo}/pulls`}
-                aria-label={address}
-                title={address}
-                aria-current={activeRepo ? "location" : undefined}
-                className="d-nv"
-              >
-                <RepoTile name={repo} big />
-              </a>
-            )
-          })}
-        </>
-      )}
-
       <span aria-hidden="true" className="d-sp" />
 
       <div className="relative">
@@ -287,8 +263,8 @@ export const GlobalRail = ({
             <button
               type="button"
               onClick={open}
-              aria-label="Display settings"
-              title="Settings"
+              aria-label="GitAce settings"
+              title="GitAce settings"
               aria-expanded={isOpen}
               className="d-nv"
             >

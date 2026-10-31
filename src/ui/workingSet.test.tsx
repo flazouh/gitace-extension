@@ -417,11 +417,12 @@ describe("Involved Issues in the Working Set", () => {
     const court = screen.getByRole("region", { name: "Needs You" })
 
     expect(within(court).getByText(/^Issues$/)).toBeDefined()
-    expect(within(court).getByText(/^Pull requests$/)).toBeDefined()
+    // The pull requests come first under the Court's own heading, which already names them.
+    expect(within(court).queryByText(/^Pull requests$/)).toBeNull()
     expect(within(court).getByText("the flaky test")).toBeDefined()
   })
 
-  test("counts each kind at the edge where the ages line up", async () => {
+  test("counts the issues at the edge where the ages line up", async () => {
     // The number belongs in the age column rather than beside the words: there it reads as the
     // end of a row, and the Court's own total above has something to add up from.
     render(
@@ -436,10 +437,9 @@ describe("Involved Issues in the Working Set", () => {
 
     const court = screen.getByRole("region", { name: "Needs You" })
     const bands = [...court.querySelectorAll("div")].filter((one) =>
-      /^(Pull requests|Issues)/.test(one.textContent ?? "")
+      /^Issues/.test(one.textContent ?? "")
     )
 
-    expect(bands.some((one) => one.textContent === "Pull requests2")).toBe(true)
     expect(bands.some((one) => one.textContent === "Issues3")).toBe(true)
   })
 

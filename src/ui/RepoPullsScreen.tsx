@@ -11,6 +11,7 @@ import type { Repository } from "../domain/repositories"
 import { SpinnerIcon } from "./spinner"
 import { TheBar } from "./TheBar"
 import { WorkingSet } from "./WorkingSet"
+import { IntoTheBar } from "./barTools"
 
 export type RepoPullsScreenProps = {
   readonly repo: { readonly owner: string; readonly repo: string }
@@ -93,12 +94,12 @@ const Tally = ({
    * `openrouter-web` before the list became a thousand rows at once.
    */
   return paging ? (
-    <span className="flex items-center gap-1.5 text-sm text-ink-muted">
+    <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs text-ink-muted">
       <SpinnerIcon size={12} aria-label="Reading" />
       {`Reading ${counted}…`}
     </span>
   ) : (
-    <span className="text-sm text-ink-muted">{counted}</span>
+    <span className="shrink-0 whitespace-nowrap text-xs text-ink-muted">{counted}</span>
   )
 }
 
@@ -158,14 +159,11 @@ export const RepoPullsScreen = ({
       />
       {listed === undefined ? null : (
         <div>
-          {/* The count alone. The repository was named here as well as in the
-              bar directly above, which is the thing this screen's own rule
-              forbids on its rows: named once, and the bar is where. Two
-              headings a centimetre apart carrying the same twelve characters
-              read as two lists rather than as one. */}
-          <div className="flex items-center justify-end pt-3">
+          {/* The count in the bar, beside the filter it answers to, rather than on a row of
+              its own above the list: a line holding one number pushed every row down. */}
+          <IntoTheBar>
             <Tally pages={listed.pages} rows={rows} paging={listed.paging} />
-          </div>
+          </IntoTheBar>
           <WorkingSet
             sittings={listed.sittings}
             onOpen={onOpen}

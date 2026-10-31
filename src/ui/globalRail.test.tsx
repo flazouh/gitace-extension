@@ -34,7 +34,7 @@ describe("the persistent global Ace rail", () => {
     expect(within(nav).getByLabelText("Notifications").getAttribute("href")).toBe("/notifications")
   })
 
-  test("lists pinned repositories as quick badges in the middle of the rail", () => {
+  test("holds no pinned repositories, which Home's left column lists with their counts", () => {
     render(
       <GlobalRail
         where={{ kind: "repository", owner: "oven-sh", repo: "bun" }}
@@ -43,9 +43,7 @@ describe("the persistent global Ace rail", () => {
       />
     )
 
-    const nav = rail()
-    expect(within(nav).getByRole("link", { name: "oven-sh/bun" }).getAttribute("href")).toBe("/oven-sh/bun/pulls")
-    expect(within(nav).getByRole("link", { name: "flazouh/ace" }).getAttribute("href")).toBe("/flazouh/ace/pulls")
+    expect(within(rail()).queryByRole("link", { name: "oven-sh/bun" })).toBeNull()
   })
 
   test("offers the GitHub interface toggle at the bottom-left of the rail", async () => {
@@ -133,7 +131,7 @@ describe("the Participant menu", () => {
     const menu = screen.getByRole("menu", { name: "Your account" })
     expect(within(menu).getAllByRole("menuitem").map((one) => one.textContent)).toEqual([
       "Your profile",
-      "Settings",
+      "GitHub settings",
       "Sign out",
       "Report a problem"
     ])
@@ -141,7 +139,7 @@ describe("the Participant menu", () => {
       "/flazouh"
     )
     expect(within(menu).getByRole("menuitem", { name: "Sign out" }).getAttribute("href")).toBe("/logout")
-    expect(within(menu).queryByRole("menuitem", { name: /GitHub/ })).toBeNull()
+    expect(within(menu).queryByRole("menuitem", { name: /Leave|GitHub interface/ })).toBeNull()
   })
 
   test("opens the problem report in a new tab", async () => {
@@ -217,7 +215,7 @@ describe("the way into the settings", () => {
       />
     )
 
-    await person.click(within(rail()).getByRole("button", { name: "Display settings" }))
+    await person.click(within(rail()).getByRole("button", { name: "GitAce settings" }))
     expect(opened).toBe(1)
   })
 })

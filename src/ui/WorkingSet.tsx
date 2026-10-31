@@ -52,7 +52,7 @@ import { Who } from "./Who"
 type Tint = "plain" | "bad" | "busy" | "good"
 
 const TINT: Record<Tint, string> = {
-  plain: "d-key",
+  plain: "d-pill d-plain",
   bad: "d-pill d-bad",
   busy: "d-pill d-busy",
   good: "d-pill d-good"
@@ -1087,6 +1087,7 @@ export const WorkingSet = ({
   keys: given,
   asking,
   onQuery,
+  query: held,
   bare = false
 }: {
   readonly sittings: ReadonlyArray<Sitting>
@@ -1144,6 +1145,13 @@ export const WorkingSet = ({
    * announce it and can be exactly such a question.
    */
   readonly onQuery?: (query: string) => void
+  /**
+   * The filter, where the screen holds it rather than this list.
+   *
+   * Home's left column narrows the list to a repository, so the line lives with the screen that
+   * draws both; every change still arrives through {@link onQuery}.
+   */
+  readonly query?: string
 }) => {
   /*
    * Seeded from the address, or from what was remembered, in the first render
@@ -1162,21 +1170,22 @@ export const WorkingSet = ({
    * the box takes back the words and refinements only this side knows.
    */
   const keys = useKeyboard(given)
-  const [query, setQuery] = useState(() => {
+  const [own, setOwn] = useState(() => {
     const remembered = scope === undefined ? "" : rememberedFilter(scope)
     if (seed === undefined || seed.length === 0) return remembered
     const extended =
       remembered.length > 0 && termsIn(seed).every((term) => asked(remembered, term))
     return extended ? remembered : seed
   })
+  const query = held ?? own
 
   const ask = useCallback(
     (next: string) => {
-      setQuery(next)
+      if (held === undefined) setOwn(next)
       if (scope !== undefined) rememberFilter(scope, next)
       onQuery?.(next)
     },
-    [scope, onQuery]
+    [held, scope, onQuery]
   )
 
   // Once, for the filter this list remembered on its own — see the prop's note.
@@ -1531,12 +1540,6 @@ export const WorkingSet = ({
                   many={sitting.count}
                 >
                   <div>
-                    {/* Both bands or neither: a Court holding one kind needs no line telling it
-                        which kind it is, and the heading above already said. */}
-                    {sitting.piles.length > 0 && sitting.issues.length > 0 ? (
-                      <Seam art="pull-request" name="Pull requests" many={sitting.piles.length} />
-                    ) : null}
-
                     {sitting.piles.map((pile) => (
                       <Pile
                         key={addressOf(pile.one.reference)}

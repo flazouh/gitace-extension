@@ -851,6 +851,9 @@ export default defineContentScript({
       // default and soft-navigated the same tab — which is how the bug report
       // link (target=_blank) landed on issues without a new tab.
       if (link.target === "_blank" || link.target === "_new") return null;
+      // A link whose plain press changes the screen it is on rather than the page, like a
+      // repository in Home's column; a press with a modifier never reaches here.
+      if (link.hasAttribute("data-gitace-in-place")) return null;
       const address = destination ?? linkAddress(link);
       if (address.hostname !== window.location.hostname) return null;
 

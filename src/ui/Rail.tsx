@@ -1,40 +1,25 @@
-import { useId, useState } from "react"
-import type { Destination } from "../domain/Settings"
 import type { RepositoryAtWork } from "../domain/rail"
-import { matching, type Repository, withPinToggled } from "../domain/repositories"
-import type { Keys } from "../keys/commands"
+import { withPinToggled } from "../domain/repositories"
 import { useArt } from "./art"
 import { RepoTile } from "./Face"
-import { useKeyboard } from "./useKeyboard"
-import { useKeys } from "./useKeys"
 
 /**
- * Home's left column: the three Destinations, and the repositories a reader actually goes to.
+ * Home's left column: the repositories a reader actually goes to, as a way to narrow the list.
  *
- * Reaching a repository in one press rather than two is the reason it exists, so it is not a
- * sidebar of links to pages. Everything about the reader rather than their work — starting
- * something, their account, the way back to GitHub — stands in the global rail beside it, which
- * is also where the column is hidden and shown.
+ * Not a second set of Destinations. Those are the global rail's, a few pixels to the left, and
+ * a row of chips here repeating them was two controls for one choice. Not a second search
+ * either: the header's filter narrows the list and ⌘K finds any repository, so a box here was
+ * a third field for the same question.
+ *
+ * A press on a row narrows Home to that repository in place, and a second press widens it
+ * again. A press with a modifier is still the link it looks like, to the repository's pull
+ * requests in a new tab.
  *
  * See `docs/spec/home.md`.
  */
 export type RailProps = {
-  /** Which Destination is being shown, so the Rail can mark it and offer the others. */
-  readonly destination: Destination
-  readonly onDestination: (destination: Destination) => void
   /** Ranked by `repositoriesAtWork`; drawn in the order it is given. */
   readonly atWork: ReadonlyArray<RepositoryAtWork>
-  /** How much of the Working Set is open, for the Destination's count. */
-  readonly needsYou: number
-  /** How much happened elsewhere, for Activity's count. Absent until that read lands. */
-  readonly happened?: number
-  /**
-   * Every repository the reader has, for the filter.
-   *
-   * The Rail lists the ones with work in them, which is six or so; the filter searches all of
-   * them, so finding a repository is typing rather than remembering.
-   */
-  readonly repositories?: ReadonlyArray<Repository>
   /**
    * The repositories the reader pinned, as `owner/repo`, in the order they pinned them.
    *
@@ -43,7 +28,10 @@ export type RailProps = {
    */
   readonly pinned?: ReadonlyArray<string>
   readonly onPinned?: (pinned: ReadonlyArray<string>) => void
-  readonly keys?: Keys
+  /** The repositories the list is narrowed to, as `owner/repo`. */
+  readonly chosen?: ReadonlyArray<string>
+  /** Narrows the list to one repository, or widens it again. Absent, the rows are links. */
+  readonly onChoose?: (address: string) => void
 }
 
 /** A repository as the Rail draws it, whichever of its two lists it is in. */
@@ -53,16 +41,11 @@ type Standing = {
   readonly count: number
 }
 
-const NONE_PINNED: ReadonlyArray<string> = []
+const NOTHING: ReadonlyArray<string> = []
 
-/** Past this many, a column of names is a list to search rather than to read. */
-const FILTERED_PAST = 12
-
-const DESTINATIONS = [
-  { which: "working-set", name: "Working Set", short: "Working Set" },
-  { which: "repositories", name: "Repositories", short: "Repos" },
-  { which: "activity", name: "Activity", short: "Activity" }
-] as const
+/** A pressed modifier is the reader asking for a new tab, which the link already does. */
+const plainPress = (event: React.MouseEvent): boolean =>
+  event.button === 0 && !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
 
 /**
  * One of the Rail's lists of repositories, pinned or at work.
@@ -76,13 +59,17 @@ const List = ({
   heading,
   standings,
   pinned,
-  onPin
+  chosen,
+  onPin,
+  onChoose
 }: {
   readonly name: string
   readonly heading: string
   readonly standings: ReadonlyArray<Standing>
   readonly pinned: ReadonlySet<string>
+  readonly chosen: ReadonlySet<string>
   readonly onPin?: (address: string) => void
+  readonly onChoose?: (address: string) => void
 }) => {
   const art = useArt()
   const Pin = art.pinned
@@ -97,14 +84,28 @@ const List = ({
         {standings.map((one) => {
           const address = `${one.owner}/${one.repo}`
           const held = pinned.has(address)
+          const on = chosen.has(address.toLowerCase())
 
           return (
-            <li key={address} className="d-gpr">
+            <li key={address} className={`d-gpr ${on ? "d-on" : ""}`}>
               <a
-                // Their pull requests rather than their code, because that is the page this
-                // extension already draws and the reason the reader is looking.
                 href={`/${address}/pulls`}
                 aria-label={one.count === 0 ? address : `${address}, ${one.count} open`}
+                aria-current={on ? "true" : undefined}
+                title={onChoose === undefined ? undefined : on ? "Show every repository" : `Show only ${address}`}
+                data-gitace-in-place={onChoose === undefined ? undefined : ""}
+                // Taken on the way down and stopped there: the screen's container answers
+                // presses on links to pages we draw, and this one is not a navigation.
+                onClickCapture={
+                  onChoose === undefined
+                    ? undefined
+                    : (event) => {
+                        if (!plainPress(event)) return
+                        event.preventDefault()
+                        event.stopPropagation()
+                        onChoose(address)
+                      }
+                }
                 className="d-gpr-link"
               >
                 <RepoTile name={one.repo} />
@@ -136,54 +137,13 @@ const List = ({
   )
 }
 
-export const Rail = ({
-  destination,
-  onDestination,
-  atWork,
-  needsYou,
-  happened,
-  repositories = [],
-  pinned = NONE_PINNED,
-  onPinned,
-  keys: given
-}: RailProps) => {
-  const keys = useKeyboard(given)
-  const art = useArt()
-  const [typed, setTyped] = useState("")
-  const filterId = useId()
-
-  const goTo = (which: Destination) => {
-    onDestination(which)
-    // Typing narrows this Rail, not the page: leaving a filter behind after a press on
-    // Activity would leave a reader looking at a list they had stopped asking about.
-    setTyped("")
-  }
-
-  /*
-   * `g d`, `g r` and `g f` are how a reader leaves a Destination, and must work on all three.
-   * Not animated and never will be: a chord pressed fifty times a day that waits for a page
-   * to slide reads as slower than the page it replaced.
-   */
-  useKeys(keys, {
-    workingSet: () => goTo("working-set"),
-    repositories: () => goTo("repositories"),
-    activity: () => goTo("activity")
-  })
-
-  const searching = typed.trim().length > 0
+export const Rail = ({ atWork, pinned = NOTHING, onPinned, chosen = NOTHING, onChoose }: RailProps) => {
   const held = new Set(pinned)
+  const picked = new Set(chosen.map((one) => one.toLowerCase()))
   const countOf = (owner: string, repo: string): number =>
     atWork.find((one) => one.owner === owner && one.repo === repo)?.count ?? 0
 
-  const listed: ReadonlyArray<Standing> = (
-    searching
-      ? matching(repositories, typed).map((one) => ({
-          owner: one.owner,
-          repo: one.repo,
-          count: countOf(one.owner, one.repo)
-        }))
-      : atWork
-  ).filter((one) => !held.has(`${one.owner}/${one.repo}`))
+  const listed = atWork.filter((one) => !held.has(`${one.owner}/${one.repo}`))
 
   /*
    * The pinned repositories, drawn from the addresses rather than from a read.
@@ -200,87 +160,34 @@ export const Rail = ({
 
   const pinning = (address: string) => onPinned?.(withPinToggled(pinned, address))
 
-  // A zero beside a Destination is a claim that it holds nothing, which is a different thing
-  // from not having read it yet, so each count says nothing until its read lands.
-  const countFor = (which: Destination): number | undefined =>
-    which === "working-set"
-      ? needsYou
-      : which === "activity"
-        ? happened
-        : repositories.length === 0
-          ? undefined
-          : repositories.length
-
   return (
-    <nav aria-label="Rail" className="d-gleft">
+    <nav aria-label="Your repositories" className="d-gleft">
       <div className="d-lefth">
-        {DESTINATIONS.map((one) => {
-          const many = countFor(one.which)
-          const here = one.which === destination
-          return (
-            <button
-              key={one.which}
-              type="button"
-              onClick={() => goTo(one.which)}
-              aria-current={here ? "page" : undefined}
-              aria-label={many === undefined ? one.name : `${one.name}, ${many}`}
-              className="d-gchip"
-            >
-              <span aria-hidden="true">{one.short}</span>
-              {many === undefined || one.which === "activity" ? null : (
-                <span aria-hidden="true" className="d-n">
-                  {many}
-                </span>
-              )}
-            </button>
-          )
-        })}
+        <span className="d-lefth-title">Your repositories</span>
       </div>
 
       <div className="d-rows">
-        {repositories.length <= FILTERED_PAST ? null : (
-          <label htmlFor={filterId} className="d-search d-rail-filter">
-            <art.search size={13} aria-hidden="true" />
-            <span className="sr-only">Filter your repositories</span>
-            <input
-              id={filterId}
-              type="search"
-              value={typed}
-              placeholder="Filter repositories"
-              onChange={(event) => setTyped(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Escape") {
-                  setTyped("")
-                  event.currentTarget.blur()
-                }
-              }}
-            />
-          </label>
-        )}
-
-        {kept.length === 0 || searching ? null : (
+        {kept.length === 0 ? null : (
           <List
             name="Repositories you pinned"
             heading="Pinned"
             standings={kept}
             pinned={held}
+            chosen={picked}
             onPin={onPinned === undefined ? undefined : pinning}
+            onChoose={onChoose}
           />
         )}
 
-        {listed.length === 0 ? (
-          searching ? (
-            <p className="d-sect">
-              Nothing matches {typed.trim()}, of {repositories.length}.
-            </p>
-          ) : null
-        ) : (
+        {listed.length === 0 ? null : (
           <List
-            name={searching ? "Repositories that match" : "Repositories you are working in"}
-            heading={searching ? `${listed.length} of ${repositories.length}` : "Your work"}
+            name="Repositories you are working in"
+            heading="Your work"
             standings={listed}
             pinned={held}
+            chosen={picked}
             onPin={onPinned === undefined ? undefined : pinning}
+            onChoose={onChoose}
           />
         )}
       </div>

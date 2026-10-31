@@ -10,7 +10,6 @@ import userEvent from "@testing-library/user-event";
 import { Effect, Option } from "effect";
 import type { Destination } from "../domain/Settings";
 import type { RepositoryAtWork } from "../domain/rail";
-import type { Repository } from "../domain/repositories";
 import { sittingsIn } from "../domain/sittings";
 import type { InvolvedPullRequest, Shelf } from "../domain/workingSet";
 import { Rail } from "./Rail";
@@ -30,105 +29,44 @@ const at = (
   needsYou,
 });
 
-const owned = (
-  nameWithOwner: string,
-  over: Partial<Repository> = {},
-): Repository => {
-  const [owner = "", repo = ""] = nameWithOwner.split("/");
-  return {
-    owner,
-    repo,
-    nameWithOwner,
-    faceUrl: Option.none(),
-    ofAnOrganisation: false,
-    isPrivate: false,
-    isEmpty: false,
-    ...over,
-  };
-};
-
 const showing = (
   over: {
     atWork?: ReadonlyArray<RepositoryAtWork>;
-    needsYou?: number;
-    happened?: number;
-    destination?: Destination;
-    onDestination?: (destination: Destination) => void;
-    repositories?: ReadonlyArray<Repository>;
     pinned?: ReadonlyArray<string>;
     onPinned?: (pinned: ReadonlyArray<string>) => void;
+    chosen?: ReadonlyArray<string>;
+    onChoose?: (address: string) => void;
   } = {},
 ) =>
   render(
     <Rail
       pinned={over.pinned}
       onPinned={over.onPinned}
-      destination={over.destination ?? "working-set"}
-      onDestination={over.onDestination ?? (() => undefined)}
       atWork={over.atWork ?? []}
-      needsYou={over.needsYou ?? 0}
-      happened={over.happened}
-      repositories={over.repositories}
+      chosen={over.chosen}
+      onChoose={over.onChoose}
     />,
   );
 
-const rail = () => screen.getByRole("navigation", { name: "Rail" });
+const rail = () => screen.getByRole("navigation", { name: "Your repositories" });
 
 /**
- * The strip that answers "where else?" without a back button.
+ * Home's left column, which narrows the list to the repositories a reader goes to.
  *
- * Two taps to a repository is the most-repeated complaint in GitHub's own threads, and
- * leaving a pull request on their soft navigation is a back button that sometimes does
- * not work. Both are answered by navigation that is simply always there — which is why
- * the tests below are about what a reader can reach rather than about how it looks.
+ * The Destinations are the global rail's and the searching is the header's and the palette's,
+ * so the tests below are about what a press here does to the list beside it.
  */
 describe("the Rail", () => {
-  test("offers all three Destinations", () => {
-    showing();
+  test("holds no Destinations, which are the global rail's", () => {
+    showing({ atWork: [at("octo-repo", 3, 2)] });
 
-    expect(within(rail()).getByRole("button", { name: /Working Set/ })).toBeDefined();
-    expect(within(rail()).getByRole("button", { name: /Repositories/ })).toBeDefined();
-    expect(within(rail()).getByRole("button", { name: /Activity/ })).toBeDefined();
+    expect(within(rail()).queryByRole("button", { name: /Working Set|Activity/ })).toBeNull();
   });
 
-  test("says which Destination the reader is on", () => {
-    showing({ destination: "activity" });
+  test("offers no filter of its own: the header's filter and the palette already search", () => {
+    showing({ atWork: [at("octo-repo", 3, 2)] });
 
-    expect(
-      screen.getByRole("button", { current: "page" }).textContent,
-    ).toContain("Activity");
-  });
-
-  test("takes a press on a Destination there", async () => {
-    const person = userEvent.setup();
-    const went: Array<Destination> = [];
-    showing({ onDestination: (which) => went.push(which) });
-
-    await person.click(screen.getByRole("button", { name: /Repositories/ }));
-
-    expect(went).toEqual(["repositories"]);
-  });
-
-  test("counts what is the reader's own move beside the Working Set", () => {
-    showing({ needsYou: 4 });
-
-    expect(
-      screen.getByRole("button", { name: "Working Set, 4" }),
-    ).toBeDefined();
-  });
-
-  test("counts what happened beside Activity, once that read has landed", () => {
-    showing({ happened: 26 });
-
-    expect(screen.getByRole("button", { name: "Activity, 26" })).toBeDefined();
-  });
-
-  test("says nothing about how much happened before anybody has read it", () => {
-    // A zero beside Activity would be a claim that nothing has happened, which is a
-    // different thing from not having asked yet.
-    showing();
-
-    expect(screen.getByRole("button", { name: "Activity" })).toBeDefined();
+    expect(screen.queryByRole("searchbox")).toBeNull();
   });
 
   test("lists the repositories the reader's work is in, in the order given", () => {
@@ -146,14 +84,45 @@ describe("the Rail", () => {
     ]);
   });
 
-  test("takes a press on a repository to its pull requests", () => {
-    // Their own page for it, which this extension already draws: the complaint is the
-    // two taps, not the destination.
-    showing({ atWork: [at("octo-repo", 3, 2)] });
+  test("narrows the list to a repository on a press, rather than leaving Home", async () => {
+    const person = userEvent.setup();
+    const chose: Array<string> = [];
+    showing({ atWork: [at("octo-repo", 3, 2)], onChoose: (address) => chose.push(address) });
 
-    expect(
-      screen.getByRole("link", { name: /octo-repo/ }).getAttribute("href"),
-    ).toBe("/flazouh/octo-repo/pulls");
+    await person.click(screen.getByRole("link", { name: /octo-repo/ }));
+
+    expect(chose).toEqual(["flazouh/octo-repo"]);
+  });
+
+  test("keeps that press from the screen's own link handling, which would leave Home", async () => {
+    const person = userEvent.setup();
+    const { container } = showing({ atWork: [at("octo-repo", 3, 2)], onChoose: () => undefined });
+    let reached = 0;
+    container.addEventListener("click", () => (reached += 1));
+
+    await person.click(screen.getByRole("link", { name: /octo-repo/ }));
+
+    expect(reached).toBe(0);
+  });
+
+  test("marks the repository the list is narrowed to", () => {
+    showing({ atWork: [at("octo-repo", 3, 2), at("lumen", 1, 0)], chosen: ["flazouh/octo-repo"] });
+
+    expect(screen.getByRole("link", { current: true }).getAttribute("href")).toBe(
+      "/flazouh/octo-repo/pulls",
+    );
+  });
+
+  test("leaves a press with a modifier to the link, for a new tab", async () => {
+    const person = userEvent.setup();
+    const chose: Array<string> = [];
+    showing({ atWork: [at("octo-repo", 3, 2)], onChoose: (address) => chose.push(address) });
+
+    await person.keyboard("{Meta>}");
+    await person.click(screen.getByRole("link", { name: /octo-repo/ }));
+    await person.keyboard("{/Meta}");
+
+    expect(chose).toEqual([]);
   });
 
   test("says nothing about repositories when nothing has been read", () => {
@@ -162,66 +131,6 @@ describe("the Rail", () => {
     expect(
       screen.queryByRole("list", { name: "Repositories you are working in" }),
     ).toBeNull();
-  });
-});
-
-describe("finding a repository by typing", () => {
-  // Past a dozen, so the column is a list to search rather than to read.
-  const many = [
-    owned("flazouh/octo-repo"),
-    owned("flazouh/lumen"),
-    owned("flowline-labs/flowline"),
-    ...Array.from({ length: 10 }, (_, index) => owned(`flazouh/repo${index}`)),
-  ];
-
-  test("searches every repository, not the handful with work in them", async () => {
-    // Story 5, and the difference between this and GitHub's own sidebar: theirs lists ten
-    // by a rule nobody can predict, and a live account had 154.
-    const person = userEvent.setup();
-    showing({ atWork: [at("octo-repo", 3, 2)], repositories: many });
-
-    await person.type(screen.getByRole("searchbox"), "flowline");
-
-    const rows = within(
-      screen.getByRole("list", { name: "Repositories that match" }),
-    ).getAllByRole("link");
-    expect(rows.map((row) => row.getAttribute("href"))).toEqual([
-      "/flowline-labs/flowline/pulls",
-    ]);
-  });
-
-  test("says so when nothing matches, and how much was searched", async () => {
-    const person = userEvent.setup();
-    showing({ repositories: many });
-
-    await person.type(screen.getByRole("searchbox"), "nowhere");
-
-    expect(screen.getByText(/Nothing matches nowhere, of 13/)).toBeDefined();
-  });
-
-  test("Escape gives the reader their own list back", async () => {
-    const person = userEvent.setup();
-    showing({ atWork: [at("octo-repo", 3, 2)], repositories: many });
-
-    await person.type(screen.getByRole("searchbox"), "lumen");
-    await person.keyboard("{Escape}");
-
-    expect(
-      screen.getByRole("list", { name: "Repositories you are working in" }),
-    ).toBeDefined();
-  });
-
-  test("no filter before the whole list has been read", () => {
-    // A box that searches six of a hundred and fifty-four is a box that lies.
-    showing({ atWork: [at("octo-repo", 3, 2)] });
-
-    expect(screen.queryByRole("searchbox")).toBeNull();
-  });
-
-  test("no filter over a list short enough to read", () => {
-    showing({ repositories: many.slice(0, 12) });
-
-    expect(screen.queryByRole("searchbox")).toBeNull();
   });
 });
 
@@ -248,13 +157,13 @@ const involved = (
   checks: Option.none(),
   reviewed: Option.none(),
   size: Option.none(),
-  ...{},
 });
 
 const onScreen = (
   home: boolean,
   over: {
     destination?: Destination;
+    onDestination?: (destination: Destination) => void;
     elsewhere?: (destination: "repositories" | "activity") => React.ReactNode;
     rows?: ReadonlyArray<InvolvedPullRequest>;
   } = {},
@@ -276,6 +185,7 @@ const onScreen = (
       onStepAside={() => {}}
       home={home}
       destination={over.destination}
+      onDestination={over.onDestination}
       elsewhere={over.elsewhere}
     />,
   );
@@ -292,15 +202,40 @@ describe("the Rail on the Working Set", () => {
   test("stands beside the list on Home, holding the repositories it read", async () => {
     onScreen(true);
 
-    await waitFor(() => expect(rail()).toBeDefined());
-
     // Derived from the same read the Courts were drawn from, so it names both.
     await waitFor(() => expect(within(rail()).getByText("flazouh/octo-repo")).toBeDefined());
     expect(within(rail()).getByText("flazouh/gitace-extension")).toBeDefined();
-    // One is the reader's move, and the Working Set Destination says so.
-    expect(
-      within(rail()).getByRole("button", { name: "Working Set, 1" }),
-    ).toBeDefined();
+  });
+
+  test("narrows Home to a repository in place, and a second press widens it again", async () => {
+    const person = userEvent.setup();
+    onScreen(true);
+
+    await waitFor(() => expect(screen.getByText("pull request 2")).toBeDefined());
+    await person.click(within(rail()).getByRole("link", { name: /octo-repo/ }));
+
+    await waitFor(() => expect(screen.queryByText("pull request 2")).toBeNull());
+    expect(screen.getByText("pull request 1")).toBeDefined();
+    expect(within(rail()).getByRole("link", { current: true })).toBeDefined();
+
+    await person.click(within(rail()).getByRole("link", { name: /octo-repo/ }));
+
+    await waitFor(() => expect(screen.getByText("pull request 2")).toBeDefined());
+  });
+
+  test("goes back to the Working Set when a repository is pressed on another Destination", async () => {
+    const person = userEvent.setup();
+    const went: Array<Destination> = [];
+    onScreen(true, {
+      destination: "activity",
+      elsewhere: (which) => <p>the {which} Destination</p>,
+      onDestination: (which) => went.push(which),
+    });
+
+    await waitFor(() => expect(within(rail()).getByText("flazouh/octo-repo")).toBeDefined());
+    await person.click(within(rail()).getByRole("link", { name: /octo-repo/ }));
+
+    expect(went).toEqual(["working-set"]);
   });
 
   test("is not on their pull request dashboard, where their own nav still is", async () => {
@@ -308,7 +243,7 @@ describe("the Rail on the Working Set", () => {
 
     await waitFor(() => expect(screen.getByRole("searchbox")).toBeDefined());
     expect(
-      screen.queryByRole("navigation", { name: "Rail" }),
+      screen.queryByRole("navigation", { name: "Your repositories" }),
     ).toBeNull();
   });
 
@@ -339,17 +274,25 @@ describe("the Rail on the Working Set", () => {
 });
 
 /**
- * Reaching a Destination without the Rail.
+ * Reaching a Destination by keyboard.
  *
  * The landing choice is only a convenience if the other two are one chord away — the whole
  * argument GitHub lost by picking a side for everybody. `g d` is unchanged from what
- * Participants already press for their dashboard and said so in as many words.
+ * Participants already press for their dashboard and said so in as many words. Held by
+ * Home's screen rather than by the column, so putting the column away keeps them.
  */
 describe("the Destination chords", () => {
+  const chording = (destination: Destination, went: Array<Destination>) =>
+    onScreen(true, {
+      destination,
+      elsewhere: (which) => <p>the {which} Destination</p>,
+      onDestination: (which) => went.push(which),
+    });
+
   test("takes g r to the repositories", async () => {
     const person = userEvent.setup();
     const went: Array<Destination> = [];
-    showing({ onDestination: (which) => went.push(which) });
+    chording("working-set", went);
 
     await person.keyboard("gr");
 
@@ -359,20 +302,19 @@ describe("the Destination chords", () => {
   test("takes g d back to the Working Set from anywhere", async () => {
     const person = userEvent.setup();
     const went: Array<Destination> = [];
-    showing({ destination: "activity", onDestination: (which) => went.push(which) });
+    chording("activity", went);
 
     await person.keyboard("gd");
 
     expect(went).toEqual(["working-set"]);
   });
 
-  test("answers a chord while the Repositories filter owns the slash", async () => {
-    // That Destination has a filter of its own, so the Rail gives up `/` there. Giving up
-    // the chords with it would have made the one Destination a reader lands on the one they
-    // cannot leave by keyboard.
+  test("answers a chord on the Repositories Destination", async () => {
+    // That Destination has a filter of its own. Giving up the chords with it would have made
+    // the one Destination a reader lands on the one they cannot leave by keyboard.
     const person = userEvent.setup();
     const went: Array<Destination> = [];
-    showing({ destination: "repositories", onDestination: (which) => went.push(which) });
+    chording("repositories", went);
 
     await person.keyboard("gf");
 
@@ -382,7 +324,7 @@ describe("the Destination chords", () => {
   test("leaves g alone on its own", async () => {
     const person = userEvent.setup();
     const went: Array<Destination> = [];
-    showing({ onDestination: (which) => went.push(which) });
+    chording("working-set", went);
 
     await person.keyboard("g");
 
@@ -399,17 +341,15 @@ describe("the Destination chords", () => {
  * pull request in it this week.
  */
 describe("pinned repositories", () => {
-  const two = [owned("flazouh/octo-repo"), owned("citrolabs/ego-lite")];
-
   test("are listed above the repositories with work in them", () => {
-    showing({ repositories: two, pinned: ["citrolabs/ego-lite"], atWork: [at("octo-repo", 3, 1)] });
+    showing({ pinned: ["citrolabs/ego-lite"], atWork: [at("octo-repo", 3, 1)] });
 
     const pinned = screen.getByRole("list", { name: "Repositories you pinned" });
     expect(within(pinned).getByRole("link", { name: /ego-lite/ })).toBeDefined();
   });
 
   test("are not repeated in the list below", () => {
-    showing({ repositories: two, pinned: ["flazouh/octo-repo"], atWork: [at("octo-repo", 3, 1)] });
+    showing({ pinned: ["flazouh/octo-repo"], atWork: [at("octo-repo", 3, 1)] });
 
     const work = screen.queryByRole("list", {
       name: "Repositories you are working in",
@@ -423,7 +363,6 @@ describe("pinned repositories", () => {
     const person = userEvent.setup();
     const asked: Array<ReadonlyArray<string>> = [];
     showing({
-      repositories: two,
       atWork: [at("octo-repo", 3, 1)],
       onPinned: (pinned) => asked.push(pinned),
     });
@@ -437,7 +376,6 @@ describe("pinned repositories", () => {
     const person = userEvent.setup();
     const asked: Array<ReadonlyArray<string>> = [];
     showing({
-      repositories: two,
       pinned: ["flazouh/octo-repo"],
       onPinned: (pinned) => asked.push(pinned),
     });
@@ -448,8 +386,8 @@ describe("pinned repositories", () => {
   });
 
   test("hold more than the six GitHub allows", () => {
-    const seven = Array.from({ length: 7 }, (_, index) => owned(`flazouh/repo${index}`));
-    showing({ repositories: seven, pinned: seven.map((one) => one.nameWithOwner) });
+    const seven = Array.from({ length: 7 }, (_, index) => `flazouh/repo${index}`);
+    showing({ pinned: seven });
 
     const pinned = screen.getByRole("list", { name: "Repositories you pinned" });
     expect(within(pinned).getAllByRole("link")).toHaveLength(7);

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { Option } from "effect"
 import type { ListedIssue } from "./issues"
 import type { InvolvedPullRequest } from "./workingSet"
-import { answers, answersIssue, asked, sieveOf, toggling, undecided, understood } from "./sieve"
+import { answers, answersIssue, asked, pickingRepo, reposAsked, sieveOf, toggling, undecided, understood } from "./sieve"
 
 const WEEK = 7 * 24 * 60 * 60 * 1000
 const NOW = Date.parse("2026-07-30T00:00:00Z")
@@ -295,5 +295,21 @@ describe("which of GitHub's terms this box can be filled with", () => {
 
   test("refuses a plain word, which is a word and not a term", () => {
     expect(understood("tokenizer")).toBe(false)
+  })
+})
+
+describe("a repository picked from Home's column", () => {
+  test("narrows the line to that one repository, replacing any other", () => {
+    expect(pickingRepo("", "oven-sh/bun")).toBe("repo:oven-sh/bun")
+    expect(pickingRepo("author:me repo:a/b repo:c/d", "oven-sh/bun")).toBe("author:me repo:oven-sh/bun")
+  })
+
+  test("a second press on the one chosen widens the line again", () => {
+    expect(pickingRepo("is:failing repo:oven-sh/bun", "oven-sh/bun")).toBe("is:failing")
+    expect(pickingRepo("repo:a/b repo:oven-sh/bun", "oven-sh/bun")).toBe("repo:oven-sh/bun")
+  })
+
+  test("reads which repositories the line asks for", () => {
+    expect(reposAsked("tokenizer repo:oven-sh/bun author:me")).toEqual(["oven-sh/bun"])
   })
 })

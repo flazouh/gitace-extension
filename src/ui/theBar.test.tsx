@@ -101,7 +101,7 @@ describe("the places the trail names", () => {
     ])
 
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
-    await userEvent.click(screen.getByRole("button", { name: "Where you have been" }))
+    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Back" }) })
 
     expect(screen.getAllByRole("menuitem").map((one) => one.textContent)).toEqual([
       "#12 in flazouh/gitace-extension",
@@ -125,7 +125,7 @@ describe("the places the trail names", () => {
     ])
 
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
-    await userEvent.click(screen.getByRole("button", { name: "Where you have been" }))
+    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Back" }) })
 
     expect(screen.getAllByRole("menuitem").map((one) => one.textContent)).toEqual([
       "#12 in flazouh/gitace-extension",
@@ -137,7 +137,7 @@ describe("the places the trail names", () => {
     havingBeen(["/flazouh/gitace-extension/blob/main/README.md", "/pulls", "/flazouh/gitace-extension/pull/14"])
 
     render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
-    await userEvent.click(screen.getByRole("button", { name: "Where you have been" }))
+    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Back" }) })
 
     expect(screen.getAllByRole("menuitem").map((one) => one.textContent)).toEqual([
       "Working Set",
@@ -387,13 +387,13 @@ describe("the reader's own settings", () => {
   test("stand in the tray, on every page the bar is on", () => {
     render(<TheBar where={{ kind: "home" }} participant={SOMEONE} />)
 
-    expect(screen.getByLabelText("Display settings")).toBeDefined()
+    expect(screen.getByLabelText("GitAce settings")).toBeDefined()
   })
 
   test("open the sheet where the reader presses them", async () => {
     render(<TheBar where={WHERE} participant={SOMEONE} />)
 
-    await userEvent.click(screen.getByLabelText("Display settings"))
+    await userEvent.click(screen.getByLabelText("GitAce settings"))
 
     expect(screen.getByRole("dialog", { name: "Settings" })).toBeDefined()
   })
@@ -408,7 +408,7 @@ describe("the reader's own settings", () => {
   test("hang outside the glass, because a filtered pane cannot hold a modal", async () => {
     render(<TheBar where={WHERE} participant={SOMEONE} />)
 
-    await userEvent.click(screen.getByLabelText("Display settings"))
+    await userEvent.click(screen.getByLabelText("GitAce settings"))
 
     const pane = document.querySelector(`#${BAR_ID} > header`)
     expect(pane).not.toBeNull()

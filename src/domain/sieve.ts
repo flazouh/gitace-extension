@@ -296,3 +296,27 @@ export const toggling = (typed: string, term: string): string => {
 
   return (without.length === terms.length ? [...terms, term] : without).join(" ")
 }
+
+const isRepoTerm = (term: string): boolean => term.toLowerCase().startsWith("repo:")
+
+/** The repositories the line asks for by `repo:`, as written. */
+export const reposAsked = (typed: string): ReadonlyArray<string> =>
+  termsIn(typed)
+    .filter(isRepoTerm)
+    .map((term) => term.slice("repo:".length))
+
+/**
+ * The line narrowed to one repository, or widened again when it already was.
+ *
+ * A press on a repository in Home's column says "this one", not "this one as well", so every
+ * other `repo:` term goes; pressing the one already chosen alone takes it out. Everything else
+ * the reader typed stays as they typed it.
+ */
+export const pickingRepo = (typed: string, address: string): string => {
+  const terms = termsIn(typed)
+  const rest = terms.filter((term) => !isRepoTerm(term))
+  const alone = reposAsked(typed)
+  const already = alone.length === 1 && alone[0]!.toLowerCase() === address.toLowerCase()
+
+  return (already ? rest : [...rest, `repo:${address}`]).join(" ")
+}
