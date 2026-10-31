@@ -865,7 +865,7 @@ describe("narrowing the Working Set down", () => {
   test("can be narrowed to only what has changed since the reader last looked", async () => {
     showing(many)
 
-    await userEvent.click(screen.getByRole("button", { name: /Activity/ }))
+    await userEvent.click(screen.getByRole("button", { name: /Attention/ }))
     await userEvent.click(screen.getByRole("menuitemcheckbox", { name: /Unread/ }))
 
     expect(screen.getByText(/drop the old migration/)).toBeDefined()
@@ -877,7 +877,7 @@ describe("narrowing the Working Set down", () => {
     // that could disagree would mean a list nobody can explain from the screen.
     showing(many)
 
-    await userEvent.click(screen.getByRole("button", { name: /Activity/ }))
+    await userEvent.click(screen.getByRole("button", { name: /Attention/ }))
     await userEvent.click(screen.getByRole("menuitemcheckbox", { name: /Unread/ }))
 
     const box = screen.getByRole("searchbox", { name: /Filter/ })

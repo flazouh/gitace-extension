@@ -35,7 +35,7 @@ describe("the filter row above a list", () => {
     showing()
 
     expect(screen.getByRole("searchbox", { name: /Filter/ })).toBeDefined()
-    for (const name of [/Author/, /Repository/, /Checks/, /Review/, /State/, /Activity/]) {
+    for (const name of [/Author/, /Repository/, /Checks/, /Review/, /State/, /Attention/]) {
       expect(chip(name)).toBeDefined()
     }
   })

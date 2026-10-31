@@ -72,7 +72,7 @@ export const CompareScreen = ({
 
   return (
     <>
-      <TheBar where={{ kind: "home" }} />
+      <TheBar where={{ kind: "repository", owner: comparing.repo.owner, repo: comparing.repo.repo }} />
       <div className="t-panels flex flex-col gap-3 py-3">
         <div className="rounded-md bg-raised p-3">
           <h1 className="text-sm">

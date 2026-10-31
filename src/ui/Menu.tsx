@@ -240,7 +240,7 @@ export const Menu = ({
                 one.press?.()
                 onShut()
               }}
-              className={`${dress} flex-1`}
+              className={`${dress} min-w-0 flex-1`}
             >
               {said}
             </button>
@@ -249,7 +249,7 @@ export const Menu = ({
               {...(up ? { role: "menuitem" } : {})}
               tabIndex={up ? undefined : -1}
               href={one.where}
-              className={`${dress} flex-1 no-underline`}
+              className={`${dress} min-w-0 flex-1 no-underline`}
               onClick={(event) => {
                 // Held keys belong to the browser — a new tab, a new window — and
                 // the page under this menu is staying, so the menu stays with it.

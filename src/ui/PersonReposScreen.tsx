@@ -314,6 +314,7 @@ export const PersonReposScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
+        <TheBar where={{ kind: "person", login }} />
         <ReadFailed
           signedOut={!signedIn()}
           why={read.why}

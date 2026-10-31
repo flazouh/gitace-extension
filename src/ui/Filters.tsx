@@ -53,7 +53,7 @@ type Facet = {
 
 /** A glyph in a tone, which is what most of these marks are. */
 const Mark = ({ art: Art, tone }: { readonly art: Art; readonly tone: string }) => (
-  <Art size={14} className={`shrink-0 ${tone}`} />
+  <Art size={16} className={`shrink-0 ${tone}`} />
 )
 
 /*
@@ -124,7 +124,7 @@ const commentsTerm = (art: Set): Term => ({
 })
 
 const activityFacet = (art: Set): Facet => ({
-  name: "Activity",
+  name: "Attention",
   terms: [
     {
       term: "is:unread",
@@ -157,7 +157,7 @@ const issueStateFacet = (art: Set): Facet => ({
 })
 
 const issueActivityFacet = (art: Set): Facet => ({
-  name: "Activity",
+  name: "Attention",
   terms: [commentsTerm(art)]
 })
 

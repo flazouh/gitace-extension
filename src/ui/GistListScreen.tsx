@@ -133,7 +133,7 @@ export const GistListScreen = ({
         `repository`, which wants an owner and a repo to draw tabs for, and a gist
         belongs to neither.
       */}
-      <TheBar where={{ kind: "home" }} />
+      <TheBar where={{ kind: "place", name: "Gists" }} />
       {/*
         No frame of its own. The shell puts one inset on `#gitace-root` for every
         screen at once — see `widths.test.ts`, which measured two insets on five screens

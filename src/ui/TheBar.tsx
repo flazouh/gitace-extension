@@ -423,6 +423,7 @@ export const TheBar = ({
       <PaintedSlot slot={slot} />
       <Bar
         {...props}
+        destination={settings.home.destination}
         participant={reader}
         tabs={shown}
         /* The same list the palette searches, so the switcher and ⌘K can never disagree. */

@@ -85,10 +85,11 @@ export const FileMark = ({ path, icons }: FileMarkProps) => {
           it over the pair threw away the name and kept the folders — which in a
           column four hundred pixels wide made thirty different files read as
           thirty copies of "features/code-review/skills/review-pr/scripts/pro…".
-          The folders shrink and ellipsise; the name never shrinks. */}
+          The folders give way first, nearly all of it; the name ellipsises only once they are gone,
+          rather than running out of a column narrower than it. */}
       <span className="flex min-w-0 font-mono text-xs" title={path}>
-        {folder === "" ? null : <span className="truncate text-ink-muted">{folder}</span>}
-        <span className="shrink-0 font-semibold text-ink">{nameOf(path)}</span>
+        {folder === "" ? null : <span className="shrink-[999] truncate text-ink-muted">{folder}</span>}
+        <span className="min-w-0 truncate font-semibold text-ink">{nameOf(path)}</span>
       </span>
     </span>
   )

@@ -1078,7 +1078,9 @@ const FileDiffPaneView = ({
         </div>
       ) : prose !== undefined ? (
         <ProseDiff diff={prose} />
-      ) : asking ? (
+      ) : asking && Option.isNone(whole.diff) ? (
+        // `asking` falls a commit after the diff lands, and the drawing is made once, into a host
+        // that is there when the diff is: a file holding its diff is never still being fetched.
         <p className="px-4 py-2.5 text-sm text-ink-muted">Fetching this file…</p>
       ) : Option.isNone(patch) ? (
         <p className="px-4 py-2.5 text-sm text-ink-muted">

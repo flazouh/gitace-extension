@@ -165,6 +165,7 @@ export const IssuesScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
+        <TheBar where={{ kind: "place", name: "Issues" }} />
         <ReadFailed
         signedOut={!signedIn()}
         why={read.why}
@@ -184,7 +185,7 @@ export const IssuesScreen = ({
     // the answer or the dissolve has nothing to start from.
     <div className="relative">
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
-      <TheBar where={{ kind: "home" }} recall={recallRepositories} owed={owed} />
+      <TheBar where={{ kind: "place", name: "Issues" }} recall={recallRepositories} owed={owed} />
       {listed === undefined ? null : (
         <div className="t-panels flex flex-col gap-1 py-3">
           <Tabs on={involvement} onGo={onGo} />

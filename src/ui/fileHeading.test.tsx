@@ -42,16 +42,19 @@ describe("naming the file above its diff", () => {
     expect(within(heading()).getByText("request.ts")).toBeDefined()
   })
 
-  test("gives up the folders rather than the name where there is room for one", () => {
+  test("gives up the folders before the name, and the name only once they are gone", () => {
     // Thirty rows in a four hundred pixel column, every one of them reading
     // "features/code-review/skills/review-pr/scripts/pro…". The name is the
-    // answer to which file this is, and it was the part being thrown away.
+    // answer to which file this is, and it was the part being thrown away. A name
+    // that could not shrink at all ran out of a narrow column over the counts beside it.
     render(browser())
 
-    const clipped = (one: HTMLElement) => one.closest(".truncate") !== null
+    const folders = within(heading()).getByText("packages/adapters/handler/")
+    const name = within(heading()).getByText("request.ts")
 
-    expect(clipped(within(heading()).getByText("packages/adapters/handler/"))).toBe(true)
-    expect(clipped(within(heading()).getByText("request.ts"))).toBe(false)
+    expect(folders.className).toContain("shrink-[999]")
+    expect(name.className).toContain("truncate")
+    expect(name.className).not.toContain("shrink-[")
   })
 
   test("says how much of it changed", () => {

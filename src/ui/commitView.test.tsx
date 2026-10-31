@@ -67,6 +67,15 @@ describe("reading one commit", () => {
     expect(screen.getByText("the projection dropped it")).toBeDefined()
   })
 
+  test("keeps the lines of a message GitHub sends as plain text, a list being a list", async () => {
+    const listed = { ...commit, bodyHtml: Option.some("\n* one change\n* another\n\nCo-authored-by: someone\n") }
+    render(view({ load: () => Effect.succeed(listed) }))
+
+    const said = await screen.findByText(/one change/)
+    expect(said.textContent).toBe("* one change\n* another\n\nCo-authored-by: someone")
+    expect(said.className).toContain("whitespace-pre-wrap")
+  })
+
   test("leads back to the whole branch", async () => {
     let closed = 0
     render(view({ onClose: () => void (closed += 1) }))

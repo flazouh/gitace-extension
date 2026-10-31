@@ -41,9 +41,15 @@ describe("turning choices into what the diff takes", () => {
 
 describe("turning choices into what the rail takes", () => {
   it("gives every width a class", () => {
-    expect(tree({ width: "narrow" }).width).toContain("clamp(13rem")
-    expect(tree({ width: "medium" }).width).toContain("clamp(16rem")
-    expect(tree({ width: "wide" }).width).toContain("clamp(20rem")
+    expect(tree({ width: "narrow" }).width).toContain("clamp(min(13rem")
+    expect(tree({ width: "medium" }).width).toContain("clamp(min(16rem")
+    expect(tree({ width: "wide" }).width).toContain("clamp(min(20rem")
+  })
+
+  it("never takes more than two fifths of a small panel, leaving the diff the rest", () => {
+    for (const width of ["narrow", "medium", "wide"] as const) {
+      expect(tree({ width }).width).toContain(",40cqi)")
+    }
   })
 
   it("lets each of them grow with the panel they are in", () => {

@@ -161,6 +161,7 @@ export const NoticesScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
+        <TheBar where={{ kind: "place", name: "Notifications" }} />
         <ReadFailed
           signedOut={!signedIn()}
           why={read.why}
@@ -231,7 +232,7 @@ export const NoticesScreen = ({
     // dissolve has nothing to start from.
     <div className="relative">
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
-      <TheBar where={{ kind: "home" }} recall={recallRepositories} unread={unreadIn(shown)} />
+      <TheBar where={{ kind: "place", name: "Notifications" }} recall={recallRepositories} unread={unreadIn(shown)} />
       {shown === undefined ? null : (
         <div className="t-panels flex flex-col gap-1 py-3">
           <Notices notices={shown} onPress={pressed} />

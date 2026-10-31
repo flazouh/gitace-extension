@@ -145,7 +145,7 @@ export const GistEditScreen = ({
 
   return (
     <>
-      <TheBar where={{ kind: "home" }} />
+      <TheBar where={{ kind: "place", name: "Gists" }} />
       {/*
         No frame of its own; the shell puts one inset on `#gitace-root` for every screen
         at once. Everything below is as wide as that leaves it, which is the first half of

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Option } from "effect";
 import { listsPullRequests, THE_HOME } from "../domain/pages";
+import type { Destination } from "../domain/Settings";
 import { switchable, type Repository } from "../domain/repositories";
 import { useArt } from "./art";
 import { BarTools } from "./barTools";
@@ -61,7 +62,14 @@ export type Where =
    * reader is on is drawn by the screen, one row below this bar and beside the counts it
    * belongs to, exactly as a repository's tabs are.
    */
-  | { readonly kind: "person"; readonly login: string };
+  | { readonly kind: "person"; readonly login: string }
+  /**
+   * A page of the reader's own that is neither Home nor a repository: Issues, Notifications, Gists.
+   *
+   * Its own kind rather than Home's. These said `home`, so the crumb on the inbox read "Every pull
+   * request you are in" and the Rail lit whichever Destination Home was last left on.
+   */
+  | { readonly kind: "place"; readonly name: string };
 
 export type BarProps = {
   readonly where: Where;
@@ -195,6 +203,15 @@ export type BarProps = {
    * somewhere: back to every repository.
    */
   readonly narrowed?: { readonly to: string; readonly widen: () => void };
+  /** Which of Home's Destinations is showing, which is what Home's crumb names. */
+  readonly destination?: Destination;
+};
+
+/** Home's crumb on each Destination: its name, and the line after it. */
+const DESTINATION: Readonly<Record<Destination, { readonly name: string; readonly line: string }>> = {
+  "working-set": { name: "Working Set", line: "Every pull request you are in, grouped by who acts next" },
+  repositories: { name: "Repositories", line: "Every repository you work in" },
+  activity: { name: "Activity", line: "What happened lately where you work" },
 };
 
 /** How long a press on Back is held before it opens the places behind, as a browser's does. */
@@ -315,6 +332,7 @@ export const Bar = ({
   behind = NOTHING,
   onHome,
   narrowed,
+  destination = "working-set",
   tray,
 }: BarProps) => {
   const art = useArt();
@@ -364,6 +382,18 @@ export const Bar = ({
         ? "here"
         : "inside"
       : undefined;
+
+  /* What the crumb says after Ours. Nothing where a chip of its own follows: a repository, somebody else. */
+  const tail: { readonly words: string; readonly current: boolean } | undefined =
+    where.kind === "home"
+      ? narrowed === undefined
+        ? { words: DESTINATION[destination].line, current: false }
+        : { words: narrowed.to, current: true }
+      : where.kind === "place"
+        ? { words: where.name, current: true }
+        : where.kind === "person" && isViewer(where.login)
+          ? { words: where.login, current: true }
+          : undefined;
 
   return (
     <header
@@ -490,7 +520,7 @@ export const Bar = ({
           <Ours onHome={onHome} />
         ) : narrowed === undefined ? (
           <span aria-current="page" className="d-crumb">
-            Working Set
+            {DESTINATION[destination].name}
           </span>
         ) : (
           <button
@@ -502,15 +532,17 @@ export const Bar = ({
             Working Set
           </button>
         )}
-        <span aria-hidden="true" className="d-crumb-sep">
-          /
-        </span>
-        {where.kind !== "home" ? null : narrowed === undefined ? (
-          <span className="d-crumb-at d-t">Every pull request you are in, grouped by who acts next</span>
-        ) : (
-          <span aria-current="page" className="d-crumb-at">
-            {narrowed.to}
+        {tail === undefined && where.kind !== "repository" && where.kind !== "person" ? null : (
+          <span aria-hidden="true" className="d-crumb-sep">
+            /
           </span>
+        )}
+        {tail === undefined ? null : tail.current ? (
+          <span aria-current="page" className="d-crumb-at">
+            {tail.words}
+          </span>
+        ) : (
+          <span className="d-crumb-at d-t">{tail.words}</span>
         )}
       </div>
 
@@ -529,9 +561,9 @@ export const Bar = ({
       {where.kind === "person" && !isViewer(where.login) ? (
         <a
           href={`/${where.login}`}
-          className={`flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-ink no-underline hover:bg-active ${TINT}`}
+          className={`flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-ink no-underline hover:bg-active ${TINT}`}
         >
-          <Owner owner={where.login} size={18} />
+          <Owner owner={where.login} size={16} />
           <span className="font-semibold">{where.login}</span>
         </a>
       ) : null}
@@ -580,7 +612,7 @@ export const Bar = ({
                * which half a hand was about to press, and the half that went somewhere was
                * the half nobody aimed at.
                */
-              className="flex items-center gap-1.5 px-2 py-1 text-ink no-underline hover:bg-active"
+              className="flex h-7 items-center gap-1.5 px-2 text-ink no-underline hover:bg-active"
             >
               {/* Their picture, asked for by name.
                   This drew `Face` with whatever the screen had handed down, and
@@ -589,7 +621,7 @@ export const Bar = ({
                   thing `Owner` exists to stop. Their redirect takes the login and
                   answers with the avatar, so nothing has to be looked up and
                   nothing has to be passed in. */}
-              <Owner owner={where.owner} size={18} />
+              <Owner owner={where.owner} size={16} />
               <span className="font-semibold">
                 {where.owner}/{where.repo}
               </span>
@@ -621,7 +653,7 @@ export const Bar = ({
                 className="grid size-7 shrink-0 place-items-center border-l border-line-muted text-ink-muted hover:bg-active hover:text-ink"
               >
                 <Chevron
-                  size={12}
+                  size={16}
                   className={`t-turn ${opened === "repositories" ? "is-turned" : ""}`}
                 />
               </button>
@@ -702,7 +734,7 @@ export const Bar = ({
                  * muted ones either side, and nothing filled, so the tab a reader is standing
                  * on stays the only one in this row wearing a fill. See `INSIDE`.
                  */
-                className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 no-underline ${
+                className={`flex h-7 items-center gap-1.5 rounded-md px-2 no-underline ${
                   one.standing === "here"
                     ? `${HERE} font-semibold`
                     : one.standing === "inside"
@@ -710,7 +742,7 @@ export const Bar = ({
                       : "text-ink-muted hover:bg-hover hover:text-ink"
                 }`}
               >
-                <Mark size={14} className="shrink-0" />
+                <Mark size={16} className="shrink-0" />
                 {one.name}
                 {one.count === undefined ? null : (
                   <span

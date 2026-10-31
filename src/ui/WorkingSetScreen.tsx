@@ -339,8 +339,14 @@ export const WorkingSetScreen = ({
       ) : (
         list
       )
+    ) : elsewhere === undefined ? (
+      list
     ) : (
-      (elsewhere?.(destination, atWork) ?? list)
+      <>
+        {/* Home is drawn on this Destination too, and only the list's claim was ever made. */}
+        <DrawnAt path={at ?? null} />
+        {elsewhere(destination, atWork)}
+      </>
     );
 
   return (

@@ -188,6 +188,23 @@ describe("a read that failed", () => {
     expect(await screen.findByText(/The issues assigned to you/)).toBeTruthy()
     expect(screen.getByRole("button", { name: "Show GitHub's list" })).toBeTruthy()
   })
+
+  test("keeps the bar and the rail, a failed read being when the way off the page matters most", async () => {
+    render(
+      <IssuesScreen
+        involvement="assigned"
+        load={() => Effect.fail(new Error("no"))}
+        onStepAside={() => {}}
+        onPage={() => {}}
+        onGo={() => {}}
+        signedIn={() => true}
+      />
+    )
+
+    await screen.findByText(/The issues assigned to you/)
+    expect(screen.getByRole("navigation", { name: "Global navigation" })).toBeTruthy()
+    expect(screen.getByText("Issues", { selector: "[aria-current=page]" })).toBeTruthy()
+  })
 })
 
 /* The same mark every list publishes now. See `repoPullsScreen.test.tsx` for why. */

@@ -70,6 +70,7 @@ export const ReleasesScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
+        <TheBar where={{ kind: "repository", owner: repo.owner, repo: repo.repo }} />
         <ReadFailed
           signedOut={!signedIn()}
           why={read.why}

@@ -123,17 +123,22 @@ export const GlobalRail = ({
   const onActivity = where.kind === "home" && destination === "activity"
   const onNotifications = at.startsWith("/notifications")
 
-  const goDestination = (which: Destination) => {
-    if (onDestination !== undefined) {
-      onDestination(which)
-      return
-    }
-    if (onHome !== undefined) {
+  /*
+   * A Destination is a link to Home, so from the inbox or a pull request it goes there the way any link
+   * does. It was a button that only changed the setting: on Issues, pressing Activity lit Activity and
+   * left the reader on Issues.
+   */
+  const toDestination = (which: Destination) => (event: React.MouseEvent) => {
+    if (!plainPress(event)) return
+    onDestination?.(which)
+    if (where.kind === "home" && onDestination !== undefined) event.preventDefault()
+    else if (onHome !== undefined) {
+      event.preventDefault()
       onHome()
-      return
     }
-    window.location.assign(THE_HOME)
   }
+
+  const inPlace = where.kind === "home" ? "" : undefined
 
   const [pinnedOwner, pinnedRepo] = pinned[0]?.split("/") ?? []
   const aimedAt =
@@ -163,18 +168,11 @@ export const GlobalRail = ({
         aria-label="Working Set"
         title="Working Set (g d)"
         aria-current={onWorkingSet ? "page" : undefined}
-        onClick={
-          onDestination === undefined
-            ? undefined
-            : (event) => {
-                if (!plainPress(event)) return
-                event.preventDefault()
-                onDestination("working-set")
-              }
-        }
+        onClick={toDestination("working-set")}
+        data-gitace-in-place={inPlace}
         className="d-nv"
       >
-        <PullRequest size={18} />
+        <PullRequest size={16} />
         {needsYou > 0 ? <span aria-hidden="true" className="d-dot" /> : null}
       </a>
 
@@ -185,30 +183,32 @@ export const GlobalRail = ({
         aria-current={onIssues ? "page" : undefined}
         className="d-nv"
       >
-        <Issue size={18} />
+        <Issue size={16} />
       </a>
 
-      <button
-        type="button"
-        onClick={() => goDestination("repositories")}
+      <a
+        href={THE_HOME}
+        onClick={toDestination("repositories")}
+        data-gitace-in-place={inPlace}
         aria-label="Repositories"
         title="Repositories (g r)"
         aria-current={onRepos ? "page" : undefined}
         className="d-nv"
       >
-        <Repos size={18} />
-      </button>
+        <Repos size={16} />
+      </a>
 
-      <button
-        type="button"
-        onClick={() => goDestination("activity")}
+      <a
+        href={THE_HOME}
+        onClick={toDestination("activity")}
+        data-gitace-in-place={inPlace}
         aria-label="Activity"
         title="Activity (g f)"
         aria-current={onActivity ? "page" : undefined}
         className="d-nv"
       >
-        <Clock size={18} />
-      </button>
+        <Clock size={16} />
+      </a>
 
       <a
         href="/notifications"
@@ -217,7 +217,7 @@ export const GlobalRail = ({
         aria-current={onNotifications ? "page" : undefined}
         className="d-nv"
       >
-        <Bell size={18} />
+        <Bell size={16} />
         {unread ? <span aria-hidden="true" className="d-dot" /> : null}
       </a>
 
@@ -233,7 +233,7 @@ export const GlobalRail = ({
           title="Create"
           className="d-nv"
         >
-          <Create size={18} />
+          <Create size={16} />
         </button>
         <Menu
           name="Create"
@@ -253,7 +253,7 @@ export const GlobalRail = ({
           title={sidebar.open ? "Hide the sidebar ([)" : "Show the sidebar ([)"}
           className="d-nv"
         >
-          <Sidebar size={18} />
+          <Sidebar size={16} />
         </button>
       )}
 
@@ -268,7 +268,7 @@ export const GlobalRail = ({
               aria-expanded={isOpen}
               className="d-nv"
             >
-              <Settings size={18} />
+              <Settings size={16} />
             </button>
           ))}
 
@@ -308,7 +308,7 @@ export const GlobalRail = ({
           title="GitHub interface"
           className="d-nv"
         >
-          <GitHub size={18} />
+          <GitHub size={16} />
         </button>
       )}
     </nav>
