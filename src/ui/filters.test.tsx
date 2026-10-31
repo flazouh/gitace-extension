@@ -40,6 +40,26 @@ describe("the filter row above a list", () => {
     }
   })
 
+  test("takes a slash from anywhere into the box, as the box says it will", async () => {
+    showing()
+
+    await userEvent.keyboard("/")
+
+    expect(document.activeElement).toBe(screen.getByRole("searchbox", { name: /Filter/ }))
+  })
+
+  test("leaves a slash alone while the reader is typing somewhere else", async () => {
+    showing()
+    const elsewhere = document.createElement("input")
+    document.body.append(elsewhere)
+    elsewhere.focus()
+
+    await userEvent.keyboard("/")
+
+    expect(document.activeElement).toBe(elsewhere)
+    elsewhere.remove()
+  })
+
   test("keeps its menus out of the document until one is opened", async () => {
     // The keyboard walk pauses while a menu is up, and it asks the document
     // whether one is. A menu rendered shut is a walk that never works again.

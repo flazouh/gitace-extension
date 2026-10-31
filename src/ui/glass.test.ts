@@ -54,16 +54,16 @@ describe("the bar as glass", () => {
      * gap; a margin on the pane would let the page slide up underneath it.
      */
     const rule = glass().slice(glass().indexOf(`${BAR_AT} {`))
-    expect(rule).toContain("padding: 8px var(--gitace-gutter) 0")
+    expect(rule).toContain("padding: 4px var(--gitace-gutter) 0")
   })
 
   test("takes the frame across and not above, height being the scarce one", () => {
-    // The gutter is thirty-two on a wide window. At the sides that is the frame the page is
-    // read in; above the bar it is thirty-two pixels of nothing pushing every card down.
+    // The same four pixels above as at the sides, so the panel is framed evenly and nothing
+    // more than that pushes every card down.
     const rule = glass().slice(glass().indexOf(`${BAR_AT} {`))
     const [top] = /padding: (\S+)/.exec(rule)?.slice(1) ?? []
 
-    expect(top).toBe("8px")
+    expect(top).toBe("4px")
   })
 
   test("floats in the same frame the columns under it start on", () => {
@@ -73,27 +73,25 @@ describe("the bar as glass", () => {
      * twelve, twenty-four and sixteen, and a reader saw a bar at one left edge with a Rail
      * at another twenty-eight pixels in.
      */
-    expect(readFileSync("src/ui/widths.css", "utf8")).toContain("--gitace-gutter: 16px")
+    expect(readFileSync("src/ui/widths.css", "utf8")).toContain("--gitace-gutter: 4px")
     expect(readFileSync("src/ui/widths.css", "utf8")).toContain("padding-inline: 0")
     expect(readFileSync("src/ui/widths.css", "utf8")).toContain(
       "padding-inline: var(--gitace-gutter)"
     )
   })
 
-  test("is GitHub's own three numbers, so their body needs no rule of ours", () => {
-    /*
-     * Measured on a pull request at eleven widths, on the element that supplies the inset:
-     * `#diff-comparison-viewer-container` is sixteen pixels below seven hundred and
-     * sixty-eight, twenty-four to a thousand and eleven, and thirty-two from there up. That
-     * inset wraps the region this extension draws into, so it is the one number on the page
-     * we cannot restate — the frame follows it rather than fighting it.
-     */
+  test("is one number at every width, their own inset being taken off wherever we stand", () => {
     const frame = readFileSync("src/ui/widths.css", "utf8")
     const steps = [...frame.matchAll(/--gitace-gutter: (\d+)px/g)].map(([, one]) => one)
-    const breaks = [...frame.matchAll(/@media \(min-width: (\d+)px\)/g)].map(([, one]) => one)
 
-    expect(steps).toEqual(["16", "24", "32"])
-    expect(breaks).toEqual(["768", "1012"])
+    expect(steps).toEqual(["4"])
+    expect(frame).toContain("padding-inline: 0 !important")
+  })
+
+  test("takes the browser's own margin off the body, so the panel starts four pixels from the rail", () => {
+    expect(readFileSync("src/ui/widths.css", "utf8")).toContain(
+      "html[data-gitace-taken] body {\n  margin: 0;\n}"
+    )
   })
 
   test("mixes its fill from the pack, so twenty-odd packs each get their own glass", () => {

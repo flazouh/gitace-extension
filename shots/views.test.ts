@@ -10,11 +10,16 @@ import { VIEWS } from "./views"
  * and the second is where GitHub runs its own product feedback. A picture of one is not a picture
  * of the other, so both are on the stage. `pull-request-review` and `pull-request-peek` are the same pull-request fixture
  * already reviewing or peeked, for the home hero and for store photographs of those layouts.
+ * `home`, `home-narrow` and `home-many` are the Working Set screen inside Home's frame: at 1440 and
+ * 1024 pixels, and with enough repositories for the left column to offer its filter.
  *
  * Named here rather than allowed by loosening the test. A view that belongs to no screen at all
  * is a picture of something nobody can reach, and that is still worth failing over.
  */
 const LAYOUTS: ReadonlyArray<string> = [
+  "home",
+  "home-narrow",
+  "home-many",
   "pull-request-review",
   "pull-request-peek",
   "org-discussions"

@@ -13,7 +13,6 @@ import {
   STATE_INK,
   STATE_WORDS
 } from "./Icon"
-import { FIELD, HERE } from "./dress"
 import { Owner } from "./Owner"
 import { Who } from "./Who"
 
@@ -48,6 +47,8 @@ type Term = {
 type Facet = {
   readonly name: string
   readonly terms: ReadonlyArray<Term>
+  /** What the chip says while none of its terms is on, where that is a scope rather than a name. */
+  readonly everything?: string
 }
 
 /** A glyph in a tone, which is what most of these marks are. */
@@ -214,6 +215,7 @@ const authorFacet = (
  */
 const repoFacet = (repos: ReadonlyArray<string>): Facet => ({
   name: "Repository",
+  everything: "All repos",
   terms: repos.map((full) => {
     const [owner = full, repo = full] = full.split("/")
 
@@ -246,8 +248,6 @@ const Chip = ({
   readonly onQuery: (query: string) => void
 }) => {
   const art = useArt()
-  // Named, because JSX takes a dotted name and not a subscript.
-  const Chevron = art["chevron-down"]
   const on = chosenIn(query, facet)
   /*
    * Where the menu is in opening and shutting, from the same hook the account and
@@ -280,19 +280,14 @@ const Chip = ({
            A step of the pack's own ladder for the chip with terms on it, not the
            accent — see `HERE` in `dress.ts`. The weight comes with it, because a
            resting chip reaches the same fill for as long as a pointer is on it. */
-        className={`flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs ${
-          on.length > 0
-            ? `${HERE} font-semibold`
-            : "bg-hover text-ink-muted hover:bg-active hover:text-ink"
-        }`}
+        {...(on.length === 0 && facet.everything !== undefined
+          ? { "aria-label": `${facet.name}: ${facet.everything}` }
+          : {})}
+        className={`d-b ${on.length > 0 || facet.everything !== undefined ? "d-tinted" : "d-ghost"}`}
       >
-        {/* One term on: the chip wears that term's own mark, so a filtered list
-            says what it is filtered to without being opened. More than one, and
-            a count is the only thing that fits. */}
         {on.length === 1 ? on[0]!.mark : null}
-        {facet.name}
+        {on.length === 0 && facet.everything !== undefined ? facet.everything : facet.name}
         {on.length > 1 ? <span className="tabular-nums">{on.length}</span> : null}
-        <Chevron size={12} />
       </button>
 
       {/*
@@ -393,6 +388,22 @@ export const Filters = ({
   // are heard. A chip cannot tell a keypress from a press on the page behind it.
   const [byKey, setByKey] = useState(false)
   const row = useRef<HTMLDivElement | null>(null)
+  const box = useRef<HTMLInputElement | null>(null)
+
+  // `/` reaches for the box, the key its own cap says, unless something else is being typed in.
+  useEffect(() => {
+    const reach = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) return
+      const on = event.target
+      if (on instanceof HTMLElement && on.closest("input, textarea, [contenteditable]") !== null) return
+      event.preventDefault()
+      event.stopPropagation()
+      box.current?.focus()
+    }
+
+    document.addEventListener("keydown", reach, true)
+    return () => document.removeEventListener("keydown", reach, true)
+  }, [])
 
   // Escape and a press elsewhere, which are the two ways anyone shuts a menu
   // without having been told how.
@@ -422,14 +433,14 @@ export const Filters = ({
     () =>
       (about === "issues"
         ? [
-            authorFacet(art, authors, viewer),
             repoFacet(repos),
+            authorFacet(art, authors, viewer),
             issueStateFacet(art),
             issueActivityFacet(art)
           ]
         : [
-            authorFacet(art, authors, viewer),
             repoFacet(repos),
+            authorFacet(art, authors, viewer),
             checksFacet(art),
             reviewFacet(art),
             stateFacet(art),
@@ -448,16 +459,27 @@ export const Filters = ({
       ref={row}
       /* The box and the chips are one control, not six: four pixels between them so the row
          reads as a single instrument, matching the column they stand in. */
-      className="relative z-30 flex flex-wrap items-center gap-1"
+      className="relative z-30 flex min-w-0 items-center gap-2"
     >
-      <input
-        type="search"
-        aria-label={`Filter ${what}`}
-        placeholder={EXAMPLE[about]}
-        value={query}
-        onChange={(event) => onQuery(event.target.value)}
-        className={`${FIELD} h-8 min-w-64 grow px-3 text-sm`}
-      />
+      <label className="d-search">
+        <art.search aria-hidden="true" />
+        <input
+          ref={box}
+          type="search"
+          aria-label={`Filter ${what}`}
+          placeholder={EXAMPLE[about]}
+          value={query}
+          onChange={(event) => onQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") event.currentTarget.blur()
+          }}
+        />
+        <span aria-hidden="true" className="d-kbd">
+          /
+        </span>
+      </label>
+
+      <div className="d-projects">
 
       {facets.map((facet) => (
         <Chip
@@ -472,15 +494,12 @@ export const Filters = ({
       ))}
 
       {anything ? (
-        <button
-          type="button"
-          onClick={() => onQuery("")}
-          className="flex h-8 shrink-0 items-center gap-1 rounded-md px-2 text-xs text-ink-muted hover:bg-hover"
-        >
+        <button type="button" onClick={() => onQuery("")} className="d-b d-ghost">
           <art.close size={12} />
           Clear
         </button>
       ) : null}
+      </div>
     </div>
   )
 }

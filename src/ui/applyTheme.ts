@@ -164,7 +164,7 @@ export const FLOOR = "--gitace-floor"
  * their feed nests two more painted layers inside `body`.
  */
 export const paintFloor = (page: Document, tokens: ThemeTokens): void => {
-  page.documentElement.style.setProperty(FLOOR, tokens["--color-canvas"])
+  page.documentElement.style.setProperty(FLOOR, tokens["--color-inset"])
 }
 
 /** Paints, and only paints: what to keep for the next first frame is said by

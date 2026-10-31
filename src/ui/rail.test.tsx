@@ -55,9 +55,6 @@ const showing = (
     destination?: Destination;
     onDestination?: (destination: Destination) => void;
     repositories?: ReadonlyArray<Repository>;
-    collapsed?: boolean;
-    onCollapsed?: (collapsed: boolean) => void;
-    participant?: Repository extends never ? never : { login: string; faceUrl: Option.Option<string> };
     pinned?: ReadonlyArray<string>;
     onPinned?: (pinned: ReadonlyArray<string>) => void;
   } = {},
@@ -72,9 +69,6 @@ const showing = (
       needsYou={over.needsYou ?? 0}
       happened={over.happened}
       repositories={over.repositories}
-      collapsed={over.collapsed}
-      onCollapsed={over.onCollapsed}
-      participant={over.participant}
     />,
   );
 
@@ -89,33 +83,12 @@ const rail = () => screen.getByRole("navigation", { name: "Rail" });
  * the tests below are about what a reader can reach rather than about how it looks.
  */
 describe("the Rail", () => {
-  test("offers all three Destinations and the links to Issues and Notifications", () => {
+  test("offers all three Destinations", () => {
     showing();
 
     expect(within(rail()).getByRole("button", { name: /Working Set/ })).toBeDefined();
-    expect(within(rail()).getByRole("link", { name: "Issues" }).getAttribute("href")).toBe("/issues");
     expect(within(rail()).getByRole("button", { name: /Repositories/ })).toBeDefined();
     expect(within(rail()).getByRole("button", { name: /Activity/ })).toBeDefined();
-    expect(within(rail()).getByRole("link", { name: "Notifications" }).getAttribute("href")).toBe("/notifications");
-  });
-
-  test("offers a bottom-left control to leave GitAce Extension when onStepAside is given", async () => {
-    const person = userEvent.setup();
-    let steppedAside = 0;
-    render(
-      <Rail
-        destination="working-set"
-        onDestination={() => undefined}
-        atWork={[]}
-        needsYou={0}
-        onStepAside={() => {
-          steppedAside += 1;
-        }}
-      />,
-    );
-
-    await person.click(within(rail()).getByRole("button", { name: "Leave GitAce Extension" }));
-    expect(steppedAside).toBe(1);
   });
 
   test("says which Destination the reader is on", () => {
@@ -193,10 +166,12 @@ describe("the Rail", () => {
 });
 
 describe("finding a repository by typing", () => {
+  // Past a dozen, so the column is a list to search rather than to read.
   const many = [
     owned("flazouh/octo-repo"),
     owned("flazouh/lumen"),
     owned("flowline-labs/flowline"),
+    ...Array.from({ length: 10 }, (_, index) => owned(`flazouh/repo${index}`)),
   ];
 
   test("searches every repository, not the handful with work in them", async () => {
@@ -221,7 +196,7 @@ describe("finding a repository by typing", () => {
 
     await person.type(screen.getByRole("searchbox"), "nowhere");
 
-    expect(screen.getByText(/Nothing matches nowhere, of 3/)).toBeDefined();
+    expect(screen.getByText(/Nothing matches nowhere, of 13/)).toBeDefined();
   });
 
   test("Escape gives the reader their own list back", async () => {
@@ -236,146 +211,17 @@ describe("finding a repository by typing", () => {
     ).toBeDefined();
   });
 
-  test("a slash from anywhere lands in the filter", async () => {
-    // Their own `/` reaches for GitHub's search, which is not this page's search while
-    // this page is the one being read.
-    const person = userEvent.setup();
-    showing({ repositories: many });
-
-    await person.keyboard("/");
-
-    expect(document.activeElement).toBe(screen.getByRole("searchbox"));
-  });
-
   test("no filter before the whole list has been read", () => {
     // A box that searches six of a hundred and fifty-four is a box that lies.
     showing({ atWork: [at("octo-repo", 3, 2)] });
 
     expect(screen.queryByRole("searchbox")).toBeNull();
   });
-});
 
-describe("narrowing the Rail", () => {
-  test("does not offer Home; the top bar already does", () => {
-    showing();
+  test("no filter over a list short enough to read", () => {
+    showing({ repositories: many.slice(0, 12) });
 
-    expect(within(rail()).queryByRole("link", { name: "Home" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Narrow the Rail" })).toBeDefined();
-  });
-
-  test("keeps the counts, which is what makes narrowing safe", async () => {
-    // Narrow is a working state rather than a hidden one. A reader who narrows the Rail
-    // should lose the words and keep the answer to "is anything mine?".
-    const person = userEvent.setup();
-    showing({ atWork: [at("octo-repo", 3, 2)], needsYou: 4 });
-
-    await person.click(screen.getByRole("button", { name: "Narrow the Rail" }));
-
-    expect(within(rail()).getByText("4")).toBeDefined();
-    // The words are still in the document, blurred away and marked hidden rather than
-    // removed: taking them out on the frame the width starts moving read as the label
-    // vanishing and the strip catching up afterwards. What a reader can reach is
-    // unchanged, which is what this asserts.
-    expect(within(rail()).getByText("Working Set").getAttribute("aria-hidden")).toBe(
-      "true",
-    );
-    expect(screen.getByRole("button", { name: "Working Set, 4" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Widen the Rail" })).toBeDefined();
-  });
-
-  test("still says where a repository goes once the words are gone", async () => {
-    const person = userEvent.setup();
-    showing({ atWork: [at("octo-repo", 3, 2)] });
-
-    await person.click(screen.getByRole("button", { name: "Narrow the Rail" }));
-
-    expect(
-      screen.getByRole("link", { name: /octo-repo/ }).getAttribute("href"),
-    ).toBe("/flazouh/octo-repo/pulls");
-  });
-
-  test("tells whoever is remembering, so a reload does not undo it", async () => {
-    const person = userEvent.setup();
-    const remembered: Array<boolean> = [];
-    showing({ onCollapsed: (narrow) => remembered.push(narrow) });
-
-    await person.click(screen.getByRole("button", { name: "Narrow the Rail" }));
-    await person.click(screen.getByRole("button", { name: "Widen the Rail" }));
-
-    expect(remembered).toEqual([true, false]);
-  });
-
-  test("starts narrow when that is what was remembered", () => {
-    showing({ collapsed: true, needsYou: 2 });
-
-    expect(screen.getByRole("button", { name: "Widen the Rail" })).toBeDefined();
-    expect(within(rail()).getByText("2")).toBeDefined();
-  });
-
-  test("takes the remembered width even though it arrives late", () => {
-    // Settings are read from storage, so the first render of the Rail is always the default
-    // one. Ignoring the answer when it lands looked precisely like a width that was never
-    // remembered, which is how this was found on the live page rather than here.
-    const { rerender } = render(
-      <Rail
-        destination="working-set"
-        onDestination={() => undefined}
-        atWork={[]}
-        needsYou={0}
-        collapsed={false}
-      />,
-    );
-
-    rerender(
-      <Rail
-        destination="working-set"
-        onDestination={() => undefined}
-        atWork={[]}
-        needsYou={0}
-        collapsed
-      />,
-    );
-
-    expect(screen.getByRole("button", { name: "Widen the Rail" })).toBeDefined();
-  });
-});
-
-describe("the Participant's own menu", () => {
-  const participant = { login: "flazouh", faceUrl: Option.none<string>() };
-
-  test("is three rows a reader goes to on a working day", async () => {
-    // GitHub's own account menu has thirty, several of which sell a plan. The complaint is
-    // not that it is untidy; it is that the few things anybody presses are buried in it.
-    // The way back to their page was a fourth row here and is a button in the bar now,
-    // which is the one place it is the same on every screen.
-    const person = userEvent.setup();
-    showing({ participant });
-
-    await person.click(
-      screen.getByRole("button", { name: /flazouh and your account/ }),
-    );
-
-    const menu = screen.getByRole("menu", { name: "Your account" });
-    expect(within(menu).getAllByRole("menuitem")).toHaveLength(3);
-    expect(within(menu).queryByRole("menuitem", { name: /GitHub/ })).toBeNull();
-    expect(
-      within(menu).getByRole("menuitem", { name: "Sign out" }).getAttribute("href"),
-    ).toBe("/logout");
-    expect(
-      within(menu).getByRole("menuitem", { name: "Your profile" }).getAttribute("href"),
-    ).toBe("/flazouh");
-  });
-
-  test("is shut until it is asked for", () => {
-    showing({ participant });
-
-    expect(screen.queryByRole("menu")).toBeNull();
-  });
-
-  test("is not drawn at all when nobody is signed in", () => {
-    showing();
-
-    expect(screen.queryByRole("button", { name: /your account/ })).toBeNull();
+    expect(screen.queryByRole("searchbox")).toBeNull();
   });
 });
 
@@ -449,8 +295,8 @@ describe("the Rail on the Working Set", () => {
     await waitFor(() => expect(rail()).toBeDefined());
 
     // Derived from the same read the Courts were drawn from, so it names both.
-    await waitFor(() => expect(within(rail()).getByText("octo-repo")).toBeDefined());
-    expect(within(rail()).getByText("gitace-extension")).toBeDefined();
+    await waitFor(() => expect(within(rail()).getByText("flazouh/octo-repo")).toBeDefined());
+    expect(within(rail()).getByText("flazouh/gitace-extension")).toBeDefined();
     // One is the reader's move, and the Working Set Destination says so.
     expect(
       within(rail()).getByRole("button", { name: "Working Set, 1" }),
@@ -489,79 +335,6 @@ describe("the Rail on the Working Set", () => {
       expect(screen.getByText(/Nothing is waiting on you/)).toBeDefined(),
     );
     expect(screen.getByText("the repositories Destination")).toBeDefined();
-  });
-});
-
-/**
- * What the face at the foot of the Rail is for.
- *
- * GitHub's own account menu is thirty rows, most of them somewhere nobody goes on a
- * working day and two of them advertisements. The three here are the ones the spec names.
- * Handing the page back to GitHub was a fourth and is not in a menu any more: it is the
- * control a reader wants when something of ours is drawn badly, so it is a button in the
- * bar, in the same corner of every screen this extension draws.
- */
-describe("the Participant menu", () => {
-  const me = { login: "flazouh", faceUrl: Option.none<string>() };
-
-  test("holds the three rows and nothing else", async () => {
-    const person = userEvent.setup();
-    showing({ participant: me });
-
-    await person.click(screen.getByRole("button", { name: /flazouh/ }));
-
-    const menu = screen.getByRole("menu", { name: "Your account" });
-    expect(within(menu).getAllByRole("menuitem")).toHaveLength(3);
-    expect(within(menu).getByRole("menuitem", { name: /Settings/ })).toBeDefined();
-    expect(within(menu).getByRole("menuitem", { name: /Sign out/ })).toBeDefined();
-  });
-
-  test("does not offer the way back to GitHub, the bar above it having it", async () => {
-    const person = userEvent.setup();
-    showing({ participant: me });
-
-    await person.click(screen.getByRole("button", { name: /flazouh/ }));
-
-    const menu = screen.getByRole("menu", { name: "Your account" });
-    expect(within(menu).queryByRole("menuitem", { name: /GitHub/ })).toBeNull();
-  });
-
-  test("shuts on Escape", async () => {
-    const person = userEvent.setup();
-    showing({ participant: me });
-
-    await person.click(screen.getByRole("button", { name: /flazouh/ }));
-    await person.keyboard("{Escape}");
-
-    expect(screen.queryByRole("menu", { name: "Your account" })).toBeNull();
-  });
-});
-
-/**
- * Starting something.
- *
- * "There is no button to create a new repository any more" is its own ask in their thread,
- * and the reason it went is the chat box that took its place. Three verbs, from the Rail,
- * at both widths — a create action that disappears when the Rail narrows is a create
- * action a reader stops trusting.
- */
-describe("the create action", () => {
-  test("offers a repository, an issue and a pull request", async () => {
-    const person = userEvent.setup();
-    showing({ repositories: [owned("flazouh/octo-repo")] });
-
-    await person.click(within(rail()).getByRole("button", { name: /Create/ }));
-
-    const menu = screen.getByRole("menu", { name: "Create" });
-    expect(within(menu).getByRole("menuitem", { name: /repository/i })).toBeDefined();
-    expect(within(menu).getByRole("menuitem", { name: /issue/i })).toBeDefined();
-    expect(within(menu).getByRole("menuitem", { name: /pull request/i })).toBeDefined();
-  });
-
-  test("is there when the Rail is narrow", () => {
-    showing({ collapsed: true });
-
-    expect(within(rail()).getByRole("button", { name: /Create/ })).toBeDefined();
   });
 });
 
@@ -682,41 +455,3 @@ describe("pinned repositories", () => {
     expect(within(pinned).getAllByRole("link")).toHaveLength(7);
   });
 });
-
-describe("widening for the filter", () => {
-  test("does it between two frames, because a box that is still moving cannot be typed into", async () => {
-    showing({ collapsed: true });
-
-    await userEvent.keyboard("/")
-
-    // The mark that tells the stylesheet this width came from a keypress and is not to be
-    // travelled to. A reader who pressed `/` is already typing; 260ms of strip travel arrives
-    // under their first letters, with the box they are aiming at somewhere else while it does.
-    expect(rail().getAttribute("data-snap")).toBe("");
-    expect(rail().getAttribute("data-narrow")).toBeNull();
-  })
-
-  test("lands in the box it opened, which did not exist when the key was pressed", async () => {
-    // The whole point of `/`: widen, then type. A narrow Rail has no filter in it at all, so
-    // reaching for one on the same tick as the widening reached for nothing and left the caret
-    // on the page — the reader's next six letters going to GitHub's own shortcuts instead.
-    // Enough of them that the filter is offered at all: a box that searches six of a hundred
-    // and fifty-four is a box that lies, so the Rail withholds it until the list is whole.
-    showing({
-      collapsed: true,
-      repositories: Array.from({ length: 30 }, (_, index) => owned(`flazouh/repo${index}`)),
-    });
-
-    await userEvent.keyboard("/")
-
-    expect(document.activeElement).toBe(screen.getByRole("searchbox"));
-  })
-
-  test("keeps the travel for a press on the widen control, which is a hand and not a key", async () => {
-    showing({ collapsed: true });
-
-    await userEvent.click(screen.getByRole("button", { name: /widen the rail/i }))
-
-    expect(rail().getAttribute("data-snap")).toBeNull()
-  })
-})

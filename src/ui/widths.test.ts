@@ -47,9 +47,13 @@ describe("the measures GitHub's own layout would otherwise hold", () => {
      * document: a rule about an ancestor says so with the mark, because asking the ancestor
      * `:has(#gitace-root)` restyled the whole interface on every change inside it. See
      * `WITHIN` in `mount.ts`.
+     *
+     * The body is the other exception: our host is always its child while the page is taken,
+     * and the mark is not always written that far up, so the taken page is its whole key.
      */
     for (const [selector] of widths().matchAll(/^html\[[^{]+/gm)) {
       expect(selector).toContain("[data-gitace-taken]")
+      if (selector.trim() === "html[data-gitace-taken] body") continue
       expect(
         selector.includes("#gitace-root") || selector.includes("[data-gitace-within]")
       ).toBe(true)

@@ -85,15 +85,6 @@ export const Home = ({
     [change]
   )
 
-  const remember = useCallback(
-    (narrow: boolean) =>
-      change((current) => ({
-        ...current,
-        home: { ...current.home, rail: narrow ? "narrow" : "wide" }
-      })),
-    [change]
-  )
-
   const pin = useCallback(
     (pinned: ReadonlyArray<string>) => change((current) => ({ ...current, pinned })),
     [change]
@@ -112,10 +103,9 @@ export const Home = ({
       home
       destination={settings.home.destination}
       onDestination={goTo}
-      collapsed={false}
+      collapsed={settings.home.sidebar === "hidden"}
       pinned={settings.pinned}
       onPinned={pin}
-      onCollapsed={remember}
       participant={participant}
       repositories={known}
       elsewhere={(which, atWork) =>

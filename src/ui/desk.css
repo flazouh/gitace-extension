@@ -1,0 +1,804 @@
+/*
+ * The desk: one frame around every screen, the rail down its left edge and one panel
+ * beside it holding the bar and the screen. Measurements are the approved mockup's
+ * (`.desk`, `.rail`, `.panel`, `.phead`, `.gsplit`): a 4px frame and gap, a 32px control,
+ * a 48px bar, a 14px panel corner, 6px for a card inside it and 4px for a well inside that.
+ *
+ * The bar and the screen are two elements on GitHub's page, so the panel is drawn in two
+ * halves that meet under the bar: the bar is its top, `#gitace-root`'s first child the rest.
+ */
+
+:root,
+:host {
+  --d-pad: 4px;
+  --d-inset: 8px;
+  --d-text: 16px;
+  --d-gap: 4px;
+  --d-control: 32px;
+  --d-bar: calc(var(--d-control) + 2 * var(--d-inset));
+  --d-r: 14px;
+  --d-r-in: 6px;
+  --d-r-well: 4px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) {
+  --d-frame: var(--color-inset);
+  --d-page: var(--color-canvas);
+  --d-card: var(--color-surface);
+  --d-ink: var(--color-ink);
+  --d-muted: var(--color-ink-muted);
+  --d-faint: color-mix(in srgb, var(--color-ink-muted) 55%, var(--color-canvas));
+  --d-accent: var(--color-busy);
+  --d-success: var(--color-pass);
+  --d-danger: var(--color-fail);
+  --d-info: var(--color-ink-accent);
+  --d-line: var(--color-line);
+  --d-tint: var(--color-hover);
+  --d-tint2: var(--color-active);
+  --d-brand-top: #e19872;
+  --d-brand-bottom: #c97b54;
+  --d-tint-t: 180ms;
+  --d-tint-e: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The two halves of the panel. */
+
+:is(#gitace-bar, [data-gitace-bar]) > header[data-desk-head] {
+  height: var(--d-bar);
+  gap: 8px;
+  padding: 0 calc(var(--d-inset) - var(--d-pad));
+  border-radius: var(--d-r) var(--d-r) 0 0;
+  background: var(--d-page);
+  box-shadow: none;
+}
+
+:is(#gitace-bar, [data-gitace-bar]) > header[data-desk-head]::before {
+  content: none;
+}
+
+#gitace-root > :first-child {
+  min-height: calc(100vh - var(--d-bar) - 2 * var(--d-pad));
+  padding: var(--d-gap) var(--d-pad) var(--d-pad);
+  border-radius: 0 0 var(--d-r) var(--d-r);
+  background: var(--d-page);
+}
+
+/* The rail. */
+
+:is(#gitace-root, [data-gitace-outside]) .d-rail {
+  width: var(--d-control);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--d-gap);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv {
+  position: relative;
+  width: var(--d-control);
+  height: var(--d-control);
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--d-r-in);
+  color: var(--d-muted);
+  text-decoration: none;
+  transition:
+    background-color var(--d-tint-t) var(--d-tint-e),
+    color var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv svg {
+  width: 18px;
+  height: 18px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv:hover {
+  color: var(--d-ink);
+  background: var(--d-tint);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv[aria-current],
+:is(#gitace-root, [data-gitace-outside]) .d-nv[aria-expanded="true"] {
+  color: var(--d-ink);
+  background: var(--d-tint2);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home {
+  --g: 14px;
+  height: calc(2 * var(--g) + 18px * 82 / 120 - 8.3px - var(--d-pad) - var(--d-gap));
+  padding-top: calc(var(--g) - var(--d-pad));
+  place-items: start center;
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home:hover {
+  background: transparent;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home svg {
+  width: 18px;
+  height: auto;
+  display: block;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home .d-ink {
+  fill: currentColor;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home .d-clay {
+  opacity: 0;
+  transition: opacity var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home .d-top {
+  stop-color: var(--d-brand-top);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home .d-bottom {
+  stop-color: var(--d-brand-bottom);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home:hover .d-clay {
+  opacity: 1;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--d-accent);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-rsep {
+  width: 16px;
+  height: 1px;
+  flex: none;
+  margin: 2px 0;
+  background: var(--d-line);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-rbadge {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  font: 600 10px/1 var(--font-sans);
+  color: #141413;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-avatar {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  font: 600 10px/1 var(--font-sans);
+  text-transform: uppercase;
+  color: #141413;
+  background: radial-gradient(circle at 30% 25%, #f6e3d4, #e9b79c 55%, #8a5038);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-avatar img {
+  width: 100%;
+  height: 100%;
+}
+
+/* The bar. */
+
+:is(#gitace-root, [data-gitace-outside]) .d-hnav {
+  display: flex;
+  flex: none;
+  gap: var(--d-gap);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-hn {
+  width: var(--d-control);
+  height: var(--d-control);
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--d-r-in);
+  color: var(--d-muted);
+  text-decoration: none;
+  transition:
+    background-color var(--d-tint-t) var(--d-tint-e),
+    color var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-hn:hover:not(:disabled) {
+  background: var(--d-tint);
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-hn:disabled {
+  color: var(--d-faint);
+  opacity: 0.5;
+  cursor: default;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-h1 {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 15px/1 var(--font-sans);
+  white-space: nowrap;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-crumb {
+  color: var(--d-muted);
+  text-decoration: none;
+}
+
+:is(#gitace-root, [data-gitace-outside]) a.d-crumb:hover {
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-crumb-sep {
+  margin: 0 2px;
+  font-weight: 400;
+  color: var(--d-faint);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-crumb-at {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-crumb-at.d-t {
+  min-width: 0;
+  max-width: 440px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 400;
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-sp {
+  flex: 1;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-search {
+  height: 28px;
+  width: 280px;
+  min-width: 180px;
+  flex: 0 1 280px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 8px 0 10px;
+  border-radius: 7px;
+  background: var(--d-card);
+  color: var(--d-muted);
+  font: 400 12.5px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-search:hover {
+  background: var(--d-tint);
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-search svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-search input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--d-ink);
+  font: inherit;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-search input::placeholder {
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-kbd {
+  margin-left: auto;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: var(--d-tint);
+  font: 400 11px/1 var(--font-mono);
+  color: var(--d-faint);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-tools {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-projects {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+/* Buttons. */
+
+:is(#gitace-root, [data-gitace-outside]) .d-b {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: 7px;
+  font: 500 12px/1 var(--font-sans);
+  white-space: nowrap;
+  color: var(--d-ink);
+  text-decoration: none;
+  transition:
+    background-color var(--d-tint-t) var(--d-tint-e),
+    color var(--d-tint-t) var(--d-tint-e),
+    transform 120ms ease;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-b:active {
+  transform: scale(0.97);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-b.d-tinted {
+  background: var(--d-tint);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-b.d-tinted:hover {
+  background: var(--d-tint2);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-b.d-ghost {
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-b.d-ghost:hover,
+:is(#gitace-root, [data-gitace-outside]) .d-b.d-ghost[aria-expanded="true"] {
+  background: var(--d-tint);
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-b svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* The split: a left column and the main card, both cards on the panel. */
+
+:is(#gitace-root, [data-gitace-outside]) .d-gsplit {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  gap: var(--d-gap);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gleft {
+  flex: 0 0 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--d-r-in);
+  background: var(--d-card);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-lefth {
+  height: var(--d-bar);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 var(--d-inset);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gchip {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border-radius: var(--d-r-in);
+  color: var(--d-muted);
+  font: 500 13px/1 var(--font-sans);
+  white-space: nowrap;
+  transition:
+    background-color var(--d-tint-t) var(--d-tint-e),
+    color var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gchip:hover {
+  background: var(--d-tint);
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gchip[aria-current] {
+  background: var(--d-tint2);
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-n {
+  font: 400 11.5px/1 var(--font-mono);
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-rows {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  padding: 0 var(--d-pad) var(--d-pad);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-sect {
+  height: 28px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  color: var(--d-muted);
+  font: 500 11.5px/1 var(--font-sans);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-sect + .d-sect,
+:is(#gitace-root, [data-gitace-outside]) .d-rows > ul + .d-sect {
+  margin-top: 6px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-sect .d-n {
+  font-size: 11px;
+  color: var(--d-faint);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: var(--d-r-well);
+  transition: background-color var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr:hover {
+  background: var(--d-tint);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr[aria-current] {
+  background: var(--d-page);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr-link {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  color: var(--d-ink);
+  font-size: 13px;
+  line-height: 16px;
+  text-decoration: none;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr .d-tt {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin {
+  position: absolute;
+  right: 34px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--d-r-well);
+  color: var(--d-muted);
+  opacity: 0;
+  transition:
+    opacity var(--d-tint-t) var(--d-tint-e),
+    background-color var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin:hover {
+  background: var(--d-tint2);
+  color: var(--d-ink);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr:hover .d-pin,
+:is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin:focus-visible {
+  opacity: 1;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin[aria-pressed="true"] {
+  color: var(--d-accent);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-rail-filter {
+  width: auto;
+  min-width: 0;
+  flex: none;
+  margin: 0 0 4px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-sw {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 4px;
+  font: 600 9.5px/16px var(--font-sans);
+  text-transform: uppercase;
+  color: #141413;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gmain {
+  container-type: inline-size;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--d-pad);
+  border-radius: var(--d-r-in);
+  background: var(--d-card);
+}
+
+/* The Working Set: one well per Court, a fixed grid per row. */
+
+:is(#gitace-root, [data-gitace-outside]) .d-court {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px;
+  padding: 4px;
+  border-radius: var(--d-r-well);
+  background: var(--d-page);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-court > :not(.d-court-head) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-court-head {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: var(--d-r-well);
+  font: 500 13px/1 var(--font-sans);
+  color: var(--d-ink);
+  text-align: start;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-court-head svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-court-head h2 {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-court-head.d-needs {
+  color: var(--d-accent);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-court-head .d-n {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-court-sub {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  color: var(--d-faint);
+  font: 500 11px/1 var(--font-sans);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0;
+  padding: 2px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--d-card) 50%, var(--d-page));
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-row {
+  position: relative;
+  border-radius: 6px;
+  transition: background-color var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-row:hover,
+:is(#gitace-root, [data-gitace-outside]) .d-ws-row[data-chosen] {
+  background: var(--d-card);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-line {
+  height: 36px;
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--d-ink);
+  text-decoration: none;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-line > * {
+  min-width: 0;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-line .d-tt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-line.d-unread .d-tt {
+  font-weight: 500;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-line .d-face {
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-line .d-gic {
+  width: 15px;
+  height: 15px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-repo-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  font: 400 12px/1 var(--font-mono);
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-key {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 11.5px/1 var(--font-mono);
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-key.d-end {
+  text-align: end;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-plus {
+  font: 400 11.5px/1 var(--font-mono);
+  color: var(--d-success);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-minus {
+  font: 400 11.5px/1 var(--font-mono);
+  color: var(--d-danger);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-good {
+  color: var(--d-success);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-bad {
+  color: var(--d-danger);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-busy {
+  color: var(--d-accent);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-pill {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font: 500 10.5px/1 var(--font-sans);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-pill.d-bad {
+  background: color-mix(in srgb, var(--d-danger) 16%, transparent);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-pill.d-good {
+  background: color-mix(in srgb, var(--d-success) 16%, transparent);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-pill.d-busy {
+  background: color-mix(in srgb, var(--d-accent) 16%, transparent);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-pill.d-plain {
+  background: var(--d-tint);
+  color: var(--d-muted);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-row .d-doings {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  translate: 0 -50%;
+  opacity: 0;
+  border-radius: 6px;
+  background: var(--d-card);
+  transition: opacity var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-ws-row:hover .d-doings,
+:is(#gitace-root, [data-gitace-outside]) .d-ws-row[data-chosen] .d-doings,
+:is(#gitace-root, [data-gitace-outside]) .d-ws-row .d-doings:focus-within,
+:is(#gitace-root, [data-gitace-outside]) .d-ws-row .d-doings:has([data-state="open"]) {
+  opacity: 1;
+}
+
+/* A window too narrow for the subtitle and the filters keeps the filters. */
+@media (max-width: 1180px) {
+  :is(#gitace-root, [data-gitace-outside]) .d-crumb-sep:has(+ .d-crumb-at),
+  :is(#gitace-root, [data-gitace-outside]) .d-crumb-at {
+    display: none;
+  }
+}
+
+/* A main card too narrow for every column keeps the ones that say whose move it is. */
+@container (max-width: 900px) {
+  :is(#gitace-root, [data-gitace-outside]) .d-ws-line {
+    --d-t-repo: 16px;
+    --d-t-comments: 0px;
+    --d-t-size: 0px;
+  }
+
+  :is(#gitace-root, [data-gitace-outside]) :is(.d-col-comments, .d-col-size) {
+    visibility: hidden;
+  }
+
+  :is(#gitace-root, [data-gitace-outside]) .d-repo-cell > .truncate {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(#gitace-root, [data-gitace-outside]) :is(.d-nv, .d-hn, .d-b, .d-gchip, .d-gpr, .d-ws-row, .d-doings) {
+    transition: none;
+  }
+}
