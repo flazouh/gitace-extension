@@ -280,7 +280,7 @@ describe("the bar, in a repository", () => {
     render(<Bar where={inFlowline} tabs={THEIR_TABS} />)
 
     const face = screen.getByRole("img", { name: "flowline-labs" }).querySelector("img")
-    expect(face?.getAttribute("src")).toBe("https://github.com/flowline-labs.png?size=36")
+    expect(face?.getAttribute("src")).toBe("https://github.com/flowline-labs.png?size=32")
   })
 
   test("keeps the way home, which is the one thing every page of ours needs", () => {

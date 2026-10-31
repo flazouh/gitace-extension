@@ -92,11 +92,14 @@ export type TreeChoices = {
  * does not. The floor is what each of these used to be, so nothing narrows on
  * the screens they were chosen for; the ceiling is where a rail stops being a
  * rail and starts being the other half of a split.
+ *
+ * The floor gives way to two fifths of a small panel. A fixed floor in the panel a pull request
+ * leaves at 1024 pixels was a 256-pixel tree beside 175 pixels of diff.
  */
 const WIDTH: Readonly<Record<string, string>> = {
-  narrow: "w-[clamp(13rem,18cqi,20rem)]",
-  medium: "w-[clamp(16rem,22cqi,26rem)]",
-  wide: "w-[clamp(20rem,28cqi,34rem)]"
+  narrow: "w-[clamp(min(13rem,40cqi),18cqi,20rem)]",
+  medium: "w-[clamp(min(16rem,40cqi),22cqi,26rem)]",
+  wide: "w-[clamp(min(20rem,40cqi),28cqi,34rem)]"
 }
 
 /**

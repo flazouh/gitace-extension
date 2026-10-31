@@ -517,6 +517,23 @@ describe("which address this list claims to have drawn", () => {
     await waitFor(() => expect(drawn()).toBe("/pulls"))
   })
 
+  test("claims Home on another Destination too, whose list is not the one drawn", async () => {
+    render(
+      <WorkingSetScreen
+        at="/"
+        home
+        destination="activity"
+        elsewhere={() => <p>What happened lately</p>}
+        load={() => Effect.succeed(listOf("Ship the claim"))}
+        onOpen={() => {}}
+        onStepAside={() => {}}
+      />
+    )
+
+    await screen.findByText("What happened lately")
+    await waitFor(() => expect(drawn()).toBe("/"))
+  })
+
   test("claims nothing while it is still reading", async () => {
     const reading = held<ReturnType<typeof listOf>>()
     render(

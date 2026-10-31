@@ -478,7 +478,7 @@
 
 :is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin {
   position: absolute;
-  right: 34px;
+  right: 4px;
   width: var(--d-control);
   height: var(--d-control);
   display: grid;
@@ -496,9 +496,18 @@
   color: var(--d-ink);
 }
 
+/* The pin takes the count's place under a hand, rather than standing over the end of the name. */
 :is(#gitace-root, [data-gitace-outside]) .d-gpr:hover .d-pin,
 :is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin:focus-visible {
   opacity: 1;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr .d-key {
+  transition: opacity var(--d-tint-t) var(--d-tint-e);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-gpr:is(:hover, :has(.d-pin:focus-visible)) .d-key {
+  opacity: 0;
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-gpr .d-pin[aria-pressed="true"] {

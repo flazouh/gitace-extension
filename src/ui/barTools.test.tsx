@@ -1,9 +1,13 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { cleanup, render, screen } from "@testing-library/react"
+import { act, cleanup, render, screen } from "@testing-library/react"
 import { BarTools, IntoTheBar } from "./barTools"
 import { ScreenActivityProvider } from "./screenActivity"
 
-afterEach(cleanup)
+const observing = globalThis.ResizeObserver
+afterEach(() => {
+  cleanup()
+  globalThis.ResizeObserver = observing
+})
 
 describe("a screen's controls in the bar", () => {
   test("stand in the bar for the screen that is showing", () => {
@@ -37,5 +41,46 @@ describe("a screen's controls in the bar", () => {
 
     expect(screen.queryByRole("button", { name: "Home's filter" })).toBeNull()
     expect(screen.getByRole("button", { name: "Repository filter" })).toBeDefined()
+  })
+
+  test("step out of a bar too narrow for them, and back in when it has room again", () => {
+    const watching: Array<() => void> = []
+    globalThis.ResizeObserver = class {
+      constructor(private readonly heard: () => void) {
+        watching.push(() => this.heard())
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver
+    const sized = (element: Element, scroll: number, client: number) => {
+      Object.defineProperty(element, "scrollWidth", { configurable: true, value: scroll })
+      Object.defineProperty(element, "clientWidth", { configurable: true, value: client })
+    }
+    const resized = () => act(() => watching.forEach((heard) => heard()))
+
+    render(
+      <header data-testid="bar">
+        <BarTools />
+        <IntoTheBar>
+          <button type="button">Repository filter</button>
+        </IntoTheBar>
+      </header>
+    )
+    const bar = screen.getByTestId("bar")
+    const filter = () => screen.getByRole("button", { name: "Repository filter" })
+    const inTheBar = () => document.querySelector("[data-bar-tools]")?.contains(filter()) ?? false
+
+    sized(bar, 1333, 1251)
+    resized()
+    expect(inTheBar()).toBe(false)
+
+    sized(bar, 1300, 1300)
+    resized()
+    expect(inTheBar()).toBe(false)
+
+    sized(bar, 1340, 1340)
+    resized()
+    expect(inTheBar()).toBe(true)
   })
 })
