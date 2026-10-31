@@ -38,7 +38,6 @@ import { useKeys } from "./useKeys"
 import { useSettings } from "./useSettings"
 import { loginOnPage } from "./viewer"
 import { ageOf, momentOf } from "./when"
-import { IntoTheBar } from "./barTools"
 import { RepoTile } from "./Face"
 import { Who } from "./Who"
 
@@ -577,7 +576,7 @@ const Row = ({
          */}
         {columns.repo ? (
           <span title={`${one.reference.owner}/${one.reference.repo}`} className="d-repo-cell">
-            <RepoTile name={one.reference.repo} />
+            <RepoTile owner={one.reference.owner} name={one.reference.repo} />
             <span className="truncate">{one.reference.repo}</span>
           </span>
         ) : null}
@@ -746,7 +745,7 @@ export const IssueRow = ({
 
         {columns.repo ? (
           <span title={`${one.reference.owner}/${one.reference.repo}`} className="d-repo-cell">
-            <RepoTile name={one.reference.repo} />
+            <RepoTile owner={one.reference.owner} name={one.reference.repo} />
             <span className="truncate">{one.reference.repo}</span>
           </span>
         ) : null}
@@ -1506,7 +1505,9 @@ export const WorkingSet = ({
            pixels of canvas this started at was a gutter doing a border's job twice over. */
         className={`t-panels flex flex-col ${bare ? "" : "py-3"}`}
       >
-        <IntoTheBar>
+        {/* Over the list it narrows rather than in the bar, where it stood apart from the rows it
+            answers to and where its chips said a facet's name and not what was chosen in it. */}
+        <div className="pb-1">
           <Filters
             query={query}
             authors={authors}
@@ -1515,7 +1516,7 @@ export const WorkingSet = ({
             what={what}
             onQuery={ask}
           />
-        </IntoTheBar>
+        </div>
 
         {!anything ? (
           <p className="px-3 py-2 text-sm text-ink-muted">

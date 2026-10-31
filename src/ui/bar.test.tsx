@@ -299,13 +299,10 @@ describe("the bar, in a repository", () => {
     expect(face?.getAttribute("src")).toBe("https://github.com/flowline-labs.png?size=32")
   })
 
-  test("keeps the way home, which is the one thing every page of ours needs", () => {
-    // The mark stood on Home only, where it is the page the reader is already on. On a
-    // pull request — the page with no Rail beside it — there was nothing of ours going
-    // anywhere but deeper into the repository.
+  test("leaves the way home to the global rail, which already says it", () => {
     render(<Bar where={inFlowline} tabs={THEIR_TABS} />)
 
-    expect(screen.getByRole("link", { name: "Working Set" }).getAttribute("href")).toBe("/")
+    expect(screen.queryByText("Working Set")).toBeNull()
   })
 
   test("gives every tab in the strip a glyph as well as its name", () => {
@@ -649,14 +646,12 @@ describe("the way back and the way forward", () => {
     { name: "Working Set", where: "/pulls", id: "2" }
   ]
 
-  test("stands at the head of the strip, before the mark for Home", () => {
+  test("stands at the head of the strip", () => {
     render(<Bar where={REPOSITORY} onBack={() => undefined} />)
 
     const back = screen.getByRole("button", { name: "Back" })
-    const home = screen.getByRole("link", { name: "Working Set" })
 
     expect(screen.getByRole("banner").firstElementChild?.contains(back)).toBe(true)
-    expect(back.compareDocumentPosition(home) & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0)
   })
 
   test("keeps back and forward together, in that order", () => {
@@ -668,10 +663,6 @@ describe("the way back and the way forward", () => {
     expect(back.compareDocumentPosition(forward) & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(
       0
     )
-    expect(
-      forward.compareDocumentPosition(screen.getByRole("link", { name: "Working Set" })) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeGreaterThan(0)
   })
 
   /*
@@ -822,29 +813,6 @@ describe("the chip that says whose page this is", () => {
  * page.
  */
 describe("the bar, in a window rather than in a tab", () => {
-  test("presses Home instead of going there, where Home is not an address", async () => {
-    /*
-     * The mark is an anchor to `/` on a page, which is correct there: a reader opens
-     * it in a new tab or copies it. In the window it unloaded the app — one webview,
-     * no address bar, and GitHub's dashboard where the interface had been.
-     */
-    let went = 0
-    render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }} onHome={() => (went += 1)} />)
-
-    const home = screen.getByRole("button", { name: "Working Set" })
-    expect(home.tagName).toBe("BUTTON")
-    expect(home.getAttribute("href")).toBeNull()
-
-    await userEvent.click(home)
-    expect(went).toBe(1)
-  })
-
-  test("keeps the address where nothing says otherwise, which is every page", () => {
-    render(<Bar where={{ kind: "repository", owner: "flazouh", repo: "gitace-extension" }} />)
-
-    expect(screen.getByRole("link", { name: "Working Set" }).getAttribute("href")).toBe("/")
-  })
-
   test("presses the tab that lists pull requests, since that list is a screen in here", async () => {
     /*
      * It stood over a card as the way back up to the list, and it was an anchor: pressed

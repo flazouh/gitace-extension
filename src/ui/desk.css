@@ -524,6 +524,14 @@
   font: 600 9.5px/16px var(--font-sans);
   text-transform: uppercase;
   color: #141413;
+  overflow: hidden;
+}
+
+:is(#gitace-root, [data-gitace-outside]) :is(.d-sw, .d-rbadge) > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-gmain {

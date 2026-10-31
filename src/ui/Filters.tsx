@@ -280,14 +280,22 @@ const Chip = ({
            A step of the pack's own ladder for the chip with terms on it, not the
            accent — see `HERE` in `dress.ts`. The weight comes with it, because a
            resting chip reaches the same fill for as long as a pointer is on it. */
-        {...(on.length === 0 && facet.everything !== undefined
-          ? { "aria-label": `${facet.name}: ${facet.everything}` }
-          : {})}
+        aria-label={`${facet.name}: ${
+          on.length === 0 ? (facet.everything ?? "any") : on.map((one) => one.words).join(", ")
+        }`}
         className={`d-b ${on.length > 0 || facet.everything !== undefined ? "d-tinted" : "d-ghost"}`}
       >
-        {on.length === 1 ? on[0]!.mark : null}
-        {on.length === 0 && facet.everything !== undefined ? facet.everything : facet.name}
-        {on.length > 1 ? <span className="tabular-nums">{on.length}</span> : null}
+        {/* What is chosen, said, rather than the facet's name over a fill: a chip reading
+            "Repository" told a reader something was filtered and never what. */}
+        {on.length === 0 ? (
+          (facet.everything ?? facet.name)
+        ) : (
+          <>
+            {on[0]!.mark}
+            <span className="max-w-40 truncate">{on[0]!.words}</span>
+            {on.length > 1 ? <span className="tabular-nums text-ink-muted">{`+${on.length - 1}`}</span> : null}
+          </>
+        )}
       </button>
 
       {/*

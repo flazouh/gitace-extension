@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Option } from "effect";
-import { listsPullRequests, THE_HOME } from "../domain/pages";
+import { listsPullRequests } from "../domain/pages";
 import type { Destination } from "../domain/Settings";
 import { switchable, type Repository } from "../domain/repositories";
 import { useArt } from "./art";
@@ -383,7 +383,10 @@ export const Bar = ({
         : "inside"
       : undefined;
 
-  /* What the crumb says after Ours. Nothing where a chip of its own follows: a repository, somebody else. */
+  /*
+   * What the strip says of the page. Home's crumb is the only crumb: off Home the global rail's mark
+   * and its Destinations are the way back, and a "Working Set" link here said it a third time.
+   */
   const tail: { readonly words: string; readonly current: boolean } | undefined =
     where.kind === "home"
       ? narrowed === undefined
@@ -516,9 +519,7 @@ export const Bar = ({
       )}
 
       <div className="d-h1">
-        {where.kind !== "home" ? (
-          <Ours onHome={onHome} />
-        ) : narrowed === undefined ? (
+        {where.kind !== "home" ? null : narrowed === undefined ? (
           <span aria-current="page" className="d-crumb">
             {DESTINATION[destination].name}
           </span>
@@ -532,7 +533,7 @@ export const Bar = ({
             Working Set
           </button>
         )}
-        {tail === undefined && where.kind !== "repository" && where.kind !== "person" ? null : (
+        {tail === undefined || where.kind !== "home" ? null : (
           <span aria-hidden="true" className="d-crumb-sep">
             /
           </span>
@@ -596,8 +597,7 @@ export const Bar = ({
              * muted ink for that middle state and this has no muted state to step up from: the
              * name is the one thing in the strip that says which repository a reader is in, so
              * it stands at full strength on every page of it. That leaves the two fills, both
-             * spoken for — see `INSIDE` — and the same answer `Ours` reaches below: said aloud,
-             * not painted.
+             * spoken for — see `INSIDE` — and the answer is said aloud, not painted.
              */
             className={`flex items-center overflow-hidden rounded-md ${
               atTheName === "here" ? HERE : TINT
@@ -827,7 +827,6 @@ export const Bar = ({
 /**
  * A thing in the strip that is an address on a page and a press in a window.
  *
- * The same statement `Ours` makes about Home, made once for the row of tabs beside it.
  * A tab is a link and belongs in an anchor: on GitHub a reader opens it in a new tab,
  * copies it, middle-clicks it, and the address is what says where it goes. In the
  * window some of those destinations are screens rather than pages — there is one
@@ -858,37 +857,6 @@ const Chip = ({
   return (
     <a href={href} className={className} {...said}>
       {children}
-    </a>
-  );
-};
-
-/**
- * What stands where their logo stood, on every page rather than only on Home.
- *
- * A mark and nothing else. This said "Working Set — 4 yours" until the Rail below it was drawing
- * the same word and the same number twenty pixels lower, and a crumb that repeats the navigation
- * it sits above is two claims on the same fact: one of them has to be wrong eventually. The Rail
- * keeps it, being the thing a reader presses; the strip keeps the space for the search.
- *
- * It stood on Home only, which is the one page where it goes nowhere: the Rail is beside that
- * list and Home is already what the reader is looking at. A pull request has no Rail, so the
- * whole of our navigation there pointed further into the repository, and the way out was
- * GitHub's own logo in a bar this extension hides. Home is where the Working Set is, and that
- * is the address a reader wants next more often than any other.
- */
-const Ours = ({ onHome }: { readonly onHome?: (() => void) | undefined }) => {
-  const said = { title: "Working Set", className: "d-crumb" };
-
-  if (onHome !== undefined)
-    return (
-      <button type="button" onClick={onHome} {...said}>
-        Working Set
-      </button>
-    );
-
-  return (
-    <a href={THE_HOME} {...said}>
-      Working Set
     </a>
   );
 };
