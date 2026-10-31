@@ -109,11 +109,12 @@
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-nv.d-home {
-  --g: 14px;
+  /* As tall as the bar, so the mark is level with the bar's controls, and the first button
+     below starts where the panel under the bar does. */
   width: var(--d-rail);
-  height: calc(2 * var(--g) + 18px * 82 / 120 - 8.3px - var(--d-pad) - var(--d-rail-gap));
-  padding-top: calc(var(--g) - var(--d-pad));
-  place-items: start center;
+  height: var(--d-bar);
+  margin-bottom: calc(var(--d-gap) - var(--d-rail-gap));
+  place-items: center;
   color: var(--d-ink);
 }
 
