@@ -94,6 +94,17 @@ describe("the Rail", () => {
     expect(chose).toEqual(["flazouh/octo-repo"]);
   });
 
+  test("keeps that press from the screen's own link handling, which would leave Home", async () => {
+    const person = userEvent.setup();
+    const { container } = showing({ atWork: [at("octo-repo", 3, 2)], onChoose: () => undefined });
+    let reached = 0;
+    container.addEventListener("click", () => (reached += 1));
+
+    await person.click(screen.getByRole("link", { name: /octo-repo/ }));
+
+    expect(reached).toBe(0);
+  });
+
   test("marks the repository the list is narrowed to", () => {
     showing({ atWork: [at("octo-repo", 3, 2), at("lumen", 1, 0)], chosen: ["flazouh/octo-repo"] });
 

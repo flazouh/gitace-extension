@@ -93,12 +93,15 @@ const List = ({
                 aria-label={one.count === 0 ? address : `${address}, ${one.count} open`}
                 aria-current={on ? "true" : undefined}
                 title={on ? `Show every repository` : `Show only ${address}`}
-                onClick={
+                // Taken on the way down and stopped there: the screen's container answers
+                // presses on links to pages we draw, and this one is not a navigation.
+                onClickCapture={
                   onChoose === undefined
                     ? undefined
                     : (event) => {
                         if (!plainPress(event)) return
                         event.preventDefault()
+                        event.stopPropagation()
                         onChoose(address)
                       }
                 }
