@@ -180,6 +180,17 @@ describe("marking lines out to say something about them", () => {
     expect(asked).toHaveLength(1)
   })
 
+  test("draws a file whose diff arrives with the page while it was still being fetched", async () => {
+    // A commit remembered from an earlier visit has no diffs, so its open file asks for one and says so.
+    // GitHub's answer then lands with the diff inside it, and that file is drawn, not left blank.
+    const { rerender } = render(pane({ file: { ...file, diff: Option.none() }, ask: () => Effect.never }))
+    await screen.findByText(/Fetching this file/)
+
+    rerender(pane({ file, ask: () => Effect.never }))
+
+    await drawn()
+  })
+
   test("refreshing file metadata keeps the prepared diff until its content changes", async () => {
     const { rerender } = render(pane())
     await drawn()
