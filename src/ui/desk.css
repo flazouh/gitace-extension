@@ -2,7 +2,7 @@
  * The desk: one frame around every screen, the rail down its left edge and one panel
  * beside it holding the bar and the screen. Measurements are the approved mockup's
  * (`.desk`, `.rail`, `.panel`, `.phead`, `.gsplit`): a 4px frame and gap, a 32px rail,
- * a 44px bar, a 14px panel corner, 6px for a card inside it and 4px for a well inside that.
+ * a 44px bar, a 14px panel corner, and 6px for every card, well and control inside it.
  *
  * The bar and the screen are two elements on GitHub's page, so the panel is drawn in two
  * halves that meet under the bar: the bar is its top, `#gitace-root`'s first child the rest.
@@ -22,7 +22,6 @@
   --d-bar: calc(var(--d-control) + 2 * var(--d-inset));
   --d-r: 14px;
   --d-r-in: 6px;
-  --d-r-well: 4px;
 }
 
 :is(#gitace-root, [data-gitace-outside]) {
@@ -443,7 +442,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  border-radius: var(--d-r-well);
+  border-radius: var(--d-r-in);
   transition: background-color var(--d-tint-t) var(--d-tint-e);
 }
 
@@ -483,7 +482,7 @@
   height: var(--d-control);
   display: grid;
   place-items: center;
-  border-radius: var(--d-r-well);
+  border-radius: var(--d-r-in);
   color: var(--d-muted);
   opacity: 0;
   transition:
@@ -536,7 +535,7 @@
   gap: 2px;
   margin: 4px;
   padding: 4px;
-  border-radius: var(--d-r-well);
+  border-radius: var(--d-r-in);
   background: var(--d-page);
 }
 
@@ -552,7 +551,7 @@
   align-items: center;
   gap: 8px;
   padding: 0 10px;
-  border-radius: var(--d-r-well);
+  border-radius: var(--d-r-in);
   font: 500 13px/1 var(--font-sans);
   color: var(--d-ink);
   text-align: start;
@@ -596,13 +595,13 @@
   gap: 2px;
   margin: 2px 0;
   padding: 2px;
-  border-radius: 6px;
+  border-radius: var(--d-r-in);
   background: color-mix(in srgb, var(--d-card) 50%, var(--d-page));
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-ws-row {
   position: relative;
-  border-radius: 6px;
+  border-radius: var(--d-r-in);
   transition: background-color var(--d-tint-t) var(--d-tint-e);
 }
 
@@ -726,7 +725,7 @@
   right: 4px;
   translate: 0 -50%;
   opacity: 0;
-  border-radius: 6px;
+  border-radius: var(--d-r-in);
   background: var(--d-card);
   transition: opacity var(--d-tint-t) var(--d-tint-e);
 }
