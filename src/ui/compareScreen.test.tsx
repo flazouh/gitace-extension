@@ -34,6 +34,7 @@ const showing = (
 const paths = (): ReadonlyArray<string> =>
   screen
     .getAllByRole("link")
+    .filter((link) => link.closest("header") === null)
     .map((link) => link.textContent ?? "")
     .filter((text) => text.includes("/"))
 
