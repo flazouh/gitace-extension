@@ -306,6 +306,34 @@
   color: var(--d-muted);
 }
 
+:is(#gitace-root, [data-gitace-outside]) .d-search.d-palette {
+  width: 240px;
+  min-width: 140px;
+  flex: 0 1 240px;
+  border: 0;
+  text-align: left;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-palette-said {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-palette .d-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  flex: none;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-palette .d-kbd svg {
+  width: 11px;
+  height: 11px;
+  color: inherit;
+}
+
 :is(#gitace-root, [data-gitace-outside]) .d-kbd {
   margin-left: auto;
   padding: 2px 4px;

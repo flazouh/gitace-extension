@@ -44,13 +44,22 @@ const THEIRS = [
 ]
 
 describe("the bar, on Home", () => {
-  test("heads the panel with the Working Set crumb and tagline from the mockup", () => {
+  test("heads the panel with the Destination's name and no line about it", () => {
     render(<Bar where={{ kind: "home" }} />)
 
-    const bar = screen.getByRole("banner")
-    expect(bar.textContent).toContain("Working Set")
-    expect(bar.textContent).toContain("Every pull request you are in, grouped by who acts next")
-    expect(bar.textContent).not.toContain("4")
+    const crumbs = screen.getByText("Working Set").parentElement
+    expect(crumbs?.textContent).toBe("Working Set")
+  })
+
+  test("opens the palette from a field in the bar that says what it is and its key", async () => {
+    let opened = 0
+    render(<Bar where={{ kind: "home" }} onSearch={() => (opened += 1)} />)
+
+    const field = screen.getByRole("button", { name: "Search anything you have" })
+    expect(field.textContent).toContain("Search or jump to…")
+    expect(field.textContent).toContain("K")
+    await userEvent.click(field)
+    expect(opened).toBe(1)
   })
 
   test("names the Destination Home is on, not the Working Set's line over Activity", () => {
@@ -58,7 +67,7 @@ describe("the bar, on Home", () => {
 
     const bar = screen.getByRole("banner")
     expect(screen.getByText("Activity").getAttribute("aria-current")).toBe("page")
-    expect(bar.textContent).not.toContain("Every pull request you are in")
+    expect(bar.textContent).not.toContain("Working Set")
   })
 
   test("names each page of the reader's own after itself, and Home only as the way back", () => {

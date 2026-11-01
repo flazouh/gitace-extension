@@ -207,12 +207,15 @@ export type BarProps = {
   readonly destination?: Destination;
 };
 
-/** Home's crumb on each Destination: its name, and the line after it. */
-const DESTINATION: Readonly<Record<Destination, { readonly name: string; readonly line: string }>> = {
-  "working-set": { name: "Working Set", line: "Every pull request you are in, grouped by who acts next" },
-  repositories: { name: "Repositories", line: "Every repository you work in" },
-  activity: { name: "Activity", line: "What happened lately where you work" },
+/** Home's crumb on each Destination: its name and nothing after it, the list below saying the rest. */
+const DESTINATION: Readonly<Record<Destination, string>> = {
+  "working-set": "Working Set",
+  repositories: "Repositories",
+  activity: "Activity",
 };
+
+/** The key held with K for the palette, as this keyboard has it. */
+const HELD = typeof navigator === "undefined" || /Mac|iP/.test(navigator.platform) ? "command" : "Ctrl";
 
 /** How long a press on Back is held before it opens the places behind, as a browser's does. */
 const LONG_PRESS = 450;
@@ -338,6 +341,7 @@ export const Bar = ({
   const art = useArt();
   const Chevron = art["chevron-down"];
   const Search = art.search;
+  const Command = art.command;
   const Back = art.back;
   const Forward = art.forward;
   const backButton = useRef<HTMLButtonElement>(null);
@@ -390,7 +394,7 @@ export const Bar = ({
   const tail: { readonly words: string; readonly current: boolean } | undefined =
     where.kind === "home"
       ? narrowed === undefined
-        ? { words: DESTINATION[destination].line, current: false }
+        ? undefined
         : { words: narrowed.to, current: true }
       : where.kind === "place"
         ? { words: where.name, current: true }
@@ -521,7 +525,7 @@ export const Bar = ({
       <div className="d-h1">
         {where.kind !== "home" ? null : narrowed === undefined ? (
           <span aria-current="page" className="d-crumb">
-            {DESTINATION[destination].name}
+            {DESTINATION[destination]}
           </span>
         ) : (
           <button
@@ -804,16 +808,21 @@ export const Bar = ({
 
       <span className="d-sp" />
 
-      {/* A glyph rather than a pill, the pill in this header being the list's own filter. */}
+      {/* A field rather than a glyph, now that the list's own filter stands over the list: the one
+          way to anything from any page, said in words, with the key that opens it. */}
       {onSearch === undefined ? null : (
         <button
           type="button"
           onClick={onSearch}
           aria-label="Search anything you have"
-          title="Search anything you have (⌘K)"
-          className="d-hn"
+          aria-keyshortcuts={HELD === "command" ? "Meta+K" : "Control+K"}
+          className="d-search d-palette"
         >
           <Search size={16} />
+          <span className="d-palette-said">Search or jump to…</span>
+          <span aria-hidden="true" className="d-kbd">
+            {HELD === "command" ? <Command size={11} /> : "Ctrl"}K
+          </span>
         </button>
       )}
 
