@@ -16,19 +16,37 @@
  */
 
 import { readFileSync, writeFileSync } from "node:fs"
-import { build, type Rolldown } from "vite"
+import react from "@vitejs/plugin-react"
+import { build, type Plugin, type Rolldown } from "vite"
 import { asciiOnly } from "./ascii"
-import { define, here, intro, plugins, resolve } from "./screenBuild"
+import { define, here, intro, resolve } from "./screenBuild"
 
 /** Where the manifest names it. */
 const OUT = here("../public/carried.js")
 
 const css = readFileSync(here("../public/screens/styles.css"), "utf8")
 
+/** The screens' stylesheet, already in hand as text, so imported as nothing. */
+const EMPTY = "\0carried-stylesheet"
+
+/**
+ * Every stylesheet a screen imports, as an empty module.
+ *
+ * Left alone, the bundler writes a classic script's CSS into the script, as a
+ * `<style>` appended to `document.head` the moment it runs. At `document_start`
+ * there is no head, and the throw took the whole script with it.
+ */
+const withoutStylesheets: Plugin = {
+  name: "without-stylesheets",
+  enforce: "pre",
+  resolveId: (source) => (/\.css(\?.*)?$/.test(source) ? EMPTY : null),
+  load: (id) => (id === EMPTY ? "export {}" : null)
+}
+
 const result = (await build({
   configFile: false,
   publicDir: false,
-  plugins: plugins(),
+  plugins: [react(), withoutStylesheets],
   resolve,
   define: { ...define, __CARRIED_CSS__: JSON.stringify(css) },
   base: "./",
@@ -61,6 +79,9 @@ if (script === undefined || chunks.length !== 1)
 // and every grammar in it, three megabytes in front of each pull request.
 const renderer = Object.keys(script.modules).find((id) => id.includes("node_modules/@pierre/diffs/"))
 if (renderer !== undefined) throw new Error(`the diff renderer was built into the carried screens, through ${renderer}`)
+
+const stylesheet = Object.keys(script.modules).find((id) => /\.css(\?.*)?$/.test(id))
+if (stylesheet !== undefined) throw new Error(`a stylesheet was built into the carried screens: ${stylesheet}`)
 
 writeFileSync(OUT, asciiOnly(script.code))
 console.log("built public/carried.js")
