@@ -141,7 +141,7 @@ import { hashIn, hashOfMutationIn, nonceOn, releaseOn, servedFor, whenAsked } fr
 import { scopedRepositoryIn } from "./scoped"
 import { decodeUploadedAsset, decodeUploadPolicy, repositoryNumberFor } from "./uploading"
 import { asLanded, landedNow, recordLanded, seeded } from "./landed"
-import { preloadedIn } from "./preloaded"
+import { preloadedIn, routedIn, routedOn } from "./preloaded"
 import { repositoriesFrom } from "./repositories"
 import { decodeSidebar, standingFrom } from "./standing"
 import type { Happening } from "../domain/activity"
@@ -494,6 +494,9 @@ const GRAPHQL = "/_graphql"
 /** The query their own issue page runs, and the count of timeline items it asks for. */
 const ISSUE_QUERY = "IssueViewerViewQuery"
 
+/** Where their issue page embeds the same `data` since it stopped preloading the query. */
+const ISSUE_ROUTE = "issueViewerRoute"
+
 /**
  * How much of a long conversation one read brings back.
  *
@@ -614,7 +617,7 @@ const issueHash = (reference: IssueRef): Effect.Effect<Option.Option<string>> =>
  * the joiners may carry.
  */
 type Served =
-  | { readonly ok: true; readonly hash: string; readonly result: unknown }
+  | { readonly ok: true; readonly hash: string | undefined; readonly result: unknown }
   | {
       readonly ok: false
       readonly why: "unreachable" | "rejected" | "undecodable"
@@ -657,6 +660,8 @@ const servedIssueAt = (route: string): Effect.Effect<Served> =>
 
       const preloaded = preloadedIn(html, ISSUE_QUERY)
       if (Option.isNone(preloaded)) {
+        const routed = routedIn(html, ISSUE_ROUTE)
+        if (Option.isSome(routed)) return { ok: true, hash: undefined, result: routed.value } satisfies Served
         return yield* Effect.fail<Served>({
           ok: false,
           why: "undecodable",
@@ -2889,6 +2894,10 @@ export const layer = Layer.succeed(GitHubGateway, {
     }),
 
     issue: Effect.fn("GitHubGateway.issue")(function* (reference: IssueRef) {
+      // The page GitHub served for this issue carries it whole: no wait for their query, no fetch.
+      const served = servedFor(performance, issuePage(reference)) ? routedOn(document, ISSUE_ROUTE) : Option.none()
+      if (Option.isSome(served)) return yield* decodedIssue(reference, served.value)
+
       const asking = yield* askedIssue(reference)
       if (Option.isNone(asking)) {
         // Nobody has the hash on this page, which is every issue reached from
@@ -2900,9 +2909,11 @@ export const layer = Layer.succeed(GitHubGateway, {
         // Under the route it would have come back from, which is the key the
         // store is read by. Written this way, the same issue opened again is
         // drawn from memory even though nothing ever asked that route.
-        yield* Effect.forkDetach(
-          rememberRoute(issueRoute(reference, preloaded.hash), preloaded.result)
-        )
+        if (preloaded.hash !== undefined) {
+          yield* Effect.forkDetach(
+            rememberRoute(issueRoute(reference, preloaded.hash), preloaded.result)
+          )
+        }
 
         return snapshot
       }

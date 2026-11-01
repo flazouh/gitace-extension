@@ -60,3 +60,32 @@ export const preloadedIn = (html: string, name: string): Option.Option<Preloaded
 
   return Option.none()
 }
+
+/**
+ * The data a page's own route was drawn from, where their page names no query for it.
+ *
+ * Their issue page stopped preloading `IssueViewerViewQuery` and now embeds the same `data`
+ * under `payload.issueViewerRoute`, with no hash beside it.
+ */
+const dataUnder = (parsed: unknown, route: string): Option.Option<unknown> => {
+  const inner = (parsed as { readonly payload?: Record<string, unknown> } | null)?.payload
+  const held = inner?.[route] as { readonly data?: unknown } | undefined
+  return held?.data === undefined ? Option.none() : Option.some({ data: held.data })
+}
+
+export const routedIn = (html: string, route: string): Option.Option<unknown> =>
+  Option.flatMap(embeddedPayload(html, `"${route}"`), (parsed) => dataUnder(parsed, route))
+
+/** The same, off the document the reader is on, which is the page GitHub served it. */
+const EMBEDDED = 'script[type="application/json"][data-target="react-app.embeddedData"]'
+
+export const routedOn = (page: Document, route: string): Option.Option<unknown> => {
+  for (const script of page.querySelectorAll(EMBEDDED)) {
+    const text = script.textContent ?? ""
+    if (!text.includes(`"${route}"`)) continue
+    const parsed = Option.liftThrowable(JSON.parse)(text)
+    const found = Option.flatMap(parsed, (one) => dataUnder(one, route))
+    if (Option.isSome(found)) return found
+  }
+  return Option.none()
+}

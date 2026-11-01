@@ -236,6 +236,44 @@ describe("two reads of one issue out of its own page", () => {
     10_000
   )
 
+  test(
+    "reads the issue out of the route their page embeds, which names no query",
+    async () => {
+      standingOn()
+      const { data } = loadFixture("issue-view") as { readonly data: unknown }
+      intercept(
+        () =>
+          new Response(
+            `<script type="application/json" data-target="react-app.embeddedData">${JSON.stringify({
+              payload: { issueViewerRoute: { data, feed: "", activityTimeline: {} } }
+            })}</script>`,
+            { status: 200 }
+          )
+      )
+
+      const issue = await Effect.runPromise(reading(reference))
+
+      expect(issue.title).toBe("Activity mode=“hidden” does not hide nested portals")
+    },
+    10_000
+  )
+
+  test("reads the issue their page was served with, and asks GitHub nothing", async () => {
+    const { data } = loadFixture("issue-view") as { readonly data: unknown }
+    const embedded = document.createElement("script")
+    embedded.type = "application/json"
+    embedded.setAttribute("data-target", "react-app.embeddedData")
+    embedded.textContent = JSON.stringify({ payload: { issueViewerRoute: { data } } })
+    document.body.append(embedded)
+    undo(() => embedded.remove())
+    const asked = intercept(() => new Response("", { status: 500 }))
+
+    const issue = await Effect.runPromise(reading(reference))
+
+    expect(issue.title).toBe("Activity mode=“hidden” does not hide nested portals")
+    expect(asked).toEqual([])
+  })
+
   /*
    * Both failures in one test, and two issues rather than one so that neither read
    * joins the other. The three-second wait above is the reason: written separately,
