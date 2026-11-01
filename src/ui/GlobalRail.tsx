@@ -138,7 +138,10 @@ export const GlobalRail = ({
     }
   }
 
-  const inPlace = where.kind === "home" ? "" : undefined
+  // Off Home too, wherever this answers the press: the shell claims an unmarked link of ours
+  // on `pointerdown` and stops its click, and the Destination was never stored.
+  const inPlace =
+    where.kind === "home" || onDestination !== undefined || onHome !== undefined ? "" : undefined
 
   const [pinnedOwner, pinnedRepo] = pinned[0]?.split("/") ?? []
   const aimedAt =
