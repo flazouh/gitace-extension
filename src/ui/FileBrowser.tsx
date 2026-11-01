@@ -636,7 +636,11 @@ export const FileBrowser = ({
       index,
     ).filter((path) => !held.has(path));
 
-    library.warm(order.slice(0, WARM_LIMIT));
+    // The open file by itself and first, which its pane would ask for too, but only
+    // once it is drawn: a stage later, with this window already gone out around it.
+    const open = walk[index]?.path;
+    if (open !== undefined && !held.has(open)) Effect.runFork(library.ask(open));
+    library.warm(order.filter((path) => path !== open).slice(0, WARM_LIMIT));
   }, [library, walk, index]);
   // A loop rather than a line, so the file after the last is the first again.
   // The two neighbours are also what gets drawn and asked for ahead of the
