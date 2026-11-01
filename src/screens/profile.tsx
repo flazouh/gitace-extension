@@ -4,7 +4,7 @@ import { theirWholeList } from "@/app/personRepos"
 import { theirAnswering } from "@/app/profile"
 import { loadWhereNoDocumentWasServed } from "@/app/softArrival"
 import { anOrganisation } from "@/github/person"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -87,19 +87,22 @@ const open = (
 
   return standAScreen({
     place: PROFILE,
-    draw: (standing) => (
+    draw: () => (
       <ProfileScreen
         at={at}
         login={page.login}
         answering={answering}
         owned={owned}
         elsewhere={column}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
         now={now}
       />
     )
   }).close
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -173,6 +176,15 @@ export const start = (): void => {
    * The address and not the path, as on their repositories tab: all three of a person's
    * pages are one path and differ in the query alone. See `whenAddressChanges`.
    */
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+  function useGitHub(): void {
+    view = "github"
+    rememberView(store, "github")
+    on = undefined
+    show(window.location.href)
+  }
+  toGitHub = useGitHub
+
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {
     view = "ours"

@@ -4,7 +4,7 @@ import { loadDiscussion, rememberedDiscussion } from "@/app/discussion"
 import { discussionDoings } from "@/app/discussionDoings"
 import { pressDiscussion } from "@/app/discussionPress"
 import { forgetIntent, intendedPath } from "@/app/intent"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -97,7 +97,7 @@ const open = (
 
   return standAScreen({
     place: DISCUSSION,
-    draw: (standing) => (
+    draw: () => (
       <DiscussionScreen
         at={at}
         reference={reference}
@@ -107,11 +107,14 @@ const open = (
         onPress={press}
         onAsk={ask}
         recallRepositories={recallRepositories}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
       />
     )
   }).close
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -176,6 +179,23 @@ export const start = (): void => {
     close = open(reference.value, new URL(url, window.location.origin).pathname)
     on = named
   }
+
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+
+  function useGitHub(): void {
+
+    view = "github"
+
+    rememberView(store, "github")
+
+    on = undefined
+
+    show(window.location.href)
+
+  }
+
+  toGitHub = useGitHub
+
 
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {

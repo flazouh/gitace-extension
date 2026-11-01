@@ -13,7 +13,7 @@ import {
 import type { Involvement } from "@/domain/issues"
 import { reportError } from "@/observability/report"
 import type { View } from "@/domain/Settings"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -162,7 +162,7 @@ const open = (
 
   return standAScreen({
     place: ISSUES,
-    draw: (standing) => (
+    draw: () => (
       <IssuesScreen
         at={at}
         involvement={dash.involvement}
@@ -173,11 +173,14 @@ const open = (
         onPage={goToPage}
         where={openedNamed("issues", dash)}
         seed={seeding(dash)}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
       />
     )
   }).close
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -261,6 +264,15 @@ export const start = (): void => {
 
   // The whole address, not the path: which page of which tab this is lives in
   // the query, and a reader pressing Next changes nothing else.
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+  function useGitHub(): void {
+    view = "github"
+    rememberView(store, "github")
+    standingFor = undefined
+    show(window.location.href)
+  }
+  toGitHub = useGitHub
+
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {
     view = "ours"

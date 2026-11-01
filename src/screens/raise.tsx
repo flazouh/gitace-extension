@@ -2,7 +2,7 @@ import { Effect, Option } from "effect"
 import { rememberedRepositories } from "@/app/destinations"
 import { forgetIntent, intendedPath } from "@/app/intent"
 import { raiseIssue } from "@/app/raising"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -56,7 +56,7 @@ const open = (reference: RepoRef, seed: Raising): (() => void) => {
 
   return standAScreen({
     place: RAISE,
-    draw: (standing) => (
+    draw: () => (
       <RaiseScreen
         repo={reference}
         seed={seed}
@@ -69,12 +69,15 @@ const open = (reference: RepoRef, seed: Raising): (() => void) => {
           )
         }
         onRaised={goToIssue}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
         recallRepositories={recallRepositories}
       />
     )
   }).close
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -134,6 +137,14 @@ export const start = (): void => {
    * The whole address, not the path: a "report this" link arrives with the title
    * and the body in the query, and they are what the boxes open with.
    */
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+  function useGitHub(): void {
+    view = "github"
+    rememberView(store, "github")
+    show(window.location.href)
+  }
+  toGitHub = useGitHub
+
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {
     view = "ours"

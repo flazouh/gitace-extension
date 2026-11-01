@@ -95,7 +95,7 @@ export const RaiseScreen = ({
 
   return (
     <div className="relative">
-      <TheBar
+      <TheBar onStepAside={onStepAside}
         where={{ kind: "repository", owner: repo.owner, repo: repo.repo }}
         recall={recallRepositories}
       />

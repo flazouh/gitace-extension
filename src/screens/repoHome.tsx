@@ -14,7 +14,7 @@ import {
   rememberedRepoHome,
   starRepo
 } from "@/app/repoHome"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -342,7 +342,7 @@ const open = (
 
   const page = standAScreen({
     place: REPO_HOME,
-    draw: (standing) => (
+    draw: () => (
       <RepoHomeScreen
         repo={home.repo}
         load={read}
@@ -350,7 +350,7 @@ const open = (
         where={repoNamed(home.repo, home.branch)}
         recallRepositories={recallRepositories}
         at={claimAt}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
         onStar={(to) => starRepo(home.repo, to).pipe(throughGitHub)}
         loadStanding={standingOf}
         loadPaths={paths}
@@ -386,6 +386,9 @@ const open = (
     }
   }
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -564,6 +567,23 @@ export const start = (): void => {
     up = open(home, at, moved, (chosen) => toBranch(repo, chosen))
     on = home
   }
+
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+
+  function useGitHub(): void {
+
+    view = "github"
+
+    rememberView(store, "github")
+
+    on = undefined
+
+    show(window.location.href)
+
+  }
+
+  toGitHub = useGitHub
+
 
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {

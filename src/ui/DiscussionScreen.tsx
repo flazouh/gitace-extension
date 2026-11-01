@@ -84,7 +84,7 @@ export const DiscussionScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
-        <TheBar where={whereFor(reference.home)} />
+        <TheBar where={whereFor(reference.home)} onStepAside={onStepAside} />
         <ReadFailed
           signedOut={!signedIn()}
           why={read.why}
@@ -111,7 +111,7 @@ export const DiscussionScreen = ({
     // nothing to start from.
     <div className="relative">
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
-      <TheBar where={whereFor(reference.home)} recall={recallRepositories} />
+      <TheBar where={whereFor(reference.home)} recall={recallRepositories} onStepAside={onStepAside} />
       {shown === undefined ? null : (
         <div className="t-panels flex flex-col pt-2 pb-2">
           <Discussion snapshot={shown} onPress={pressing} onAsk={onAsk} />

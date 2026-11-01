@@ -153,7 +153,7 @@ export const RepoPullsScreen = ({
        * Their whole header goes, both rows of it, and this says the same things in one:
        * the repository, and the tabs read off their own nav.
        */}
-      <TheBar
+      <TheBar onStepAside={onStepAside}
         where={{ kind: "repository", owner: repo.owner, repo: repo.repo }}
         recall={recallRepositories}
       />

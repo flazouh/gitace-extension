@@ -13,7 +13,7 @@ import type { RowDoing } from "@/domain/doable";
 import type { Sitting } from "@/domain/sittings";
 import { reportError } from "@/observability/report";
 import type { View } from "@/domain/Settings";
-import { chosenSettings } from "@/app/settings";
+import { chosenSettings, rememberView } from "@/app/settings";
 import {
   aScreen,
   handOverToGitHub,
@@ -217,7 +217,7 @@ const open = (
         stopAnswering();
       };
     },
-    draw: (standing) =>
+    draw: () =>
       place === HOME ? (
         // Home is the page whose navigation this extension takes — their sidebar of
         // repositories is hidden, and their own readers asked for one such list rather
@@ -232,7 +232,7 @@ const open = (
           // request and back is the same Back as from `/pulls`.
           where={THE_WORKING_SET}
           onOpen={openWithTheKeyboard}
-          onStepAside={standing.stepAside}
+          onStepAside={() => toGitHub()}
           ask={askFor}
           repositories={() => loadRepositories().pipe(throughGitHub)}
           rememberedRepositories={() =>
@@ -259,7 +259,7 @@ const open = (
           at={at}
           where={THE_WORKING_SET}
           onOpen={openWithTheKeyboard}
-          onStepAside={standing.stepAside}
+          onStepAside={() => toGitHub()}
           ask={askFor}
           /*
            * The bar's own two, which Home reads off GitHub for the Rail and this page
@@ -289,6 +289,9 @@ const open = (
     },
   };
 };
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {};
 
 /**
  * Puts the Working Set in charge of the document, once.
@@ -392,6 +395,23 @@ export const start = (): void => {
     up = open(place, path);
     markScreenRoute(document, path);
   };
+
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+
+  function useGitHub(): void {
+
+    view = "github";
+
+    rememberView(store, "github");
+
+    standing = null;
+
+    show(window.location.pathname);
+
+  }
+
+  toGitHub = useGitHub;
+
 
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {

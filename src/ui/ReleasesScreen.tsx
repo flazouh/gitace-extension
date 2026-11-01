@@ -70,7 +70,7 @@ export const ReleasesScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
-        <TheBar where={{ kind: "repository", owner: repo.owner, repo: repo.repo }} />
+        <TheBar onStepAside={onStepAside} where={{ kind: "repository", owner: repo.owner, repo: repo.repo }} />
         <ReadFailed
           signedOut={!signedIn()}
           why={read.why}
@@ -91,7 +91,7 @@ export const ReleasesScreen = ({
     // nothing to start from.
     <div className="relative">
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
-      <TheBar
+      <TheBar onStepAside={onStepAside}
         where={{ kind: "repository", owner: repo.owner, repo: repo.repo }}
         recall={recallRepositories}
       />

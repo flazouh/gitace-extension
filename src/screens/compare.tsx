@@ -1,5 +1,5 @@
 import { Effect, Option } from "effect"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -102,7 +102,7 @@ export const start = (): void => {
           changed={changed}
           reading={reading}
           failed={failed}
-          onStepAside={stepAside}
+          onStepAside={useGitHub}
         />
       )
     })
@@ -125,6 +125,25 @@ export const start = (): void => {
       )
     )
   }
+
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+
+  function useGitHub(): void {
+
+    view = "github"
+
+    rememberView(store, "github")
+
+    standing?.close()
+
+    standing = null
+
+    stood = null
+
+    show(window.location.pathname)
+
+  }
+
 
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {

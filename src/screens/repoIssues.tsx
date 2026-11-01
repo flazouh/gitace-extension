@@ -6,7 +6,7 @@ import { drawingIssues } from "@/app/rows"
 import { addressFor, type IssueList, issueListIn, queryFor, seeding } from "@/domain/issueList"
 import { reportError } from "@/observability/report"
 import type { View } from "@/domain/Settings"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -169,7 +169,7 @@ const open = (
 
   return standAScreen({
     place: REPO_ISSUES,
-    draw: (standing) => (
+    draw: () => (
       <IssueListScreen
         at={at}
         repo={list.repo}
@@ -180,11 +180,14 @@ const open = (
         onQuery={boxAsked}
         where={openedNamed("issue-list", list)}
         seed={seeding(list)}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
       />
     )
   }).close
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -266,6 +269,15 @@ export const start = (): void => {
 
   // The whole address, not the path: which page of which search this is lives
   // in the query, and a reader pressing Next changes nothing else.
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+  function useGitHub(): void {
+    view = "github"
+    rememberView(store, "github")
+    standingFor = undefined
+    show(window.location.href)
+  }
+  toGitHub = useGitHub
+
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {
     view = "ours"
