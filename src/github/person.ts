@@ -103,6 +103,17 @@ const tallyIn = (page: Document, tab: string): Option.Option<string> => {
 }
 
 /**
+ * How many repositories their tab says they have, where it says so as a plain number.
+ *
+ * Nothing where the counter is abbreviated: `1.2k` is a size to show, not a count to
+ * plan a walk by.
+ */
+export const theirRepositoryCount = (page: Document): Option.Option<number> =>
+  Option.flatMap(tallyIn(page, "repositories"), (said) =>
+    /^\d[\d,]*$/.test(said) ? Option.some(Number(said.replaceAll(",", ""))) : Option.none()
+  )
+
+/**
  * Their face, at the size the column draws it.
  *
  * Their big one first — the 260-pixel image inside the link to the full-sized file —

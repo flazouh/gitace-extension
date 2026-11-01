@@ -477,6 +477,22 @@ describe("reading one page of a repository's pull requests", () => {
     expect(asked.indexOf("checks")).toBeLessThan(asked.indexOf("page 2"))
   })
 
+  test("asks for each row's checks once, the first page's included", async () => {
+    const asked: Array<string> = []
+    intercept((url) => {
+      if (url.includes("/pulls?q=")) {
+        const page = url.includes("page=2") ? 2 : 1
+        return searchAnswer([aRow({ id: `PR_${page}`, number: page })], { currentPage: page, totalPages: 2, totalCount: 2 })
+      }
+      if (url.includes("/pulls/inbox/deferred")) asked.push(...(url.match(/PR_\d+/g) ?? []))
+      return oneStranger(url)
+    })
+
+    await read()
+
+    expect(asked.toSorted()).toEqual(["PR_1", "PR_2"])
+  })
+
   test("says the list is still coming until its last page lands, and only then", async () => {
     intercept((url) => {
       if (url.includes("/pulls?q=")) {

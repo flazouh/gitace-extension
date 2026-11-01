@@ -329,6 +329,8 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
   )
   /** The checks and reviews asked for before the pages behind them land. */
   let early: Standings = new Map()
+  /** Every row those early reads answered for, including the ones with nothing to say. */
+  const answeredEarly = new Set<string>()
   let paged: Paged | undefined
   /** Which draw is the latest, so a slow one cannot land over a newer list. */
   let drawn = 0
@@ -374,6 +376,7 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
   const standingsOf = (rows: ReadonlyArray<InvolvedPullRequest>) =>
     gateway.standingsFor(rows.map((one) => one.id)).pipe(
       Effect.flatMap((standings) => {
+        for (const one of rows) answeredEarly.add(one.id)
         early = new Map([...early, ...standings])
         return draw
       }),
@@ -443,7 +446,8 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
 
   // Over what the early reads found rather than instead of it: a row this answer leaves
   // out keeps the checks it was already drawn with.
-  const standings = yield* gateway.standingsFor(rows.map((one) => one.id)).pipe(
+  // Not the rows the early reads already asked about, seconds ago.
+  const standings = yield* gateway.standingsFor(rows.map((one) => one.id).filter((id) => !answeredEarly.has(id))).pipe(
     Effect.map((all): Standings => new Map([...early, ...all])),
     Effect.orElseSucceed((): Standings => early)
   )
