@@ -16,12 +16,12 @@ import { sizesOf } from "./sizes"
  * How many branch reads run at once.
  *
  * Each is a whole `merge_box` for one pull request, asked only where a stack
- * could exist, and a Working Set spanning several busy repositories can want a
- * dozen. Four at a time keeps the list appearing quickly without opening a dozen
- * connections to GitHub on the reader's session for something the page is
- * perfectly readable without.
+ * could exist and nothing kept says it already, so a first visit can want thirty
+ * and the next one none. The repository list's eight: measured on Home, four at a
+ * time strung thirty merge boxes of 700 ms each into a chain five seconds long,
+ * the last thing on the page to land.
  */
-const BRANCHES_AT_ONCE = 4
+const BRANCHES_AT_ONCE = 8
 
 /**
  * The branches of the pull requests that could be stacked, as far as they can be
@@ -33,12 +33,16 @@ const BRANCHES_AT_ONCE = 4
  * smaller lie than a stack invented from a failed read.
  */
 const branchesOf = Effect.fn("branchesOf")(function* (
-  involved: ReadonlyArray<InvolvedPullRequest>
+  involved: ReadonlyArray<InvolvedPullRequest>,
+  /** The pull requests whose kept branches need no read, by name. */
+  known: ReadonlySet<string>
 ) {
   const gateway = yield* GitHubGateway
 
   const found = yield* Effect.all(
-    worthAskingForBranches(involved).map((reference) =>
+    worthAskingForBranches(involved)
+      .filter((reference) => !known.has(keyOf(reference)))
+      .map((reference) =>
       gateway.branches(reference).pipe(
         Effect.orElseSucceed((): Option.Option<Branches> => Option.none()),
         Effect.map((branches) => [keyOf(reference), branches] as const)
@@ -207,9 +211,14 @@ export const loadWorkingSet = Effect.fn("loadWorkingSet")(function* () {
   // Together, because they are independent reads of different routes and the
   // sizes are the cheap one: taken in turn they would wait out six rounds of
   // merge boxes to spend a second on twenty-five requests of seventy bytes.
-  const [branches, sizes] = yield* Effect.all([branchesOf(known), sizesOf(known)], {
-    concurrency: 2
-  })
+  // Only what the store cannot vouch for: on a second visit that is the rows that moved.
+  const [branches, sizes] = yield* Effect.all(
+    [
+      branchesOf(known, kept.stillTrue.branches),
+      sizesOf(known.filter((one) => !kept.stillTrue.sizes.has(one.id)))
+    ],
+    { concurrency: 2 }
+  )
 
   return sittingsIn(
     withSizes(known, sizes),

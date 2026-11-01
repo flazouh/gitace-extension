@@ -2579,13 +2579,13 @@ export const layer = Layer.succeed(GitHubGateway, {
       }
     }),
 
-    sizeOf: Effect.fn("GitHubGateway.sizeOf")(function* (reference: PullRequestRef) {
+    sizeOf: Effect.fn("GitHubGateway.sizeOf")(function* (reference: PullRequestRef, head?: string) {
       const raw = yield* fetchRoute(reference, DIFFSTAT)
 
       const size = sizeIn(
         yield* decodeDiffstat(raw).pipe(Effect.catch(undecodableFrom(reference, DIFFSTAT)))
       )
-      yield* Effect.forkDetach(rememberSize(reference, size))
+      yield* Effect.forkDetach(rememberSize(reference, size, head))
 
       return size
     }),
@@ -4591,7 +4591,13 @@ export const layerFromRecordings = (recordings: ReadonlyArray<Recording>) =>
     // nothing — and the lists already draw a row whose size never arrived.
     sizeOf: (reference: PullRequestRef) => Effect.fail(notRecorded(reference)),
     // Nothing was kept about any row, here as above.
-    rememberedRows: () => Effect.succeed({ branches: new Map(), sizes: new Map() as Sizes, standings: new Map() as Standings }),
+    rememberedRows: () =>
+      Effect.succeed({
+        branches: new Map(),
+        sizes: new Map() as Sizes,
+        standings: new Map() as Standings,
+        stillTrue: { sizes: new Set<string>(), branches: new Set<string>() }
+      }),
 
     // Nobody offline is anybody: the card is a live read and nothing here fakes one.
     portrait: () => Effect.succeed(Option.none<Portrait>()),
@@ -4748,7 +4754,13 @@ export const layerFromSnapshots = (snapshots: ReadonlyArray<PullRequestSnapshot>
     // As above: nothing is listed here, so nothing here has a size.
     sizeOf: (reference: PullRequestRef) => Effect.fail(notRecorded(reference)),
     // Nothing was kept about any row, here as above.
-    rememberedRows: () => Effect.succeed({ branches: new Map(), sizes: new Map() as Sizes, standings: new Map() as Standings }),
+    rememberedRows: () =>
+      Effect.succeed({
+        branches: new Map(),
+        sizes: new Map() as Sizes,
+        standings: new Map() as Standings,
+        stillTrue: { sizes: new Set<string>(), branches: new Set<string>() }
+      }),
 
     // Nobody offline is anybody: the card is a live read and nothing here fakes one.
     portrait: () => Effect.succeed(Option.none<Portrait>()),

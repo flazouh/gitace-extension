@@ -170,12 +170,16 @@ const allPages = Effect.fn("repoList.allPages")(function* (
 })
 
 const branchesOf = Effect.fn("repoList.branchesOf")(function* (
-  rows: ReadonlyArray<InvolvedPullRequest>
+  rows: ReadonlyArray<InvolvedPullRequest>,
+  /** The pull requests whose kept branches need no read, by name. */
+  known: ReadonlySet<string>
 ) {
   const gateway = yield* GitHubGateway
 
   const found = yield* Effect.all(
-    worthAskingForBranches(rows).map((reference) =>
+    worthAskingForBranches(rows)
+      .filter((reference) => !known.has(keyOf(reference)))
+      .map((reference) =>
       gateway.branches(reference).pipe(
         Effect.orElseSucceed((): Option.Option<Branches> => Option.none()),
         Effect.map((branches) => [keyOf(reference), branches] as const)
@@ -452,13 +456,14 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
   // boxes, so holding one behind the other would cost the reader five seconds of
   // a column that was ready.
   const sizing = yield* Effect.forkChild(
-    sizesOf(known).pipe(
+    // Only what the store cannot vouch for: on a second visit that is the rows that moved.
+    sizesOf(known.filter((one) => !kept.stillTrue.sizes.has(one.id))).pipe(
       Effect.tap((sizes) => Effect.sync(() => partly(sofar(withSizes(known, sizes)))))
     ),
     { startImmediately: true }
   )
 
-  const branches = yield* branchesOf(known)
+  const branches = yield* branchesOf(known, kept.stillTrue.branches)
   const measured = withSizes(known, yield* Fiber.join(sizing))
 
   return {
