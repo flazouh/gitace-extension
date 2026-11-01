@@ -543,6 +543,16 @@ const issuePage = (reference: IssueRef): string =>
 
 const ASKING = "3 seconds"
 
+/** Once the document has been read to its end, where this runs from its start. */
+const parsedFully = (page: Document): Effect.Effect<void> =>
+  page.readyState !== "loading"
+    ? Effect.void
+    : Effect.callback<void>((resume) => {
+        const done = () => resume(Effect.void)
+        page.addEventListener("DOMContentLoaded", done, { once: true })
+        return Effect.sync(() => page.removeEventListener("DOMContentLoaded", done))
+      })
+
 /** The browser's own way of being told about requests as they are made. */
 const watchingResources = (onSeen: (names: ReadonlyArray<string>) => void) => {
   const observer = new PerformanceObserver((list) => {
@@ -2895,8 +2905,11 @@ export const layer = Layer.succeed(GitHubGateway, {
 
     issue: Effect.fn("GitHubGateway.issue")(function* (reference: IssueRef) {
       // The page GitHub served for this issue carries it whole: no wait for their query, no fetch.
-      const served = servedFor(performance, issuePage(reference)) ? routedOn(document, ISSUE_ROUTE) : Option.none()
-      if (Option.isSome(served)) return yield* decodedIssue(reference, served.value)
+      if (servedFor(performance, issuePage(reference))) {
+        yield* parsedFully(document)
+        const served = routedOn(document, ISSUE_ROUTE)
+        if (Option.isSome(served)) return yield* decodedIssue(reference, served.value)
+      }
 
       const asking = yield* askedIssue(reference)
       if (Option.isNone(asking)) {

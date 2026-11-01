@@ -274,6 +274,25 @@ describe("two reads of one issue out of its own page", () => {
     expect(asked).toEqual([])
   })
 
+  test("waits for the page to be read to its end before looking, as it starts at its start", async () => {
+    const { data } = loadFixture("issue-view") as { readonly data: unknown }
+    Object.defineProperty(document, "readyState", { configurable: true, get: () => "loading" })
+    undo(() => Reflect.deleteProperty(document, "readyState"))
+    const asked = intercept(() => new Response("", { status: 500 }))
+
+    const pending = Effect.runPromise(reading(reference))
+    const embedded = document.createElement("script")
+    embedded.type = "application/json"
+    embedded.setAttribute("data-target", "react-app.embeddedData")
+    embedded.textContent = JSON.stringify({ payload: { issueViewerRoute: { data } } })
+    document.body.append(embedded)
+    undo(() => embedded.remove())
+    document.dispatchEvent(new Event("DOMContentLoaded"))
+
+    expect((await pending).title).toBe("Activity mode=“hidden” does not hide nested portals")
+    expect(asked).toEqual([])
+  })
+
   /*
    * Both failures in one test, and two issues rather than one so that neither read
    * joins the other. The three-second wait above is the reason: written separately,
