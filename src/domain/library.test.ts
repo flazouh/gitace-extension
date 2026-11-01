@@ -65,9 +65,37 @@ describe("the library of diffs, which asks the network as little as it can", () 
     const library = diffLibrary(network.fetch)
 
     library.warm(["a.ts", "b.ts", "c.ts"])
+    await settled()
+
+    expect(network.asked).toEqual([["a.ts", "b.ts", "c.ts"]])
+  })
+
+  /*
+   * Measured on a 27-file pull request: the file on the screen, sent at the front of a
+   * batch of ten, answered in 978ms, where one file alone answers in about 400. The batch
+   * is budgeted by bytes as well, so the file a reader is looking at could come back
+   * empty and be asked for a second time.
+   */
+  test("sends the file being opened by itself, ahead of the window warmed around it", async () => {
+    const network = recording()
+    const library = diffLibrary(network.fetch)
+
+    library.warm(["a.ts", "b.ts", "c.ts"])
     await ran(library.ask("c.ts"))
 
-    expect(network.asked).toEqual([["c.ts", "a.ts", "b.ts"]])
+    expect(network.asked).toEqual([["c.ts"], ["a.ts", "b.ts"]])
+  })
+
+  test("sends the file being opened while warming fills every request it allows", async () => {
+    const network = deferred()
+    const library = diffLibrary(network.fetch, { batch: 2, inFlight: 2 })
+
+    library.warm(["a", "b", "c", "d", "e", "f"])
+    await settled()
+    void ran(library.ask("z"))
+    await settled()
+
+    expect(network.asked).toEqual([["a", "b"], ["c", "d"], ["z"]])
   })
 
   test("says nothing about a file it already holds", async () => {

@@ -656,6 +656,47 @@ describe("what the gateway sends to GitHub", () => {
     expect(new URL(calls[1]?.url ?? "https://example.invalid").searchParams.get("paths")).toBe("big.go")
   })
 
+  /*
+   * Each of those questions is one of their slow routes, about 400ms. Asked one after
+   * another, three starved files on a real pull request drew their last diff 1.2s after
+   * the batch had answered.
+   */
+  test("asks again for every starved file at once", async () => {
+    const starved = (path: string) => ({ path, isBinary: false, isTooBig: true, truncatedReason: null, diffLines: [] })
+    const whole = (path: string) => ({
+      ...starved(path),
+      isTooBig: false,
+      diffLines: [{ type: "HUNK", text: "@@ -1 +1 @@", left: null, right: null }]
+    })
+    let inTheAir = 0
+    let most = 0
+    globalThis.fetch = Object.assign(
+      (input: RequestInfo | URL) => {
+        const paths = new URL(String(input)).searchParams.get("paths") ?? ""
+        if (paths.includes(",")) return Promise.resolve(Response.json([starved("a.go"), starved("b.go"), starved("c.go")]))
+        inTheAir += 1
+        most = Math.max(most, inTheAir)
+        return new Promise<Response>((answer) =>
+          setTimeout(() => {
+            inTheAir -= 1
+            answer(Response.json([whole(paths)]))
+          }, 5)
+        )
+      },
+      { preconnect: realFetch.preconnect }
+    )
+
+    const got = await Effect.runPromise(
+      Effect.gen(function* () {
+        const gateway = yield* GitHubGateway
+        return yield* gateway.diffs(draft, "abc123", ["a.go", "b.go", "c.go"])
+      }).pipe(Effect.provide(layer))
+    )
+
+    expect(got.map((one) => one.diff.lines.length)).toEqual([1, 1, 1])
+    expect(most).toBe(3)
+  })
+
   /**
    * A commit page embeds content for as many files as fits a byte budget and
    * sends the rest as names. There is no asking for one by name — the route

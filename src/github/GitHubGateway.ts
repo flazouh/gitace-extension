@@ -4475,13 +4475,12 @@ export const layer = Layer.succeed(GitHubGateway, {
       const starved = answered.filter((one) => one.diff.isTruncated && one.diff.lines.length === 0)
       if (starved.length === 0) return answered
 
-      const whole = new Map<string, FetchedDiff>()
-      for (const one of starved) {
-        const alone = yield* askFor([one.path]).pipe(
-          Effect.catch(() => Effect.succeed<ReadonlyArray<FetchedDiff>>([]))
-        )
-        for (const again of alone) whole.set(again.path, again)
-      }
+      const alone = yield* Effect.forEach(
+        starved,
+        (one) => askFor([one.path]).pipe(Effect.catch(() => Effect.succeed<ReadonlyArray<FetchedDiff>>([]))),
+        { concurrency: "unbounded" }
+      )
+      const whole = new Map(alone.flat().map((again) => [again.path, again]))
 
       return answered.map((one) => whole.get(one.path) ?? one)
     })

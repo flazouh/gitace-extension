@@ -26,8 +26,8 @@ export type DiffLimits = {
  * GitHub sends the first few diffs with the page and holds the rest back, so
  * moving through a large pull request means a request per file, and the reader
  * waits at each one. This is the one place that knows what has been fetched:
- * asking for an open file and warming the ones around it go through the same
- * queue, so the two never race and never duplicate. A path is requested once,
+ * asking for an open file and warming the ones around it share one set of
+ * answers, so the two never race and never duplicate. A path is requested once,
  * whoever asks and however many times.
  *
  * Nothing here knows about React, and nothing here knows about GitHub — the
@@ -121,15 +121,15 @@ export const diffLibrary = (fetch: DiffFetcher, limits?: DiffLimits): DiffLibrar
         const found = held.get(path)
         if (found !== undefined) return Effect.succeed(found)
 
-        const answer = answerFor(path)
-
-        // To the front, since someone is looking at this one: it may have been
-        // queued as part of a window that has not gone out yet.
         const at = queued.indexOf(path)
-        if (at > 0) queued.splice(at, 1)
-        if (at !== 0) queued.unshift(path)
+        if (waiting.has(path) && at === -1) return Deferred.await(answerFor(path))
 
-        schedule()
+        // By itself and now, since someone is looking at this one: out of any window
+        // still queued, and past the limit warming keeps to. In a batch it waited for
+        // nine other files and shared their byte budget.
+        const answer = answerFor(path)
+        if (at !== -1) queued.splice(at, 1)
+        send([path])
         return Deferred.await(answer)
       }),
 
