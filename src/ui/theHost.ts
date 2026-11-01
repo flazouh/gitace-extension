@@ -71,19 +71,27 @@ const ourSheets = shared.ourSheets
  */
 const forAShadowRoot = (css: string): string => css.replace(/:root\b/g, ":host")
 
+const fetched = (href: string): Effect.Effect<string, unknown> =>
+  Effect.gen(function* () {
+    const said = yield* Effect.tryPromise({ try: () => fetch(href), catch: (cause) => cause })
+    return yield* Effect.tryPromise({ try: () => said.text(), catch: (cause) => cause })
+  })
+
 /**
  * The sheet, built from the stylesheet the build already publishes.
  *
  * Read once and kept: the second screen a reader opens finds it built. Two asks
  * that race both fetch, which costs one extra read of a file the browser already
  * has from the extension's own origin, and the later one wins harmlessly.
+ *
+ * `text` is the same file already in hand, which the arrival script carries: a
+ * fetch from a content script can wait on GitHub's page to finish loading.
  */
-export const theSheet = (href: string): Effect.Effect<CSSStyleSheet, unknown> =>
+export const theSheet = (href: string, text?: string): Effect.Effect<CSSStyleSheet, unknown> =>
   Effect.gen(function* () {
     if (shared.sheet !== null) return shared.sheet
 
-    const said = yield* Effect.tryPromise({ try: () => fetch(href), catch: (cause) => cause })
-    const css = yield* Effect.tryPromise({ try: () => said.text(), catch: (cause) => cause })
+    const css = text ?? (yield* fetched(href))
 
     // Against its own address, so the fonts it names are read from beside it. A
     // constructed sheet otherwise resolves `url()` against GitHub's page.

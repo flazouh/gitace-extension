@@ -18,6 +18,7 @@
  */
 
 import { type Cause, Effect } from "effect"
+import { ARRIVAL, type Arrival } from "@/app/arrival"
 import { onwardWith } from "@/observability/report"
 import { OUTSIDE } from "@/ui/mount"
 import { dressShadow, keepTheirStylesOff, theHost, theSheet } from "@/ui/theHost"
@@ -133,8 +134,25 @@ export const fileOf = (what: Wanted): { readonly script: string; readonly styles
   styles: STYLES
 })
 
+let decided: { readonly from: Arrival | null } | undefined
+
+/**
+ * The arrival script if this document has one, read once and kept.
+ *
+ * Once, so a document takes every screen from one place: a script that turned up
+ * after the first screen was imported would otherwise hand the next one a second
+ * copy of everything the first one holds.
+ */
+export const arrived = (): Arrival | null => {
+  decided ??= { from: (globalThis as { [ARRIVAL]?: Arrival })[ARRIVAL] ?? null }
+  return decided.from
+}
+
 /** Lets Chromium fetch and compile a screen before navigation needs its exports. */
-export const preloadScreen = (what: Wanted): boolean => {
+export const preloadScreen = (what: Wanted, from: Arrival | null = arrived()): boolean => {
+  // Already compiled, in the script that carried it here.
+  if (from !== null) return false
+
   const href = urlOf(fileOf(what).script)
   if (document.querySelector(`link[rel="modulepreload"][href="${href}"]`) !== null) return false
 
@@ -217,12 +235,15 @@ const linked = (at: string): Effect.Effect<void> =>
  * the link's own failure is: an unstyled interface is still an interface, and the
  * screen's failsafe hands the page back if it comes to worse than that.
  */
-const dressed = (at: string): Effect.Effect<void> =>
+const dressed = (at: string, text?: string): Effect.Effect<void> =>
   Effect.gen(function* () {
     const url = urlOf(at)
-    yield* linked(at)
+    // Not waited for when the sheet came as text: the shadow root is dressed from
+    // the text, and the link only dresses what of ours stands in their document.
+    if (text === undefined) yield* linked(at)
+    else Effect.runFork(linked(at))
 
-    const built = yield* theSheet(url).pipe(Effect.catch(onwardWith(null)))
+    const built = yield* theSheet(url, text).pipe(Effect.catch(onwardWith(null)))
     if (built === null) return
 
     dressShadow(theHost(document).shadow, built)
@@ -236,6 +257,26 @@ const dressed = (at: string): Effect.Effect<void> =>
      */
     keepTheirStylesOff(document)
   })
+
+/**
+ * Once the parser has made `document.head`.
+ *
+ * A screen from the arrival script can be asked for at `document_start`, when the
+ * document is a root element and nothing else, and modules under it append to the
+ * head as they are evaluated. One imported by URL never could: its fetch alone
+ * outlasted the parser's first few nodes.
+ */
+const headed: Effect.Effect<void> = Effect.callback<void>((resume) => {
+  if (document.head !== null) return resume(Effect.void)
+
+  const watching = new MutationObserver(() => {
+    if (document.head === null) return
+    watching.disconnect()
+    resume(Effect.void)
+  })
+  watching.observe(document.documentElement, { childList: true })
+  return Effect.sync(() => watching.disconnect())
+})
 
 const held = new Map<Wanted, Screen>()
 
@@ -252,7 +293,10 @@ const held = new Map<Wanted, Screen>()
  * — and a screen rendered against a stylesheet still in flight is a frame of
  * unstyled interface, which is worse than the frame of nothing it replaced.
  */
-export const screenFor = (what: Wanted): Effect.Effect<Screen, Cause.UnknownError> =>
+export const screenFor = (
+  what: Wanted,
+  from: Arrival | null = arrived()
+): Effect.Effect<Screen, Cause.UnknownError> =>
   Effect.suspend(() => {
     const had = held.get(what)
     if (had !== undefined) return Effect.succeed(had)
@@ -260,13 +304,18 @@ export const screenFor = (what: Wanted): Effect.Effect<Screen, Cause.UnknownErro
     const file = fileOf(what)
     return Effect.all(
       [
-        dressed(file.styles),
-        Effect.tryPromise(() =>
-          // Ignored by the bundler on purpose: this is an extension URL, and a content
-          // script's own relative imports resolve against github.com, where none of
-          // these files exist and would not be allowed to.
-          import(/* @vite-ignore */ urlOf(file.script))
-        )
+        dressed(file.styles, from?.css),
+        from === null
+          ? Effect.tryPromise(() =>
+              // Ignored by the bundler on purpose: this is an extension URL, and a content
+              // script's own relative imports resolve against github.com, where none of
+              // these files exist and would not be allowed to.
+              import(/* @vite-ignore */ urlOf(file.script))
+            )
+          : Effect.andThen(
+              headed,
+              Effect.tryPromise(() => from.screens[what]())
+            )
       ],
       { concurrency: "unbounded" }
     ).pipe(
