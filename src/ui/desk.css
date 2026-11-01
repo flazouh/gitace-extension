@@ -308,10 +308,18 @@
 
 :is(#gitace-root, [data-gitace-outside]) .d-search.d-palette {
   width: 240px;
-  min-width: 140px;
+  min-width: var(--d-control);
   flex: 0 1 240px;
+  container: palette / inline-size;
   border: 0;
   text-align: left;
+}
+
+/* An 800-pixel window has no room for the label: the bar keeps the glass and the press. */
+@container palette (max-width: 120px) {
+  :is(#gitace-root, [data-gitace-outside]) :is(.d-palette-said, .d-palette .d-kbd) {
+    display: none;
+  }
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-palette-said {

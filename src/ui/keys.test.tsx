@@ -15,6 +15,7 @@ import { DEFAULTS } from "../domain/Settings"
 import { FileBrowser } from "./FileBrowser"
 import { ROOT_ID } from "./mount"
 import { ScreenActivityProvider } from "./screenActivity"
+import { HOST_ID } from "./theHost"
 import { SettingsMenu } from "./SettingsMenu"
 import { useKeys } from "./useKeys"
 
@@ -254,6 +255,27 @@ describe("reaching a Destination with two keys", () => {
     await userEvent.keyboard("grgfgg")
 
     expect(going()).toBe("went to Repositories, Activity, Home; moved 0")
+  })
+
+  test("goes there with their page holding a menu of its own, our tree in its shadow", async () => {
+    const theirs = document.createElement("ul")
+    theirs.setAttribute("role", "menu")
+    theirs.hidden = true
+    const host = document.createElement("div")
+    host.id = HOST_ID
+    const root = document.createElement("div")
+    root.id = ROOT_ID
+    host.attachShadow({ mode: "open" }).append(root)
+    document.body.append(theirs, host)
+    undo(() => {
+      theirs.remove()
+      host.remove()
+    })
+    render(<Going />, { container: root })
+
+    await userEvent.keyboard("gd")
+
+    expect(root.textContent).toBe("went to the Working Set; moved 0")
   })
 
   test("goes nowhere on the leader alone", async () => {
