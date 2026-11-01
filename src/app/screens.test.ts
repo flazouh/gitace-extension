@@ -97,18 +97,16 @@ describe("a document that arrived with every screen", () => {
       value: { runtime: { getURL: (path: string) => `chrome-extension://test${path}` } }
     })
 
-  const carrying = (screen: Screen, asked: Array<string>): Arrival => ({
-    screens: Object.fromEntries(
-      WANTED.map((what) => [
-        what,
-        () => {
-          asked.push(what)
-          return Promise.resolve(screen)
-        }
-      ])
-    ) as Arrival["screens"],
-    css: ""
-  })
+  const carrying = (screen: Screen, asked: Array<string>): Arrival => {
+    const screens = {} as Record<(typeof WANTED)[number], () => PromiseLike<Screen>>
+    for (const what of WANTED) {
+      screens[what] = () => {
+        asked.push(what)
+        return Promise.resolve(screen)
+      }
+    }
+    return { screens, css: "" }
+  }
 
   test("takes the screen from the arrival script rather than importing it", async () => {
     extension()
