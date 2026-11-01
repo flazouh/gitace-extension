@@ -360,7 +360,9 @@
 
 :is(#gitace-root, [data-gitace-outside]) .d-projects {
   display: flex;
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
 }
 
@@ -813,6 +815,20 @@
 
   :is(#gitace-root, [data-gitace-outside]) .d-repo-cell > .truncate {
     display: none;
+  }
+}
+
+/* Beside the sidebar in an 800-pixel window: the face, the title and whose move it is. */
+@container (max-width: 640px) {
+  :is(#gitace-root, [data-gitace-outside]) .d-ws-line {
+    --d-t-title: 0px;
+    --d-t-number: 0px;
+    --d-t-checks: 0px;
+    --d-t-age: 0px;
+  }
+
+  :is(#gitace-root, [data-gitace-outside]) :is(.d-col-number, .d-col-checks, .d-col-age) {
+    visibility: hidden;
   }
 }
 

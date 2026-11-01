@@ -164,14 +164,14 @@ const Checks = ({ rollup }: { readonly rollup: CheckRollup }) => (
 const TRACK = {
   face: "20px",
   state: "16px",
-  number: "54px",
-  title: "minmax(180px,1fr)",
+  number: "var(--d-t-number, 54px)",
+  title: "minmax(var(--d-t-title, 180px),1fr)",
   repo: "var(--d-t-repo, 110px)",
   standing: "130px",
-  checks: "70px",
+  checks: "var(--d-t-checks, 70px)",
   comments: "var(--d-t-comments, 44px)",
   size: "var(--d-t-size, 76px)",
-  age: "52px"
+  age: "var(--d-t-age, 52px)"
 } as const
 
 type TrackFit = {
@@ -559,7 +559,7 @@ const Row = ({
          * Then the context is already established and the address on every line is
          * a column of identical text taking width from the titles beside it.
          */}
-        <span className="d-key">{`#${one.reference.number}`}</span>
+        <span className="d-key d-col-number">{`#${one.reference.number}`}</span>
 
         <span className="d-tt">{one.title}</span>
 
@@ -631,7 +631,7 @@ const Row = ({
          * repair — the icons now run straight down the page instead of landing
          * wherever the title before them happened to stop.
          */}
-        <span className="min-w-0 truncate">
+        <span className="d-col-checks min-w-0 truncate">
           {Option.match(one.checks, {
             onNone: () => null,
             onSome: (rollup) => <Checks rollup={rollup} />
@@ -642,7 +642,7 @@ const Row = ({
 
         <Sized size={one.size} />
 
-        <span title={momentOf(one.changedAt)} className="d-key d-end">
+        <span title={momentOf(one.changedAt)} className="d-key d-end d-col-age">
           {shortAge(one.changedAt)}
         </span>
       </a>
@@ -739,7 +739,7 @@ export const IssueRow = ({
           className={`shrink-0 ${one.state === "open" ? "text-pass" : "text-ink-muted"}`}
         />
 
-        <span className="d-key">{`#${one.reference.number}`}</span>
+        <span className="d-key d-col-number">{`#${one.reference.number}`}</span>
 
         <span className="d-tt">{one.title}</span>
 
@@ -823,7 +823,7 @@ export const IssueRow = ({
         <time
           dateTime={one.raisedAt}
           title={`Raised ${momentOf(one.raisedAt)}`}
-          className="d-key d-end"
+          className="d-key d-end d-col-age"
         >
           {shortAge(one.raisedAt)}
         </time>
