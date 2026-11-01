@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test"
 import { Effect } from "effect"
-import { ARRIVAL, type Arrival } from "./arrival"
-import { arrived, fileOf, isWanted, preloadScreen, screenFor, startScreenOnce, WANTED, type Screen } from "./screens"
+import { CARRIED, type Carried } from "./carried"
+import { carried, fileOf, isWanted, preloadScreen, screenFor, startScreenOnce, WANTED, type Screen } from "./screens"
 
 const beforeBrowser = Object.getOwnPropertyDescriptor(globalThis, "browser")
 
@@ -90,14 +90,14 @@ describe("naming the screen a page wants", () => {
   })
 })
 
-describe("a document that arrived with every screen", () => {
+describe("a document that came with every screen", () => {
   const extension = () =>
     Object.defineProperty(globalThis, "browser", {
       configurable: true,
       value: { runtime: { getURL: (path: string) => `chrome-extension://test${path}` } }
     })
 
-  const carrying = (screen: Screen, asked: Array<string>): Arrival => {
+  const carrying = (screen: Screen, asked: Array<string>): Carried => {
     const screens = {} as Record<(typeof WANTED)[number], () => PromiseLike<Screen>>
     for (const what of WANTED) {
       screens[what] = () => {
@@ -108,7 +108,7 @@ describe("a document that arrived with every screen", () => {
     return { screens, css: "" }
   }
 
-  test("takes the screen from the arrival script rather than importing it", async () => {
+  test("takes the screen from the screens script rather than importing it", async () => {
     extension()
     // On the page already, as it is for every screen after a document's first; this
     // test has no stylesheet to load.
@@ -119,7 +119,7 @@ describe("a document that arrived with every screen", () => {
     const asked: Array<string> = []
 
     // An import of an extension address cannot succeed here, so the screen coming
-    // back at all is the arrival script having answered.
+    // back at all is the screens script having answered.
     const got = await Effect.runPromise(screenFor("commit", carrying(screen, asked)))
 
     expect(got).toBe(screen)
@@ -135,10 +135,10 @@ describe("a document that arrived with every screen", () => {
   })
 
   test("takes every screen from one place, even if the script turns up later", () => {
-    const first = arrived()
-    ;(globalThis as { [ARRIVAL]?: Arrival })[ARRIVAL] = carrying({ start: () => {} }, [])
+    const first = carried()
+    ;(globalThis as { [CARRIED]?: Carried })[CARRIED] = carrying({ start: () => {} }, [])
 
-    expect(arrived()).toBe(first)
-    Reflect.deleteProperty(globalThis, ARRIVAL)
+    expect(carried()).toBe(first)
+    Reflect.deleteProperty(globalThis, CARRIED)
   })
 })

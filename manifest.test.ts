@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import type { TargetBrowser } from "wxt"
-import config, { ARRIVING, arrivingOn } from "./wxt.config"
+import config, { CARRYING, carryingOn } from "./wxt.config"
 
 /*
  * What each store will accept, which is not the same number.
@@ -46,7 +46,7 @@ describe("the manifest description", () => {
   })
 })
 
-describe("the arrival script", () => {
+describe("the screens script", () => {
   const shell = {
     matches: ["*://github.com/*"],
     js: ["content-scripts/shell.js"],
@@ -56,18 +56,18 @@ describe("the arrival script", () => {
   const guard = { matches: ["*://github.com/*"], js: ["content-scripts/navigation-guard.js"], world: "MAIN" }
 
   test("runs ahead of the shell, in the same entry, on a document that arrives on a pull request", () => {
-    const [arriving] = arrivingOn([shell])
+    const [arriving] = carryingOn([shell])
 
-    expect(arriving).toEqual({ ...shell, matches: ARRIVING, js: ["arrival.js", "content-scripts/shell.js"] })
+    expect(arriving).toEqual({ ...shell, matches: CARRYING, js: ["carried.js", "content-scripts/shell.js"] })
   })
 
   test("keeps the shell's own entry off those documents, so the shell is injected once", () => {
-    const [, everywhere] = arrivingOn([shell])
+    const [, everywhere] = carryingOn([shell])
 
-    expect(everywhere).toEqual({ ...shell, exclude_matches: ARRIVING })
+    expect(everywhere).toEqual({ ...shell, exclude_matches: CARRYING })
   })
 
   test("leaves every other entry as it was", () => {
-    expect(arrivingOn([guard])).toEqual([guard])
+    expect(carryingOn([guard])).toEqual([guard])
   })
 })

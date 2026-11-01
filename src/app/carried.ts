@@ -2,7 +2,7 @@ import type { Screen, Wanted } from "./screens"
 
 /**
  * Every screen, carried by a classic content script on a document that arrived on
- * a pull request. Built by `scripts/build-arrival.ts` from `src/screens/arrival.ts`.
+ * a pull request. Built by `scripts/build-carried.ts` from `src/screens/carried.ts`.
  *
  * A screen imported from a content script is a module, and Chrome may hold a
  * module's fetch and evaluation until GitHub's page has loaded: measured on a large
@@ -15,15 +15,15 @@ import type { Screen, Wanted } from "./screens"
  * second copy of those beside the shared chunks would be two screens each sure
  * the page is theirs.
  *
- * Its own module, importing nothing at run time, because the arrival script runs
+ * Its own module, importing nothing at run time, because the screens script runs
  * whatever it imports the moment it is injected.
  */
-export type Arrival = {
+export type Carried = {
   /** What the bundler makes of a dynamic import, which is its API and not ours. */
   readonly screens: Readonly<Record<Wanted, () => PromiseLike<Screen>>>
   /** `screens/styles.css`, as text. */
   readonly css: string
 }
 
-/** Where the arrival script leaves itself, on the isolated world's global. */
-export const ARRIVAL = "gitaceArrival"
+/** Where the screens script leaves itself, on the isolated world's global. */
+export const CARRIED = "gitaceCarried"

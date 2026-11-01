@@ -30,8 +30,8 @@ public/markdown-mermaid-local.js
 # Built by scripts/build-screens.ts, not by hand.
 public/screens/
 
-# Built by scripts/build-arrival.ts, not by hand.
-public/arrival.js
+# Built by scripts/build-carried.ts, not by hand.
+public/carried.js
 
 # Saved source pages for research, fetched not written. See .research/README.md
 .research/

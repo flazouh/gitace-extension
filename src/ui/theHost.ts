@@ -84,7 +84,7 @@ const fetched = (href: string): Effect.Effect<string, unknown> =>
  * that race both fetch, which costs one extra read of a file the browser already
  * has from the extension's own origin, and the later one wins harmlessly.
  *
- * `text` is the same file already in hand, which the arrival script carries: a
+ * `text` is the same file already in hand, which the screens script carries: a
  * fetch from a content script can wait on GitHub's page to finish loading.
  */
 export const theSheet = (href: string, text?: string): Effect.Effect<CSSStyleSheet, unknown> =>
@@ -320,7 +320,7 @@ export const keepTheirStylesOff = (target: Document): void => {
  * is off the screen.
  *
  * Both halves shipped missing. The first, in v0.17.0: theirs turned off before
- * ours had arrived, and a page with no stylesheets at all — see
+ * ours had carried, and a page with no stylesheets at all — see
  * {@link oursInForce}. The second, found on github.com/login: the sign-on screen
  * is started by a root class GitHub puts on its login box as well as on an
  * organisation's wall, and hands the login page back when it finds no wall. Then

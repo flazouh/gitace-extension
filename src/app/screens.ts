@@ -18,7 +18,7 @@
  */
 
 import { type Cause, Effect } from "effect"
-import { ARRIVAL, type Arrival } from "@/app/arrival"
+import { CARRIED, type Carried } from "@/app/carried"
 import { onwardWith } from "@/observability/report"
 import { OUTSIDE } from "@/ui/mount"
 import { dressShadow, keepTheirStylesOff, theHost, theSheet } from "@/ui/theHost"
@@ -134,22 +134,22 @@ export const fileOf = (what: Wanted): { readonly script: string; readonly styles
   styles: STYLES
 })
 
-let decided: { readonly from: Arrival | null } | undefined
+let decided: { readonly from: Carried | null } | undefined
 
 /**
- * The arrival script if this document has one, read once and kept.
+ * The screens script if this document has one, read once and kept.
  *
  * Once, so a document takes every screen from one place: a script that turned up
  * after the first screen was imported would otherwise hand the next one a second
  * copy of everything the first one holds.
  */
-export const arrived = (): Arrival | null => {
-  decided ??= { from: (globalThis as { [ARRIVAL]?: Arrival })[ARRIVAL] ?? null }
+export const carried = (): Carried | null => {
+  decided ??= { from: (globalThis as { [CARRIED]?: Carried })[CARRIED] ?? null }
   return decided.from
 }
 
 /** Lets Chromium fetch and compile a screen before navigation needs its exports. */
-export const preloadScreen = (what: Wanted, from: Arrival | null = arrived()): boolean => {
+export const preloadScreen = (what: Wanted, from: Carried | null = carried()): boolean => {
   // Already compiled, in the script that carried it here.
   if (from !== null) return false
 
@@ -261,7 +261,7 @@ const dressed = (at: string, text?: string): Effect.Effect<void> =>
 /**
  * Once the parser has made `document.head`.
  *
- * A screen from the arrival script can be asked for at `document_start`, when the
+ * A screen from the screens script can be asked for at `document_start`, when the
  * document is a root element and nothing else, and modules under it append to the
  * head as they are evaluated. One imported by URL never could: its fetch alone
  * outlasted the parser's first few nodes.
@@ -295,7 +295,7 @@ const held = new Map<Wanted, Screen>()
  */
 export const screenFor = (
   what: Wanted,
-  from: Arrival | null = arrived()
+  from: Carried | null = carried()
 ): Effect.Effect<Screen, Cause.UnknownError> =>
   Effect.suspend(() => {
     const had = held.get(what)

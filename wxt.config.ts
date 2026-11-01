@@ -5,8 +5,8 @@ import { defineConfig, type TargetBrowser } from "wxt"
 
 const here = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 
-/** The documents the arrival script is injected into, ahead of the shell. */
-export const ARRIVING = ["*://github.com/*/*/pull/*"]
+/** The documents the screens script is injected into, ahead of the shell. */
+export const CARRYING = ["*://github.com/*/*/pull/*"]
 
 /** One `content_scripts` entry, as much of it as this reads. */
 type Injected = {
@@ -17,20 +17,20 @@ type Injected = {
 
 /**
  * The shell's entry, split in two: the documents that arrive on a pull request get
- * the arrival script first and the shell after it, and every other document gets
- * the shell alone. See `Arrival` in `src/app/arrival.ts`.
+ * the screens script first and the shell after it, and every other document gets
+ * the shell alone. See `Carried` in `src/app/carried.ts`.
  *
  * One entry with both scripts rather than an entry of its own, because Chrome runs
  * the scripts of one entry in the order they are listed, and the shell has to find
- * the arrival script already there. And the shell's own entry stays off those
+ * the screens script already there. And the shell's own entry stays off those
  * documents, or the shell would be injected twice.
  */
-export const arrivingOn = <Entry extends Injected>(scripts: ReadonlyArray<Entry>): Array<Entry> =>
+export const carryingOn = <Entry extends Injected>(scripts: ReadonlyArray<Entry>): Array<Entry> =>
   scripts.flatMap((entry) =>
     entry.js?.includes("content-scripts/shell.js") === true
       ? [
-          { ...entry, matches: ARRIVING, js: ["arrival.js", ...entry.js] },
-          { ...entry, exclude_matches: [...(entry.exclude_matches ?? []), ...ARRIVING] }
+          { ...entry, matches: CARRYING, js: ["carried.js", ...entry.js] },
+          { ...entry, exclude_matches: [...(entry.exclude_matches ?? []), ...CARRYING] }
         ]
       : [entry]
   )
@@ -66,12 +66,12 @@ export default defineConfig({
    */
   webExt: { disabled: true },
   hooks: {
-    // A build only, and only once `scripts/build-arrival.ts` has written the script:
+    // A build only, and only once `scripts/build-carried.ts` has written the script:
     // the dev server does not rebuild it, and a manifest naming a file that is not
     // there is an extension that will not load.
     "build:manifestGenerated": (wxt, manifest) => {
-      if (wxt.config.command !== "build" || !existsSync(here("public/arrival.js"))) return
-      manifest.content_scripts = arrivingOn(manifest.content_scripts ?? [])
+      if (wxt.config.command !== "build" || !existsSync(here("public/carried.js"))) return
+      manifest.content_scripts = carryingOn(manifest.content_scripts ?? [])
     }
   },
   manifest: ({ browser }) => ({

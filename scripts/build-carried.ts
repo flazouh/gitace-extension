@@ -2,10 +2,10 @@
  * Builds every screen into one classic script, for a document that arrives on a
  * pull request.
  *
- *     bun run build:arrival    (and as part of `bun run build`, after the screens)
+ *     bun run build:carried    (and as part of `bun run build`, after the screens)
  *
- * Why, and why every screen: see `Arrival` in `src/app/arrival.ts`. The manifest
- * injects it ahead of the shell on those documents; see `arrivingOn` in
+ * Why, and why every screen: see `Carried` in `src/app/carried.ts`. The manifest
+ * injects it ahead of the shell on those documents; see `carryingOn` in
  * `wxt.config.ts`.
  *
  * After `build-screens.ts`, because it carries the stylesheet that build writes, as
@@ -21,7 +21,7 @@ import { asciiOnly } from "./ascii"
 import { define, here, intro, plugins, resolve } from "./screenBuild"
 
 /** Where the manifest names it. */
-const OUT = here("../public/arrival.js")
+const OUT = here("../public/carried.js")
 
 const css = readFileSync(here("../public/screens/styles.css"), "utf8")
 
@@ -30,14 +30,14 @@ const result = (await build({
   publicDir: false,
   plugins: plugins(),
   resolve,
-  define: { ...define, __ARRIVAL_CSS__: JSON.stringify(css) },
+  define: { ...define, __CARRIED_CSS__: JSON.stringify(css) },
   base: "./",
   build: {
     write: false,
     target: "chrome120",
     minify: true,
     rollupOptions: {
-      input: here("../src/screens/arrival.ts"),
+      input: here("../src/screens/carried.ts"),
       output: { format: "iife", intro },
       onwarn: (warning, warn) => {
         // A classic script has no `import.meta`, and the bundler writes `{}` for it.
@@ -54,13 +54,13 @@ const result = (await build({
 const chunks = result.output.filter((item) => item.type === "chunk")
 const [script] = chunks
 if (script === undefined || chunks.length !== 1)
-  throw new Error(`expected one script for the arrival, built ${chunks.length}`)
+  throw new Error(`expected one script for the carried screens, built ${chunks.length}`)
 
 // The renderer is a file of its own, fetched when a diff is drawn. Modules here are
 // kept whole, so one import of anything from the engine carried the whole library
 // and every grammar in it, three megabytes in front of each pull request.
 const renderer = Object.keys(script.modules).find((id) => id.includes("node_modules/@pierre/diffs/"))
-if (renderer !== undefined) throw new Error(`the diff renderer was built into the arrival, through ${renderer}`)
+if (renderer !== undefined) throw new Error(`the diff renderer was built into the carried screens, through ${renderer}`)
 
 writeFileSync(OUT, asciiOnly(script.code))
-console.log("built public/arrival.js")
+console.log("built public/carried.js")

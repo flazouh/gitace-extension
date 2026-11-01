@@ -1,15 +1,15 @@
 /**
  * Every screen in one classic script, for a document that arrived on a pull
- * request. See `Arrival` in `src/app/arrival.ts`, and `scripts/build-arrival.ts`.
+ * request. See `Carried` in `src/app/carried.ts`, and `scripts/build-carried.ts`.
  *
  * Imported lazily so that nothing runs until the shell asks: the build inlines
  * each import as a function that evaluates its module on the first call.
  */
-import { ARRIVAL, type Arrival } from "@/app/arrival"
+import { CARRIED, type Carried } from "@/app/carried"
 
-declare const __ARRIVAL_CSS__: string
+declare const __CARRIED_CSS__: string
 
-const arrival: Arrival = {
+const carried: Carried = {
   screens: {
     "pull-request": () => import("./pullRequest"),
     commit: () => import("./commit"),
@@ -33,7 +33,7 @@ const arrival: Arrival = {
     compare: () => import("./compare"),
     "sign-on": () => import("./signOn")
   },
-  css: __ARRIVAL_CSS__
+  css: __CARRIED_CSS__
 }
 
-;(globalThis as { [ARRIVAL]?: Arrival })[ARRIVAL] = arrival
+;(globalThis as { [CARRIED]?: Carried })[CARRIED] = carried

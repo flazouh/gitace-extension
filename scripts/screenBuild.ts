@@ -1,6 +1,6 @@
 /**
  * What every build of the screens agrees on: `build-screens.ts`, which publishes
- * them as modules, and `build-arrival.ts`, which carries them in one classic
+ * them as modules, and `build-carried.ts`, which carries them in one classic
  * script. Two builds of one source with different aliases would be two different
  * interfaces, depending on how a document was reached.
  */
