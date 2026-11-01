@@ -363,11 +363,12 @@ const STANDINGS_KEPT = 2000
 /**
  * How many of these facts are kept.
  *
- * Two per pull request, at under a hundred bytes each: four hundred is two hundred
- * pull requests, which is every list a reader has open several times over, and
- * still smaller than one of the forty pull requests kept above.
+ * Two per pull request, at under a hundred bytes each: four thousand is two lists of a
+ * thousand, which is the most one list reads, and under half a megabyte. It was four
+ * hundred, and one visit to a busy repository's list wrote that many on its own: every
+ * other list lost its sizes and stacks and asked GitHub for all of them again.
  */
-const ROWS_KEPT = 400
+const ROWS_KEPT = 4000
 
 type Held<Value> = { readonly at: number; readonly value: Value }
 

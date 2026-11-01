@@ -584,6 +584,19 @@ describe("keeping what each row of a long list showed", () => {
     expect(kept.standings.size).toBe(1000)
   })
 
+  test("keeps a short list's sizes after a long list's are kept", async () => {
+    const short = rowsOf(3)
+    const long = Array.from({ length: 1000 }, (_, at) => ({
+      id: `OTHER_${at}`,
+      reference: { owner: "someone", repo: "busy", number: at + 1 }
+    }))
+
+    await Promise.all(short.map((one) => Effect.runPromise(rememberSize(one.reference, sizeOf))))
+    for (const one of long) await Effect.runPromise(rememberSize(one.reference, sizeOf))
+
+    expect((await Effect.runPromise(recallRows(short))).sizes.size).toBe(3)
+  })
+
   test("loses no row to writes that land at the same moment", async () => {
     // Each size is kept by its own fiber the moment it is read, and two of them reading
     // the index, adding their key and writing it back each dropped the other's key.
