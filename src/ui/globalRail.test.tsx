@@ -219,6 +219,31 @@ describe("the sidebar control", () => {
     expect(went).toEqual(["working-set", "home"])
   })
 
+  test("takes the reader Home itself from a page, rather than loading the document", async () => {
+    const person = userEvent.setup()
+    const went: Array<string> = []
+    window.history.replaceState(null, "", "/issues")
+    render(
+      <GlobalRail
+        where={{ kind: "repository", owner: "oven-sh", repo: "bun" }}
+        at="/issues"
+        destination="activity"
+        onDestination={(which) => went.push(which)}
+      />
+    )
+
+    const loads: Array<boolean> = []
+    const heard = (event: Event) => loads.push(!event.defaultPrevented)
+    document.addEventListener("click", heard)
+
+    await person.click(within(rail()).getByRole("link", { name: "Working Set" }))
+    document.removeEventListener("click", heard)
+
+    expect(went).toEqual(["working-set"])
+    expect(loads).toEqual([false])
+    expect(window.location.pathname).toBe("/")
+  })
+
   test("is not offered where there is no left column", () => {
     render(<GlobalRail where={{ kind: "repository", owner: "oven-sh", repo: "bun" }} />)
 
