@@ -115,6 +115,18 @@ describe("reading the whole Working Set", () => {
     expect(Option.isNone(sittings[0]!.piles[0]!.one.checks)).toBe(true)
   })
 
+  test("asks for the checks of a pull request on two shelves once", async () => {
+    const asked = intercept((url) => {
+      if (url.includes("filter=needs-action") || url.includes("filter=waiting-for-review")) return aShelf([aRow()])
+      return oneRow(url)
+    })
+
+    await read()
+
+    const deferred = asked.filter((url) => url.includes("/pulls/inbox/deferred"))
+    expect(deferred.join(" ").split("PR_kwDOABCDE84AAAAB")).toHaveLength(2)
+  })
+
   test("does not ask for branches where no stack could exist", async () => {
     // A repository with one pull request in the Working Set has nothing to stack
     // it on, and each of these reads is a whole merge_box.

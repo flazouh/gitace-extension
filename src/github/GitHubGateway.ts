@@ -2986,8 +2986,10 @@ export const layer = Layer.succeed(GitHubGateway, {
       // Concurrently, because the batches are independent and a Working Set of
       // forty is five round trips that would otherwise be taken one at a time
       // while the reader looks at rows with no checks on them.
+      // Once each: a pull request on two shelves is passed twice, and asked twice it was
+      // a batch more on Home for answers already in another.
       const batches = yield* Effect.all(
-        inBatches(ids).map((batch) =>
+        inBatches([...new Set(ids)]).map((batch) =>
           Effect.gen(function* () {
             const route = deferredRoute(batch)
             const raw = yield* fetchViewerRoute(route)
