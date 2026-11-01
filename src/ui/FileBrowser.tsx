@@ -970,7 +970,7 @@ export const FileBrowser = ({
 
           return waiting === undefined ? (
             <span
-              className="hidden shrink-0 items-center gap-1.5 text-xs text-ink-muted tabular-nums @[46rem]/band:flex"
+              className="hidden shrink-0 items-center gap-1.5 text-xs text-ink-muted tabular-nums @[50rem]/band:flex"
               title={held}
             >
               {bar}
@@ -980,7 +980,7 @@ export const FileBrowser = ({
               type="button"
               onClick={() => onward(waiting)}
               title={`${held}. Go to the first that has not been: ${waiting.path}`}
-              className="hidden shrink-0 items-center gap-1.5 rounded-md px-1.5 py-0.5 text-xs text-ink-muted tabular-nums hover:bg-hover hover:text-ink @[46rem]/band:flex"
+              className="hidden shrink-0 items-center gap-1.5 rounded-md px-1.5 py-0.5 text-xs text-ink-muted tabular-nums hover:bg-hover hover:text-ink @[50rem]/band:flex"
             >
               {bar}
             </button>
@@ -995,7 +995,7 @@ export const FileBrowser = ({
             type="button"
             onClick={putAllBack}
             title="Every file back to unread, so the whole pull request can be read again"
-            className="hidden shrink-0 rounded-md px-1.5 py-0.5 text-xs text-ink-muted hover:bg-hover hover:text-ink @[50rem]/band:block"
+            className="hidden shrink-0 rounded-md px-1.5 py-0.5 text-xs text-ink-muted hover:bg-hover hover:text-ink @[56rem]/band:block"
           >
             Put all back
           </button>

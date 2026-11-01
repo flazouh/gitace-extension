@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs"
 import { describe, expect, test } from "bun:test"
 
 const desk = () => readFileSync("src/ui/desk.css", "utf8")
+const files = () => readFileSync("src/ui/FileBrowser.tsx", "utf8")
 
 const rule = (selector: string): string => {
   const at = desk().indexOf(`${selector} {`)
@@ -52,5 +53,15 @@ describe("an 800-pixel window, which scrolled sideways", () => {
     for (const track of ["--d-t-title", "--d-t-number", "--d-t-checks", "--d-t-age"])
       expect(step).toContain(`${track}: 0px;`)
     expect(step).toContain(".d-col-number, .d-col-checks, .d-col-age")
+  })
+})
+
+describe("the band over a pull request's files", () => {
+  test("brings its quieter parts back only where the band holds them beside its buttons", () => {
+    // Measured at 1440 pixels on a pull request of 27 files: the band was 52rem, everything
+    // in it took 54rem, and the menu at its end was cut by the panel.
+    expect(files()).not.toMatch(/@\[(4[0-9])rem\]\/band:flex/)
+    expect(files()).toContain("@[50rem]/band:flex")
+    expect(files()).toContain("@[56rem]/band:block")
   })
 })
