@@ -110,7 +110,7 @@ export const IssueListScreen = ({
     // the answer or the dissolve has nothing to start from.
     <div className="relative">
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
-      <TheBar
+      <TheBar onStepAside={onStepAside}
         where={{ kind: "repository", owner: repo.owner, repo: repo.repo }}
         recall={recallRepositories}
       />

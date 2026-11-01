@@ -2,7 +2,8 @@ import { Effect, Option, Semaphore } from "effect"
 import type { Stat } from "../domain/commitList"
 import { keyOf, type PullRequestRef } from "../domain/PullRequestRef"
 import type { Branches } from "../domain/sittings"
-import type { CheckRollup, Opinion, Size, Sizes, Standings } from "../domain/workingSet"
+import type { CheckRollup, Opinion, Size } from "../domain/workingSet"
+import type { RememberedRows } from "../ports/GitHubGateway"
 import type { ForgetfulKeyValue } from "../ports/KeyValue"
 import type { RawPayloads } from "./snapshot"
 
@@ -362,11 +363,12 @@ const STANDINGS_KEPT = 2000
 /**
  * How many of these facts are kept.
  *
- * Two per pull request, at under a hundred bytes each: four hundred is two hundred
- * pull requests, which is every list a reader has open several times over, and
- * still smaller than one of the forty pull requests kept above.
+ * Two per pull request, at under a hundred bytes each: four thousand is two lists of a
+ * thousand, which is the most one list reads, and under half a megabyte. It was four
+ * hundred, and one visit to a busy repository's list wrote that many on its own: every
+ * other list lost its sizes and stacks and asked GitHub for all of them again.
  */
-const ROWS_KEPT = 400
+const ROWS_KEPT = 4000
 
 type Held<Value> = { readonly at: number; readonly value: Value }
 
@@ -441,8 +443,24 @@ const keepRow = Effect.fn("snapshots.keepRow")(function* (
 export const rememberBranches = (reference: PullRequestRef, branches: Branches) =>
   keepRow(rowKey(BRANCHES, reference), branches)
 
-export const rememberSize = (reference: PullRequestRef, size: Size) =>
-  keepRow(rowKey(SIZE, reference), size)
+/**
+ * A size, with the commit it was counted at where the caller knows it.
+ *
+ * The count changes only when the head does, and every row of a list says its head, so
+ * a size kept with one is a read the next visit does not have to make at all.
+ */
+export const rememberSize = (reference: PullRequestRef, size: Size, head?: string) =>
+  keepRow(rowKey(SIZE, reference), head === undefined ? size : { ...size, head })
+
+/**
+ * How long a pull request's branches are taken as read.
+ *
+ * Its head branch never changes. Its base does when it is retargeted, which is rare, and
+ * the common case — the layer under it landing — takes that layer off the list, which
+ * unstacks the row whatever is kept. A day is a merge box per row a day rather than per
+ * visit.
+ */
+const BRANCHES_FOR = 24 * 60 * 60 * 1000
 
 /**
  * The checks of a whole list at once: one write for the values and one for the index.
@@ -479,17 +497,12 @@ export const rememberStandings = Effect.fn("snapshots.rememberStandings")(functi
   yield* keepRecent(store, STANDINGS_INDEX, Object.keys(items), STANDINGS_KEPT)
 })
 
-/**
- * What is kept about these rows: their stacks by name, their sizes and their
- * standings by id.
- */
-export type RememberedRows = {
-  readonly branches: ReadonlyMap<string, Branches>
-  readonly sizes: Sizes
-  readonly standings: Standings
+const nothingKept: RememberedRows = {
+  branches: new Map(),
+  sizes: new Map(),
+  standings: new Map(),
+  stillTrue: { sizes: new Set(), branches: new Set() }
 }
-
-const nothingKept: RememberedRows = { branches: new Map(), sizes: new Map(), standings: new Map() }
 
 /**
  * Everything kept about a list's rows, in one read of the store.
@@ -499,7 +512,8 @@ const nothingKept: RememberedRows = { branches: new Map(), sizes: new Map(), sta
  * spent on the one path whose whole purpose is to answer before the network can.
  */
 export const recallRows = Effect.fn("snapshots.recallRows")(function* (
-  rows: ReadonlyArray<{ readonly id: string; readonly reference: PullRequestRef }>
+  rows: ReadonlyArray<{ readonly id: string; readonly reference: PullRequestRef; readonly headSha?: string }>,
+  now: number = Date.now()
 ) {
   const store = area()
   if (store === undefined || rows.length === 0) return nothingKept
@@ -519,13 +533,22 @@ export const recallRows = Effect.fn("snapshots.recallRows")(function* (
   const branches = new Map<string, Branches>()
   const sizes = new Map<string, Size>()
   const standings = new Map<string, { checks: Option.Option<CheckRollup>; reviewed: Option.Option<Opinion> }>()
+  const sized = new Set<string>()
+  const branched = new Set<string>()
 
   for (const one of rows) {
     const stack: unknown = held[rowKey(BRANCHES, one.reference)]
-    if (isHeld(stack) && areBranches(stack.value)) branches.set(keyOf(one.reference), stack.value)
+    if (isHeld(stack) && areBranches(stack.value)) {
+      branches.set(keyOf(one.reference), { baseBranch: stack.value.baseBranch, headBranch: stack.value.headBranch })
+      if (now - stack.at < BRANCHES_FOR) branched.add(keyOf(one.reference))
+    }
 
     const size: unknown = held[rowKey(SIZE, one.reference)]
-    if (isHeld(size) && isSize(size.value)) sizes.set(one.id, size.value)
+    if (isHeld(size) && isSize(size.value)) {
+      sizes.set(one.id, { added: size.value.added, deleted: size.value.deleted })
+      const head: unknown = (size.value as { head?: unknown }).head
+      if (one.headSha !== undefined && head === one.headSha) sized.add(one.id)
+    }
 
     const standing: unknown = held[`${STANDING}${one.id}`]
     if (isHeld(standing) && isStanding(standing.value)) {
@@ -536,7 +559,7 @@ export const recallRows = Effect.fn("snapshots.recallRows")(function* (
     }
   }
 
-  return { branches, sizes, standings } satisfies RememberedRows
+  return { branches, sizes, standings, stillTrue: { sizes: sized, branches: branched } } satisfies RememberedRows
 })
 
 /**

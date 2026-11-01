@@ -3,6 +3,7 @@ import { heldDown, type Command, type Keys } from "../keys/commands"
 import { commandFor, read, type Waiting } from "../keys/match"
 import { ROOT_ID } from "./mount"
 import { useScreenActivity, useScreenRoot } from "./screenActivity"
+import { ourTree } from "./theHost"
 
 /**
  * The part of the page that is ours.
@@ -75,7 +76,10 @@ const somethingIsUp = (within: ParentNode): boolean =>
  * Where there is no such element — a test, a page this was never mounted on —
  * the document is still the honest answer.
  */
-const scopeIn = (target: Document): ParentNode => target.getElementById(ROOT_ID) ?? target
+const standingRoot = (target: Document): HTMLElement | null =>
+  target.getElementById(ROOT_ID) ?? ourTree(target)?.getElementById(ROOT_ID) ?? null
+
+const scopeIn = (target: Document): ParentNode => standingRoot(target) ?? target
 
 /**
  * Whether this tree is the one the reader is looking at.
@@ -87,7 +91,7 @@ const scopeIn = (target: Document): ParentNode => target.getElementById(ROOT_ID)
  */
 const ownsThePage = (host: Element | undefined, page: Document): boolean => {
   if (host !== undefined && !host.isConnected) return false
-  const standing = page.getElementById(ROOT_ID)
+  const standing = standingRoot(page)
   return host === undefined || standing === null || standing === host
 }
 

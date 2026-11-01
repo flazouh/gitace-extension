@@ -13,9 +13,10 @@
  * anything.
  */
 
-import { Effect } from "effect"
+import { Effect, Option } from "effect"
 import type { Listing, ListedRepository } from "../domain/life"
 import type { PersonPage } from "../domain/person"
+import { theirRepositoryCount } from "../github/person"
 import { hasNextIn, isTheirRepositories, repositoriesIn } from "../github/personRepos"
 import { GitHubGateway } from "../ports/GitHubGateway"
 
@@ -44,13 +45,25 @@ export const theirFirstPage = (page: Document): Listing =>
     ? { rows: repositoriesIn(page), more: hasNextIn(page) }
     : { rows: [], more: false }
 
+/** Thirty, which is how many rows one page of their tab holds. */
+const PER_PAGE = 30
+
+/**
+ * How many of their documents are asked for at once, where it is known how many there are.
+ *
+ * Two. A person with 154 repositories is five documents of a third of a megabyte each,
+ * and asking for all five at once is the kind of thing GitHub is entitled to answer with
+ * a 429 — which would cost the reader the whole list rather than the tail of it. Two is
+ * what a reader paging their tab by hand comes to, and it halves the walk: measured on a
+ * profile, pages two and three one after the other were two seconds of the screen.
+ */
+const PAGES_AT_ONCE = 2
+
 /**
  * Every page after the first, in order, until their pager runs out or the cap does.
  *
- * One at a time and never in parallel. A person with 154 repositories is five requests
- * for documents of a third of a megabyte each, and asking for all five at once is the
- * kind of thing GitHub is entitled to answer with a 429 — which would cost the reader
- * the whole list rather than the tail of it.
+ * Two at a time where `pages` says how many there are, and one at a time where it does
+ * not, because then only each page's own pager says whether there is another.
  *
  * Comes back with what it managed to read. A page that fails ends the walk rather than
  * failing the whole read: four pages of five is a list with a group count that is
@@ -58,15 +71,29 @@ export const theirFirstPage = (page: Document): Listing =>
  */
 export const theirOtherPages = Effect.fn("theirOtherPages")(function* (
   page: PersonPage,
-  upTo: number = AT_MOST
+  upTo: number = AT_MOST,
+  /** How many pages their list is, where their tab's counter said. */
+  pages?: number
 ) {
   const gateway = yield* GitHubGateway
   const rows: Array<Listing["rows"][number]> = []
-
-  for (let wanted = 2; wanted <= upTo; wanted += 1) {
-    const listing = yield* gateway
+  const read = (wanted: number) =>
+    gateway
       .personRepositories(page.login, wanted, page.narrowing)
       .pipe(Effect.orElseSucceed(() => ({ rows: [], more: false }) as Listing))
+
+  if (pages !== undefined) {
+    const wanted = Array.from({ length: Math.max(0, Math.min(pages, upTo) - 1) }, (_, at) => at + 2)
+    const listings = yield* Effect.forEach(wanted, read, { concurrency: PAGES_AT_ONCE })
+    for (const listing of listings) {
+      rows.push(...listing.rows)
+      if (!listing.more || listing.rows.length === 0) return { rows, more: false }
+    }
+    return { rows, more: pages > upTo }
+  }
+
+  for (let wanted = 2; wanted <= upTo; wanted += 1) {
+    const listing = yield* read(wanted)
 
     rows.push(...listing.rows)
     if (!listing.more || listing.rows.length === 0) return { rows, more: false }
@@ -125,6 +152,9 @@ export const theirWholeList = Effect.fn("theirWholeList")(function* (
   sofar({ rows: first.rows, capped: false })
   if (!first.more) return { rows: first.rows, capped: false }
 
-  const rest = yield* theirOtherPages(page, upTo)
+  // Their counter is the whole list, so it plans the walk only where nothing narrows it.
+  const filters = [...new URLSearchParams(page.narrowing)].filter(([name, value]) => name !== "tab" && value !== "")
+  const counted = filters.length === 0 ? Option.getOrUndefined(theirRepositoryCount(served)) : undefined
+  const rest = yield* theirOtherPages(page, upTo, counted === undefined ? undefined : Math.ceil(counted / PER_PAGE))
   return { rows: [...first.rows, ...rest.rows], capped: rest.more }
 })

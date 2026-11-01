@@ -6,7 +6,7 @@ import type { PullRequestRef } from "@/domain/PullRequestRef"
 import { addressFor, type RepoList, repoListIn, seeding } from "@/domain/repoList"
 import { reportError } from "@/observability/report"
 import type { View } from "@/domain/Settings"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -205,7 +205,7 @@ const open = (
 
   return standAScreen({
     place: REPO_PULLS,
-    draw: (standing) => (
+    draw: () => (
       <RepoPullsScreen
         at={at}
         repo={list.repo}
@@ -216,11 +216,14 @@ const open = (
         where={openedNamed("repo-pulls", list)}
         seed={seeding(list)}
         onQuery={asked}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
       />
     )
   }).close
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -314,6 +317,15 @@ export const start = (): void => {
   }
 
   // The whole address, not the path: the search lives in the query.
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+  function useGitHub(): void {
+    view = "github"
+    rememberView(store, "github")
+    standingFor = undefined
+    show(window.location.href)
+  }
+  toGitHub = useGitHub
+
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {
     view = "ours"

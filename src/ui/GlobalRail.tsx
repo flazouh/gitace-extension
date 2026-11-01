@@ -5,6 +5,7 @@ import { THE_HOME } from "../domain/pages"
 import type { Repository } from "../domain/repositories"
 import { useArt } from "./art"
 import type { Where } from "./Bar"
+import { goTo } from "./going"
 import { Menu, type Row } from "./Menu"
 import { participantRows } from "./participant"
 import { openTab } from "../app/openTab"
@@ -135,10 +136,16 @@ export const GlobalRail = ({
     else if (onHome !== undefined) {
       event.preventDefault()
       onHome()
+    } else if (onDestination !== undefined) {
+      event.preventDefault()
+      goTo(window, THE_HOME)
     }
   }
 
-  const inPlace = where.kind === "home" ? "" : undefined
+  // Off Home too, wherever this answers the press: the shell claims an unmarked link of ours
+  // on `pointerdown` and stops its click, and the Destination was never stored.
+  const inPlace =
+    where.kind === "home" || onDestination !== undefined || onHome !== undefined ? "" : undefined
 
   const [pinnedOwner, pinnedRepo] = pinned[0]?.split("/") ?? []
   const aimedAt =

@@ -170,12 +170,16 @@ const allPages = Effect.fn("repoList.allPages")(function* (
 })
 
 const branchesOf = Effect.fn("repoList.branchesOf")(function* (
-  rows: ReadonlyArray<InvolvedPullRequest>
+  rows: ReadonlyArray<InvolvedPullRequest>,
+  /** The pull requests whose kept branches need no read, by name. */
+  known: ReadonlySet<string>
 ) {
   const gateway = yield* GitHubGateway
 
   const found = yield* Effect.all(
-    worthAskingForBranches(rows).map((reference) =>
+    worthAskingForBranches(rows)
+      .filter((reference) => !known.has(keyOf(reference)))
+      .map((reference) =>
       gateway.branches(reference).pipe(
         Effect.orElseSucceed((): Option.Option<Branches> => Option.none()),
         Effect.map((branches) => [keyOf(reference), branches] as const)
@@ -325,6 +329,8 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
   )
   /** The checks and reviews asked for before the pages behind them land. */
   let early: Standings = new Map()
+  /** Every row those early reads answered for, including the ones with nothing to say. */
+  const answeredEarly = new Set<string>()
   let paged: Paged | undefined
   /** Which draw is the latest, so a slow one cannot land over a newer list. */
   let drawn = 0
@@ -370,6 +376,7 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
   const standingsOf = (rows: ReadonlyArray<InvolvedPullRequest>) =>
     gateway.standingsFor(rows.map((one) => one.id)).pipe(
       Effect.flatMap((standings) => {
+        for (const one of rows) answeredEarly.add(one.id)
         early = new Map([...early, ...standings])
         return draw
       }),
@@ -439,7 +446,8 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
 
   // Over what the early reads found rather than instead of it: a row this answer leaves
   // out keeps the checks it was already drawn with.
-  const standings = yield* gateway.standingsFor(rows.map((one) => one.id)).pipe(
+  // Not the rows the early reads already asked about, seconds ago.
+  const standings = yield* gateway.standingsFor(rows.map((one) => one.id).filter((id) => !answeredEarly.has(id))).pipe(
     Effect.map((all): Standings => new Map([...early, ...all])),
     Effect.orElseSucceed((): Standings => early)
   )
@@ -452,13 +460,14 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
   // boxes, so holding one behind the other would cost the reader five seconds of
   // a column that was ready.
   const sizing = yield* Effect.forkChild(
-    sizesOf(known).pipe(
+    // Only what the store cannot vouch for: on a second visit that is the rows that moved.
+    sizesOf(known.filter((one) => !kept.stillTrue.sizes.has(one.id))).pipe(
       Effect.tap((sizes) => Effect.sync(() => partly(sofar(withSizes(known, sizes)))))
     ),
     { startImmediately: true }
   )
 
-  const branches = yield* branchesOf(known)
+  const branches = yield* branchesOf(known, kept.stillTrue.branches)
   const measured = withSizes(known, yield* Fiber.join(sizing))
 
   return {

@@ -232,6 +232,12 @@ export type RememberedRows = {
   readonly branches: ReadonlyMap<string, Branches>
   readonly sizes: Sizes
   readonly standings: Standings
+  /**
+   * What is kept and needs no read to confirm: sizes counted at the head the row has
+   * now, by id, and branches read recently enough that a retarget is unlikely, by name.
+   * A list asks GitHub only for the rest.
+   */
+  readonly stillTrue: { readonly sizes: ReadonlySet<string>; readonly branches: ReadonlySet<string> }
 }
 
 /**
@@ -1250,7 +1256,7 @@ export class GitHubGateway extends Context.Service<
      * same at seventy bytes an answer, where the changes route carries the same
      * two numbers under three quarters of a megabyte of the diffs behind them.
      */
-    readonly sizeOf: (reference: PullRequestRef) => Effect.Effect<Size, GatewayError>
+    readonly sizeOf: (reference: PullRequestRef, head?: string) => Effect.Effect<Size, GatewayError>
     /**
      * The stacks and the sizes already known about these rows, from the store.
      *
@@ -1266,7 +1272,7 @@ export class GitHubGateway extends Context.Service<
      * only way to find out.
      */
     readonly rememberedRows: (
-      rows: ReadonlyArray<{ readonly id: string; readonly reference: PullRequestRef }>
+      rows: ReadonlyArray<{ readonly id: string; readonly reference: PullRequestRef; readonly headSha?: string }>
     ) => Effect.Effect<RememberedRows>
     /**
      * Who somebody is, as their own hovercard tells it.

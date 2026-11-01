@@ -5,6 +5,8 @@ import { personPageIn } from "../domain/person"
 import { AT_MOST, type TheirList, theirFirstPage, theirOtherPages, theirWholeList } from "./personRepos"
 
 const real = await Bun.file("tests/fixtures/personRepos.html").text()
+/** The same page with no counter on their tab, so only each page's pager says whether there is more. */
+const uncounted = real.replaceAll('<span title="55" data-view-component="true" class="Counter">55</span>', "")
 const last = await Bun.file("tests/fixtures/personReposArchived.html").text()
 
 const realFetch = globalThis.fetch
@@ -86,6 +88,29 @@ describe("the pages behind it", () => {
     expect(asked[2]).toContain("page=4")
   })
 
+  test("asks for the pages it knows are there two at a time", async () => {
+    const asked: Array<string> = []
+    let release = (): void => {}
+    const both = new Promise<void>((done) => {
+      release = done
+    })
+    globalThis.fetch = Object.assign(
+      async (input: RequestInfo | URL): Promise<Response> => {
+        asked.push(String(input))
+        if (asked.length === 2) release()
+        await both
+        return html(real)
+      },
+      { preconnect: realFetch.preconnect }
+    )
+
+    const rest = await Effect.runPromise(theirOtherPages(page, AT_MOST, 3).pipe(Effect.provide(layer)))
+
+    expect(asked.map((url) => new URL(url).searchParams.get("page"))).toEqual(["2", "3"])
+    expect(rest.rows).toHaveLength(60)
+    expect(rest.more).toBe(false)
+  })
+
   test("says so when it stopped at the cap rather than at the end", async () => {
     intercept(() => html(real))
 
@@ -163,10 +188,30 @@ describe("their whole list, in the order the screen needs it", () => {
     expect(all.rows).toHaveLength(34)
   })
 
+  test("plans the walk by the count on their tab", async () => {
+    // Their counter says 55, which is two pages, so page two is the last even though every
+    // page of this fixture offers a Next.
+    const asked = intercept(() => html(real))
+
+    const { all } = await walk(document_(real))
+
+    expect(asked).toHaveLength(1)
+    expect(all.rows).toHaveLength(60)
+  })
+
+  test("walks by their pager where the address narrows the list, since the counter does not", async () => {
+    const forks = Option.getOrThrow(personPageIn("https://github.com/flazouh?tab=repositories&type=fork"))
+    const asked = intercept((url) => html(url.includes("page=3") ? last : real))
+
+    await Effect.runPromise(theirWholeList(forks, document_(real), () => {}).pipe(Effect.provide(layer)))
+
+    expect(asked).toHaveLength(2)
+  })
+
   test("says when the walk stopped at the cap rather than at the end", async () => {
     intercept(() => html(real))
 
-    const { all } = await walk(document_(real))
+    const { all } = await walk(document_(uncounted))
 
     expect(all.capped).toBe(true)
     expect(all.rows).toHaveLength(30 * AT_MOST)

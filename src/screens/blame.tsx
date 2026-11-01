@@ -2,7 +2,7 @@ import { Effect, Option } from "effect"
 import { rememberedRepositories } from "@/app/destinations"
 import { loadBlame } from "@/app/blame"
 import { forgetIntent, intendedPath } from "@/app/intent"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -44,7 +44,7 @@ const open = (at: BlameAt, path: string): (() => void) => {
 
   return standAScreen({
     place: BLAME,
-    draw: (standing) => (
+    draw: () => (
       <BlameScreen
         repo={at.repo}
         branch={at.branch}
@@ -53,11 +53,14 @@ const open = (at: BlameAt, path: string): (() => void) => {
         where={openedNamed("blame", at)}
         load={read}
         recallRepositories={recallRepositories}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
       />
     )
   }).close
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -122,6 +125,23 @@ export const start = (): void => {
     close = open(at.value, new URL(url, window.location.origin).pathname)
     on = address
   }
+
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+
+  function useGitHub(): void {
+
+    view = "github"
+
+    rememberView(store, "github")
+
+    on = undefined
+
+    show(window.location.href)
+
+  }
+
+  toGitHub = useGitHub
+
 
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {

@@ -108,7 +108,7 @@ const List = ({
                 }
                 className="d-gpr-link"
               >
-                <RepoTile name={one.repo} />
+                <RepoTile owner={one.owner} name={one.repo} />
                 <span aria-hidden="true" className="d-tt">
                   {address}
                 </span>

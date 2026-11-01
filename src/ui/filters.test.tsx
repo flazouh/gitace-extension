@@ -103,10 +103,17 @@ describe("the filter row above a list", () => {
     ).toBe("false")
   })
 
-  test("says on the chip itself how many of its terms are on", () => {
+  test("says on the chip what is chosen in it, not only that something is", () => {
+    showing("is:failing")
+
+    expect(chip(/Checks/).textContent).toBe("Failing")
+  })
+
+  test("names the first of several terms on the chip and counts the rest", () => {
     showing("is:failing is:running")
 
-    expect(chip(/Checks/).textContent).toContain("2")
+    expect(chip(/Checks/).textContent).toBe("Failing+1")
+    expect(chip(/Checks/).getAttribute("aria-label")).toBe("Checks: Failing, Running")
   })
 
   test("offers the authors who are actually on the screen, and the reader themselves", async () => {

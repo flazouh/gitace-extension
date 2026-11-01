@@ -361,6 +361,58 @@ describe("keeping the Working Set to open again", () => {
     expect(sittings[0]?.piles[0]?.above).toHaveLength(1)
   })
 
+  test("asks for no size or stack a second time when nothing about the rows moved", async () => {
+    // Measured on a live Home: thirty diffstats and thirty merge boxes on every visit, the
+    // merge boxes a chain five seconds long, for counts and branch names already kept.
+    asGitHub(twoShelvedAndMeasured)
+    await readWorkingSet()
+
+    const asked: Array<string> = []
+    asGitHub((url) => {
+      asked.push(url)
+      return twoShelvedAndMeasured(url)
+    })
+    const sittings = await readWorkingSetAnswering()
+
+    expect(asked.filter((url) => url.includes("/page_data/"))).toEqual([])
+    expect(sittings[0]?.piles[0]?.above).toHaveLength(1)
+    expect(sittings[0]?.piles[0]?.one.size).toEqual(Option.some({ added: 40, deleted: 4 }))
+  })
+
+  test("counts a row again once its head has moved", async () => {
+    asGitHub(twoShelvedAndMeasured)
+    await readWorkingSet()
+
+    const asked: Array<string> = []
+    asGitHub((url) => {
+      asked.push(url)
+      if (url.includes("/page_data/diffstat")) return Response.json({ diffstat: { linesAdded: 41, linesDeleted: 4 } })
+      if (url.includes("/pulls/inbox/queries") && url.includes("filter=needs-action")) {
+        return Response.json(shelfPayload([aRow(1, { headSha: "a-new-commit" }), aRow(2)]))
+      }
+      return twoShelvedAndMeasured(url)
+    })
+    const sittings = await readWorkingSetAnswering()
+
+    expect(asked.filter((url) => url.includes("/page_data/diffstat"))).toEqual([
+      "https://github.com/microsoft/vscode/pull/1/page_data/diffstat"
+    ])
+    expect(sittings[0]?.piles[0]?.one.size).toEqual(Option.some({ added: 41, deleted: 4 }))
+  })
+
+  test("reads a row's branches again a day on, since a base can be retargeted", async () => {
+    asGitHub(twoShelvedAndMeasured)
+    await readWorkingSet()
+    const rows = [1, 2].map((number) => ({ id: String(4_000_000 + number), reference: ref(number) }))
+
+    const soon = await Effect.runPromise(recallRows(rows, Date.now() + 60_000))
+    const later = await Effect.runPromise(recallRows(rows, Date.now() + 25 * 60 * 60 * 1000))
+
+    expect(soon.stillTrue.branches.size).toBe(2)
+    expect(later.stillTrue.branches.size).toBe(0)
+    expect(later.branches.size).toBe(2)
+  })
+
   test("gives back how the checks stood, which is half of what decides the Court", async () => {
     /*
      * This used to be kept out, on the grounds that a rollup from half an hour ago is
@@ -530,6 +582,19 @@ describe("keeping what each row of a long list showed", () => {
 
     const kept = await Effect.runPromise(recallRows(rows))
     expect(kept.standings.size).toBe(1000)
+  })
+
+  test("keeps a short list's sizes after a long list's are kept", async () => {
+    const short = rowsOf(3)
+    const long = Array.from({ length: 1000 }, (_, at) => ({
+      id: `OTHER_${at}`,
+      reference: { owner: "someone", repo: "busy", number: at + 1 }
+    }))
+
+    await Promise.all(short.map((one) => Effect.runPromise(rememberSize(one.reference, sizeOf))))
+    for (const one of long) await Effect.runPromise(rememberSize(one.reference, sizeOf))
+
+    expect((await Effect.runPromise(recallRows(short))).sizes.size).toBe(3)
   })
 
   test("loses no row to writes that land at the same moment", async () => {

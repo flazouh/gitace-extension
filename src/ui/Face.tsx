@@ -1,4 +1,6 @@
+import { useState } from "react"
 import { Option } from "effect"
+import { faceOf } from "./Who"
 
 /**
  * An owner's face, or their initial where GitHub gave none.
@@ -23,16 +25,38 @@ const badgeColor = (name: string): string => {
   return BADGE_PALETTE[Math.abs(hash) % BADGE_PALETTE.length] ?? "#f9a825"
 }
 
-/** A repository as a letter on its own colour, the mark a row and the Rail give it. */
-export const RepoTile = ({ name, big = false }: { readonly name: string; readonly big?: boolean }) => (
-  <span
-    aria-hidden="true"
-    className={big ? "d-rbadge" : "d-sw"}
-    style={{ background: badgeColor(name) }}
-  >
-    {name.slice(0, 1).toUpperCase()}
-  </span>
-)
+/**
+ * A repository as its owner's picture, the mark a row and the Rail give it, as GitHub marks one.
+ *
+ * The letter on its own colour is what is left where the picture will not load, so a row
+ * never shows a broken image or an empty square.
+ */
+export const RepoTile = ({
+  owner,
+  name,
+  big = false
+}: {
+  readonly owner: string
+  readonly name: string
+  readonly big?: boolean
+}) => {
+  const [broken, setBroken] = useState(false)
+  const size = big ? 22 : 16
+
+  return (
+    <span
+      aria-hidden="true"
+      className={big ? "d-rbadge" : "d-sw"}
+      style={broken ? { background: badgeColor(name) } : undefined}
+    >
+      {broken ? (
+        name.slice(0, 1).toUpperCase()
+      ) : (
+        <img alt="" src={faceOf(owner, size * 2)} width={size} height={size} onError={() => setBroken(true)} />
+      )}
+    </span>
+  )
+}
 
 export const Face = ({
   faceUrl,

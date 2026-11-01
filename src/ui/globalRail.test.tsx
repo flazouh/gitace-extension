@@ -197,6 +197,53 @@ describe("the sidebar control", () => {
     expect(within(rail()).getByRole("button", { name: "Show the sidebar" })).toBeDefined()
   })
 
+  test("keeps a Destination pressed off Home to itself, so the page cannot take it as a route", async () => {
+    // The shell claims a link of ours on `pointerdown` and stops its click before React
+    // sees it: Home opened, and the Destination pressed was never stored.
+    const person = userEvent.setup()
+    const went: Array<string> = []
+    render(
+      <GlobalRail
+        where={{ kind: "repository", owner: "oven-sh", repo: "bun" }}
+        at="/issues"
+        destination="activity"
+        onDestination={(which) => went.push(which)}
+        onHome={() => went.push("home")}
+      />
+    )
+    const workingSet = within(rail()).getByRole("link", { name: "Working Set" })
+
+    await person.click(workingSet)
+
+    expect(workingSet.hasAttribute("data-gitace-in-place")).toBe(true)
+    expect(went).toEqual(["working-set", "home"])
+  })
+
+  test("takes the reader Home itself from a page, rather than loading the document", async () => {
+    const person = userEvent.setup()
+    const went: Array<string> = []
+    window.history.replaceState(null, "", "/issues")
+    render(
+      <GlobalRail
+        where={{ kind: "repository", owner: "oven-sh", repo: "bun" }}
+        at="/issues"
+        destination="activity"
+        onDestination={(which) => went.push(which)}
+      />
+    )
+
+    const loads: Array<boolean> = []
+    const heard = (event: Event) => loads.push(!event.defaultPrevented)
+    document.addEventListener("click", heard)
+
+    await person.click(within(rail()).getByRole("link", { name: "Working Set" }))
+    document.removeEventListener("click", heard)
+
+    expect(went).toEqual(["working-set"])
+    expect(loads).toEqual([false])
+    expect(window.location.pathname).toBe("/")
+  })
+
   test("is not offered where there is no left column", () => {
     render(<GlobalRail where={{ kind: "repository", owner: "oven-sh", repo: "bun" }} />)
 

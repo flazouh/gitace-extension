@@ -306,6 +306,42 @@
   color: var(--d-muted);
 }
 
+:is(#gitace-root, [data-gitace-outside]) .d-search.d-palette {
+  width: 240px;
+  min-width: var(--d-control);
+  flex: 0 1 240px;
+  container: palette / inline-size;
+  border: 0;
+  text-align: left;
+}
+
+/* An 800-pixel window has no room for the label: the bar keeps the glass and the press. */
+@container palette (max-width: 120px) {
+  :is(#gitace-root, [data-gitace-outside]) :is(.d-palette-said, .d-palette .d-kbd) {
+    display: none;
+  }
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-palette-said {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-palette .d-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  flex: none;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-palette .d-kbd svg {
+  width: 11px;
+  height: 11px;
+  color: inherit;
+}
+
 :is(#gitace-root, [data-gitace-outside]) .d-kbd {
   margin-left: auto;
   padding: 2px 4px;
@@ -324,7 +360,9 @@
 
 :is(#gitace-root, [data-gitace-outside]) .d-projects {
   display: flex;
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
 }
 
@@ -524,6 +562,14 @@
   font: 600 9.5px/16px var(--font-sans);
   text-transform: uppercase;
   color: #141413;
+  overflow: hidden;
+}
+
+:is(#gitace-root, [data-gitace-outside]) :is(.d-sw, .d-rbadge) > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-gmain {
@@ -769,6 +815,20 @@
 
   :is(#gitace-root, [data-gitace-outside]) .d-repo-cell > .truncate {
     display: none;
+  }
+}
+
+/* Beside the sidebar in an 800-pixel window: the face, the title and whose move it is. */
+@container (max-width: 640px) {
+  :is(#gitace-root, [data-gitace-outside]) .d-ws-line {
+    --d-t-title: 0px;
+    --d-t-number: 0px;
+    --d-t-checks: 0px;
+    --d-t-age: 0px;
+  }
+
+  :is(#gitace-root, [data-gitace-outside]) :is(.d-col-number, .d-col-checks, .d-col-age) {
+    visibility: hidden;
   }
 }
 

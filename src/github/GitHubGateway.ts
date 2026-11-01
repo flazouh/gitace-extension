@@ -141,7 +141,7 @@ import { hashIn, hashOfMutationIn, nonceOn, releaseOn, servedFor, whenAsked } fr
 import { scopedRepositoryIn } from "./scoped"
 import { decodeUploadedAsset, decodeUploadPolicy, repositoryNumberFor } from "./uploading"
 import { asLanded, landedNow, recordLanded, seeded } from "./landed"
-import { preloadedIn } from "./preloaded"
+import { preloadedIn, routedIn, routedOn } from "./preloaded"
 import { repositoriesFrom } from "./repositories"
 import { decodeSidebar, standingFrom } from "./standing"
 import type { Happening } from "../domain/activity"
@@ -494,6 +494,9 @@ const GRAPHQL = "/_graphql"
 /** The query their own issue page runs, and the count of timeline items it asks for. */
 const ISSUE_QUERY = "IssueViewerViewQuery"
 
+/** Where their issue page embeds the same `data` since it stopped preloading the query. */
+const ISSUE_ROUTE = "issueViewerRoute"
+
 /**
  * How much of a long conversation one read brings back.
  *
@@ -539,6 +542,16 @@ const issuePage = (reference: IssueRef): string =>
   `/${reference.owner}/${reference.repo}/issues/${reference.number}`
 
 const ASKING = "3 seconds"
+
+/** Once the document has been read to its end, where this runs from its start. */
+const parsedFully = (page: Document): Effect.Effect<void> =>
+  page.readyState !== "loading"
+    ? Effect.void
+    : Effect.callback<void>((resume) => {
+        const done = () => resume(Effect.void)
+        page.addEventListener("DOMContentLoaded", done, { once: true })
+        return Effect.sync(() => page.removeEventListener("DOMContentLoaded", done))
+      })
 
 /** The browser's own way of being told about requests as they are made. */
 const watchingResources = (onSeen: (names: ReadonlyArray<string>) => void) => {
@@ -614,7 +627,7 @@ const issueHash = (reference: IssueRef): Effect.Effect<Option.Option<string>> =>
  * the joiners may carry.
  */
 type Served =
-  | { readonly ok: true; readonly hash: string; readonly result: unknown }
+  | { readonly ok: true; readonly hash: string | undefined; readonly result: unknown }
   | {
       readonly ok: false
       readonly why: "unreachable" | "rejected" | "undecodable"
@@ -657,6 +670,8 @@ const servedIssueAt = (route: string): Effect.Effect<Served> =>
 
       const preloaded = preloadedIn(html, ISSUE_QUERY)
       if (Option.isNone(preloaded)) {
+        const routed = routedIn(html, ISSUE_ROUTE)
+        if (Option.isSome(routed)) return { ok: true, hash: undefined, result: routed.value } satisfies Served
         return yield* Effect.fail<Served>({
           ok: false,
           why: "undecodable",
@@ -2579,13 +2594,13 @@ export const layer = Layer.succeed(GitHubGateway, {
       }
     }),
 
-    sizeOf: Effect.fn("GitHubGateway.sizeOf")(function* (reference: PullRequestRef) {
+    sizeOf: Effect.fn("GitHubGateway.sizeOf")(function* (reference: PullRequestRef, head?: string) {
       const raw = yield* fetchRoute(reference, DIFFSTAT)
 
       const size = sizeIn(
         yield* decodeDiffstat(raw).pipe(Effect.catch(undecodableFrom(reference, DIFFSTAT)))
       )
-      yield* Effect.forkDetach(rememberSize(reference, size))
+      yield* Effect.forkDetach(rememberSize(reference, size, head))
 
       return size
     }),
@@ -2889,6 +2904,13 @@ export const layer = Layer.succeed(GitHubGateway, {
     }),
 
     issue: Effect.fn("GitHubGateway.issue")(function* (reference: IssueRef) {
+      // The page GitHub served for this issue carries it whole: no wait for their query, no fetch.
+      if (servedFor(performance, issuePage(reference))) {
+        yield* parsedFully(document)
+        const served = routedOn(document, ISSUE_ROUTE)
+        if (Option.isSome(served)) return yield* decodedIssue(reference, served.value)
+      }
+
       const asking = yield* askedIssue(reference)
       if (Option.isNone(asking)) {
         // Nobody has the hash on this page, which is every issue reached from
@@ -2900,9 +2922,11 @@ export const layer = Layer.succeed(GitHubGateway, {
         // Under the route it would have come back from, which is the key the
         // store is read by. Written this way, the same issue opened again is
         // drawn from memory even though nothing ever asked that route.
-        yield* Effect.forkDetach(
-          rememberRoute(issueRoute(reference, preloaded.hash), preloaded.result)
-        )
+        if (preloaded.hash !== undefined) {
+          yield* Effect.forkDetach(
+            rememberRoute(issueRoute(reference, preloaded.hash), preloaded.result)
+          )
+        }
 
         return snapshot
       }
@@ -2986,8 +3010,10 @@ export const layer = Layer.succeed(GitHubGateway, {
       // Concurrently, because the batches are independent and a Working Set of
       // forty is five round trips that would otherwise be taken one at a time
       // while the reader looks at rows with no checks on them.
+      // Once each: a pull request on two shelves is passed twice, and asked twice it was
+      // a batch more on Home for answers already in another.
       const batches = yield* Effect.all(
-        inBatches(ids).map((batch) =>
+        inBatches([...new Set(ids)]).map((batch) =>
           Effect.gen(function* () {
             const route = deferredRoute(batch)
             const raw = yield* fetchViewerRoute(route)
@@ -4591,7 +4617,13 @@ export const layerFromRecordings = (recordings: ReadonlyArray<Recording>) =>
     // nothing — and the lists already draw a row whose size never arrived.
     sizeOf: (reference: PullRequestRef) => Effect.fail(notRecorded(reference)),
     // Nothing was kept about any row, here as above.
-    rememberedRows: () => Effect.succeed({ branches: new Map(), sizes: new Map() as Sizes, standings: new Map() as Standings }),
+    rememberedRows: () =>
+      Effect.succeed({
+        branches: new Map(),
+        sizes: new Map() as Sizes,
+        standings: new Map() as Standings,
+        stillTrue: { sizes: new Set<string>(), branches: new Set<string>() }
+      }),
 
     // Nobody offline is anybody: the card is a live read and nothing here fakes one.
     portrait: () => Effect.succeed(Option.none<Portrait>()),
@@ -4748,7 +4780,13 @@ export const layerFromSnapshots = (snapshots: ReadonlyArray<PullRequestSnapshot>
     // As above: nothing is listed here, so nothing here has a size.
     sizeOf: (reference: PullRequestRef) => Effect.fail(notRecorded(reference)),
     // Nothing was kept about any row, here as above.
-    rememberedRows: () => Effect.succeed({ branches: new Map(), sizes: new Map() as Sizes, standings: new Map() as Standings }),
+    rememberedRows: () =>
+      Effect.succeed({
+        branches: new Map(),
+        sizes: new Map() as Sizes,
+        standings: new Map() as Standings,
+        stillTrue: { sizes: new Set<string>(), branches: new Set<string>() }
+      }),
 
     // Nobody offline is anybody: the card is a live read and nothing here fakes one.
     portrait: () => Effect.succeed(Option.none<Portrait>()),

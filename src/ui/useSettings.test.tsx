@@ -88,6 +88,39 @@ describe("the settings a page is looking at", () => {
     expect(kept.written().diff.layout).toBe("split")
   })
 
+  it("stores a choice whose press also took the screen down", async () => {
+    // The rail on Issues: the Destination is chosen, then Home takes the page, and
+    // the tree that made the choice is gone before it renders again.
+    const kept = counting()
+    let leave = () => {}
+    const Leaving = () => {
+      const { change } = useSettings()
+      return (
+        <button
+          onClick={() => {
+            change((current) => ({ ...current, home: { ...current.home, destination: "activity" } }))
+            leave()
+          }}
+        >
+          Activity
+        </button>
+      )
+    }
+    const view = render(
+      <SettingsProvider store={kept.store}>
+        <Leaving />
+      </SettingsProvider>
+    )
+    leave = () => view.unmount()
+    await act(async () => {})
+
+    await act(async () => {
+      screen.getByRole("button").click()
+    })
+
+    expect(kept.written().home.destination).toBe("activity")
+  })
+
   it("still applies a choice with nowhere to keep it", async () => {
     // A screen outside any provider, which is a test, a browser that has taken
     // the storage permission away, and an interface not yet inside a shell. The

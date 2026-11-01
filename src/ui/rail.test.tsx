@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
   cleanup,
+  fireEvent,
   render,
   screen,
   waitFor,
@@ -82,6 +83,17 @@ describe("the Rail", () => {
       "/flazouh/octo-repo/pulls",
       "/flazouh/githubpro/pulls",
     ]);
+  });
+
+  test("marks each repository with its owner's picture, and its letter only where that will not load", () => {
+    showing({ atWork: [at("octo-repo", 3, 2)] });
+
+    const picture = within(rail()).getByRole("link").querySelector("img");
+    expect(picture?.getAttribute("src")).toBe("https://github.com/flazouh.png?size=32");
+
+    fireEvent.error(picture!);
+    expect(within(rail()).getByRole("link").querySelector("img")).toBeNull();
+    expect(within(rail()).getByText("O")).toBeDefined();
   });
 
   test("narrows the list to a repository on a press, rather than leaving Home", async () => {

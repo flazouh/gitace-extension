@@ -122,7 +122,7 @@ export const HistoryScreen = ({
     // has nothing to start from.
     <div className="relative">
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
-      <TheBar where={{ kind: "repository", owner, repo }} recall={recallRepositories} />
+      <TheBar onStepAside={onStepAside} where={{ kind: "repository", owner, repo }} recall={recallRepositories} />
       {history === undefined ? null : (
         <div>
           {/*

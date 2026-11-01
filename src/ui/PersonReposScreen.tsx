@@ -314,7 +314,7 @@ export const PersonReposScreen = ({
       <>
         {/* The failure screen is an answer too. See {@link DrawnAt}. */}
         <DrawnAt path={at ?? null} />
-        <TheBar where={{ kind: "person", login }} />
+        <TheBar onStepAside={onStepAside} where={{ kind: "person", login }} />
         <ReadFailed
           signedOut={!signedIn()}
           why={read.why}
@@ -331,7 +331,7 @@ export const PersonReposScreen = ({
   return (
     <div className="relative">
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
-      <TheBar where={{ kind: "person", login }} />
+      <TheBar onStepAside={onStepAside} where={{ kind: "person", login }} />
       <div className="flex min-w-0 flex-col gap-4 py-3 lg:flex-row lg:items-start">
         {them === undefined ? null : <PersonAside who={them} onStepAside={onStepAside} />}
 

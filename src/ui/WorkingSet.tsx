@@ -38,7 +38,6 @@ import { useKeys } from "./useKeys"
 import { useSettings } from "./useSettings"
 import { loginOnPage } from "./viewer"
 import { ageOf, momentOf } from "./when"
-import { IntoTheBar } from "./barTools"
 import { RepoTile } from "./Face"
 import { Who } from "./Who"
 
@@ -165,14 +164,14 @@ const Checks = ({ rollup }: { readonly rollup: CheckRollup }) => (
 const TRACK = {
   face: "20px",
   state: "16px",
-  number: "54px",
-  title: "minmax(180px,1fr)",
+  number: "var(--d-t-number, 54px)",
+  title: "minmax(var(--d-t-title, 180px),1fr)",
   repo: "var(--d-t-repo, 110px)",
   standing: "130px",
-  checks: "70px",
+  checks: "var(--d-t-checks, 70px)",
   comments: "var(--d-t-comments, 44px)",
   size: "var(--d-t-size, 76px)",
-  age: "52px"
+  age: "var(--d-t-age, 52px)"
 } as const
 
 type TrackFit = {
@@ -560,7 +559,7 @@ const Row = ({
          * Then the context is already established and the address on every line is
          * a column of identical text taking width from the titles beside it.
          */}
-        <span className="d-key">{`#${one.reference.number}`}</span>
+        <span className="d-key d-col-number">{`#${one.reference.number}`}</span>
 
         <span className="d-tt">{one.title}</span>
 
@@ -577,7 +576,7 @@ const Row = ({
          */}
         {columns.repo ? (
           <span title={`${one.reference.owner}/${one.reference.repo}`} className="d-repo-cell">
-            <RepoTile name={one.reference.repo} />
+            <RepoTile owner={one.reference.owner} name={one.reference.repo} />
             <span className="truncate">{one.reference.repo}</span>
           </span>
         ) : null}
@@ -632,7 +631,7 @@ const Row = ({
          * repair — the icons now run straight down the page instead of landing
          * wherever the title before them happened to stop.
          */}
-        <span className="min-w-0 truncate">
+        <span className="d-col-checks min-w-0 truncate">
           {Option.match(one.checks, {
             onNone: () => null,
             onSome: (rollup) => <Checks rollup={rollup} />
@@ -643,7 +642,7 @@ const Row = ({
 
         <Sized size={one.size} />
 
-        <span title={momentOf(one.changedAt)} className="d-key d-end">
+        <span title={momentOf(one.changedAt)} className="d-key d-end d-col-age">
           {shortAge(one.changedAt)}
         </span>
       </a>
@@ -740,13 +739,13 @@ export const IssueRow = ({
           className={`shrink-0 ${one.state === "open" ? "text-pass" : "text-ink-muted"}`}
         />
 
-        <span className="d-key">{`#${one.reference.number}`}</span>
+        <span className="d-key d-col-number">{`#${one.reference.number}`}</span>
 
         <span className="d-tt">{one.title}</span>
 
         {columns.repo ? (
           <span title={`${one.reference.owner}/${one.reference.repo}`} className="d-repo-cell">
-            <RepoTile name={one.reference.repo} />
+            <RepoTile owner={one.reference.owner} name={one.reference.repo} />
             <span className="truncate">{one.reference.repo}</span>
           </span>
         ) : null}
@@ -824,7 +823,7 @@ export const IssueRow = ({
         <time
           dateTime={one.raisedAt}
           title={`Raised ${momentOf(one.raisedAt)}`}
-          className="d-key d-end"
+          className="d-key d-end d-col-age"
         >
           {shortAge(one.raisedAt)}
         </time>
@@ -1506,7 +1505,9 @@ export const WorkingSet = ({
            pixels of canvas this started at was a gutter doing a border's job twice over. */
         className={`t-panels flex flex-col ${bare ? "" : "py-3"}`}
       >
-        <IntoTheBar>
+        {/* Over the list it narrows rather than in the bar, where it stood apart from the rows it
+            answers to and where its chips said a facet's name and not what was chosen in it. */}
+        <div className="pb-1">
           <Filters
             query={query}
             authors={authors}
@@ -1515,7 +1516,7 @@ export const WorkingSet = ({
             what={what}
             onQuery={ask}
           />
-        </IntoTheBar>
+        </div>
 
         {!anything ? (
           <p className="px-3 py-2 text-sm text-ink-muted">

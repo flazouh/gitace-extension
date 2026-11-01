@@ -47,6 +47,7 @@ describe("reading the seven routes from a page", () => {
     setSystemTime()
     forgetArrival(window)
     forgetFlights()
+    Reflect.deleteProperty(document, "readyState")
   })
 
   const payloadFor = (url: string): unknown => {

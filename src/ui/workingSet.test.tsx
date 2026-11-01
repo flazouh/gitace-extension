@@ -779,7 +779,7 @@ describe("a stack in the Working Set", () => {
 
     const row = screen.getByRole("link", { name: /the foundation/ })
 
-    expect(row.style.gridTemplateColumns).toContain("minmax(180px,1fr)")
+    expect(row.style.gridTemplateColumns).toContain("minmax(var(--d-t-title, 180px),1fr)")
     expect(row.style.gridTemplateColumns).not.toContain("minmax(0,4rem)")
   })
 })

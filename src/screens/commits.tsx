@@ -8,7 +8,7 @@ import {
 } from "@/app/commitList"
 import { rememberedRepositories } from "@/app/destinations"
 import { forgetIntent, intendedPath } from "@/app/intent"
-import { chosenSettings } from "@/app/settings"
+import { chosenSettings, rememberView } from "@/app/settings"
 import {
   aScreen,
   handOverToGitHub,
@@ -145,7 +145,7 @@ const open = (
 
   return standAScreen({
     place: COMMITS,
-    draw: (standing) => (
+    draw: () => (
       <HistoryScreen
         at={at}
         list={list}
@@ -156,12 +156,15 @@ const open = (
         authors={askAuthors}
         onGo={goTo}
         where={openedNamed("commits", list)}
-        onStepAside={standing.stepAside}
+        onStepAside={() => toGitHub()}
         recallRepositories={recallRepositories}
       />
     )
   }).close
 }
+
+/** What Leave does, which is the started screen's: see `useGitHub` in {@link start}. */
+let toGitHub = (): void => {}
 
 /**
  * Puts this screen in charge of the document, once.
@@ -242,6 +245,15 @@ export const start = (): void => {
 
   // The whole address, not the path: which page of the branch this is lives in the
   // query, and a reader pressing Older changes nothing else.
+  /** Pressed in our interface: GitHub's page from here on, starting with this one. */
+  function useGitHub(): void {
+    view = "github"
+    rememberView(store, "github")
+    standingFor = undefined
+    show(window.location.href)
+  }
+  toGitHub = useGitHub
+
   /** Pressed on GitHub's page: ours from here on, starting with this one. */
   function takeBack(): void {
     view = "ours"
