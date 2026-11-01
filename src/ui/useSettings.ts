@@ -1,5 +1,5 @@
 import { Effect, UndefinedOr } from "effect"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { DEFAULTS, type Settings } from "../domain/Settings"
 import { SCHEME_KEY } from "./applyTheme"
 import { useSettingsStore } from "./settings"
@@ -38,8 +38,13 @@ const withRecalledAppearance = (stored: Settings): Settings => {
  */
 export const useSettings = () => {
   const held = useSettingsStore()
-  const [settings, setSettings] = useState<Settings>(DEFAULTS)
+  const [settings, setShown] = useState<Settings>(DEFAULTS)
   const [ready, setReady] = useState(false)
+  const latest = useRef(settings)
+  const setSettings = useCallback((next: Settings) => {
+    latest.current = next
+    setShown(next)
+  }, [])
 
   useEffect(() => {
     // Interrupted rather than flagged: a read still in flight when the panel
@@ -62,7 +67,7 @@ export const useSettings = () => {
       reading.interruptUnsafe()
       stop()
     }
-  }, [held])
+  }, [held, setSettings])
 
   /**
    * A change, applied to whatever the settings are now rather than to a copy of them.
@@ -77,13 +82,14 @@ export const useSettings = () => {
    */
   const change = useCallback(
     (next: Settings | ((current: Settings) => Settings)) => {
-      setSettings((current) => {
-        const wanted = typeof next === "function" ? next(current) : next
-        Effect.runFork(held.write(wanted))
-        return wanted
-      })
+      // Written at the press, not in a state updater: a press that also hands the page to
+      // another screen unmounts this tree before it renders again, and an updater that never
+      // runs is a choice never stored.
+      const wanted = typeof next === "function" ? next(latest.current) : next
+      setSettings(wanted)
+      Effect.runFork(held.write(wanted))
     },
-    [held]
+    [held, setSettings]
   )
 
   return { settings, change, ready }

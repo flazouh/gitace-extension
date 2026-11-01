@@ -42,29 +42,30 @@ const Faces = ({
   const also =
     held === undefined || authors.some((author) => author.login === held.login) ? undefined : held
 
+  const everyone = [
+    ...authors.map((author) => ({ label: author.login, login: author.login, faceUrl: author.faceUrl })),
+    ...(also === undefined
+      ? []
+      : [{ label: `${also.login}, who committed it`, login: also.login, faceUrl: also.faceUrl }])
+  ]
+  const shown = everyone.slice(0, FACES_SHOWN)
+  const named =
+    everyone.length > FACES_SHOWN
+      ? `${everyone.slice(0, -1).map((one) => one.login).join(", ")} and ${everyone.at(-1)?.login}`
+      : undefined
+
   return (
-    // `overflow-hidden` because this is a grid track of a fixed width: a commit
-    // with four authors would otherwise widen the column on its own row and
-    // take the alignment of the whole page with it.
-    <span className="flex items-center -space-x-1 overflow-hidden">
-      {authors.map((author) => (
-        <Who
-          key={author.login}
-          login={author.login}
-          src={Option.getOrUndefined(author.faceUrl)}
-          size={16}
-        />
+    // A fixed track, so a third face is named in the label rather than drawn half.
+    <span aria-label={named} title={named} className="flex items-center -space-x-1 overflow-hidden">
+      {shown.map((one) => (
+        <Who key={one.label} login={one.label} src={Option.getOrUndefined(one.faceUrl)} size={16} />
       ))}
-      {also === undefined ? null : (
-        <Who
-          login={`${also.login}, who committed it`}
-          src={Option.getOrUndefined(also.faceUrl)}
-          size={16}
-        />
-      )}
     </span>
   )
 }
+
+/** As many faces as the faces track holds whole. */
+const FACES_SHOWN = 2
 
 /**
  * The room a cell takes when there is nothing in it to draw.
@@ -89,7 +90,7 @@ const Empty = () => <span aria-hidden />
  * width.
  */
 const TRACK = {
-  /** Two overlapped faces. A third is rare and is clipped rather than paid for. */
+  /** Two overlapped faces. A third is rare and is named rather than paid for. */
   faces: "1.75rem",
   headline: "minmax(0,1fr)",
   more: "1rem",

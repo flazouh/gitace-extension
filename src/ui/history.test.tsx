@@ -202,6 +202,18 @@ describe("what else a row can say about a commit", () => {
     expect(screen.getByRole("img", { name: "octo-repo, who committed it" })).toBeDefined()
   })
 
+  test("draws two faces whole on a commit three wrote, and names the third", () => {
+    one(
+      landed("3f12934", "Written by three", {
+        authors: [person("flazouh"), person("cursoragent"), person("claude")]
+      })
+    )
+
+    expect(screen.getAllByRole("img", { name: /^(flazouh|cursoragent)$/ })).toHaveLength(2)
+    expect(screen.queryByRole("img", { name: "claude" })).toBeNull()
+    expect(screen.getByLabelText("flazouh, cursoragent and claude")).toBeDefined()
+  })
+
   test("shows one face for the ordinary commit, whose author committed it", () => {
     one(landed("3f12934", "An ordinary commit"))
 
