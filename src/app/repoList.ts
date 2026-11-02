@@ -15,6 +15,7 @@ import {
   type Pages,
   WorkingSetError
 } from "../ports/GitHubGateway"
+import { whileShown } from "./setAside"
 import { sizesOf } from "./sizes"
 
 /**
@@ -180,10 +181,10 @@ const branchesOf = Effect.fn("repoList.branchesOf")(function* (
     worthAskingForBranches(rows)
       .filter((reference) => !known.has(keyOf(reference)))
       .map((reference) =>
-      gateway.branches(reference).pipe(
-        Effect.orElseSucceed((): Option.Option<Branches> => Option.none()),
-        Effect.map((branches) => [keyOf(reference), branches] as const)
-      )
+      whileShown(
+        gateway.branches(reference).pipe(Effect.orElseSucceed((): Option.Option<Branches> => Option.none())),
+        (): Option.Option<Branches> => Option.none()
+      ).pipe(Effect.map((branches) => [keyOf(reference), branches] as const))
     ),
     { concurrency: BRANCHES_AT_ONCE }
   )
@@ -447,9 +448,12 @@ export const loadRepoList = Effect.fn("loadRepoList")(function* (
   // Over what the early reads found rather than instead of it: a row this answer leaves
   // out keeps the checks it was already drawn with.
   // Not the rows the early reads already asked about, seconds ago.
-  const standings = yield* gateway.standingsFor(rows.map((one) => one.id).filter((id) => !answeredEarly.has(id))).pipe(
-    Effect.map((all): Standings => new Map([...early, ...all])),
-    Effect.orElseSucceed((): Standings => early)
+  const standings = yield* whileShown(
+    gateway.standingsFor(rows.map((one) => one.id).filter((id) => !answeredEarly.has(id))).pipe(
+      Effect.map((all): Standings => new Map([...early, ...all])),
+      Effect.orElseSucceed((): Standings => early)
+    ),
+    (): Standings => early
   )
 
   const known = withStandings(rows, standings)

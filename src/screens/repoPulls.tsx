@@ -2,6 +2,7 @@ import { Effect, Fiber, Option } from "effect"
 import { rememberedRepositories } from "@/app/destinations"
 import { forgetIntent, intendedPath } from "@/app/intent"
 import { type Listed, loadRepoList, rememberedRepoList } from "@/app/repoList"
+import { settingAside } from "@/app/setAside"
 import type { PullRequestRef } from "@/domain/PullRequestRef"
 import { addressFor, type RepoList, repoListIn, seeding } from "@/domain/repoList"
 import { reportError } from "@/observability/report"
@@ -77,8 +78,10 @@ const open = (
 ): (() => void) => {
   // Started before anything is waited on. Reading the list and waiting for GitHub to
   // render a region to stand in have nothing to say to each other.
+  const aside = settingAside(window)
   const reading = (partly: (listed: Listed) => void) =>
     loadRepoList(list, partly).pipe(
+      aside.within,
       throughGitHub,
       // Held as it lands, so that coming back to this page is this page rather
       // than a paler copy of it read out of the store.
@@ -205,6 +208,7 @@ const open = (
 
   return standAScreen({
     place: REPO_PULLS,
+    holding: () => aside.holding((path) => path === at),
     draw: () => (
       <RepoPullsScreen
         at={at}

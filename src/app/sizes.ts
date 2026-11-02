@@ -2,6 +2,7 @@ import { Effect } from "effect"
 import type { PullRequestRef } from "../domain/PullRequestRef"
 import type { InvolvedPullRequest, Size, Sizes } from "../domain/workingSet"
 import { GitHubGateway } from "../ports/GitHubGateway"
+import { whileShown } from "./setAside"
 
 /**
  * How many size reads run at once.
@@ -34,9 +35,12 @@ export const sizesOf = Effect.fn("sizesOf")(function* (
 
   const found = yield* Effect.all(
     rows.map((one) =>
-      gateway.sizeOf(one.reference, one.headSha).pipe(
-        Effect.map((size): ReadonlyArray<readonly [string, Size]> => [[one.id, size]]),
-        Effect.orElseSucceed((): ReadonlyArray<readonly [string, Size]> => [])
+      whileShown(
+        gateway.sizeOf(one.reference, one.headSha).pipe(
+          Effect.map((size): ReadonlyArray<readonly [string, Size]> => [[one.id, size]]),
+          Effect.orElseSucceed((): ReadonlyArray<readonly [string, Size]> => [])
+        ),
+        (): ReadonlyArray<readonly [string, Size]> => []
       )
     ),
     { concurrency: AT_ONCE }
