@@ -359,6 +359,15 @@ export const forgetTheHost = (page: Document): void => {
   letTheirStylesBack(page)
 }
 
+/**
+ * The sheet unbuilt, for a test that built one. Kept for the whole worker like the
+ * host, so the next file's host would adopt it and find ours in force before it
+ * had asked for anything.
+ */
+export const forgetTheSheet = (): void => {
+  shared.sheet = null
+}
+
 /** Their sheets back on, and the watch let go. */
 export const letTheirStylesBack = (target: Document): void => {
   watching?.disconnect()

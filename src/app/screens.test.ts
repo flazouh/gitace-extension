@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test"
 import { Effect } from "effect"
 import { CARRIED, type Carried } from "./carried"
 import { carried, fileOf, isWanted, preloadScreen, screenFor, startScreenOnce, WANTED, type Screen } from "./screens"
+import { forgetTheSheet } from "@/ui/theHost"
 
 const beforeBrowser = Object.getOwnPropertyDescriptor(globalThis, "browser")
 
@@ -91,6 +92,8 @@ describe("naming the screen a page wants", () => {
 })
 
 describe("a document that came with every screen", () => {
+  afterEach(forgetTheSheet)
+
   const extension = () =>
     Object.defineProperty(globalThis, "browser", {
       configurable: true,
