@@ -11,10 +11,10 @@ describe("painting a theme onto a root", () => {
     const root = document.createElement("div")
     document.body.append(root)
 
-    paintTheme(root, "dark", "gitace", false)
+    paintTheme(root, "dark", "cursor", false)
 
-    expect(root.style.getPropertyValue("--color-canvas")).toBe("#141413")
-    expect(root.style.getPropertyValue("--control")).toBe("#F0EEE617")
+    expect(root.style.getPropertyValue("--color-canvas")).toBe("#181818")
+    expect(root.style.getPropertyValue("--control")).toBe("#F0F0F011")
     expect(root.classList.contains("dark")).toBe(true)
   })
 

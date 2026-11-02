@@ -148,7 +148,7 @@ export const Supplied = ({
   <ScreenActivityProvider active={active} root={root}>
   <RegistryProvider registry={registry()}>
     <SettingsProvider store={settings()}>
-      <Theme element={root} here="gitace">
+      <Theme element={root} here="cursor">
         <ArtProvider here={HUGEICONS}>
         <PortraitsProvider reads={onGitHub}>
           <RendererProvider load={loadDiffEngine}>

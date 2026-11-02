@@ -163,12 +163,9 @@ export const THEME_KNOBS = [
     "pack",
     "Theme",
     "Which colour pack paints the interface",
-    "Which colour pack paints the screens. Match is the default and means the place: GitHub's own colours on GitHub's page, where this interface stands under their header and inside their tab, and GitAce Extension — this product's own look — in a window of its own. The rest are familiar editor and terminal packs, Dracula, Gruvbox, Tokyo Night, One Dark and others, each with its own light and dark face, and each of them holds everywhere once it is asked for by name.",
+    "Which colour pack paints the screens. Match is the default and is Cursor's light and dark, the product's own look, on GitHub's page and in a window of its own. The rest are familiar editor and terminal packs, Dracula, Gruvbox, Tokyo Night, One Dark and others, each with its own light and dark face, and each of them holds everywhere once it is asked for by name.",
     [
       { value: "match", label: "Match the page" },
-      // "GitAce" alone: a chip in a trough of one-word names, where the full name
-      // takes half a row. See the Icons knob below, which says the same.
-      { value: "gitace", label: "GitAce" },
       { value: "anthropic", label: "Anthropic" },
       { value: "cursor", label: "Cursor" },
       { value: "github", label: "GitHub" },

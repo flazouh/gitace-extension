@@ -43,7 +43,7 @@ const involved: InvolvedPullRequest = {
 }
 
 describe("the shell the extension mounts", () => {
-  test("draws the interface in GitAce's own glyphs and Ace theme by default", async () => {
+  test("draws the interface in GitAce's own glyphs and Cursor's theme by default", async () => {
     render(
       <Supplied>
         <WorkingSet sittings={sittingsIn([involved], () => Option.none())} onOpen={() => {}} />

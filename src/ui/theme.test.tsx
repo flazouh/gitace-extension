@@ -4,7 +4,7 @@ import { Effect, Option } from "effect"
 import { createRoot } from "react-dom/client"
 import { DEFAULTS, type Settings } from "../domain/Settings"
 
-import { packOf, tokensOf } from "../domain/theme"
+import { tokensOf } from "../domain/theme"
 import type { Store } from "../ports/Settings"
 import { PACK_KEY, SCHEME_KEY } from "./applyTheme"
 import { ROOT_ID } from "./mount"
@@ -125,7 +125,7 @@ describe("the frame before the store has answered", () => {
     // desktop is the case that first put a white panel in a black page.
     document.documentElement.setAttribute("data-color-mode", "dark")
     localStorage.setItem(SCHEME_KEY, "system")
-    localStorage.setItem(PACK_KEY, "gitace")
+    localStorage.setItem(PACK_KEY, "cursor")
 
     const container = aContainer()
     document.body.append(container)
@@ -141,7 +141,7 @@ describe("the frame before the store has answered", () => {
     document.documentElement.removeAttribute("data-color-mode")
 
     expect(container.style.getPropertyValue("--color-canvas")).toBe(
-      tokensOf("gitace", "dark")["--color-canvas"]
+      tokensOf("cursor", "dark")["--color-canvas"]
     )
   })
 
@@ -162,9 +162,8 @@ describe("the frame before the store has answered", () => {
     document.documentElement.removeAttribute("data-color-mode")
 
     expect(container.style.getPropertyValue("--color-canvas")).toBe(
-      // Resolved, because the default answer is `match` and a test rendering a
-      // screen with no shell around it is the window case.
-      tokensOf(packOf(DEFAULTS.theme.pack, "gitace"), "dark")["--color-canvas"]
+      // Cursor Dark: the default answer is `match`, and `match` is Cursor's.
+      tokensOf("cursor", "dark")["--color-canvas"]
     )
   })
 

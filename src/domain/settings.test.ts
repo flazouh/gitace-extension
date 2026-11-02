@@ -137,11 +137,14 @@ describe("choosing how the interface looks", () => {
     expect(readSettings({ theme: { art: "octicons" } }).theme.art).toBe("match")
   })
 
+  it("gives a reader who chose the removed GitAce pack the default, which is Cursor's", () => {
+    expect(readSettings({ theme: { pack: "gitace" } }).theme.pack).toBe("match")
+  })
+
   it("offers every pack the product ships", () => {
     const pack = THEME_KNOBS.find((one) => one.key === "pack")
     expect(pack?.choices.map((choice) => choice.value)).toEqual([
       "match",
-      "gitace",
       "anthropic",
       "cursor",
       "github",
