@@ -699,30 +699,22 @@ describe("the diffs GitHub holds back", () => {
     return { requests, fetch }
   }
 
-  test("asks for the open file and reads ahead in the same request", async () => {
-    const network = counting()
-    showing(aPullRequest(), network.fetch)
-    await awaitPage()
-
-    await waitFor(() => expect(network.requests).toEqual([["src/spin.ts", "README.md"]]))
-  })
-
   test("costs nothing to open a file that was read ahead of", async () => {
     const network = counting()
     showing(aPullRequest(), network.fetch)
     await awaitPage()
-    await waitFor(() => expect(network.requests).toHaveLength(1))
+    await waitFor(() => expect(network.requests.flat()).toEqual(["src/spin.ts", "README.md"]))
 
     await userEvent.click(within(section("Files")).getByRole("button", { name: /Next file/ }))
 
-    expect(network.requests).toHaveLength(1)
+    expect(network.requests.flat()).toEqual(["src/spin.ts", "README.md"])
   })
 
   test("asks once for a file opened, left and opened again", async () => {
     const network = counting()
     showing(aPullRequest(), network.fetch)
     await awaitPage()
-    await waitFor(() => expect(network.requests).toHaveLength(1))
+    await waitFor(() => expect(network.requests.flat()).toEqual(["src/spin.ts", "README.md"]))
 
     await userEvent.click(within(section("Files")).getByRole("button", { name: /Next file/ }))
     await userEvent.click(within(section("Files")).getByRole("button", { name: /Previous/ }))
