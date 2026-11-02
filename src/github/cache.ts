@@ -213,13 +213,24 @@ const STANDING_INDEX = "standing:index"
 const STANDING_KEPT = 16
 
 /**
+ * The third, for one file's diff read before the reader pressed for its pull request.
+ *
+ * Apart from the browsed routes because a diff is tens of kilobytes and a list is what a
+ * reader comes back to: eight of these pushing out eight pages of repository lists would
+ * trade the next list for a file that was opened once. A diff for one head sha never
+ * changes, so an old one is as true as a new one and only room decides.
+ */
+const AHEAD_INDEX = "ahead:index"
+const AHEAD_KEPT = 8
+
+/**
  * Which of the two a route is written under.
  *
  * Said by the caller rather than worked out from the route, because the route is a URL
  * and matching page names against URL shapes is exactly the kind of rule that goes
  * quietly wrong when GitHub renames one.
  */
-export type Keeping = "standing" | "browsed"
+export type Keeping = "standing" | "browsed" | "ahead"
 
 type Answer = { readonly at: number; readonly payload: unknown }
 
@@ -300,13 +311,13 @@ export const rememberRoute = Effect.fn("snapshots.rememberRoute")(function* (
   const key = `${ROUTE}${route}`
   yield* orNothing(() => store.set({ [key]: { at: Date.now(), payload } satisfies Answer }), undefined)
 
-  const standing = keeping === "standing"
-  yield* keepRecent(
-    store,
-    standing ? STANDING_INDEX : ROUTE_INDEX,
-    [key],
-    standing ? STANDING_KEPT : ROUTES_KEPT
-  )
+  const [index, kept] =
+    keeping === "standing"
+      ? [STANDING_INDEX, STANDING_KEPT]
+      : keeping === "ahead"
+        ? [AHEAD_INDEX, AHEAD_KEPT]
+        : [ROUTE_INDEX, ROUTES_KEPT]
+  yield* keepRecent(store, index, [key], kept)
 })
 
 /**

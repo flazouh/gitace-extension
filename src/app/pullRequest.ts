@@ -6,6 +6,8 @@ import type {
   PullRequestSnapshot
 } from "../domain/PullRequest"
 import type { PullRequestRef, RepoRef } from "../domain/PullRequestRef"
+import { railOrder } from "../domain/railOrder"
+import { apart } from "../domain/testing"
 import { afterWrite } from "../github/landed"
 import { GitHubGateway, type Review, type UpdateMethod } from "../ports/GitHubGateway"
 
@@ -40,6 +42,35 @@ export const loadPullRequest = Effect.fn("loadPullRequest")(function* (
   partly({ snapshot })
 
   return { snapshot: { ...snapshot, checks: yield* gateway.tolerated(snapshot.checks) } }
+})
+
+/**
+ * A pull request read ahead of the press, with the diff it opens on.
+ *
+ * GitHub sends some files' diffs with the page and holds the rest back, and a held-back
+ * file at the top of the rail is asked for once the screen is up: measured on a press
+ * that had rested on the row, the title at 285ms and the diff at 670ms, waiting on that
+ * one request. So it is asked for here as well, the way the screen asks for it — alone,
+ * at the head — and the gateway keeps it for the screen to find.
+ *
+ * Both tops of the rail, the whole pull request's and the code's without its tests,
+ * because which of them the screen opens on is a setting the reader holds, and the two
+ * are usually the same file.
+ */
+export const warmPullRequest = Effect.fn("warmPullRequest")(function* (reference: PullRequestRef) {
+  const loaded = yield* loadPullRequest(reference)
+  const { files, headSha } = loaded.snapshot
+  const halves = apart(files)
+  const tops = new Set(
+    [halves.all, halves.code].flatMap((some) => railOrder(some.map((file) => file.path)).slice(0, 1))
+  )
+  const heldBack = files.filter((file) => tops.has(file.path) && Option.isNone(file.diff))
+
+  const gateway = yield* GitHubGateway
+  yield* Effect.forEach(heldBack, (file) => Effect.ignore(gateway.diffs(reference, headSha, [file.path])), {
+    concurrency: 2
+  })
+  return loaded
 })
 
 /**
