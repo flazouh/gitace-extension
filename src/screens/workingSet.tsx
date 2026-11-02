@@ -7,6 +7,7 @@ import {
   rememberedRepositories
 } from "@/app/destinations";
 import { drawingIssues } from "@/app/rows";
+import { settingAside } from "@/app/setAside";
 import { loadWorkingSet, rememberedWorkingSet } from "@/app/workingSet";
 import { fromPathname, type PullRequestRef } from "@/domain/PullRequestRef";
 import type { RowDoing } from "@/domain/doable";
@@ -108,8 +109,10 @@ const open = (
   // GitHub to render a region to stand in have nothing to say to each other, and
   // running them one after the other spends the whole of GitHub's page load doing
   // nothing.
+  const aside = settingAside(window);
   const reading = () =>
     loadWorkingSet().pipe(
+      aside.within,
       throughGitHub,
       // Held as it lands, so that coming back to this list is the list rather
       // than a paler copy of it read out of the store.
@@ -210,7 +213,9 @@ const open = (
     holding: (container) => {
       drawingOurOwnRows(window, true);
       const stopAnswering = answerPressesIn(container, window, isPullRequest);
+      const stopReading = aside.holding((path) => path === at);
       return () => {
+        stopReading();
         // Off the page: whatever is on it now draws its own rows and answers its own
         // presses.
         drawingOurOwnRows(window, false);

@@ -19,6 +19,7 @@ type Preparing = (path: string) => void
 type World = Window & {
   gitaceOpening?: string
   gitacePreparing?: Set<Preparing>
+  gitacePressing?: Set<Preparing>
 }
 
 export const intendTo = (target: Window, path: string): void => {
@@ -45,6 +46,25 @@ export const whenPreparing = (target: Window, prepare: Preparing): (() => void) 
   world.gitacePreparing.add(prepare)
 
   return () => world.gitacePreparing?.delete(prepare)
+}
+
+/**
+ * Says a press is on its way to `path`, to whatever is standing.
+ *
+ * Unlike {@link prepareTo}, which a rested pointer says too: this is the reader
+ * having chosen, and a screen that hears it can stop doing anything for itself.
+ */
+export const pressingFor = (target: Window, path: string): void => {
+  for (const pressing of (target as World).gitacePressing ?? []) pressing(path)
+}
+
+/** Listens for presses, from the moment one starts. */
+export const whenPressing = (target: Window, pressing: Preparing): (() => void) => {
+  const world = target as World
+  world.gitacePressing ??= new Set()
+  world.gitacePressing.add(pressing)
+
+  return () => world.gitacePressing?.delete(pressing)
 }
 
 /**

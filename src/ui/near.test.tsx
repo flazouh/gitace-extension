@@ -3,7 +3,12 @@ import { cleanup, render, waitFor } from "@testing-library/react"
 import { type Box, gapTo, NEAR, useNearby, withinReach } from "./near"
 import { AHEAD, linkNear, type Pick } from "./linkNear"
 
-afterEach(cleanup)
+const pageAnswer = document.elementFromPoint
+afterEach(() => {
+  cleanup()
+  document.elementFromPoint = pageAnswer
+  document.body.replaceChildren()
+})
 
 const box = (left: number, top: number, right: number, bottom: number) => ({
   left,
@@ -148,6 +153,21 @@ const asLaidOut = (
 const AT = { x: 500, y: 500 }
 
 describe("the link the pointer is heading for", () => {
+  test("is found inside our own shadow root, where the page only sees the host", () => {
+    const host = document.createElement("div")
+    const shadow = host.attachShadow({ mode: "open" })
+    const link = document.createElement("a")
+    link.href = "/flazouh/stack-probe/pull/7"
+    const title = document.createElement("span")
+    link.append(title)
+    shadow.append(link)
+    document.body.append(host)
+    document.elementFromPoint = () => host
+    shadow.elementFromPoint = () => title
+
+    expect(linkNear(AT)?.link.pathname).toBe("/flazouh/stack-probe/pull/7")
+  })
+
   test("is the one under it, where there is one", () => {
     const { pick } = asLaidOut([["flazouh", box(490, 490, 560, 510)]])
 

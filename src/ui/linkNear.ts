@@ -66,7 +66,22 @@ export type Reached = { readonly link: HTMLAnchorElement; readonly from: Offset 
 /** What is under one point of the page. Only a test ever passes one. */
 export type Pick = (x: number, y: number) => Element | null
 
-const onThePage: Pick = (x, y) => document.elementFromPoint(x, y)
+/**
+ * What is under a point, inside every shadow root on the way down.
+ *
+ * The document answers for its own tree and no further: a point over our interface, which
+ * lives in a shadow root of its own, comes back as the host, and the host is inside no
+ * link. So no row of ours was ever read ahead, only GitHub's own links around it.
+ */
+const onThePage: Pick = (x, y) => {
+  let found = document.elementFromPoint(x, y)
+  while (found?.shadowRoot) {
+    const inner = found.shadowRoot.elementFromPoint(x, y)
+    if (inner === null || inner === found) break
+    found = inner
+  }
+  return found
+}
 
 /**
  * The nearest link to a point, anywhere on the page, or nothing where there is none

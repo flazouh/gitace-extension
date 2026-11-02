@@ -11,7 +11,7 @@ import { whenIdle } from "@/app/idle";
 import { claimShell } from "@/app/shellClaim";
 import { protectOwnedLinks } from "@/app/ownedLinks";
 import { titleAt } from "@/app/entitling";
-import { intendTo, intendedPath, prepareTo, whenPreparing } from "@/app/intent";
+import { intendTo, intendedPath, prepareTo, pressingFor, whenPreparing } from "@/app/intent";
 import {
   markOwnedRoute,
   OWNED_ROUTE,
@@ -749,6 +749,7 @@ export default defineContentScript({
           window.location.origin,
         );
         prepareTo(window, target.pathname);
+        pressingFor(window, target.pathname);
         const wanted = placeFor(what, target.pathname).name;
 
         /*

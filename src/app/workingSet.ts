@@ -10,6 +10,7 @@ import {
   withStandings
 } from "../domain/workingSet"
 import { GitHubGateway } from "../ports/GitHubGateway"
+import { whileShown } from "./setAside"
 import { sizesOf } from "./sizes"
 
 /**
@@ -43,10 +44,10 @@ const branchesOf = Effect.fn("branchesOf")(function* (
     worthAskingForBranches(involved)
       .filter((reference) => !known.has(keyOf(reference)))
       .map((reference) =>
-      gateway.branches(reference).pipe(
-        Effect.orElseSucceed((): Option.Option<Branches> => Option.none()),
-        Effect.map((branches) => [keyOf(reference), branches] as const)
-      )
+      whileShown(
+        gateway.branches(reference).pipe(Effect.orElseSucceed((): Option.Option<Branches> => Option.none())),
+        (): Option.Option<Branches> => Option.none()
+      ).pipe(Effect.map((branches) => [keyOf(reference), branches] as const))
     ),
     { concurrency: BRANCHES_AT_ONCE }
   )
