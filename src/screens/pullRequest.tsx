@@ -48,6 +48,7 @@ import type { View } from "@/domain/Settings"
 import { chosenSettings, rememberView } from "@/app/settings"
 import { prepareAScreen, standAScreen, type Standing } from "@/shell/screen"
 import { liveUpdates, settings, throughGitHub } from "@/shell/supplied"
+import { loadDiffEngine } from "@/shell/diffEngine"
 import { type Loaded, PullRequestScreen } from "@/ui/PullRequestScreen"
 import {
   hasPreparedScreen,
@@ -205,6 +206,11 @@ const open = (
   const remembered = Effect.runFork(
     rememberedPullRequest(reference).pipe(throughGitHub)
   )
+
+  // The renderer as well, which the first file's pane asks for only once it is
+  // mounted: on a direct load that was its import, a fifth of a second, begun after
+  // the card was already drawn. Held once fetched, so the pane's ask is free.
+  Effect.runFork(Effect.ignore(loadDiffEngine))
 
   const fetchDiffs = (paths: ReadonlyArray<string>, head: string) =>
     loadDiffs(reference, head, paths).pipe(throughGitHub)

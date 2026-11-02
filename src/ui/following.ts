@@ -89,7 +89,7 @@ const learnLayout = (source: string, across: Across): Effect.Effect<void> => {
 const SCRIPT = /\.[cm]?[jt]sx?$/u
 import { useLedger } from "./ledger"
 import { useSettings } from "./useSettings"
-import { sameName } from "../diff/engine"
+import { sameName } from "../diff/sameName"
 import { lineBounds, showLine } from "./showLine"
 import { onward } from "../observability/report"
 

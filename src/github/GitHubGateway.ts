@@ -2065,12 +2065,13 @@ const wroteIssue = Effect.fn("wroteIssue")(function* (reference: IssueRef) {
 
 export const layer = Layer.succeed(GitHubGateway, {
     snapshot: Effect.fn("GitHubGateway.snapshot")(function* (reference: PullRequestRef) {
-      const raw = yield* payloadsThroughWorker(reference)
-
-      // Before the state is worn, since wearing it is the whole reason this is
-      // read at all. A card opened cold in a new tab, on a pull request closed
-      // from a list in the last one, is the case it exists for.
-      yield* seeded
+      // Seeded before the state is worn, since wearing it is the whole reason the seed
+      // is read at all: a card opened cold in a new tab, on a pull request closed from
+      // a list in the last one. Asked beside GitHub rather than after it, because the
+      // store answers in order and by then the screen has asked it for the kept copy.
+      const [raw] = yield* Effect.all([payloadsThroughWorker(reference), seeded], {
+        concurrency: "unbounded"
+      })
 
       const snapshot = yield* decodeInto(reference, raw)
 
@@ -2118,10 +2119,8 @@ export const layer = Layer.succeed(GitHubGateway, {
     tolerated: asTolerated,
 
     remembered: Effect.fn("GitHubGateway.remembered")(function* (reference: PullRequestRef) {
-      const raw = yield* recall(reference)
+      const [, raw] = yield* Effect.all([seeded, recall(reference)], { concurrency: "unbounded" })
       if (Option.isNone(raw)) return Option.none<PullRequestSnapshot>()
-
-      yield* seeded
 
       // Decoded through exactly the path a live read takes. A payload kept
       // before a schema changed fails here and is a miss, where a stored
@@ -4476,13 +4475,12 @@ export const layer = Layer.succeed(GitHubGateway, {
       const starved = answered.filter((one) => one.diff.isTruncated && one.diff.lines.length === 0)
       if (starved.length === 0) return answered
 
-      const whole = new Map<string, FetchedDiff>()
-      for (const one of starved) {
-        const alone = yield* askFor([one.path]).pipe(
-          Effect.catch(() => Effect.succeed<ReadonlyArray<FetchedDiff>>([]))
-        )
-        for (const again of alone) whole.set(again.path, again)
-      }
+      const alone = yield* Effect.forEach(
+        starved,
+        (one) => askFor([one.path]).pipe(Effect.catch(() => Effect.succeed<ReadonlyArray<FetchedDiff>>([]))),
+        { concurrency: "unbounded" }
+      )
+      const whole = new Map(alone.flat().map((again) => [again.path, again]))
 
       return answered.map((one) => whole.get(one.path) ?? one)
     })

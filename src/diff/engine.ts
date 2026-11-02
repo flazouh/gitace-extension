@@ -28,6 +28,7 @@ import {
   type Picked
 } from "../ports/Renderer"
 import { LOADERS } from "../syntax/loaders"
+import { sameName } from "./sameName"
 import {
   CORE_CSS_ATTRIBUTE,
   FileDiff,
@@ -270,16 +271,7 @@ export const held = (event: { metaKey: boolean; ctrlKey: boolean; shiftKey: bool
   alt: event.altKey
 })
 
-/**
- * Whether a Name is the one an element was reported for.
- *
- * The engine marks the element it was last handed and no other, so a Name from
- * somewhere else — a stale one, or one the pane worked out for itself — has to be
- * told apart from the one under the pointer. Three fields rather than identity,
- * because the pane may rebuild the object before handing it back.
- */
-export const sameName = (one: Name, two: Name): boolean =>
-  one.line === two.line && one.from === two.from && one.side === two.side
+export { sameName }
 
 /**
  * Whether a token the renderer reported is one this drawing drew.

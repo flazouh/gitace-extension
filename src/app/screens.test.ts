@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { fileOf, isWanted, preloadScreen, startScreenOnce, WANTED } from "./screens"
+import { Effect } from "effect"
+import { CARRIED, type Carried } from "./carried"
+import { carried, fileOf, isWanted, preloadScreen, screenFor, startScreenOnce, WANTED, type Screen } from "./screens"
+import { forgetTheSheet } from "@/ui/theHost"
 
 const beforeBrowser = Object.getOwnPropertyDescriptor(globalThis, "browser")
 
@@ -85,5 +88,60 @@ describe("naming the screen a page wants", () => {
     expect(startScreenOnce(started, "pull-request", screen)).toBe(true)
     expect(startScreenOnce(started, "pull-request", screen)).toBe(false)
     expect(starts).toBe(1)
+  })
+})
+
+describe("a document that came with every screen", () => {
+  afterEach(forgetTheSheet)
+
+  const extension = () =>
+    Object.defineProperty(globalThis, "browser", {
+      configurable: true,
+      value: { runtime: { getURL: (path: string) => `chrome-extension://test${path}` } }
+    })
+
+  const carrying = (screen: Screen, asked: Array<string>): Carried => {
+    const screens = {} as Record<(typeof WANTED)[number], () => PromiseLike<Screen>>
+    for (const what of WANTED) {
+      screens[what] = () => {
+        asked.push(what)
+        return Promise.resolve(screen)
+      }
+    }
+    return { screens, css: "" }
+  }
+
+  test("takes the screen from the screens script rather than importing it", async () => {
+    extension()
+    // On the page already, as it is for every screen after a document's first; this
+    // test has no stylesheet to load.
+    const link = document.createElement("link")
+    link.href = "chrome-extension://test/screens/styles.css"
+    document.head.append(link)
+    const screen = { start: () => {} }
+    const asked: Array<string> = []
+
+    // An import of an extension address cannot succeed here, so the screen coming
+    // back at all is the screens script having answered.
+    const got = await Effect.runPromise(screenFor("commit", carrying(screen, asked)))
+
+    expect(got).toBe(screen)
+    expect(asked).toEqual(["commit"])
+    link.remove()
+  })
+
+  test("has nothing to preload", () => {
+    extension()
+
+    expect(preloadScreen("blame", carrying({ start: () => {} }, []))).toBe(false)
+    expect(document.querySelector('link[rel="modulepreload"][href$="/screens/blame.js"]')).toBeNull()
+  })
+
+  test("takes every screen from one place, even if the script turns up later", () => {
+    const first = carried()
+    ;(globalThis as { [CARRIED]?: Carried })[CARRIED] = carrying({ start: () => {} }, [])
+
+    expect(carried()).toBe(first)
+    Reflect.deleteProperty(globalThis, CARRIED)
   })
 })

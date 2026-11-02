@@ -1,0 +1,87 @@
+/**
+ * Builds every screen into one classic script, for a document that arrives on a
+ * pull request.
+ *
+ *     bun run build:carried    (and as part of `bun run build`, after the screens)
+ *
+ * Why, and why every screen: see `Carried` in `src/app/carried.ts`. The manifest
+ * injects it ahead of the shell on those documents; see `carryingOn` in
+ * `wxt.config.ts`.
+ *
+ * After `build-screens.ts`, because it carries the stylesheet that build writes, as
+ * text: a content script's fetch can wait on GitHub's page like its imports can.
+ *
+ * Not built while developing. The screens rebuild on save there and this would not,
+ * so a pull request opened directly would draw yesterday's interface.
+ */
+
+import { readFileSync, writeFileSync } from "node:fs"
+import react from "@vitejs/plugin-react"
+import { build, type Plugin, type Rolldown } from "vite"
+import { asciiOnly } from "./ascii"
+import { define, here, intro, resolve } from "./screenBuild"
+
+/** Where the manifest names it. */
+const OUT = here("../public/carried.js")
+
+const css = readFileSync(here("../public/screens/styles.css"), "utf8")
+
+/** The screens' stylesheet, already in hand as text, so imported as nothing. */
+const EMPTY = "\0carried-stylesheet"
+
+/**
+ * Every stylesheet a screen imports, as an empty module.
+ *
+ * Left alone, the bundler writes a classic script's CSS into the script, as a
+ * `<style>` appended to `document.head` the moment it runs. At `document_start`
+ * there is no head, and the throw took the whole script with it.
+ */
+const withoutStylesheets: Plugin = {
+  name: "without-stylesheets",
+  enforce: "pre",
+  resolveId: (source) => (/\.css(\?.*)?$/.test(source) ? EMPTY : null),
+  load: (id) => (id === EMPTY ? "export {}" : null)
+}
+
+const result = (await build({
+  configFile: false,
+  publicDir: false,
+  plugins: [react(), withoutStylesheets],
+  resolve,
+  define: { ...define, __CARRIED_CSS__: JSON.stringify(css) },
+  base: "./",
+  build: {
+    write: false,
+    target: "chrome120",
+    minify: true,
+    rollupOptions: {
+      input: here("../src/screens/carried.ts"),
+      output: { format: "iife", intro },
+      onwarn: (warning, warn) => {
+        // A classic script has no `import.meta`, and the bundler writes `{}` for it.
+        // Only Vite's preload helper reads it, for the chunks it is to preload, and
+        // a script that cannot be split has none.
+        if (warning.code === "EMPTY_IMPORT_META") return
+        warn(warning)
+      }
+    }
+  },
+  logLevel: "warn"
+})) as Rolldown.RolldownOutput
+
+const chunks = result.output.filter((item) => item.type === "chunk")
+const [script] = chunks
+if (script === undefined || chunks.length !== 1)
+  throw new Error(`expected one script for the carried screens, built ${chunks.length}`)
+
+// The renderer is a file of its own, fetched when a diff is drawn. Modules here are
+// kept whole, so one import of anything from the engine carried the whole library
+// and every grammar in it, three megabytes in front of each pull request.
+const renderer = Object.keys(script.modules).find((id) => id.includes("node_modules/@pierre/diffs/"))
+if (renderer !== undefined) throw new Error(`the diff renderer was built into the carried screens, through ${renderer}`)
+
+const stylesheet = Object.keys(script.modules).find((id) => /\.css(\?.*)?$/.test(id))
+if (stylesheet !== undefined) throw new Error(`a stylesheet was built into the carried screens: ${stylesheet}`)
+
+writeFileSync(OUT, asciiOnly(script.code))
+console.log("built public/carried.js")

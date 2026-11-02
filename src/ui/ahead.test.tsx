@@ -102,3 +102,32 @@ describe("the file after the one being read", () => {
     expect(shown("c.ts")).toBe(true)
   })
 })
+
+describe("the diffs GitHub held back", () => {
+  /*
+   * Measured on a 27-file pull request: the file on the screen went out at the front of a
+   * batch of ten and answered in 978ms, where one file alone answers in about 400.
+   */
+  test("asks for the file on the screen by itself, before the window around it", async () => {
+    const asked: Array<ReadonlyArray<string>> = []
+    const heldBack = (path: string): ChangedFile => ({ ...file(path), diff: Option.none() })
+    render(
+      <FileBrowser
+        files={["a.ts", "b.ts", "c.ts"].map(heldBack)}
+        fetchDiffs={(paths) =>
+          Effect.sync(() => {
+            asked.push(paths)
+            return []
+          })
+        }
+        diff={diffChoices(DEFAULTS.diff)}
+        tree={treeChoices(DEFAULTS.tree)}
+        keys={DEFAULT_KEYS}
+      />
+    )
+
+    await waitFor(() => expect(asked.flat()).toContain("c.ts"))
+    expect(asked[0]).toEqual(["a.ts"])
+    expect(asked.slice(1).flat()).not.toContain("a.ts")
+  })
+})
