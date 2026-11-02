@@ -438,7 +438,7 @@ const SAMPLES: Record<string, (choice: string) => ReactNode> = {
   ),
   appearance: (choice) => {
     const scheme: Scheme = choice === "light" ? "light" : "dark"
-    const tokens = tokensOf("gitace", scheme)
+    const tokens = tokensOf("cursor", scheme)
     return (
       // The one outline left in this file, and it is not ours: this is a swatch of
       // another pack, painted in that pack's canvas. On a light appearance that
@@ -460,24 +460,12 @@ const SAMPLES: Record<string, (choice: string) => ReactNode> = {
     )
   },
   pack: (choice) => {
-    /*
-     * Two faces of one pack, or the two packs `match` chooses between.
-     *
-     * `match` is not a pack and has no light and dark of its own: what it paints
-     * depends on whether this is drawn on GitHub's page or in a window. So the
-     * sample answers with the pair it is choosing from, labelled by place, which
-     * is the one thing about this choice a picture can settle.
-     */
-    const faces: ReadonlyArray<readonly [ThemeTokens, string]> =
-      choice === "match"
-        ? [
-            [tokensOf("github", "light"), "On their page"],
-            [tokensOf("gitace", "light"), "In a window"]
-          ]
-        : [
-            [tokensOf(choice as Pack, "light"), "Light"],
-            [tokensOf(choice as Pack, "dark"), "Dark"]
-          ]
+    // `match` is not a pack, and what it comes to is Cursor's, on their page and in a window alike.
+    const pack: Pack = choice === "match" ? "cursor" : (choice as Pack)
+    const faces: ReadonlyArray<readonly [ThemeTokens, string]> = [
+      [tokensOf(pack, "light"), "Light"],
+      [tokensOf(pack, "dark"), "Dark"]
+    ]
 
     return (
       <div className="flex gap-1">

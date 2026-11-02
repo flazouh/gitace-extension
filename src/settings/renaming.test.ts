@@ -113,8 +113,8 @@ describe("carrying the extension's own storage", () => {
     )
     expect(read.diff.layout).toBe("split")
     expect(read.theme.appearance).toBe("dark")
-    // The product's own pack and icons were stored under the old word too.
-    expect(read.theme.pack).toBe("gitace")
+    // The product's own icons were stored under the old word too. Its old pack is gone, so the pack is the default.
+    expect(read.theme.pack).toBe("match")
     expect(read.theme.art).toBe("gitace")
     expect(SETTINGS).toBe("gitace.settings")
   })
@@ -205,10 +205,10 @@ describe("carrying the page's own storage", () => {
 })
 
 describe("the stored word for the product's own look", () => {
-  it("reads the old word as the new one", () => {
+  it("reads the old word as the new one, and the old pack, which is gone, as the default", () => {
     const read = readSettings({ theme: { pack: "gitquiet", art: "gitquiet" } })
 
-    expect(read.theme.pack).toBe("gitace")
+    expect(read.theme.pack).toBe("match")
     expect(read.theme.art).toBe("gitace")
   })
 })

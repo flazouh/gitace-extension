@@ -5,8 +5,7 @@
  * file is the only place those names get real colours. Both shells call
  * `tokensOf` and paint the result onto their root.
  *
- * GitAce Extension literals are taken from `desktop/src/view/style.css` so the default
- * pack is the desktop window, not an approximation of it.
+ * The default pack is Cursor's: what `match` comes to wherever it is drawn.
  */
 
 import type { ThemeSettings } from "./Settings"
@@ -129,64 +128,6 @@ const face = (one: Face): ThemeTokens => ({
   "--bgColor-inset": one.inset,
   "--font-sans": GEIST
 })
-
-/** Ace Warm — the product default (crates/ui/assets/themes/ace-light.json and ace-dark.json). */
-const GITACE: Record<Scheme, Face> = {
-  light: {
-    canvas: "#F0EEE6",
-    inset: "#EAE7DC",
-    surface: "#EAE7DC",
-    raised: "#E1DDCF",
-    hover: "#1414130f",
-    active: "#1414131a",
-    ink: "#141413",
-    muted: "#63605A",
-    accent: "#536B89",
-    onEmphasis: "#FFFFFF",
-    pass: "#4C735E",
-    fail: "#865C5B",
-    busy: "#865404",
-    done: "#5B21B6",
-    accentFill: "#0883FD",
-    passFill: "#4C735E",
-    failFill: "#865C5B",
-    doneFill: "#7C3AED",
-    passMuted: "#4C735E26",
-    failMuted: "#865C5B26",
-    accentMuted: "#536B8926",
-    attentionMuted: "#F9A82526",
-    doneMuted: "#7C3AED26",
-    line: "#14141314",
-    lineMuted: "#1414130d"
-  },
-  dark: {
-    canvas: "#141413",
-    inset: "#181818",
-    surface: "#1C1C1A",
-    raised: "#242320",
-    hover: "#F0EEE617",
-    active: "#F0EEE624",
-    ink: "#F0EEE6",
-    muted: "#8A867C",
-    accent: "#8EA7C7",
-    onEmphasis: "#FFFFFF",
-    pass: "#87B099",
-    fail: "#C59895",
-    busy: "#F9A825",
-    done: "#A371F7",
-    accentFill: "#0883FD",
-    passFill: "#4C735E",
-    failFill: "#865C5B",
-    doneFill: "#8957E5",
-    passMuted: "#87B09926",
-    failMuted: "#C5989526",
-    accentMuted: "#8EA7C726",
-    attentionMuted: "#F9A82526",
-    doneMuted: "#A371F726",
-    line: "#F0EEE60D",
-    lineMuted: "#F0EEE608"
-  }
-}
 
 /** Warm paper / charcoal, in the Claude family of hues. */
 const ANTHROPIC: Record<Scheme, Face> = {
@@ -1025,7 +966,6 @@ const ZINC = pair(
 )
 
 const PACKS: Record<Pack, Record<Scheme, Face>> = {
-  gitace: GITACE,
   anthropic: ANTHROPIC,
   cursor: CURSOR,
   github: GITHUB,

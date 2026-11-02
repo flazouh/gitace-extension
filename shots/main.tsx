@@ -40,7 +40,7 @@ if (stage === null) throw new Error(`#${ROOT_ID} is missing from index.html`)
  * extension that is what covers GitHub's own page. Here there is no page to cover,
  * and without it the frame around a screen is white.
  */
-paintFloor(document, tokensOf("gitace", "dark"))
+paintFloor(document, tokensOf("cursor", "dark"))
 document.documentElement.style.background = "var(--gitace-floor)"
 
 /*

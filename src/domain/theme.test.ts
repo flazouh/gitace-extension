@@ -26,18 +26,6 @@ describe("resolving appearance", () => {
 })
 
 describe("the colour packs", () => {
-  it("gives GitAce Extension dark Ace's warm dark canvas and ink", () => {
-    expect(tokensOf("gitace", "dark")["--color-canvas"]).toBe("#141413")
-    expect(tokensOf("gitace", "dark")["--color-surface"]).toBe("#1C1C1A")
-    expect(tokensOf("gitace", "dark")["--color-ink"]).toBe("#F0EEE6")
-  })
-
-  it("gives GitAce Extension light Ace's warm light canvas and ink", () => {
-    expect(tokensOf("gitace", "light")["--color-canvas"]).toBe("#F0EEE6")
-    expect(tokensOf("gitace", "light")["--color-surface"]).toBe("#EAE7DC")
-    expect(tokensOf("gitace", "light")["--color-ink"]).toBe("#141413")
-  })
-
   it("matches Cursor Dark Anysphere and Cursor Light", () => {
     // From Cursor.app extensions/theme-cursor/themes/*.json
     expect(tokensOf("cursor", "dark")["--color-canvas"]).toBe("#181818")
@@ -59,7 +47,7 @@ describe("the colour packs", () => {
   })
 
   it("answers every token name the screens spend", () => {
-    const tokens = tokensOf("gitace", "dark")
+    const tokens = tokensOf("cursor", "dark")
     for (const name of [
       "--color-canvas",
       "--color-inset",
@@ -85,12 +73,12 @@ describe("the colour packs", () => {
 describe("the pack a place wears when nobody asked for one", () => {
   it("is the place's own, which is what match means", () => {
     expect(packOf("match", "github")).toBe("github")
-    expect(packOf("match", "gitace")).toBe("gitace")
+    expect(packOf("match", "cursor")).toBe("cursor")
   })
 
   it("is the reader's, wherever they are, once they name one", () => {
     expect(packOf("dracula", "github")).toBe("dracula")
-    expect(packOf("gitace", "github")).toBe("gitace")
+    expect(packOf("cursor", "github")).toBe("cursor")
   })
 
   it("never answers with something the table cannot paint", () => {

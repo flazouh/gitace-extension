@@ -176,7 +176,7 @@ describe("lifting a desktop appearance into settings", () => {
     localStorage.setItem(SCHEME_KEY, "dark")
     const kept = counting({
       ...DEFAULTS,
-      theme: { appearance: "light", pack: "gitace", art: "match" }
+      theme: { appearance: "light", pack: "cursor", art: "match" }
     })
 
     await act(async () => {

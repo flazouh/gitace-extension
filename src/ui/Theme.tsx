@@ -46,7 +46,7 @@ export const usePaintedTheme = (): PaintedTheme => {
   if (painted !== null) return painted
   return {
     scheme: schemeOnPage(document.documentElement, prefersDarkScheme()),
-    pack: "gitace"
+    pack: "cursor"
   }
 }
 
@@ -84,7 +84,7 @@ const targetOf = (scope: ThemeScope): HTMLElement | null => {
 export const Theme = ({
   scope = "root",
   element,
-  here = "gitace",
+  here = "cursor",
   children
 }: {
   readonly scope?: ThemeScope

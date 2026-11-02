@@ -13,7 +13,7 @@ import { CHROME_AT } from "./stores"
 import "./index.css"
 import "@/ui/onboarding.css"
 
-const LIGHT = { [SETTINGS]: { theme: { appearance: "light", pack: "gitace" } } }
+const LIGHT = { [SETTINGS]: { theme: { appearance: "light", pack: "cursor" } } }
 const THEIR_PULLS = "https://github.com/pulls"
 
 const Screen = ({ shot }: { readonly shot: Shot }) => {
