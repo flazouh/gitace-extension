@@ -9,12 +9,30 @@
  * So it is built beside the extension instead, into `public/`, which WXT copies
  * verbatim into the output and the manifest exposes as a web-accessible
  * resource.
+ *
+ * Split, with `diff-engine.js` as the entry and every grammar and theme a chunk in
+ * `diff-engine/`, because a diff needs one of each. As one file the first diff on a
+ * page waited for all of them: 4.6 MB, about half a second from asked to evaluated
+ * on a direct load of a pull request.
  */
 
+import { rmSync } from "node:fs"
 import { fileURLToPath } from "node:url"
-import { build } from "vite"
+import { build, type Plugin } from "vite"
 
 const here = (path: string) => fileURLToPath(new URL(path, import.meta.url))
+
+/** Where the chunks go, beside the entry so its relative imports find them. */
+const CHUNKS = "diff-engine"
+
+/**
+ * The last build's chunks gone before this one writes its own. Their names carry
+ * a hash, so nothing overwrites them, and WXT would copy every one of them.
+ */
+const freshChunks: Plugin = {
+  name: "gitace:fresh-diff-engine-chunks",
+  buildStart: () => rmSync(here(`../public/${CHUNKS}`), { recursive: true, force: true })
+}
 
 /** `--watch`, which scripts/dev.ts passes and a build never does. */
 const watch = process.argv.includes("--watch")
@@ -29,6 +47,7 @@ const result = await build({
   // Vite would otherwise treat the folder it is writing into as a folder to
   // copy from, and warn about it for the rest of time.
   publicDir: false,
+  plugins: [freshChunks],
   resolve: {
     // The same substitution the extension makes: Shiki minus the grammars
     // nobody's pull request is written in. See src/diff/shiki.ts.
@@ -41,15 +60,16 @@ const result = await build({
     outDir: here("../public"),
     emptyOutDir: false,
     target: "chrome120",
+    // Library mode leaves an ES build unminified, which here is a fifth more to
+    // fetch and parse before the first diff.
+    minify: true,
     watch: watch ? {} : null,
     lib: {
       entry: here("../src/diff/engine.ts"),
       formats: ["es"],
       fileName: () => "diff-engine.js"
     },
-    // One file, so the content script has one thing to fetch and the manifest
-    // one thing to expose.
-    rollupOptions: { output: { codeSplitting: false } }
+    rollupOptions: { output: { chunkFileNames: `${CHUNKS}/[name]-[hash].js` } }
   },
   logLevel: "warn"
 })

@@ -203,6 +203,8 @@ export default defineConfig({
       {
         resources: [
           "diff-engine.js",
+          // Its grammars and themes, each asked for by the first diff that needs it.
+          "diff-engine/*",
           "markdown-mermaid.js",
           "markdown-mermaid-local.js",
           "screens/*",
