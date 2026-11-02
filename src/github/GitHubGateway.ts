@@ -4448,7 +4448,20 @@ export const layer = Layer.succeed(GitHubGateway, {
       const askFor = (wanted: ReadonlyArray<string>) =>
         Effect.gen(function* () {
           const route = diffEntriesRoute(head, wanted)
+          /*
+           * One file asked for alone is the file a pull request opens on, and the one the
+           * read-ahead asks for before the press. Kept by its route, which names the head
+           * sha, so the screen's own ask finds it rather than waiting on GitHub.
+           */
+          const alone = wanted.length === 1
+          const keptAs = `/${reference.owner}/${reference.repo}/pull/${reference.number}${route}`
+          const kept = alone ? yield* recallRoute(keptAs) : Option.none<unknown>()
+          if (Option.isSome(kept)) {
+            const decoded = yield* Effect.option(toDiffs(kept.value))
+            if (Option.isSome(decoded)) return decoded.value
+          }
           const raw = yield* fetchRoute(reference, route)
+          if (alone) yield* Effect.forkDetach(rememberRoute(keptAs, raw, "ahead"))
 
           return yield* toDiffs(raw).pipe(
             Effect.catch((cause) =>

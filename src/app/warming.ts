@@ -30,7 +30,7 @@ import { warmIssue } from "./issue"
 import { warmIssueList } from "./issueList"
 import { warmNotices } from "./notices"
 import { warmPerson } from "./person"
-import { loadPullRequest, warmCommit } from "./pullRequest"
+import { warmCommit, warmPullRequest } from "./pullRequest"
 import { warmRepoHome } from "./repoHome"
 import { warmRepoList } from "./repoList"
 import { warmRun } from "./run"
@@ -134,7 +134,7 @@ const pageFor = (href: string, at: string): Ahead | null => {
   const pull = elsewhereThan(here.pathname, link.pathname)
   if (Option.isSome(pull)) {
     const { owner, repo, number } = pull.value
-    return { key: `${owner}/${repo}/${number}`, read: loadPullRequest(pull.value) }
+    return { key: `${owner}/${repo}/${number}`, read: warmPullRequest(pull.value) }
   }
 
   // Home as well as their dashboard, under the one name: both draw this list, and reading

@@ -5,7 +5,7 @@ import { forgetEverything, installStorage } from "../../tests/storage"
 import type { Check } from "../domain/PullRequest"
 import type { PullRequestRef } from "../domain/PullRequestRef"
 import { layer } from "../github/GitHubGateway"
-import { loadPullRequest } from "./pullRequest"
+import { loadPullRequest, warmPullRequest } from "./pullRequest"
 
 /**
  * What the reader is shown first, and what arrives behind it.
@@ -155,5 +155,37 @@ describe("reading a pull request whose checks include a tolerated failure", () =
       ["failed", "failed"],
       ["tolerated", "tolerated"]
     ])
+  })
+})
+
+describe("a pull request read ahead of the press", () => {
+  const changes = draftWithBotFindings.changes as {
+    readonly payload: { readonly pullRequestsChangesRoute: Record<string, unknown> }
+  }
+  const withoutDiffs = {
+    ...changes,
+    payload: { ...changes.payload, pullRequestsChangesRoute: { ...changes.payload.pullRequestsChangesRoute, diffContents: [] } }
+  }
+
+  const reading = (answered: unknown): Promise<ReadonlyArray<string>> => {
+    const asked: Array<string> = []
+    const handler = (input: RequestInfo | URL): Promise<Response> => {
+      const url = String(input)
+      if (url.includes("diff_entries")) {
+        asked.push(decodeURIComponent(new URL(url).searchParams.get("paths") ?? ""))
+        return Promise.resolve(Response.json([]))
+      }
+      return Promise.resolve(Response.json(url.includes("/changes") ? answered : payloadFor(url)))
+    }
+    globalThis.fetch = Object.assign(handler, { preconnect: realFetch.preconnect })
+    return Effect.runPromise(warmPullRequest(reference).pipe(Effect.provide(layer))).then(() => asked)
+  }
+
+  test("reads the diff it opens on, alone, where GitHub held it back", async () => {
+    expect(await reading(withoutDiffs)).toEqual(["src/vs/editor/browser/widget/multiDiffEditor/multiDiffEditorWidget.ts"])
+  })
+
+  test("reads nothing more where GitHub sent it with the page", async () => {
+    expect(await reading(draftWithBotFindings.changes)).toEqual([])
   })
 })
