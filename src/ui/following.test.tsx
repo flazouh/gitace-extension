@@ -209,6 +209,7 @@ const staged = (
   }
 
   const renderer: LoadEngine = Effect.succeed({
+    prepare: () => {},
     renderDiff: (container: HTMLElement, request: DiffRequest) => {
       stage.drew.push(request)
       stage.into.push(container)

@@ -29,10 +29,13 @@ import {
 } from "../ports/Renderer"
 import { LOADERS } from "../syntax/loaders"
 import { sameName } from "./sameName"
+import type { Pack } from "../domain/theme"
 import {
   CORE_CSS_ATTRIBUTE,
   FileDiff,
+  getFiletypeFromFileName,
   parsePatchFiles,
+  preloadHighlighter,
   registerCustomTheme,
   wrapCoreCSS
 } from "@pierre/diffs"
@@ -367,6 +370,25 @@ const dressedContainer = (theme: "light" | "dark", choices: DiffChoices): HTMLEl
   style.textContent = wrapCoreCSS(OURS)
   shadow.append(style)
   return host
+}
+
+/**
+ * The highlighter, with the grammar and the theme pair a draw of `path` will ask for.
+ *
+ * Each grammar and theme is a chunk of its own (scripts/build-diff-engine.ts), so a
+ * draw that finds them missing goes out plain and is coloured once they arrive:
+ * measured on a direct load of a pull request, plain for 150 ms. A pane has the
+ * renderer well before GitHub has answered for the file, which is time enough.
+ */
+export const prepare = (path: string, choices: DiffChoices, pack?: Pack): void => {
+  const { dark, light } = syntaxOf(choices.syntax, pack ?? "github")
+  Effect.runFork(
+    Effect.ignore(
+      Effect.tryPromise(() =>
+        preloadHighlighter({ themes: [dark, light], langs: [getFiletypeFromFileName(path)] })
+      )
+    )
+  )
 }
 
 export const renderDiff = (container: HTMLElement, request: DiffRequest): DiffHandle => {

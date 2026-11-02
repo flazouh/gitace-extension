@@ -215,6 +215,11 @@ export const PAPER = "--diffs-paper"
 
 export type DiffEngine = {
   readonly renderDiff: (container: HTMLElement, request: DiffRequest) => DiffHandle
+  /**
+   * The grammar and colours a draw of `path` will need, loaded now, so a pane that
+   * has the renderer before it has the file's diff does not draw it uncoloured.
+   */
+  readonly prepare: (path: string, choices: DiffChoices, pack?: Pack) => void
 }
 
 /**

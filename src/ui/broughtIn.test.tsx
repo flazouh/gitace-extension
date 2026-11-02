@@ -31,6 +31,7 @@ const handle: DiffHandle = {
 }
 
 const stub: LoadEngine = Effect.succeed({
+  prepare: () => {},
   renderDiff: (_container: HTMLElement, request: DiffRequest) => {
     asked.push(request)
     return handle

@@ -42,6 +42,7 @@ const handle: DiffHandle = {
 }
 
 const stub: LoadEngine = Effect.succeed({
+  prepare: () => {},
   renderDiff: (_container: HTMLElement, request: DiffRequest) => {
     asked.push(request)
     return handle
@@ -702,5 +703,29 @@ describe("a file too large to draw without being asked", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Show the diff" }))
 
     expect((await drawn()).path).toBe("src/catalogue.generated.ts")
+  })
+})
+
+describe("the colours a file is drawn in", () => {
+  test("are asked for while GitHub is still answering for the file", async () => {
+    const prepared: Array<string> = []
+    const preparing: LoadEngine = Effect.succeed({
+      prepare: (path: string) => {
+        prepared.push(path)
+      },
+      renderDiff: () => handle
+    })
+
+    render(
+      <RendererProvider load={preparing}>
+        <FileDiffPane
+          file={{ ...file, diff: Option.none() }}
+          ask={() => Effect.never}
+          choices={CHOICES}
+        />
+      </RendererProvider>
+    )
+
+    await waitFor(() => expect(prepared).toEqual(["src/one.ts"]))
   })
 })

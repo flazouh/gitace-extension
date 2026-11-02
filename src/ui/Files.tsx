@@ -592,6 +592,12 @@ const FileDiffPaneView = ({
     return () => loading.interruptUnsafe()
   }, [load])
 
+  // While GitHub is still answering for the file, which is most of the time a
+  // pane has the renderer and nothing to draw.
+  useEffect(() => {
+    engine?.prepare(file.path, drawnWith.choices, drawnWith.pack)
+  }, [engine, file.path, drawnWith])
+
   /*
    * The way to reveal this file's hidden lines, or nothing where there is none.
    *

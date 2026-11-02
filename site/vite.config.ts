@@ -46,7 +46,7 @@ const chunkBeside = (file: string, missing: string, chunks?: string): Plugin => 
       server.middlewares.use(at, (_request, response) => serve(file, response))
       if (chunks === undefined) return
       server.middlewares.use(`/${chunks}`, (request, response) => {
-        const name = (request.url ?? "").split("?", 1)[0].replace(/^\//, "")
+        const name = ((request.url ?? "").split("?", 1)[0] ?? "").replace(/^\//, "")
         if (name === "" || name.includes("/") || name.includes("..")) {
           response.statusCode = 404
           response.end()
