@@ -246,11 +246,11 @@ export const NoticesScreen = ({
 }
 
 /**
- * Whether the bar's own tray wears its dot, which on this page it reads off the rows.
+ * How many of the rows on screen are unread, for the count on the rail's Notifications.
  *
- * Everywhere else the bar asks GitHub. Here the inbox is on the screen, so a reader who marks
- * the last unread row read watches the dot go out in the same frame rather than on their next
+ * Read off the rows, because here the inbox is on the screen: a reader who marks the last
+ * unread row read watches the count go out in the same frame rather than on their next
  * navigation.
  */
-const unreadIn = (notices: ReadonlyArray<Notice> | undefined): boolean | undefined =>
-  notices === undefined ? undefined : notices.some((one) => one.unread)
+const unreadIn = (notices: ReadonlyArray<Notice> | undefined): number | undefined =>
+  notices === undefined ? undefined : notices.filter((one) => one.unread).length

@@ -32,6 +32,8 @@ export type RailProps = {
   readonly chosen?: ReadonlyArray<string>
   /** Narrows the list to one repository, or widens it again. Absent, the rows are links. */
   readonly onChoose?: (address: string) => void
+  /** Puts this column away. The bar brings it back, since a column put away has no header to press. */
+  readonly onColumn?: () => void
 }
 
 /** A repository as the Rail draws it, whichever of its two lists it is in. */
@@ -137,7 +139,8 @@ const List = ({
   )
 }
 
-export const Rail = ({ atWork, pinned = NOTHING, onPinned, chosen = NOTHING, onChoose }: RailProps) => {
+export const Rail = ({ atWork, pinned = NOTHING, onPinned, chosen = NOTHING, onChoose, onColumn }: RailProps) => {
+  const Column = useArt().narrow
   const held = new Set(pinned)
   const picked = new Set(chosen.map((one) => one.toLowerCase()))
   const countOf = (owner: string, repo: string): number =>
@@ -164,6 +167,17 @@ export const Rail = ({ atWork, pinned = NOTHING, onPinned, chosen = NOTHING, onC
     <nav aria-label="Your repositories" className="d-gleft">
       <div className="d-lefth">
         <span className="d-lefth-title">Your repositories</span>
+        {onColumn === undefined ? null : (
+          <button
+            type="button"
+            onClick={onColumn}
+            aria-label="Hide the sidebar"
+            title="Hide the sidebar (⌘B)"
+            className="d-hn d-lefth-end"
+          >
+            <Column size={16} />
+          </button>
+        )}
       </div>
 
       <div className="d-rows">

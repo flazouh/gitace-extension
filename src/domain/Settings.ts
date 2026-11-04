@@ -536,7 +536,7 @@ export const HOME_KNOBS = [
     "sidebar",
     "Sidebar",
     "Home's left column shown or hidden",
-    "Whether Home keeps its left column: the three Destinations, the repositories you pinned and the ones your work is in. Hidden gives the Working Set the whole width; the rail at the left edge still reaches every Destination, and its sidebar control brings the column back.",
+    "Whether Home keeps its left column: the repositories you pinned and the ones your work is in. Hidden gives the Working Set the whole width; the rail at the left edge still reaches every Destination, and the control at the start of the bar, or ⌘B, brings the column back.",
     [
       { value: "shown", label: "Shown" },
       { value: "hidden", label: "Hidden" }

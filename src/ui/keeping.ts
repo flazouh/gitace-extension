@@ -63,6 +63,9 @@ export const FILTER = "gitace:filter:"
 /** The repositories most recently read, so the switcher opens on the few that are used. */
 export const LATELY = `${OURS}lately`
 
+/** The Destination a press off Home asked it for, in the tab's session until Home takes it. */
+export const HOME_ASKED = `${OURS}home.asked`
+
 /** The last list drawn, so a launch has something to show while GitHub answers. */
 export const KEPT_ROWS = `${OURS}kept.rows`
 

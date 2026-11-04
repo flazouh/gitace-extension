@@ -99,8 +99,12 @@ fifteen-item menu.
 
 ### Home, and the three Destinations
 
-`github.com/` becomes ours, and lands on one of three Destinations, remembered per
-Participant and changed from the Rail rather than from a settings page:
+`github.com/` becomes ours, and lands on one of three Destinations, chosen per Participant
+in Settings ("Home opens as"). A press in the Rail visits a Destination without moving where
+Home lands: when the last button pressed was the setting, one glance at Activity changed
+the next morning's page. The Ace mark at the top of the Rail is the Working Set, so the
+Rail's top is five pages of equal standing, each with its chord: the mark `g d`, Issues
+`g i`, Repositories `g r`, Activity `g f` and Notifications `g n`.
 
 - **Working Set** — the Courts, as they already are on `/pulls`. The default.
 - **Repositories** — orientation, ranked by the Participant's own work in each.

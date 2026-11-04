@@ -171,6 +171,18 @@ describe("choosing something", () => {
     expect(written).toEqual({ ...DEFAULTS, diff: { ...DEFAULTS.diff, layout: "split" } })
   })
 
+  test("sets where Home opens, which a press in the rail no longer does", async () => {
+    let written: Settings | undefined
+    const frame = await opened((settings) => {
+      written = settings
+    })
+
+    await tab(frame, "Home")
+    await userEvent.click(within(rowFor(frame, "Home opens as")).getByRole("radio", { name: "Activity" }))
+
+    expect(written).toEqual({ ...DEFAULTS, home: { ...DEFAULTS.home, destination: "activity" } })
+  })
+
   test("writes a rail knob to the rail rather than to the diff", async () => {
     let written: Settings | undefined
     const frame = await opened((settings) => {

@@ -109,17 +109,12 @@
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-nv.d-home {
-  /* As tall as the bar, so the mark is level with the bar's controls, and the first button
-     below starts where the panel under the bar does. */
-  width: var(--d-rail);
-  height: var(--d-bar);
-  margin-bottom: calc(var(--d-gap) - var(--d-rail-gap));
-  place-items: center;
+  /* A button like the rest of the rail, centred in a slot as tall as the bar: the mark is level
+     with the bar's controls, and the first button below starts where the panel under the bar does. */
+  --d-home-slot: calc((var(--d-bar) - var(--d-control)) / 2);
+  margin-top: var(--d-home-slot);
+  margin-bottom: calc(var(--d-home-slot) + var(--d-gap) - var(--d-rail-gap));
   color: var(--d-ink);
-}
-
-:is(#gitace-root, [data-gitace-outside]) .d-nv.d-home:hover {
-  background: transparent;
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-nv.d-home svg {
@@ -149,16 +144,24 @@
   opacity: 1;
 }
 
-/* Out on the corner, ringed in the rail's own fill: inside a small button it covers the icon. */
-:is(#gitace-root, [data-gitace-outside]) .d-dot {
+/* Out on the lower corner, ringed in the rail's own fill: inside a small button it covers the
+   icon, and on the upper one the mark's would be cut by the top of the window. */
+:is(#gitace-root, [data-gitace-outside]) .d-count {
   position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--d-accent);
+  bottom: -4px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--d-tint2);
   box-shadow: 0 0 0 2px var(--d-frame);
+  color: var(--d-ink);
+  font: 500 10px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-rbadge {
@@ -434,6 +437,10 @@
   align-items: center;
   gap: 4px;
   padding: 0 var(--d-inset);
+}
+
+:is(#gitace-root, [data-gitace-outside]) .d-lefth-end {
+  margin-left: auto;
 }
 
 :is(#gitace-root, [data-gitace-outside]) .d-lefth-title {

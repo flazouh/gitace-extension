@@ -64,8 +64,10 @@ Three regions, left to right:
   It sits over the start of the reading column rather than pinned to the right edge at
   x=1355, and it names the key it actually owns. This is the answer to both "the repository
   search covers recent only" and the command palette deprecation listed at 405.
-- **What is not ours.** The notifications mark — a dot rather than a number, because a dot is
-  the whole of what `/notifications/indicator` knows — and the Participant's face
+- **What is not ours.** The notifications mark — a count of the unread rows where the inbox
+  is on screen to count them, and nothing elsewhere, because `/notifications/indicator`
+  knows only whether there is something, and a mark that cannot say how much does not say
+  what it means — and the Participant's face
   carrying the same five-item menu the Rail has — switch account, settings, the shortcut
   sheet, hand the page back to GitHub, sign out. The inbox behind the bell stays GitHub's:
   it is out of scope in the Home spec and a different product surface.
@@ -253,9 +255,9 @@ on Home ⌘K opens on what is owed and `ego` narrows to four; on `flowline#1934`
 ## Further Notes
 
 The unread question is settled and the answer narrows the design: `/notifications/indicator`
-answers `{"mode":"global"}` to cookies and their own bell carries no number, so a dot is not a
-compromise here — it is everything that can honestly be drawn. Anything more would need the
-inbox itself, which is out of scope.
+answers `{"mode":"global"}` to cookies and their own bell carries no number. A number is
+honest only where the inbox is on screen, so that is the only place one is drawn; a dot
+everywhere else said "something" and left the reader to open the inbox to learn what.
 
 The second thing worth writing down before any of this is built: this is the third widening
 of the vision, after Home and Involved Issues. `CONTEXT.md` still says the work around a pull

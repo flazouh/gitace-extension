@@ -82,7 +82,7 @@ describe("changing a key", () => {
   test("writes a Command chord Cap's way, which is how the pane toggles are bound", async () => {
     const { written } = panel()
 
-    await userEvent.click(change("Details pane"))
+    await userEvent.click(change("Left column"))
     await userEvent.keyboard("{Meta>}b{/Meta}")
 
     expect(written.at(-1)?.bound).toEqual({ toggleDetails: "⌘b" })

@@ -598,7 +598,7 @@ describe("the repository's name, which is where the Code tab's mark goes", () =>
 describe("what the bar leaves to the rail beside it", () => {
   test("draws no inbox, account or way out of its own, the rail having one of each", () => {
     render(
-      <Bar where={{ kind: "home" }} unread participant={someone} onStepAside={() => undefined} />
+      <Bar where={{ kind: "home" }} unread={3} participant={someone} onStepAside={() => undefined} />
     )
 
     const bar = screen.getByRole("banner")

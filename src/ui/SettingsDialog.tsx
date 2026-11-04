@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import {
   DIFF_KNOBS,
+  HOME_KNOBS,
   KEY_KNOBS,
   SIGN_ON_KNOBS,
   THEME_KNOBS,
@@ -66,6 +67,12 @@ const PAGES: ReadonlyArray<Page> = [
     label: "Appearance",
     note: "Light or dark, which colour pack paints the screens, and which set draws the glyphs.",
     art: "appearance"
+  },
+  {
+    id: "home",
+    label: "Home",
+    note: "Where github.com opens, and what its Working Set holds.",
+    art: "home"
   },
   {
     id: "diff",
@@ -157,12 +164,12 @@ const Row = ({
             onPointerEnter={() => look(choice.value)}
             onFocus={() => look(choice.value)}
             /*
-             * Wide enough for the longest word any knob offers, which is
-             * `Characters`. It used to be narrower and truncate, and `Charac…`
-             * beside `Words` and `Off` is a choice a reader has to guess at —
-             * the one thing a row of choices cannot afford.
+             * Never narrower than its own word. It used to be a fixed share and
+             * truncate, and `Charac…` beside `Words` and `Off`, or `Repositori…`
+             * beside `Activity`, is a choice a reader has to guess at — the one
+             * thing a row of choices cannot afford.
              */
-            className="flex min-w-16 flex-1 cursor-pointer items-center justify-center rounded-sm px-1.5 py-1 text-center text-[11px] text-ink-muted hover:text-ink has-[:checked]:bg-accent-emphasis has-[:checked]:font-semibold has-[:checked]:text-ink-on-emphasis"
+            className="flex min-w-fit flex-1 cursor-pointer items-center justify-center rounded-sm px-1.5 py-1 text-center text-[11px] text-ink-muted hover:text-ink has-[:checked]:bg-accent-emphasis has-[:checked]:font-semibold has-[:checked]:text-ink-on-emphasis"
           >
             <input
               type="radio"
@@ -288,6 +295,8 @@ export const SettingsSheet = ({
     onChange({ ...settings, tree: { ...settings.tree, [key]: value } })
   const pickSignOn: Pick = (key, value) =>
     onChange({ ...settings, signOn: { ...settings.signOn, [key]: value } })
+  const pickHome: Pick = (key, value) =>
+    onChange({ ...settings, home: { ...settings.home, [key]: value } })
   const pickKeys: Pick = (key, value) =>
     onChange({ ...settings, keys: { ...settings.keys, [key]: value } })
 
@@ -296,6 +305,7 @@ export const SettingsSheet = ({
 
   const parts: Record<string, ReadonlyArray<Part>> = {
     appearance: [{ knobs: THEME_KNOBS, chosen: settings.theme, onPick: pickTheme }],
+    home: [{ knobs: HOME_KNOBS, chosen: settings.home, onPick: pickHome }],
     diff: [{ knobs: DIFF_KNOBS.filter(plain), chosen: settings.diff, onPick: pickDiff }],
     files: [{ knobs: TREE_KNOBS.filter(plain), chosen: settings.tree, onPick: pickTree }],
     keyboard: [{ knobs: KEY_KNOBS, chosen: settings.keys, onPick: pickKeys }],
