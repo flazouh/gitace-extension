@@ -29,8 +29,10 @@ export type Command =
   | "toggleDetails"
   | "toggleFiles"
   | "workingSet"
+  | "issues"
   | "repositories"
   | "activity"
+  | "notifications"
   | "home"
 
 /**
@@ -177,8 +179,10 @@ const STANDARD: Table = {
   toggleDetails: ["⌘b"],
   toggleFiles: ["⌘⇧b"],
   workingSet: ["g d"],
+  issues: ["g i"],
   repositories: ["g r"],
   activity: ["g f"],
+  notifications: ["g n"],
   home: ["g g"]
 }
 
@@ -218,8 +222,10 @@ const VIM: Table = {
   toggleDetails: ["⌘b"],
   toggleFiles: ["⌘⇧b"],
   workingSet: ["g d"],
+  issues: ["g i"],
   repositories: ["g r"],
   activity: ["g f"],
+  notifications: ["g n"],
   home: ["g h"]
 }
 
@@ -238,8 +244,10 @@ const NOTHING: Table = {
   toggleDetails: [],
   toggleFiles: [],
   workingSet: [],
+  issues: [],
   repositories: [],
   activity: [],
+  notifications: [],
   home: []
 }
 
@@ -280,8 +288,8 @@ export const KEYBOARD: ReadonlyArray<{
   { command: "dismiss", word: "Close", gist: "The way out of whatever is open" },
   {
     command: "toggleDetails",
-    word: "Details pane",
-    gist: "The left column of merge, conversation and checks, and back"
+    word: "Left column",
+    gist: "A pull request's merge, conversation and checks, or Home's repositories, and back"
   },
   {
     command: "toggleFiles",
@@ -289,8 +297,10 @@ export const KEYBOARD: ReadonlyArray<{
     gist: "The tree and the diff on the right, and back"
   },
   { command: "workingSet", word: "Working set", gist: "Everything waiting on you" },
+  { command: "issues", word: "Issues", gist: "Your issues, on GitHub's page" },
   { command: "repositories", word: "Repositories", gist: "The repositories you keep" },
   { command: "activity", word: "Activity", gist: "The feed" },
+  { command: "notifications", word: "Notifications", gist: "The inbox" },
   { command: "home", word: "Home", gist: "The front of the interface" }
 ]
 

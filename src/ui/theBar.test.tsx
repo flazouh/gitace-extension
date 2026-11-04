@@ -916,7 +916,7 @@ describe("the bar says how much sky it takes", () => {
     expect(
       screen
         .getByRole("navigation", { name: "Global navigation" })
-        .querySelector('[aria-label="Ace"]')
+        .querySelector(".d-home")
     ).not.toBeNull()
   })
 })

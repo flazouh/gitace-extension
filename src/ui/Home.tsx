@@ -1,5 +1,5 @@
 import type { Effect, Option } from "effect"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import type { Destination } from "../domain/Settings"
 import type { PullRequestRef } from "../domain/PullRequestRef"
 import type { RowDoing } from "../domain/doable"
@@ -9,6 +9,7 @@ import type { Sitting } from "../domain/sittings"
 import type { Keys } from "../keys/commands"
 import { Activity } from "./Activity"
 import { Repositories } from "./Repositories"
+import { takeHomeAsked } from "./homeAsked"
 import { WorkingSetScreen } from "./WorkingSetScreen"
 import { type Load, useLive } from "./useLive"
 import { useSettings } from "./useSettings"
@@ -75,13 +76,20 @@ export const Home = ({
   const everything = useLive(repositories, rememberedRepositories)
   const known = everything.read.status === "ready" ? everything.read.value : undefined
 
-  // Both written against whatever the settings are at the moment of the press rather than
-  // against this render's copy of them: pressing a Destination and then narrowing the Rail
-  // are two changes a second apart, and each spreading its own stale snapshot is how one of
-  // them silently undid the other.
-  const goTo = useCallback(
-    (destination: Destination) =>
-      change((current) => ({ ...current, home: { ...current.home, destination } })),
+  // What Home shows now, and not the setting it opens on: a press is a visit, and only settings
+  // move where `github.com/` lands. Unset, it is the setting, which may still be on its way.
+  const [shown, goTo] = useState<Destination | undefined>(takeHomeAsked)
+  const destination = shown ?? settings.home.destination
+
+  // Written against whatever the settings are at the moment of the press rather than against
+  // this render's copy of them: two changes a second apart, each spreading its own stale
+  // snapshot, is how one of them silently undid the other.
+  const turnColumn = useCallback(
+    () =>
+      change((current) => ({
+        ...current,
+        home: { ...current.home, sidebar: current.home.sidebar === "shown" ? "hidden" : "shown" }
+      })),
     [change]
   )
 
@@ -101,9 +109,10 @@ export const Home = ({
       ask={ask}
       keys={keys}
       home
-      destination={settings.home.destination}
+      destination={destination}
       onDestination={goTo}
       collapsed={settings.home.sidebar === "hidden"}
+      onColumn={turnColumn}
       pinned={settings.pinned}
       onPinned={pin}
       participant={participant}

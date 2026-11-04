@@ -78,8 +78,8 @@ export type BarProps = {
    * there to read — which is Home, and any page whose bar arrives before their nav does.
    */
   readonly tabs?: ReadonlyArray<Tab>;
-  /** Whether anything is in the inbox. A dot, never a number: see the spec. */
-  readonly unread?: boolean;
+  /** How many notifications are unread, where the page has counted them, for the rail's count. */
+  readonly unread?: number;
   /**
    * Everything the reader has, for the switcher behind the repository's name.
    *
@@ -187,6 +187,11 @@ export type BarProps = {
    * address bar. See `around.ts`.
    */
   readonly onHome?: () => void;
+  /**
+   * Brings Home's left column back, handed in only while it is put away: its own header is
+   * what puts it away, and is gone with it.
+   */
+  readonly onColumn?: () => void;
   /**
    * Whatever is around this bar keeps past everything about the page.
    *
@@ -336,6 +341,7 @@ export const Bar = ({
   onHome,
   narrowed,
   destination = "working-set",
+  onColumn,
   tray,
 }: BarProps) => {
   const art = useArt();
@@ -343,6 +349,7 @@ export const Bar = ({
   const Search = art.search;
   const Command = art.command;
   const Back = art.back;
+  const Column = art.narrow;
   const Forward = art.forward;
   const backButton = useRef<HTMLButtonElement>(null);
   const pressing = useRef<number | undefined>(undefined);
@@ -462,6 +469,17 @@ export const Bar = ({
        * Wordless like the tray at the other end. The mark says the direction and
        * the name says the destination, for a pointer and for anyone being read to.
        */}
+      {onColumn === undefined ? null : (
+        <button
+          type="button"
+          onClick={onColumn}
+          aria-label="Show the sidebar"
+          title="Show the sidebar (⌘B)"
+          className="d-hn"
+        >
+          <Column size={16} />
+        </button>
+      )}
       {onBack === undefined && onForward === undefined ? null : (
         <div className="relative d-hnav">
           <button

@@ -22,6 +22,7 @@ import { usePaintedTheme } from "./Theme";
 import { useOursToDraw } from "./useOursToDraw";
 import { whenTheScreenMoves } from "./mount";
 import { useSettings } from "./useSettings";
+import type { Destination } from "../domain/Settings";
 import { useScreenActivity } from "./screenActivity";
 import { tabMark } from "./tabMarks";
 import { participantOnPage } from "./viewer";
@@ -58,6 +59,8 @@ export const TheBar = ({
   onPrepareRoute,
   needsYou,
   aimAt,
+  destination,
+  onDestination,
   ...props
 }: Omit<
   BarProps,
@@ -87,8 +90,13 @@ export const TheBar = ({
   readonly recall?: () => Effect.Effect<
     Option.Option<ReadonlyArray<Repository>>
   >;
-  /** How much of the Working Set is waiting on the reader, for the dot on its rail item. */
+  /** How much of the Working Set is waiting on the reader, for the count on the mark. */
   readonly needsYou?: number;
+  /**
+   * Home's switch between its Destinations, handed in by Home alone. Anywhere else a press on one
+   * is a walk to Home carrying which, and the setting Home opens on stays the reader's to set.
+   */
+  readonly onDestination?: (destination: Destination) => void;
   /** The repository the reader is most at work in, for the rail's Create menu. */
   readonly aimAt?: { readonly owner: string; readonly repo: string };
   /** A detached route root whose bar is being built before navigation. */
@@ -423,7 +431,7 @@ export const TheBar = ({
       <PaintedSlot slot={slot} />
       <Bar
         {...props}
-        destination={settings.home.destination}
+        destination={destination ?? "working-set"}
         participant={reader}
         tabs={shown}
         /* The same list the palette searches, so the switcher and ⌘K can never disagree. */
@@ -482,28 +490,11 @@ export const TheBar = ({
         aimAt={aimAt}
         repositories={findable}
         pinned={settings.pinned}
-        destination={settings.home.destination}
-        onDestination={(which) =>
-          change((current) => ({ ...current, home: { ...current.home, destination: which } }))
-        }
+        destination={destination ?? "working-set"}
+        onDestination={onDestination}
         onHome={around.home}
         onStepAside={props.onStepAside}
         participant={reader}
-        sidebar={
-          props.where.kind === "home"
-            ? {
-                open: settings.home.sidebar === "shown",
-                toggle: () =>
-                  change((current) => ({
-                    ...current,
-                    home: {
-                      ...current.home,
-                      sidebar: current.home.sidebar === "shown" ? "hidden" : "shown",
-                    },
-                  })),
-              }
-            : undefined
-        }
         settings={(trigger) => (
           <SettingsDialog settings={settings} onChange={change} trigger={trigger} />
         )}

@@ -6,6 +6,7 @@ import type { Repository } from "../domain/repositories"
 import { useArt } from "./art"
 import type { Where } from "./Bar"
 import { goTo } from "./going"
+import { askHomeFor } from "./homeAsked"
 import { Menu, type Row } from "./Menu"
 import { participantRows } from "./participant"
 import { RailTip, RailTips } from "./RailTip"
@@ -14,11 +15,14 @@ import { openTab } from "../app/openTab"
 export type GlobalRailProps = {
   readonly where: Where
   readonly at?: string
-  readonly unread?: boolean
+  /** How many notifications are unread, where the page has counted them. */
+  readonly unread?: number
   readonly needsYou?: number
   readonly repositories?: ReadonlyArray<Repository>
   readonly pinned?: ReadonlyArray<string>
+  /** The Destination Home is showing now. */
   readonly destination?: Destination
+  /** Home's own switch between its Destinations, handed in only on Home, which answers a press in place. */
   readonly onDestination?: (destination: Destination) => void
   readonly onHome?: () => void
   readonly onStepAside?: () => void
@@ -26,8 +30,6 @@ export type GlobalRailProps = {
   readonly aimAt?: { readonly owner: string; readonly repo: string }
   /** Who the reader is, for the avatar and its menu at the foot. */
   readonly participant?: { readonly login: string; readonly faceUrl: Option.Option<string> }
-  /** Whether Home's left column is showing, and the press that shows or hides it. */
-  readonly sidebar?: { readonly open: boolean; readonly toggle: () => void }
   /** The settings sheet, handed the control that opens it. */
   readonly settings?: (trigger: (open: () => void, opened: boolean) => ReactNode) => ReactNode
 }
@@ -86,6 +88,14 @@ const creatingFor = (aimedAt: { readonly owner: string; readonly repo: string } 
   { name: "New gist", where: "https://gist.github.com/", art: "code" }
 ]
 
+/** A count in a button's corner, for what is waiting behind it. Past 99 it stops being a number to read. */
+const Count = ({ of }: { readonly of: number }) =>
+  of > 0 ? (
+    <span aria-hidden="true" className="d-count">
+      {of > 99 ? "99+" : of}
+    </span>
+  ) : null
+
 /** A pressed modifier is the reader asking for a new tab, which the link already does. */
 const plainPress = (event: React.MouseEvent): boolean =>
   !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
@@ -93,7 +103,7 @@ const plainPress = (event: React.MouseEvent): boolean =>
 export const GlobalRail = ({
   where,
   at = typeof window === "undefined" ? "/" : window.location.pathname,
-  unread = false,
+  unread = 0,
   needsYou = 0,
   repositories = [],
   pinned = NONE,
@@ -103,17 +113,14 @@ export const GlobalRail = ({
   onStepAside,
   aimAt,
   participant,
-  sidebar,
   settings
 }: GlobalRailProps) => {
   const art = useArt()
-  const PullRequest = art["pull-request"]
   const Issue = art.issue
   const Repos = art.files
   const Clock = art.clock
   const Bell = art.notifications
   const Create = art.create
-  const Sidebar = art.narrow
   const Settings = art.diff
   const GitHub = art.github
   const [opened, setOpened] = useState<"create" | "account" | undefined>(undefined)
@@ -127,26 +134,17 @@ export const GlobalRail = ({
 
   /*
    * A Destination is a link to Home, so from the inbox or a pull request it goes there the way any link
-   * does. It was a button that only changed the setting: on Issues, pressing Activity lit Activity and
-   * left the reader on Issues.
+   * does, carrying which Destination was pressed. Only Home switches in place. The press never moves
+   * the setting Home opens on: that is the reader's choice in settings, not the last button they hit.
    */
   const toDestination = (which: Destination) => (event: React.MouseEvent) => {
     if (!plainPress(event)) return
-    onDestination?.(which)
-    if (where.kind === "home" && onDestination !== undefined) event.preventDefault()
-    else if (onHome !== undefined) {
-      event.preventDefault()
-      onHome()
-    } else if (onDestination !== undefined) {
-      event.preventDefault()
-      goTo(window, THE_HOME)
-    }
+    event.preventDefault()
+    if (onDestination !== undefined) return onDestination(which)
+    askHomeFor(which)
+    if (onHome !== undefined) onHome()
+    else goTo(window, THE_HOME)
   }
-
-  // Off Home too, wherever this answers the press: the shell claims an unmarked link of ours
-  // on `pointerdown` and stops its click, and the Destination was never stored.
-  const inPlace =
-    where.kind === "home" || onDestination !== undefined || onHome !== undefined ? "" : undefined
 
   const [pinnedOwner, pinnedRepo] = pinned[0]?.split("/") ?? []
   const aimedAt =
@@ -162,35 +160,25 @@ export const GlobalRail = ({
         data-gitace-global-rail=""
         className="d-rail fixed left-1 top-1 bottom-1 z-30"
       >
-        {onHome !== undefined ? (
-          <RailTip name="Ace">
-            <button type="button" onClick={onHome} aria-label="Ace" className="d-nv d-home">
-              <AceMark />
-            </button>
-          </RailTip>
-        ) : (
-          <RailTip name="Ace">
-            <a href={THE_HOME} aria-label="Ace" className="d-nv d-home">
-              <AceMark />
-            </a>
-          </RailTip>
-        )}
-
+        {/*
+         * The mark is the Working Set: Home's first page, and the one `github.com/` was replaced by.
+         * A second button for it below drew one place twice.
+         */}
         <RailTip name="Working Set" keys="g d">
           <a
             href={THE_HOME}
-            aria-label="Working Set"
+            aria-label={needsYou > 0 ? `Working Set, ${needsYou} waiting on you` : "Working Set"}
             aria-current={onWorkingSet ? "page" : undefined}
             onClick={toDestination("working-set")}
-            data-gitace-in-place={inPlace}
-            className="d-nv"
+            data-gitace-in-place=""
+            className="d-nv d-home"
           >
-            <PullRequest size={16} />
-            {needsYou > 0 ? <span aria-hidden="true" className="d-dot" /> : null}
+            <AceMark />
+            <Count of={needsYou} />
           </a>
         </RailTip>
 
-        <RailTip name="Issues">
+        <RailTip name="Issues" keys="g i">
           <a
             href="/issues"
             aria-label="Issues"
@@ -205,7 +193,7 @@ export const GlobalRail = ({
           <a
             href={THE_HOME}
             onClick={toDestination("repositories")}
-            data-gitace-in-place={inPlace}
+            data-gitace-in-place=""
             aria-label="Repositories"
             aria-current={onRepos ? "page" : undefined}
             className="d-nv"
@@ -218,7 +206,7 @@ export const GlobalRail = ({
           <a
             href={THE_HOME}
             onClick={toDestination("activity")}
-            data-gitace-in-place={inPlace}
+            data-gitace-in-place=""
             aria-label="Activity"
             aria-current={onActivity ? "page" : undefined}
             className="d-nv"
@@ -227,15 +215,15 @@ export const GlobalRail = ({
           </a>
         </RailTip>
 
-        <RailTip name="Notifications">
+        <RailTip name="Notifications" keys="g n">
           <a
             href="/notifications"
-            aria-label={unread ? "Notifications, something is waiting" : "Notifications"}
+            aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
             aria-current={onNotifications ? "page" : undefined}
             className="d-nv"
           >
             <Bell size={16} />
-            {unread ? <span aria-hidden="true" className="d-dot" /> : null}
+            <Count of={unread} />
           </a>
         </RailTip>
 
@@ -262,20 +250,6 @@ export const GlobalRail = ({
             rows={creatingFor(aimedAt)}
           />
         </div>
-
-        {sidebar === undefined ? null : (
-          <RailTip name={sidebar.open ? "Hide the sidebar" : "Show the sidebar"} keys="[">
-            <button
-              type="button"
-              onClick={sidebar.toggle}
-              aria-pressed={sidebar.open}
-              aria-label={sidebar.open ? "Hide the sidebar" : "Show the sidebar"}
-              className="d-nv"
-            >
-              <Sidebar size={16} />
-            </button>
-          </RailTip>
-        )}
 
         {settings === undefined
           ? null

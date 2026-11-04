@@ -10,6 +10,7 @@ import { repositoriesAtWork, type RepositoryAtWork } from "../domain/rail";
 import type { Keys } from "../keys/commands";
 import { Rail } from "./Rail";
 import { TheBar } from "./TheBar";
+import { goTo as walkTo } from "./going";
 import { useWaiting } from "./useWaiting";
 import { useKeyboard } from "./useKeyboard";
 import { useKeys } from "./useKeys";
@@ -72,16 +73,18 @@ export type WorkingSetScreenProps = {
   /**
    * Which of Home's three Destinations is showing.
    *
-   * Kept by the settings record rather than by the address, which is the one decision here
-   * worth defending: `/` is GitHub's address and pushing our own onto it would put a page
-   * in their history that their soft navigation knows nothing about. A reader who wants
-   * Repositories every morning says so once in Settings; a reader who wants it for one
-   * minute presses it in the Rail and the choice is theirs until they change it.
+   * Kept by Home rather than by the address, which is the one decision here worth
+   * defending: `/` is GitHub's address and pushing our own onto it would put a page in their
+   * history that their soft navigation knows nothing about. A reader who wants Repositories
+   * every morning says so once in Settings; a reader who wants it for one minute presses it
+   * in the Rail, and the next visit lands where Settings say.
    */
   readonly destination?: Destination;
   readonly onDestination?: (destination: Destination) => void;
-  /** Whether the reader has put the left column away, from the global rail. */
+  /** Whether the reader has put the left column away. */
   readonly collapsed?: boolean;
+  /** Puts the left column away, or brings it back. */
+  readonly onColumn?: () => void;
   /** Who the reader is, for the Rail's menu. */
   readonly participant?: {
     readonly login: string;
@@ -143,6 +146,7 @@ export const WorkingSetScreen = ({
   destination = "working-set",
   onDestination,
   collapsed,
+  onColumn,
   participant,
   repositories,
   recallRepositories,
@@ -160,8 +164,9 @@ export const WorkingSetScreen = ({
 
   /*
    * `g d`, `g r` and `g f` are how a reader leaves a Destination, and must work on all three,
-   * with the left column shown or put away. Not animated: a chord pressed fifty times a day
-   * that waits for a page to slide reads as slower than the page it replaced.
+   * with the left column shown or put away; `g i` and `g n` reach the rail's other two pages.
+   * Not animated: a chord pressed fifty times a day that waits for a page to slide reads as
+   * slower than the page it replaced.
    */
   useKeys(
     board,
@@ -170,6 +175,9 @@ export const WorkingSetScreen = ({
           workingSet: () => goTo("working-set"),
           repositories: () => goTo("repositories"),
           activity: () => goTo("activity"),
+          issues: () => walkTo(window, "/issues"),
+          notifications: () => walkTo(window, "/notifications"),
+          ...(onColumn === undefined ? {} : { toggleDetails: onColumn }),
         }
       : {},
   );
@@ -256,6 +264,8 @@ export const WorkingSetScreen = ({
       onStepAside={onStepAside}
       needsYou={needsYou}
       aimAt={atWork[0]}
+      {...(home ? { destination, onDestination: goTo } : {})}
+      {...(home && collapsed && onColumn !== undefined ? { onColumn } : {})}
       {...(home && chosen.length === 1
         ? { narrowed: { to: chosen[0]!, widen: () => narrow(pickingRepo(query, chosen[0]!)) } }
         : {})}
@@ -356,6 +366,7 @@ export const WorkingSetScreen = ({
         {collapsed ? null : (
           <Rail
             atWork={atWork}
+            onColumn={onColumn}
             pinned={pinned}
             onPinned={onPinned}
             chosen={chosen}

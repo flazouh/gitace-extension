@@ -3,6 +3,7 @@ import { cleanup, render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Option } from "effect"
 import { GlobalRail } from "./GlobalRail"
+import { takeHomeAsked } from "./homeAsked"
 
 afterEach(cleanup)
 
@@ -22,16 +23,22 @@ const repository = (nameWithOwner: string) => {
 }
 
 describe("the persistent global Ace rail", () => {
-  test("draws the Ace mark at the top and the five Option 1 surfaces below it", () => {
-    render(<GlobalRail where={{ kind: "home" }} />)
+  test("opens on the mark, which is the Working Set, and lists five pages with nothing drawn twice", () => {
+    render(<GlobalRail where={{ kind: "home" }} at="/" />)
 
-    const nav = rail()
-    expect(within(nav).getByLabelText("Ace")).toBeDefined()
-    expect(within(nav).getByLabelText("Working Set").getAttribute("href")).toBe("/")
-    expect(within(nav).getByLabelText("Issues").getAttribute("href")).toBe("/issues")
-    expect(within(nav).getByLabelText("Repositories")).toBeDefined()
-    expect(within(nav).getByLabelText("Activity")).toBeDefined()
-    expect(within(nav).getByLabelText("Notifications").getAttribute("href")).toBe("/notifications")
+    const pages = within(rail()).getAllByRole("link")
+    expect(pages.map((one) => one.getAttribute("aria-label"))).toEqual([
+      "Working Set",
+      "Issues",
+      "Repositories",
+      "Activity",
+      "Notifications"
+    ])
+    expect(pages[0]!.classList.contains("d-home")).toBe(true)
+    expect(pages[0]!.getAttribute("href")).toBe("/")
+    expect(pages[0]!.getAttribute("aria-current")).toBe("page")
+    expect(pages[1]!.getAttribute("href")).toBe("/issues")
+    expect(pages[4]!.getAttribute("href")).toBe("/notifications")
   })
 
   test("holds no pinned repositories, which Home's left column lists with their counts", () => {
@@ -64,11 +71,20 @@ describe("the persistent global Ace rail", () => {
     expect(steppedAside).toBe(1)
   })
 
-  test("marks the Working Set when something is waiting on the reader", () => {
-    render(<GlobalRail where={{ kind: "home" }} needsYou={2} />)
+  test("counts what is waiting on the reader on the mark, and what is unread on Notifications", () => {
+    render(<GlobalRail where={{ kind: "home" }} needsYou={2} unread={14} />)
 
-    const item = within(rail()).getByLabelText("Working Set")
-    expect(item.querySelector(".d-dot")).not.toBeNull()
+    const mark = within(rail()).getByRole("link", { name: "Working Set, 2 waiting on you" })
+    expect(mark.textContent).toBe("2")
+    const bell = within(rail()).getByRole("link", { name: "Notifications, 14 unread" })
+    expect(bell.textContent).toBe("14")
+  })
+
+  test("draws no count where nothing is waiting, and stops counting past 99", () => {
+    render(<GlobalRail where={{ kind: "home" }} needsYou={0} unread={240} />)
+
+    expect(within(rail()).getByRole("link", { name: "Working Set" }).textContent).toBe("")
+    expect(within(rail()).getByRole("link", { name: /^Notifications/ }).textContent).toBe("99+")
   })
 
   test("names a button in a tooltip of ours beside it, with its keys, and not in the browser's", async () => {
@@ -82,6 +98,17 @@ describe("the persistent global Ace rail", () => {
     await person.hover(within(rail()).getByLabelText("Repositories"))
     const tip = await screen.findByRole("tooltip")
     expect(tip.textContent).toBe("Repositories g r")
+  })
+
+  test("names every page's keys, the mark's being the Working Set's", async () => {
+    const said: Array<string> = []
+    for (const name of ["Working Set", "Issues", "Notifications"]) {
+      render(<GlobalRail where={{ kind: "home" }} />)
+      await userEvent.setup().hover(within(rail()).getByLabelText(name))
+      said.push((await screen.findByRole("tooltip")).textContent ?? "")
+      cleanup()
+    }
+    expect(said).toEqual(["Working Set g d", "Issues g i", "Notifications g n"])
   })
 })
 
@@ -195,70 +222,71 @@ describe("the Participant menu", () => {
   })
 })
 
-describe("the sidebar control", () => {
-  test("hides Home's left column, and says it will show it once hidden", async () => {
-    const person = userEvent.setup()
-    const pressed: Array<boolean> = []
-    const { rerender } = render(
-      <GlobalRail where={{ kind: "home" }} sidebar={{ open: true, toggle: () => pressed.push(true) }} />
-    )
+/**
+ * A Destination pressed is a visit, never the place Home opens.
+ *
+ * It used to write the setting, so a glance at Activity moved where `github.com/` landed the
+ * next morning. Only Settings move that now.
+ */
+describe("a Destination pressed", () => {
+  afterEach(() => sessionStorage.clear())
 
-    await person.click(within(rail()).getByRole("button", { name: "Hide the sidebar" }))
-    expect(pressed).toEqual([true])
-
-    rerender(<GlobalRail where={{ kind: "home" }} sidebar={{ open: false, toggle: () => {} }} />)
-    expect(within(rail()).getByRole("button", { name: "Show the sidebar" })).toBeDefined()
-  })
-
-  test("keeps a Destination pressed off Home to itself, so the page cannot take it as a route", async () => {
-    // The shell claims a link of ours on `pointerdown` and stops its click before React
-    // sees it: Home opened, and the Destination pressed was never stored.
+  test("switches Home in place, through Home's own switch", async () => {
     const person = userEvent.setup()
     const went: Array<string> = []
-    render(
-      <GlobalRail
-        where={{ kind: "repository", owner: "oven-sh", repo: "bun" }}
-        at="/issues"
-        destination="activity"
-        onDestination={(which) => went.push(which)}
-        onHome={() => went.push("home")}
-      />
-    )
-    const workingSet = within(rail()).getByRole("link", { name: "Working Set" })
-
-    await person.click(workingSet)
-
-    expect(workingSet.hasAttribute("data-gitace-in-place")).toBe(true)
-    expect(went).toEqual(["working-set", "home"])
-  })
-
-  test("takes the reader Home itself from a page, rather than loading the document", async () => {
-    const person = userEvent.setup()
-    const went: Array<string> = []
-    window.history.replaceState(null, "", "/issues")
-    render(
-      <GlobalRail
-        where={{ kind: "repository", owner: "oven-sh", repo: "bun" }}
-        at="/issues"
-        destination="activity"
-        onDestination={(which) => went.push(which)}
-      />
-    )
+    render(<GlobalRail where={{ kind: "home" }} onDestination={(which) => went.push(which)} />)
 
     const loads: Array<boolean> = []
     const heard = (event: Event) => loads.push(!event.defaultPrevented)
     document.addEventListener("click", heard)
-
-    await person.click(within(rail()).getByRole("link", { name: "Working Set" }))
+    await person.click(within(rail()).getByRole("link", { name: "Activity" }))
     document.removeEventListener("click", heard)
 
-    expect(went).toEqual(["working-set"])
+    expect(went).toEqual(["activity"])
     expect(loads).toEqual([false])
-    expect(window.location.pathname).toBe("/")
+    expect(sessionStorage.length).toBe(0)
   })
 
-  test("is not offered where there is no left column", () => {
-    render(<GlobalRail where={{ kind: "repository", owner: "oven-sh", repo: "bun" }} />)
+  test("off Home, is carried to Home once, and the shell's Home is opened rather than the page", async () => {
+    // The shell claims a link of ours on `pointerdown` and stops its click before React
+    // sees it, so every Destination is marked as answered in place.
+    const person = userEvent.setup()
+    const went: Array<string> = []
+    render(
+      <GlobalRail
+        where={{ kind: "repository", owner: "oven-sh", repo: "bun" }}
+        at="/issues"
+        onHome={() => went.push("home")}
+      />
+    )
+    const activity = within(rail()).getByRole("link", { name: "Activity" })
+
+    await person.click(activity)
+
+    expect(activity.hasAttribute("data-gitace-in-place")).toBe(true)
+    expect(went).toEqual(["home"])
+    expect(takeHomeAsked()).toBe("activity")
+    expect(takeHomeAsked()).toBeUndefined()
+  })
+
+  test("off Home on a page, walks to Home itself rather than loading the document", async () => {
+    const person = userEvent.setup()
+    window.history.replaceState(null, "", "/issues")
+    render(<GlobalRail where={{ kind: "repository", owner: "oven-sh", repo: "bun" }} at="/issues" />)
+
+    const loads: Array<boolean> = []
+    const heard = (event: Event) => loads.push(!event.defaultPrevented)
+    document.addEventListener("click", heard)
+    await person.click(within(rail()).getByRole("link", { name: "Repositories" }))
+    document.removeEventListener("click", heard)
+
+    expect(loads).toEqual([false])
+    expect(window.location.pathname).toBe("/")
+    expect(takeHomeAsked()).toBe("repositories")
+  })
+
+  test("leaves the left column's control to the column, out of the rail", () => {
+    render(<GlobalRail where={{ kind: "home" }} />)
 
     expect(within(rail()).queryByRole("button", { name: /the sidebar/ })).toBeNull()
   })
