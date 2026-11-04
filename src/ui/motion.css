@@ -809,6 +809,58 @@
 }
 
 /**
+ * A rail glyph's name, beside it.
+ *
+ * It comes in from the side it points away from, right to left onto the glyph, fast and then slow,
+ * and goes faster than it came. The first name of a run along the rail waits for Radix's delay and
+ * travels; every one after it is asked for at once and comes in shorter, because the pointer is
+ * already moving down the rail and a full entrance on each glyph would trail behind it.
+ */
+.t-tip {
+  --duration-quick: 150ms;
+  --duration-micro: 80ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --distance-small: 6px;
+  --tip-in-dur: var(--duration-quick);
+  --tip-again-dur: var(--duration-micro);
+  --tip-out-dur: var(--duration-micro);
+  --tip-ease: var(--ease-out);
+  --tip-travel: var(--distance-small);
+}
+
+.t-tip[data-state="delayed-open"] {
+  animation: t-tip-in var(--tip-in-dur) var(--tip-ease) both;
+}
+
+.t-tip[data-state="instant-open"] {
+  animation: t-tip-in var(--tip-again-dur) var(--tip-ease) both;
+}
+
+.t-tip[data-state="closed"] {
+  animation: t-tip-out var(--tip-out-dur) var(--tip-ease) both;
+}
+
+@keyframes t-tip-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--tip-travel));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes t-tip-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/**
  * A portalled dropdown (Radix), same scale as `.t-menu` but outside the root.
  *
  * Open invitation, close gets out of the way: 150ms in, 80ms out. It sat at
@@ -1055,6 +1107,7 @@
   }
 
   .t-card[data-state],
+  .t-tip[data-state],
   .t-dropdown[data-state],
   .t-modal,
   .t-modal::backdrop,

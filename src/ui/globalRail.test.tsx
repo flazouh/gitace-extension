@@ -70,6 +70,19 @@ describe("the persistent global Ace rail", () => {
     const item = within(rail()).getByLabelText("Working Set")
     expect(item.querySelector(".d-dot")).not.toBeNull()
   })
+
+  test("names a button in a tooltip of ours beside it, with its keys, and not in the browser's", async () => {
+    const person = userEvent.setup()
+    render(<GlobalRail where={{ kind: "home" }} onStepAside={() => undefined} />)
+
+    for (const item of within(rail()).getAllByRole("link").concat(within(rail()).getAllByRole("button"))) {
+      expect(item.getAttribute("title")).toBeNull()
+    }
+
+    await person.hover(within(rail()).getByLabelText("Repositories"))
+    const tip = await screen.findByRole("tooltip")
+    expect(tip.textContent).toBe("Repositories g r")
+  })
 })
 
 /**

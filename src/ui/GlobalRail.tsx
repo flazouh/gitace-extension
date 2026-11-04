@@ -8,6 +8,7 @@ import type { Where } from "./Bar"
 import { goTo } from "./going"
 import { Menu, type Row } from "./Menu"
 import { participantRows } from "./participant"
+import { RailTip, RailTips } from "./RailTip"
 import { openTab } from "../app/openTab"
 
 export type GlobalRailProps = {
@@ -155,169 +156,185 @@ export const GlobalRail = ({
       : repositories[0])
 
   return (
-    <nav
-      aria-label="Global navigation"
-      data-gitace-global-rail=""
-      className="d-rail fixed left-1 top-1 bottom-1 z-30"
-    >
-      {onHome !== undefined ? (
-        <button type="button" onClick={onHome} aria-label="Ace" title="Ace" className="d-nv d-home">
-          <AceMark />
-        </button>
-      ) : (
-        <a href={THE_HOME} aria-label="Ace" title="Ace" className="d-nv d-home">
-          <AceMark />
-        </a>
-      )}
-
-      <a
-        href={THE_HOME}
-        aria-label="Working Set"
-        title="Working Set (g d)"
-        aria-current={onWorkingSet ? "page" : undefined}
-        onClick={toDestination("working-set")}
-        data-gitace-in-place={inPlace}
-        className="d-nv"
+    <RailTips>
+      <nav
+        aria-label="Global navigation"
+        data-gitace-global-rail=""
+        className="d-rail fixed left-1 top-1 bottom-1 z-30"
       >
-        <PullRequest size={16} />
-        {needsYou > 0 ? <span aria-hidden="true" className="d-dot" /> : null}
-      </a>
-
-      <a
-        href="/issues"
-        aria-label="Issues"
-        title="Issues"
-        aria-current={onIssues ? "page" : undefined}
-        className="d-nv"
-      >
-        <Issue size={16} />
-      </a>
-
-      <a
-        href={THE_HOME}
-        onClick={toDestination("repositories")}
-        data-gitace-in-place={inPlace}
-        aria-label="Repositories"
-        title="Repositories (g r)"
-        aria-current={onRepos ? "page" : undefined}
-        className="d-nv"
-      >
-        <Repos size={16} />
-      </a>
-
-      <a
-        href={THE_HOME}
-        onClick={toDestination("activity")}
-        data-gitace-in-place={inPlace}
-        aria-label="Activity"
-        title="Activity (g f)"
-        aria-current={onActivity ? "page" : undefined}
-        className="d-nv"
-      >
-        <Clock size={16} />
-      </a>
-
-      <a
-        href="/notifications"
-        aria-label={unread ? "Notifications, something is waiting" : "Notifications"}
-        title="Notifications"
-        aria-current={onNotifications ? "page" : undefined}
-        className="d-nv"
-      >
-        <Bell size={16} />
-        {unread ? <span aria-hidden="true" className="d-dot" /> : null}
-      </a>
-
-      <span aria-hidden="true" className="d-sp" />
-
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setOpened(opened === "create" ? undefined : "create")}
-          aria-haspopup="menu"
-          aria-expanded={opened === "create"}
-          aria-label="Create"
-          title="Create"
-          className="d-nv"
-        >
-          <Create size={16} />
-        </button>
-        <Menu
-          name="Create"
-          origin="beside"
-          open={opened === "create"}
-          onShut={() => setOpened(undefined)}
-          rows={creatingFor(aimedAt)}
-        />
-      </div>
-
-      {sidebar === undefined ? null : (
-        <button
-          type="button"
-          onClick={sidebar.toggle}
-          aria-pressed={sidebar.open}
-          aria-label={sidebar.open ? "Hide the sidebar" : "Show the sidebar"}
-          title={sidebar.open ? "Hide the sidebar ([)" : "Show the sidebar ([)"}
-          className="d-nv"
-        >
-          <Sidebar size={16} />
-        </button>
-      )}
-
-      {settings === undefined
-        ? null
-        : settings((open, isOpen) => (
-            <button
-              type="button"
-              onClick={open}
-              aria-label="GitAce settings"
-              title="GitAce settings"
-              aria-expanded={isOpen}
-              className="d-nv"
-            >
-              <Settings size={16} />
+        {onHome !== undefined ? (
+          <RailTip name="Ace">
+            <button type="button" onClick={onHome} aria-label="Ace" className="d-nv d-home">
+              <AceMark />
             </button>
-          ))}
+          </RailTip>
+        ) : (
+          <RailTip name="Ace">
+            <a href={THE_HOME} aria-label="Ace" className="d-nv d-home">
+              <AceMark />
+            </a>
+          </RailTip>
+        )}
 
-      {participant === undefined ? null : (
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setOpened(opened === "account" ? undefined : "account")}
-            aria-haspopup="menu"
-            aria-expanded={opened === "account"}
-            aria-label={`${participant.login} and your account`}
-            title={participant.login}
+        <RailTip name="Working Set" keys="g d">
+          <a
+            href={THE_HOME}
+            aria-label="Working Set"
+            aria-current={onWorkingSet ? "page" : undefined}
+            onClick={toDestination("working-set")}
+            data-gitace-in-place={inPlace}
             className="d-nv"
           >
-            <span className="d-avatar">
-              {Option.match(participant.faceUrl, {
-                onNone: () => participant.login.slice(0, 2),
-                onSome: (url) => <img src={url} alt="" />
-              })}
-            </span>
-          </button>
+            <PullRequest size={16} />
+            {needsYou > 0 ? <span aria-hidden="true" className="d-dot" /> : null}
+          </a>
+        </RailTip>
+
+        <RailTip name="Issues">
+          <a
+            href="/issues"
+            aria-label="Issues"
+            aria-current={onIssues ? "page" : undefined}
+            className="d-nv"
+          >
+            <Issue size={16} />
+          </a>
+        </RailTip>
+
+        <RailTip name="Repositories" keys="g r">
+          <a
+            href={THE_HOME}
+            onClick={toDestination("repositories")}
+            data-gitace-in-place={inPlace}
+            aria-label="Repositories"
+            aria-current={onRepos ? "page" : undefined}
+            className="d-nv"
+          >
+            <Repos size={16} />
+          </a>
+        </RailTip>
+
+        <RailTip name="Activity" keys="g f">
+          <a
+            href={THE_HOME}
+            onClick={toDestination("activity")}
+            data-gitace-in-place={inPlace}
+            aria-label="Activity"
+            aria-current={onActivity ? "page" : undefined}
+            className="d-nv"
+          >
+            <Clock size={16} />
+          </a>
+        </RailTip>
+
+        <RailTip name="Notifications">
+          <a
+            href="/notifications"
+            aria-label={unread ? "Notifications, something is waiting" : "Notifications"}
+            aria-current={onNotifications ? "page" : undefined}
+            className="d-nv"
+          >
+            <Bell size={16} />
+            {unread ? <span aria-hidden="true" className="d-dot" /> : null}
+          </a>
+        </RailTip>
+
+        <span aria-hidden="true" className="d-sp" />
+
+        <div className="relative">
+          <RailTip name="Create">
+            <button
+              type="button"
+              onClick={() => setOpened(opened === "create" ? undefined : "create")}
+              aria-haspopup="menu"
+              aria-expanded={opened === "create"}
+              aria-label="Create"
+              className="d-nv"
+            >
+              <Create size={16} />
+            </button>
+          </RailTip>
           <Menu
-            name="Your account"
+            name="Create"
             origin="beside"
-            open={opened === "account"}
+            open={opened === "create"}
             onShut={() => setOpened(undefined)}
-            rows={accountRows(participant.login)}
+            rows={creatingFor(aimedAt)}
           />
         </div>
-      )}
 
-      {onStepAside === undefined ? null : (
-        <button
-          type="button"
-          onClick={onStepAside}
-          aria-label="Leave GitAce Extension"
-          title="GitHub interface"
-          className="d-nv"
-        >
-          <GitHub size={16} />
-        </button>
-      )}
-    </nav>
+        {sidebar === undefined ? null : (
+          <RailTip name={sidebar.open ? "Hide the sidebar" : "Show the sidebar"} keys="[">
+            <button
+              type="button"
+              onClick={sidebar.toggle}
+              aria-pressed={sidebar.open}
+              aria-label={sidebar.open ? "Hide the sidebar" : "Show the sidebar"}
+              className="d-nv"
+            >
+              <Sidebar size={16} />
+            </button>
+          </RailTip>
+        )}
+
+        {settings === undefined
+          ? null
+          : settings((open, isOpen) => (
+              <RailTip name="GitAce settings">
+                <button
+                  type="button"
+                  onClick={open}
+                  aria-label="GitAce settings"
+                  aria-expanded={isOpen}
+                  className="d-nv"
+                >
+                  <Settings size={16} />
+                </button>
+              </RailTip>
+            ))}
+
+        {participant === undefined ? null : (
+          <div className="relative">
+            <RailTip name={participant.login}>
+              <button
+                type="button"
+                onClick={() => setOpened(opened === "account" ? undefined : "account")}
+                aria-haspopup="menu"
+                aria-expanded={opened === "account"}
+                aria-label={`${participant.login} and your account`}
+                className="d-nv"
+              >
+                <span className="d-avatar">
+                  {Option.match(participant.faceUrl, {
+                    onNone: () => participant.login.slice(0, 2),
+                    onSome: (url) => <img src={url} alt="" />
+                  })}
+                </span>
+              </button>
+            </RailTip>
+            <Menu
+              name="Your account"
+              origin="beside"
+              open={opened === "account"}
+              onShut={() => setOpened(undefined)}
+              rows={accountRows(participant.login)}
+            />
+          </div>
+        )}
+
+        {onStepAside === undefined ? null : (
+          <RailTip name="GitHub interface">
+            <button
+              type="button"
+              onClick={onStepAside}
+              aria-label="Leave GitAce Extension"
+              className="d-nv"
+            >
+              <GitHub size={16} />
+            </button>
+          </RailTip>
+        )}
+      </nav>
+    </RailTips>
   )
 }
