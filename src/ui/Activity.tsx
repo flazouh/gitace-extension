@@ -389,7 +389,7 @@ export const Activity = ({ activity, waiting = false, now = new Date() }: Activi
     // rise into place forty milliseconds apart down the column and the run stops after
     // six, so a day with thirty repositories in it still assembles in a quarter of a
     // second.
-    <section aria-label="Activity" className="t-panels flex flex-col gap-3">
+    <section aria-label="Activity" className="t-panels flex flex-col gap-0.5">
       {/*
        * Not the whole-page wait. That one carries the attribute the click benchmark reads
        * to decide when a reader could start reading, and this page is usually drawn from

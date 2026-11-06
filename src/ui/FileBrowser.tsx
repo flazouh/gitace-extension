@@ -919,7 +919,7 @@ export const FileBrowser = ({
       className={
         review?.active === true
           ? "fixed inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-surface p-2"
-          : "t-panel-fade flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-md bg-surface"
+          : "t-panel-fade flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-md border border-solid border-edge bg-surface"
       }
       style={review?.active === true ? { zIndex: 2_147_483_646 } : undefined}
     >

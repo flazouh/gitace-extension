@@ -10,6 +10,14 @@
  * `text-sm`, and switching to Tailwind's 14px would loosen every measured row.
  */
 
+/*
+ * A panel's hairline: the ink at 5%, so it is the same faint edge on every pack. Inline, so
+ * each element mixes it from the ink in force there rather than the root's.
+ */
+@theme inline {
+  --color-edge: color-mix(in srgb, var(--color-ink) 5%, transparent);
+}
+
 @theme {
   --color-canvas: #FCFCFC;
   --color-inset: #F3F3F3;

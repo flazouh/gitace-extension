@@ -127,7 +127,7 @@ export const BroughtIn = ({
          place and replaces it. The line and the corner are the sheet's to give,
          not this file's: see `dress.ts`, which exists because two cards once
          argued about them. */
-      className="t-panel-fade flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-md bg-surface"
+      className="t-panel-fade flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-md border border-solid border-edge bg-surface"
     >
       <div className="flex items-center gap-2 px-3 py-2">
         {chosen === undefined ? (

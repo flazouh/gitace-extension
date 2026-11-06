@@ -99,7 +99,7 @@ export const RaiseScreen = ({
         where={{ kind: "repository", owner: repo.owner, repo: repo.repo }}
         recall={recallRepositories}
       />
-      <div className="t-panels flex flex-col gap-3 py-3">
+      <div className="t-panels flex flex-col gap-0.5 py-3">
         <div className="flex flex-col gap-2 rounded-md bg-surface p-3">
           <h1 className="text-xs font-semibold text-ink-muted">
             A new issue in <span className="text-ink">{named}</span>

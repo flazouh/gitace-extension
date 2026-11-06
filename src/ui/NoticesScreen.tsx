@@ -234,7 +234,7 @@ export const NoticesScreen = ({
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
       <TheBar onStepAside={onStepAside} where={{ kind: "place", name: "Notifications" }} recall={recallRepositories} unread={unreadIn(shown)} />
       {shown === undefined ? null : (
-        <div className="t-panels flex flex-col gap-1 py-3">
+        <div className="t-panels flex flex-col gap-0.5 py-3">
           <Notices notices={shown} onPress={pressed} />
         </div>
       )}

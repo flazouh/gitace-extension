@@ -115,7 +115,7 @@ export const IssueListScreen = ({
         recall={recallRepositories}
       />
       {listed === undefined ? null : (
-        <div className="t-panels flex flex-col gap-1 py-3">
+        <div className="t-panels flex flex-col gap-0.5 py-3">
           <IssueList
             listed={listed}
             what={named}

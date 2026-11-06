@@ -283,7 +283,7 @@ const RunHeader = ({
   return (
     <section
       aria-label="This run"
-      className={`t-panel-fade mb-1.5 shrink-0 p-1 ${CARD}`}
+      className={`t-panel-fade mb-0.5 shrink-0 p-1 ${CARD}`}
     >
       <div className="mb-1 flex items-center gap-2.5">
         <span

@@ -152,7 +152,7 @@ export const GistEditScreen = ({
         what was asked for.
       */}
       <div
-        className="t-panels flex flex-col gap-1.5 py-3"
+        className="t-panels flex flex-col gap-0.5 py-3"
         onKeyDown={(event) => {
           // The shortcut every box on GitHub answers, and their own editor does not.
           if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) save()

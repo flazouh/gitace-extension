@@ -96,7 +96,7 @@ export const ColumnHandle = ({
       onKeyDown={press}
       onDoubleClick={reset}
       title="Drag to resize. Double-click to reset."
-      className="group relative -mx-1 w-[calc(0.375rem+0.5rem)] shrink-0 cursor-col-resize touch-none select-none self-stretch outline-none"
+      className="group relative -mx-1 w-[calc(0.125rem+0.5rem)] shrink-0 cursor-col-resize touch-none select-none self-stretch outline-none"
     >
       {/* Pinned the way the files panel is, so the handle is under the pointer for as long as the panel is. */}
       <div className="sticky top-[calc(var(--gitace-bar-h,0px)+0.5rem)] flex h-[calc(100vh-var(--gitace-bar-h,0px)-1rem)] min-h-[40rem] justify-center">

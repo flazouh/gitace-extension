@@ -187,7 +187,7 @@ export const IssuesScreen = ({
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
       <TheBar onStepAside={onStepAside} where={{ kind: "place", name: "Issues" }} recall={recallRepositories} owed={owed} />
       {listed === undefined ? null : (
-        <div className="t-panels flex flex-col gap-1 py-3">
+        <div className="t-panels flex flex-col gap-0.5 py-3">
           <Tabs on={involvement} onGo={onGo} />
           <IssueList
             listed={listed}

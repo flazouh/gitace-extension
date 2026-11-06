@@ -245,7 +245,7 @@ export const Header = ({
     // not inside that well and not outside the card entirely.
     <section
       aria-label="This pull request"
-      className={`t-panel-fade mb-1.5 shrink-0 p-1 ${CARD}`}
+      className={`t-panel-fade mb-0.5 shrink-0 p-1 ${CARD}`}
     >
         {/* No padding of its own: the card's own inset is what holds both rows
             off its border, so the badge's fill starts where the well's fill

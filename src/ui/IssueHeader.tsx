@@ -164,7 +164,7 @@ export const IssueHeader = ({
 }) => (
   <section
     aria-label="This issue"
-    className={`t-panel-fade mb-1.5 shrink-0 p-1 ${CARD}`}
+    className={`t-panel-fade mb-0.5 shrink-0 p-1 ${CARD}`}
   >
     <div className="mb-1 flex items-center gap-2.5">
       <TheState
@@ -235,7 +235,7 @@ export const IssueHeader = ({
 export const ListedHeader = ({ one }: { readonly one: ListedIssue }) => (
   <section
     aria-label="This issue"
-    className={`t-panel-fade mb-1.5 shrink-0 p-1 ${CARD}`}
+    className={`t-panel-fade mb-0.5 shrink-0 p-1 ${CARD}`}
   >
     <div className="mb-1 flex items-center gap-2.5">
       {/* "Closed" and no more. GitHub's search says which of the two states an

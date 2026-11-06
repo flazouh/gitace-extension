@@ -96,7 +96,7 @@ export const DiscussionsScreen = ({
       <DrawnAt path={read.status === "loading" ? null : (at ?? null)} />
       <TheBar onStepAside={onStepAside} where={whereFor(list.home)} recall={recallRepositories} />
       {shown === undefined ? null : (
-        <div className="t-panels flex flex-col gap-3 pt-2 pb-2">
+        <div className="t-panels flex flex-col gap-0.5 pt-2 pb-2">
           <Categories list={list} categories={shown.categories} />
           <Discussions home={list.home} discussions={shown.rows} />
           <Pages list={list} more={shown.more} />

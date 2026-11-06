@@ -180,7 +180,7 @@ export const Repositories = ({
     // `t-panels` for the same reason the Courts have it: the box and the card under it
     // rise into place forty milliseconds apart, so the Destination assembles itself the
     // way the Working Set does instead of appearing all at once beside a list that does.
-    <nav aria-label="Repositories" className="t-panels flex flex-col gap-3">
+    <nav aria-label="Repositories" className="t-panels flex flex-col gap-0.5">
       {/*
        * The box runs the width of the card under it, the way the Working Set's filters run
        * the width of the Courts. Held to `max-w-lg` it was half a line long above a list

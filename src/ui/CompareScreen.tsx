@@ -73,7 +73,7 @@ export const CompareScreen = ({
   return (
     <>
       <TheBar onStepAside={onStepAside} where={{ kind: "repository", owner: comparing.repo.owner, repo: comparing.repo.repo }} />
-      <div className="t-panels flex flex-col gap-3 py-3">
+      <div className="t-panels flex flex-col gap-0.5 py-3">
         <div className="rounded-md bg-raised p-3">
           <h1 className="text-sm">
             <span className="text-ink-muted">

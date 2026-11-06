@@ -73,7 +73,7 @@
 /*
  * The pane, with the glass on a layer of its own.
  *
- * The same corner as the cards under it, and the cards are `--radius-lg`. Not the component's class:
+ * The same corner as the cards under it, and the cards are `--radius-md`. Not the component's class:
  * `Section.tsx` writes `rounded-md`, and `quiet.css` then takes every card on this page to
  * `--radius-lg` with `!important`, so the class is a number nobody sees. Matching it instead of the
  * drawn corner is exactly the mistake made here once, which left the bar at six over a column of
@@ -102,7 +102,7 @@
 :is(#gitace-bar, [data-gitace-bar]) > header {
   position: relative;
   isolation: isolate;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background-color: transparent;
   /*
    * One shadow, and it is separation.

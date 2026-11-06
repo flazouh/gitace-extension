@@ -139,7 +139,7 @@ export const GistListScreen = ({
         screen at once — see `widths.test.ts`, which measured two insets on five screens
         before that rule existed and now refuses a screen that grows a third.
       */}
-      <div className="t-panels flex flex-col gap-3 py-3">
+      <div className="t-panels flex flex-col gap-0.5 py-3">
         <div className="flex flex-wrap items-center gap-2">
           <input
             ref={search}
