@@ -8,11 +8,13 @@ import type { Settings } from "../domain/Settings"
 import type { Store } from "../ports/Settings"
 import { Home } from "./Home"
 import { askHomeFor } from "./homeAsked"
+import { rememberFilter } from "./remembered"
 import { SettingsProvider } from "./settings"
 
 afterEach(() => {
   cleanup()
   sessionStorage.clear()
+  localStorage.clear()
 })
 
 const storeWithSidebarHidden: Store = {
@@ -107,5 +109,20 @@ describe("where Home lands", () => {
 
     showingHome(keeping(DEFAULTS).store)
     await waitFor(() => expect(crumb().textContent).toBe("Working Set"))
+  })
+})
+
+describe("the crumb on a Working Set narrowed to one repository", () => {
+  test("names the Destination shown, the narrowing being the Working Set's own", async () => {
+    const person = userEvent.setup()
+    rememberFilter("working-set", "repo:oven-sh/bun")
+    showingHome(keeping(DEFAULTS).store)
+    const banner = () => within(screen.getByRole("banner"))
+    await waitFor(() => expect(banner().getByRole("button", { name: "Working Set" })).toBeDefined())
+
+    await person.click(within(screen.getByRole("navigation", { name: "Global navigation" })).getByLabelText("Activity"))
+
+    await waitFor(() => expect(banner().getByText("Activity").getAttribute("aria-current")).toBe("page"))
+    expect(banner().queryByRole("button", { name: "Working Set" })).toBeNull()
   })
 })
