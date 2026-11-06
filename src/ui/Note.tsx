@@ -5,6 +5,7 @@ import { useState } from "react"
 import { PRESSABLE } from "./dress"
 import { Markdown } from "./Markdown"
 import { Says } from "./says"
+import { Send } from "./Send"
 import { Who } from "./Who"
 import { Writing } from "./Writing"
 
@@ -152,21 +153,21 @@ export const Note = ({
           onSend={() => void post()}
           suggest={suggest}
           onUpload={onUpload}
+          send={
+            <Send
+              onSend={() => void post()}
+              disabled={text.trim() === "" || posting || onPost === undefined}
+              busy={posting}
+            >
+              <Says among={WORDS} said={posting ? WORDS[1] : WORDS[0]} waiting={WORDS[1]} />
+            </Send>
+          }
         />
       </div>
       {refused === undefined ? null : (
         <p className="mt-1.5 text-xs text-fail">GitHub would not take that: {refused}</p>
       )}
       <div className="mt-1.5 flex items-center gap-1.5">
-        <button
-          type="button"
-          disabled={text.trim() === "" || posting || onPost === undefined}
-          aria-busy={posting ? true : undefined}
-          onClick={() => void post()}
-          className="rounded-md bg-pass-emphasis px-2.5 py-1 text-xs font-semibold text-ink-on-emphasis disabled:opacity-40"
-        >
-          <Says among={WORDS} said={posting ? WORDS[1] : WORDS[0]} waiting={WORDS[1]} />
-        </button>
         {/* Only where there is somewhere to keep it. A draft hangs on the lines
             it is about, so a File Remark has no key to be found again by, and a
             button that quietly discarded instead would be worse than none. */}

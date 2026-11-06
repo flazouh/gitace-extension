@@ -85,6 +85,7 @@
 @import "./stack.css";
 /* The bar's own shape, which only makes sense over a page: see the file. */
 @import "./glass.css";
+@import "./composer.css";
 /* Last, because every rule in it takes something away from the ones above. */
 @import "./quiet.css";
 @import "./desk.css";

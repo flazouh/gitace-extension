@@ -9,6 +9,7 @@ import {
   ArrowLeft01Icon,
   ArrowMoveUpRightIcon,
   ArrowRight01Icon,
+  ArrowRight02Icon,
   Attachment01Icon,
   BoldIcon,
   Book02Icon,
@@ -61,6 +62,8 @@ import {
   MessageMultiple01Icon,
   MinusSignCircleIcon,
   MoreHorizontalIcon,
+  MoreVerticalIcon,
+  Mic01Icon,
   PaintBoardIcon,
   PaintBrush01Icon,
   PaintBucketIcon,
@@ -233,6 +236,9 @@ export const HUGEICONS: Set = {
   more: from(MoreHorizontalIcon),
   link: from(Link01Icon),
   attach: from(Attachment01Icon),
+  mic: from(Mic01Icon),
+  send: from(ArrowRight02Icon),
+  "mic-menu": from(MoreVerticalIcon),
   /*
    * Ours in both sets, because this shape belongs to the keyboard rather than to a drawing
    * style — the same argument the GitHub mark makes from the other direction. Theirs had no

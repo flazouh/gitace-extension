@@ -8,6 +8,7 @@ import { PRESSABLE } from "./dress"
 import { forget, held, hold } from "./held"
 import { Markdown } from "./Markdown"
 import { Says } from "./says"
+import { Send } from "./Send"
 import { ageOf, momentOf } from "./when"
 import { Who } from "./Who"
 import { Writing } from "./Writing"
@@ -246,6 +247,11 @@ const Answer = ({
             onSend={say}
             suggest={answering.suggest}
             onUpload={answering.onUpload}
+            send={
+              <Send onSend={say} disabled={text.trim() === "" || saying} busy={saying}>
+                <Says among={WORDS} said={saying ? WORDS[1] : WORDS[0]} waiting={WORDS[1]} />
+              </Send>
+            }
           />
           {refused === undefined ? null : (
             <p className="text-xs text-fail">GitHub would not take that: {refused}</p>
@@ -255,15 +261,6 @@ const Answer = ({
       <div className="flex items-center gap-1.5">
         {answer === undefined ? null : writing ? (
           <>
-            <button
-              type="button"
-              disabled={text.trim() === "" || saying}
-              aria-busy={saying ? true : undefined}
-              onClick={say}
-              className="rounded-md bg-pass-emphasis px-2.5 py-1 text-xs font-semibold text-ink-on-emphasis enabled:hover:opacity-90 disabled:opacity-40"
-            >
-              <Says among={WORDS} said={saying ? WORDS[1] : WORDS[0]} waiting={WORDS[1]} />
-            </button>
             <button
               type="button"
               disabled={saying}

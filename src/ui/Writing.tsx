@@ -1,5 +1,5 @@
 import { Effect, Fiber } from "effect"
-import { useEffect, useRef, useState } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import {
   pictured,
   placed,
@@ -17,10 +17,12 @@ import {
   type Suggesting
 } from "../domain/suggesting"
 import { type ArtName, useArt } from "./art"
+import { Dictation } from "./Dictation"
 import { FLOAT } from "./dress"
 import { Markdown } from "./Markdown"
 import { continued, indented, linked } from "./typing"
-import { type Way, Ways } from "./Ways"
+import { useDictation } from "./useDictation"
+import { keepVoiceChoices, voiceChoices } from "./voiceChoices"
 
 /**
  * The box anything is written in, wherever it is being written.
@@ -65,7 +67,7 @@ const said = (mark: Mark): string =>
 /** One mark's glyph, drawn in whatever set the screen around it is drawn in. */
 const MarkArt = ({ mark }: { readonly mark: Mark }) => {
   const Drawn = useArt()[mark.art]
-  return <Drawn size={14} />
+  return <Drawn size={16} />
 }
 
 const MARKS: ReadonlyArray<Mark> = [
@@ -158,30 +160,6 @@ const because = (cause: unknown): string | undefined => {
   return typeof detail === "string" && detail.length > 0 ? detail : undefined
 }
 
-/**
- * As tall as the box is allowed to grow before it keeps its own scrollbar.
- *
- * A Tailwind class rather than a number, because it is worn twice below — once by the
- * wrapper, once by the mirror — and the two capping at different heights is the last
- * line of a long comment slipping out of view.
- */
-const ROOM = "max-h-[520px]"
-
-/**
- * The cell both halves of the growing box stand in, with the padding they share.
- *
- * One string for the same reason `ROOM` is one: the mirror and the field wrap at the
- * width these classes leave them, and padding that drifted apart on one side is a
- * mirror wrapping a word earlier than the field it sizes.
- */
-const CELL = "col-start-1 row-start-1 px-2.5 py-2"
-
-/** The box, or what the words in it come to. */
-const WAYS = [
-  { name: "write", said: "Write", art: "write" },
-  { name: "preview", said: "Preview", art: "eye" }
-] as const satisfies ReadonlyArray<Way<"write" | "preview">>
-
 export const Writing = ({
   text,
   onText,
@@ -190,7 +168,8 @@ export const Writing = ({
   onEscape,
   onSend,
   suggest,
-  onUpload
+  onUpload,
+  send
 }: {
   readonly text: string
   readonly onText: (text: string) => void
@@ -216,6 +195,12 @@ export const Writing = ({
    * nothing, which is what it was before. See `attaching.ts` for what gets written.
    */
   readonly onUpload?: (file: File) => Effect.Effect<Uploaded, unknown>
+  /**
+   * The button that sends what is written, drawn in the box at the foot of its controls, as
+   * Ace's composer has Send. See `Send`. Absent where the surface around the box has buttons
+   * of its own to send it with.
+   */
+  readonly send?: ReactNode
 }) => {
   const [previewing, setPreviewing] = useState(false)
   const box = useRef<HTMLTextAreaElement>(null)
@@ -239,6 +224,28 @@ export const Writing = ({
    */
   const standing = useRef(text)
   standing.current = text
+
+  const [choices, setChoices] = useState(voiceChoices)
+  /*
+   * Sent on the render after the last words land rather than when it stops: the surface's own
+   * sending reads the text it holds, and that is only the dictated text once it has rendered.
+   */
+  const [sendSoon, setSendSoon] = useState(false)
+  const hearing = useDictation({
+    text: () => standing.current,
+    onText: (said) => {
+      standing.current = said
+      onText(said)
+    },
+    onDone: () => {
+      if (choices.send) setSendSoon(true)
+    }
+  })
+  useEffect(() => {
+    if (!sendSoon) return
+    setSendSoon(false)
+    onSend()
+  }, [sendSoon, onSend])
 
   useEffect(() => {
     if (suggest === undefined) return
@@ -353,7 +360,8 @@ export const Writing = ({
 
   return (
     <div
-      className={`relative rounded-md bg-canvas ${over ? "outline outline-2 outline-accent" : ""}`}
+      className="t-composer"
+      {...(over ? { "data-over": "" } : {})}
       /*
        * Dropping a file anywhere on the box, not only on the field. A reader dragging a
        * screenshot aims at the box they can see, and the toolbar is part of it.
@@ -374,70 +382,10 @@ export const Writing = ({
         attach([...event.dataTransfer.files])
       }}
     >
-      {/* The tabs and the marks, on the surface above the box being typed in: the
-          inset fill under the field is what separates the two now. */}
-      <div className="flex items-center gap-0.5 bg-surface px-1.5 py-1">
-        <Ways
-          ways={WAYS}
-          on={previewing ? "preview" : "write"}
-          onPick={(way) => setPreviewing(way === "preview")}
-          label="How to look at this comment"
-        />
-        <span className="mx-1 h-4 w-px bg-line" />
-        {MARKS.map((mark) => (
-          <button
-            key={mark.name}
-            type="button"
-            aria-label={mark.name}
-            /*
-             * The shortcut is told rather than folded into the name: a screen reader saying
-             * "Bold Command B button" is worse than the attribute that exists to carry it.
-             */
-            aria-keyshortcuts={mark.key === undefined ? undefined : `Meta+${mark.key}`}
-            title={said(mark)}
-            disabled={previewing}
-            onClick={() => apply(mark)}
-            className="rounded p-1 text-ink-muted hover:bg-hover hover:text-ink disabled:opacity-40"
-          >
-            <MarkArt mark={mark} />
-
-          </button>
-        ))}
-        {onUpload === undefined ? null : (
-          <>
-            <span className="mx-1 h-4 w-px bg-line" />
-            {/*
-              A control for the thing paste and drop already do, because neither of them is
-              visible and one of them needs a mouse that can drag.
-            */}
-            <button
-              type="button"
-              aria-label="Attach a file"
-              title="Attach a file"
-              disabled={previewing}
-              onClick={() => picker.current?.click()}
-              className="rounded p-1 text-ink-muted hover:bg-hover hover:text-ink disabled:opacity-40"
-            >
-              <MarkArt mark={{ name: "Attach a file", art: "attach" }} />
-            </button>
-            <input
-              ref={picker}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(event) => {
-                attach([...(event.target.files ?? [])])
-                // Emptied, or the same file chosen twice in a row is chosen once.
-                event.target.value = ""
-              }}
-            />
-          </>
-        )}
-      </div>
       {previewing ? (
-        <div className="min-h-16 px-2.5 py-2">
+        <div className="t-composer-words">
           {text.trim() === "" ? (
-            <p className="text-sm text-ink-muted">Nothing to preview yet.</p>
+            <p className="text-ink-muted">Nothing to preview yet.</p>
           ) : (
             <Markdown markdown={text} />
           )}
@@ -462,7 +410,7 @@ export const Writing = ({
          * its own — so the two cannot drift apart, and a wrapped line counts as the two
          * lines it is.
          */
-        <div className={`grid text-sm ${ROOM}`}>
+        <div className="t-composer-words">
           <div
             aria-hidden="true"
             /*
@@ -471,7 +419,7 @@ export const Writing = ({
              * `position: absolute`, which lifts the mirror out of the row it exists to
              * size. An arbitrary property makes a class name nobody else has.
              */
-            className={`${CELL} overflow-hidden whitespace-pre-wrap break-words [visibility:hidden] ${ROOM}`}
+            className="overflow-hidden whitespace-pre-wrap break-words [visibility:hidden]"
           >
             {/* The space is load-bearing: a trailing newline draws no line box of its own,
                 and without it Enter opened a line the box was one line too short for. */}
@@ -487,7 +435,6 @@ export const Writing = ({
               setShut(false)
             }}
             onSelect={(event) => setCaret(event.currentTarget.selectionStart)}
-            className={`${CELL} block min-h-20 w-full resize-none overflow-y-auto bg-canvas text-ink [font:inherit]`}
             /*
              * An address pasted over chosen words is a link around them, which is what the
              * reader meant and what every other box they write in already does.
@@ -615,6 +562,81 @@ export const Writing = ({
           />
         </div>
       )}
+      <div className="t-composer-tools">
+        <div className="t-composer-group">
+          <button
+            type="button"
+            className="t-tool"
+            aria-label="Preview"
+            aria-pressed={previewing}
+            title={previewing ? "Back to writing" : "Preview"}
+            onClick={() => setPreviewing((was) => !was)}
+          >
+            <MarkArt mark={{ name: "Preview", art: "eye" }} />
+          </button>
+          {MARKS.map((mark) => (
+            <button
+              key={mark.name}
+              type="button"
+              aria-label={mark.name}
+              /*
+               * The shortcut is told rather than folded into the name: a screen reader saying
+               * "Bold Command B button" is worse than the attribute that exists to carry it.
+               */
+              aria-keyshortcuts={mark.key === undefined ? undefined : `Meta+${mark.key}`}
+              title={said(mark)}
+              disabled={previewing}
+              onClick={() => apply(mark)}
+              className="t-tool"
+            >
+              <MarkArt mark={mark} />
+            </button>
+          ))}
+          {onUpload === undefined ? null : (
+            <>
+              {/*
+                A control for the thing paste and drop already do, because neither of them is
+                visible and one of them needs a mouse that can drag.
+              */}
+              <button
+                type="button"
+                aria-label="Attach a file"
+                title="Attach a file"
+                disabled={previewing}
+                onClick={() => picker.current?.click()}
+                className="t-tool"
+              >
+                <MarkArt mark={{ name: "Attach a file", art: "attach" }} />
+              </button>
+              <input
+                ref={picker}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(event) => {
+                  attach([...(event.target.files ?? [])])
+                  // Emptied, or the same file chosen twice in a row is chosen once.
+                  event.target.value = ""
+                }}
+              />
+            </>
+          )}
+        </div>
+        <div className="t-composer-group">
+          {hearing.can ? (
+            <Dictation
+              hearing={hearing}
+              choices={choices}
+              onChoices={(next) => {
+                setChoices(next)
+                keepVoiceChoices(next)
+              }}
+              blocked={previewing}
+            />
+          ) : null}
+          {send}
+        </div>
+      </div>
       {showing ? (
         <ul
           role="listbox"
@@ -651,14 +673,14 @@ export const Writing = ({
         What the files are doing, under the box rather than over the words. Said out loud as
         well: the mark in the text is a comment, which a screen reader passes over in silence.
       */}
-      {going > 0 || wrong !== undefined ? (
+      {going > 0 || (wrong ?? hearing.wrong) !== undefined ? (
         <p
           aria-live="polite"
-          className={`px-2.5 pb-1.5 text-xs ${wrong === undefined ? "text-ink-muted" : "text-danger"}`}
+          className={`px-0.5 text-xs ${going > 0 ? "text-ink-muted" : "text-danger"}`}
         >
           {going > 0
             ? `Attaching ${going === 1 ? "a file" : `${going} files`}…`
-            : wrong}
+            : (wrong ?? hearing.wrong)}
         </p>
       ) : null}
     </div>

@@ -700,6 +700,11 @@
   transform-origin: bottom left;
 }
 
+/* The microphone's menu, at the bottom right of a writing box. */
+:is(#gitace-root, [data-gitace-outside]) .t-menu[data-origin="bottom-right"] {
+  transform-origin: bottom right;
+}
+
 :is(#gitace-root, [data-gitace-outside]) .t-menu.is-open {
   transform: scale(1);
   opacity: 1;

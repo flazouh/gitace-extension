@@ -97,6 +97,9 @@ export const KEPT_SEEN = `${OURS}kept.seen`
  */
 export const HELD = `${OURS}held.`
 
+/** The microphone's switches in a writing box: hold to record, send when it stops. See `voiceChoices.ts`. */
+export const VOICE = `${OURS}voice`
+
 /** One durable Review Pass per pull request. See `passes.ts`. */
 export const PASSES = `${OURS}passes.`
 

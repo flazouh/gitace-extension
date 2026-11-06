@@ -86,6 +86,22 @@ All of it is in `typing.ts`, tested there, and applied in `Writing.tsx`.
 - The box grows with what is in it, up to a screenful. A five line window with a scrollbar in
   it is the thing people complain about in their own.
 
+## The box is Ace's composer
+
+It is drawn as Ace's composer is (`crates/ui/src/prompt_input` in Ace), to the pixel: a raised
+box, 6 of padding and a 6 corner, the words at 14 on a 24 line above a row of 28-high controls.
+At the left of that row, Preview, the marks and Attach, with no fill until they are pointed at. At
+the right, the microphone and Send. Send stands in the box where the surface sends from it (a
+remark on the pull request, on some lines, an answer in a thread); a review and a new issue keep
+the buttons of their own. `composer.css` holds the measures, and every colour is the pack's.
+
+The microphone is the browser's speech recognition, so there is nothing to install. The words
+land after what was typed, as they are heard. While it listens the button grows into the
+recording pill (the bars, the clock, a stop) and the narrow button of its menu steps aside. The
+menu holds two switches, kept on this machine: Hold to record, and Send when recording stops.
+Where the browser cannot hear, there is no microphone; where it refuses, the box says why under
+the controls.
+
 ## Offering a name and a number
 
 An at sign offers the people who can be mentioned here, a hash offers what can be referred to by

@@ -74,13 +74,14 @@ export type Row = {
  * to grow down from its own — growth from the middle, or from the wrong corner, reads as a
  * panel arriving from somewhere else on the page rather than as this control opening.
  */
-export type Origin = "bottom-left" | "top-left" | "top-right" | "beside"
+export type Origin = "bottom-left" | "bottom-right" | "top-left" | "top-right" | "beside"
 
 /** How many rows a narrowed menu draws, past which another letter is the answer. */
 const MOST_SHOWN = 50
 
 const PLACED: Record<Origin, string> = {
   "bottom-left": "bottom-full left-0 mb-1",
+  "bottom-right": "bottom-full right-0 mb-1",
   "top-left": "top-full left-0 mt-1",
   "top-right": "top-full right-0 mt-1",
   beside: "left-full bottom-0 ml-2"
