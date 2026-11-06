@@ -244,6 +244,10 @@ export type ArtName =
    * drag has no way to do it at all.
    */
   | "attach"
+  // Speaking into a writing box, the arrow that sends it, and the microphone's own menu: Ace's composer.
+  | "mic"
+  | "send"
+  | "mic-menu"
   /**
    * Writing the words, as against reading them back.
    *

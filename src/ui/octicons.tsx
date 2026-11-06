@@ -86,6 +86,7 @@ import {
 } from "@primer/octicons-react"
 import type { Art, Set } from "./art"
 import { CommandKeyIcon } from "./commandKey"
+import { HUGEICONS } from "./hugeicons"
 import { SpinnerIcon } from "./spinner"
 
 /**
@@ -154,6 +155,10 @@ export const OCTICONS: Set = {
   more: KebabHorizontalIcon,
   link: LinkIcon,
   attach: PaperclipIcon,
+  // Octicons draws no microphone and no upright kebab, so this set borrows the other one's.
+  mic: HUGEICONS.mic,
+  send: ArrowRightIcon,
+  "mic-menu": HUGEICONS["mic-menu"],
   /*
    * Ours in both sets, because this one is not a picture of an idea and Octicons has no key
    * in it at all.

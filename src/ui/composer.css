@@ -1,0 +1,303 @@
+/*
+ * The writing box, as Ace's composer draws it (`crates/ui/src/prompt_input` in Ace).
+ *
+ * A raised box with 6 of padding on every side: the words at the top, and a row of 28-high
+ * controls at its foot, the marks at the left and the microphone and Send at the right, 4
+ * apart within a group. The words stand 2 in from the padding, a 24 line in a 28 row, as
+ * Ace's do. Raised above the card it sits on: the raised tone lifted toward the ink in a dark
+ * pack and toward white in a light one, the soft menu edge, and a small shadow.
+ */
+.t-composer {
+  --t-control: 28px;
+  --t-corner: 7px;
+  --t-tint: color-mix(in srgb, var(--color-ink) 9%, transparent);
+  --t-tint-hover: color-mix(in srgb, var(--color-ink) 14%, transparent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 6px;
+  background: light-dark(
+    color-mix(in srgb, var(--color-raised) 30%, white),
+    color-mix(in srgb, var(--color-raised) 94%, var(--color-ink))
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--color-ink) 5%, transparent),
+    0 1px 2px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 20%)),
+    0 8px 24px light-dark(rgb(0 0 0 / 5%), rgb(0 0 0 / 18%));
+}
+
+/* The box wears the focus ring of the field inside it, which then draws none of its own. */
+.t-composer:has(textarea:focus-visible) {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+:is(#gitace-root, [data-gitace-outside]) .t-composer-words > textarea:focus-visible {
+  outline: none;
+}
+
+.t-composer[data-over] {
+  outline: 2px solid var(--color-ink-accent);
+}
+
+.t-composer-words {
+  display: grid;
+  max-height: 520px;
+  font: 400 14px / 24px var(--font-sans);
+}
+
+.t-composer-words > * {
+  grid-area: 1 / 1;
+  min-height: var(--t-control);
+  max-height: 520px;
+  padding: 2px;
+}
+
+.t-composer-words > textarea {
+  display: block;
+  width: 100%;
+  resize: none;
+  overflow-y: auto;
+  border: 0;
+  outline: none;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.t-composer-words > textarea::placeholder {
+  color: color-mix(in srgb, var(--color-ink-muted) 80%, var(--color-ink));
+}
+
+.t-composer-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: var(--t-control);
+}
+
+.t-composer-group {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+/* The marks give way to the microphone's pill and to Send in a narrow box, and Send never does. */
+.t-composer-group:first-child {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* A control with no fill until it is pointed at: Ace's ghost icon button. */
+.t-tool {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--t-control);
+  height: var(--t-control);
+  padding: 0;
+  border: 0;
+  border-radius: var(--t-corner);
+  background: transparent;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-quick) var(--ease-out),
+    color var(--duration-quick) var(--ease-out);
+}
+
+.t-tool:enabled:hover,
+.t-tool[aria-pressed="true"] {
+  background: var(--t-tint);
+  color: var(--color-ink);
+}
+
+/* The microphone and the narrow button of its menu: one group of two tinted segments, a seam apart. */
+.t-mic {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 1px;
+}
+
+.t-mic-button,
+.t-mic-menu {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: var(--t-control);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: var(--t-tint);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: background-color var(--duration-quick) var(--ease-out);
+}
+
+.t-mic-button:enabled:hover,
+.t-mic-menu:enabled:hover,
+.t-mic-menu[aria-expanded="true"] {
+  background: var(--t-tint-hover);
+}
+
+/*
+ * Listening, the button grows into the recording pill: the bars, the clock and a stop, on
+ * Send's fill. Its width springs from the square to the pill's, and the menu button steps
+ * aside into the room it takes.
+ */
+.t-mic-button {
+  width: var(--t-control);
+  border-radius: var(--t-corner) 0 0 var(--t-corner);
+  transition:
+    width var(--duration-quick) var(--ease-out),
+    border-radius var(--duration-quick) var(--ease-out),
+    background-color var(--duration-quick) var(--ease-out);
+}
+
+.t-mic-button[data-listening] {
+  width: 114px;
+  border-radius: var(--t-corner);
+  background: var(--color-accent-emphasis);
+  color: var(--color-ink-on-emphasis);
+}
+
+.t-mic-button[data-listening]:hover {
+  background: color-mix(in srgb, var(--color-accent-emphasis) 83%, var(--color-ink-on-emphasis));
+}
+
+.t-mic-button > span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  transition: opacity var(--duration-quick) var(--ease-out);
+}
+
+.t-mic-face {
+  padding-left: 6px;
+}
+
+.t-mic-pill {
+  gap: 8px;
+  padding-left: 10px;
+  opacity: 0;
+}
+
+.t-mic-button[data-listening] .t-mic-face {
+  opacity: 0;
+}
+
+.t-mic-button[data-listening] .t-mic-pill {
+  opacity: 1;
+}
+
+.t-mic-waves {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5px;
+  width: 38px;
+  height: 16px;
+}
+
+.t-mic-waves > i {
+  flex: 1;
+  max-width: 6px;
+  height: 3px;
+  border-radius: 3px;
+  background: light-dark(color-mix(in srgb, var(--color-busy) 40%, white), var(--color-busy));
+}
+
+.t-mic-clock {
+  flex: none;
+  width: 26px;
+  font: 400 11px / 16px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.t-mic-stop {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.t-mic-stop::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--color-fail-emphasis);
+}
+
+.t-mic-menu {
+  width: 18px;
+  border-radius: 0 var(--t-corner) var(--t-corner) 0;
+  transition:
+    width var(--duration-quick) var(--ease-out),
+    opacity var(--duration-quick) var(--ease-out),
+    background-color var(--duration-quick) var(--ease-out);
+}
+
+.t-mic[data-listening] .t-mic-menu {
+  width: 0;
+  opacity: 0;
+}
+
+/* Send, as Ace's: the word, then the arrow in a chip 4 in from the button's edge. */
+.t-go {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: var(--t-control);
+  padding: 0 4px 0 8px;
+  border: 0;
+  border-radius: var(--t-corner);
+  background: var(--color-accent-emphasis);
+  color: var(--color-ink-on-emphasis);
+  font: 500 12px / 1 var(--font-sans);
+  cursor: pointer;
+  transition: background-color var(--duration-quick) var(--ease-out);
+}
+
+.t-go:enabled:hover {
+  background: color-mix(in srgb, var(--color-accent-emphasis) 83%, var(--color-ink-on-emphasis));
+}
+
+.t-go-chip {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  transition: background-color var(--duration-quick) var(--ease-out);
+}
+
+.t-go:enabled:hover .t-go-chip {
+  background: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.t-composer :is(.t-tool, .t-mic-button, .t-mic-menu, .t-go):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-composer *,
+  .t-composer *::after {
+    transition: none !important;
+  }
+}
