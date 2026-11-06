@@ -83,6 +83,8 @@ export const useDictation = ({
   const [wrong, setWrong] = useState<string>()
   const hearing = useRef<Hearing>(undefined)
   const heard = useRef(0)
+  const begun = useRef(false)
+  const ending = useRef<() => void>(undefined)
   const ears = useRef<{ readonly stream: MediaStream; readonly audio: AudioContext; readonly read: AnalyserNode }>(
     undefined
   )
@@ -118,41 +120,67 @@ export const useDictation = ({
       const why = SAID[event.error]
       if (why !== undefined) setWrong(why)
     }
-    one.onend = () => {
+    const end = () => {
+      if (hearing.current !== one) return
       hearing.current = undefined
+      begun.current = false
       heard.current = 0
       deafen()
       setListening(false)
       said.current.onDone()
     }
+    one.onend = end
     hearing.current = one
+    ending.current = end
     setWrong(undefined)
     setSeconds(0)
     setListening(true)
-    one.start()
 
-    // The bars only: dictation goes on without them where the page cannot open the microphone twice.
+    const begin = () => {
+      if (hearing.current !== one) return
+      begun.current = true
+      one.start()
+    }
+
+    /*
+     * The microphone is opened first, and the recogniser only once it is: both ask for it, and
+     * two asks at once stack two prompts, the second of which a browser may never show.
+     */
     const devices = navigator.mediaDevices
-    if (devices === undefined) return
+    if (devices?.getUserMedia === undefined) {
+      begin()
+      return
+    }
     Effect.runFork(
       Effect.tryPromise(() => devices.getUserMedia({ audio: true })).pipe(
-        Effect.map((stream) => {
-          if (hearing.current !== one) {
-            for (const track of stream.getTracks()) track.stop()
-            return
+        Effect.match({
+          onSuccess: (stream) => {
+            if (hearing.current !== one) {
+              for (const track of stream.getTracks()) track.stop()
+              return
+            }
+            const audio = new AudioContext()
+            const read = audio.createAnalyser()
+            read.fftSize = 512
+            audio.createMediaStreamSource(stream).connect(read)
+            ears.current = { stream, audio, read }
+            begin()
+          },
+          onFailure: () => {
+            if (hearing.current !== one) return
+            setWrong(SAID["not-allowed"])
+            end()
           }
-          const audio = new AudioContext()
-          const read = audio.createAnalyser()
-          read.fftSize = 512
-          audio.createMediaStreamSource(stream).connect(read)
-          ears.current = { stream, audio, read }
-        }),
-        Effect.ignore
+        })
       )
     )
   }, [Made, text, deafen])
 
-  const stop = useCallback(() => hearing.current?.stop(), [])
+  /* Stopped before the microphone was allowed, there is no recogniser running to say it ended. */
+  const stop = useCallback(() => {
+    if (begun.current) hearing.current?.stop()
+    else ending.current?.()
+  }, [])
 
   useEffect(() => {
     if (!listening) return

@@ -144,6 +144,49 @@ describe("the writing box, as Ace's composer", () => {
     expect(screen.getByRole("button", { name: "Dictate" })).toBeDefined()
   })
 
+  test("asks for the microphone once, starting the recogniser only once it is allowed", async () => {
+    let allow: (stream: MediaStream) => void = () => {}
+    const asked = new Promise<MediaStream>((resolve) => (allow = resolve))
+    Object.defineProperty(navigator, "mediaDevices", { value: { getUserMedia: () => asked }, configurable: true })
+    const audio = globalThis as { AudioContext?: unknown }
+    audio.AudioContext = class {
+      createAnalyser() {
+        return { fftSize: 0, getFloatTimeDomainData() {} }
+      }
+      createMediaStreamSource() {
+        return { connect() {} }
+      }
+      close() {
+        return Promise.resolve()
+      }
+    }
+    render(<Box />)
+    await userEvent.click(screen.getByRole("button", { name: "Dictate" }))
+    expect(Heard.last?.started).toBe(false)
+
+    await act(async () => {
+      allow({ getTracks: () => [] } as unknown as MediaStream)
+      await asked
+    })
+    expect(Heard.last?.started).toBe(true)
+    delete (navigator as { mediaDevices?: unknown }).mediaDevices
+    delete audio.AudioContext
+  })
+
+  test("says so where the microphone is refused, and never starts the recogniser", async () => {
+    Object.defineProperty(navigator, "mediaDevices", {
+      value: { getUserMedia: () => Promise.reject(new Error("NotAllowedError")) },
+      configurable: true
+    })
+    render(<Box />)
+    await userEvent.click(screen.getByRole("button", { name: "Dictate" }))
+
+    expect(await screen.findByText(/Dictation needs the microphone/)).toBeDefined()
+    expect(Heard.last?.started).toBe(false)
+    expect(screen.getByRole("button", { name: "Dictate" })).toBeDefined()
+    delete (navigator as { mediaDevices?: unknown }).mediaDevices
+  })
+
   test("says why it stopped, where the browser refused", async () => {
     render(<Box />)
     await userEvent.click(screen.getByRole("button", { name: "Dictate" }))
