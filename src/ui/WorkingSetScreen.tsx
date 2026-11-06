@@ -266,7 +266,7 @@ export const WorkingSetScreen = ({
       aimAt={atWork[0]}
       {...(home ? { destination, onDestination: goTo } : {})}
       {...(home && collapsed && onColumn !== undefined ? { onColumn } : {})}
-      {...(home && chosen.length === 1
+      {...(home && chosen.length === 1 && destination === "working-set"
         ? { narrowed: { to: chosen[0]!, widen: () => narrow(pickingRepo(query, chosen[0]!)) } }
         : {})}
     />
