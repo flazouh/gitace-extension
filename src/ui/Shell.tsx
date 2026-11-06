@@ -772,7 +772,7 @@ export const Shell = ({
             onToggleFiles={() => setFilesOpen((was) => !was)}
           />
         ) : null}
-        {/* Six pixels between panels, not twelve. Every gap here is width that
+        {/* Two pixels between panels, as everywhere. Every gap here is width that
             could have been code, and the borders already do the separating —
             spacing on top of a border says the same thing twice.
 
@@ -781,7 +781,7 @@ export const Shell = ({
             nobody's business but its own. */}
         <div
           ref={about.row}
-          className={`flex items-start pb-2 ${detailsOpen && filesOpen ? "" : "gap-1.5"}`}
+          className={`flex items-start pb-2 ${detailsOpen && filesOpen ? "" : "gap-0.5"}`}
         >
           {preparedStage >= 3 && detailsOpen ? (
             <About

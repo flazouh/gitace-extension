@@ -28,13 +28,12 @@
 export const TINT = "bg-hover"
 
 /**
- * A named card: a fill and a corner, no line.
+ * A named card: a fill, a corner, and the hairline every panel parts from the frame by.
  *
- * `!rounded-lg` is twelve pixels and beats Primer's `.rounded-md`, which is six
- * and `!important`. Without the bang the extension kept GitHub's six and the
- * edge stayed on.
+ * Banged throughout, because Primer's `.rounded-md` and `.border` are `!important`:
+ * without it a card kept GitHub's own line in GitHub's own colour.
  */
-export const CARD = "!rounded-lg !border-0 bg-surface"
+export const CARD = "!rounded-md !border !border-solid !border-edge bg-surface"
 
 /**
  * A notice that is not about the thing being read.
@@ -43,7 +42,7 @@ export const CARD = "!rounded-lg !border-0 bg-surface"
  * ladder, because two packs put `inset` and `surface` at the same value and a
  * second fill taken from them is invisible.
  */
-export const NOTICE = "!rounded-lg !border-0 bg-accent-muted"
+export const NOTICE = "!rounded-md !border-0 bg-accent-muted"
 
 /** The label row on a card: no rule, no tint of its own. */
 export const CARD_HEAD = "flex items-center gap-2 border-b-0 bg-transparent px-3 py-2"

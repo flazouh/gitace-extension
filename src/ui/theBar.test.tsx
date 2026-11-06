@@ -920,3 +920,35 @@ describe("the bar says how much sky it takes", () => {
     ).not.toBeNull()
   })
 })
+
+/**
+ * What waits on the reader, on every page and not only on Home.
+ *
+ * Only Home reads the Working Set, so the count on the mark used to be there alone and went out
+ * the moment the reader opened a pull request. The last count Home drew is the one to keep.
+ */
+describe("the count on the mark", () => {
+  afterEach(() => localStorage.clear())
+
+  const mark = () => screen.getByRole("link", { name: /^Working Set/ })
+
+  test("is the last count Home drew, on a page that reads no Working Set", async () => {
+    const { unmount } = render(<TheBar where={{ kind: "home" }} participant={SOMEONE} repositories={KEPT} needsYou={7} />)
+    await waitFor(() => expect(mark().getAttribute("aria-label")).toBe("Working Set, 7 waiting on you"))
+    unmount()
+
+    render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
+
+    await waitFor(() => expect(mark().getAttribute("aria-label")).toBe("Working Set, 7 waiting on you"))
+  })
+
+  test("goes out once Home has drawn nothing waiting", async () => {
+    const { unmount } = render(<TheBar where={{ kind: "home" }} participant={SOMEONE} repositories={KEPT} needsYou={0} />)
+    await waitFor(() => expect(mark().getAttribute("aria-label")).toBe("Working Set"))
+    unmount()
+
+    render(<TheBar where={WHERE} participant={SOMEONE} repositories={KEPT} />)
+
+    await waitFor(() => expect(mark().getAttribute("aria-label")).toBe("Working Set"))
+  })
+})

@@ -34,7 +34,7 @@ describe("our floor under their page", () => {
     paintFloor(document, tokensOf("cursor", "dark"))
 
     const painted = document.documentElement.style
-    expect(painted.getPropertyValue(FLOOR)).toBe("#141414")
+    expect(painted.getPropertyValue(FLOOR)).toBe("#181818")
     expect(painted.getPropertyValue("--color-canvas")).toBe("")
     expect(painted.getPropertyValue("--bgColor-default")).toBe("")
   })

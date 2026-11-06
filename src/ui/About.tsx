@@ -110,7 +110,7 @@ export const About = ({
   readonly width?: number
 }) => (
   <div
-    className={`t-panels flex flex-col gap-1.5 ${wide ? "min-w-0 flex-1" : "shrink-0"}`}
+    className={`t-panels flex flex-col gap-0.5 ${wide ? "min-w-0 flex-1" : "shrink-0"}`}
     style={wide ? undefined : { width: `${width}rem` }}
   >
     {/* Both absences go in as they are. Which face the card wears, and in what order

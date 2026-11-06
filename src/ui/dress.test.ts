@@ -108,14 +108,14 @@ describe("where the reader is", () => {
  * the one" was on a link to a page nobody was on.
  */
 describe("a named card", () => {
-  test("is a fill and a corner, with the line taken off hard enough for GitHub", () => {
-    expect(CARD).toContain("!rounded-lg")
-    expect(CARD).toContain("!border-0")
+  test("is a fill, a button's corner, and the hairline, put on hard enough for GitHub", () => {
+    expect(CARD).toContain("!rounded-md")
+    expect(CARD).toContain("!border-edge")
     expect(CARD).toContain("bg-surface")
   })
 
   test("is the same shape as a notice, and a different fill", () => {
-    expect(NOTICE).toContain("!rounded-lg")
+    expect(NOTICE).toContain("!rounded-md")
     expect(NOTICE).toContain("!border-0")
     expect(NOTICE).toContain("bg-accent-muted")
     expect(NOTICE).not.toContain("bg-surface")

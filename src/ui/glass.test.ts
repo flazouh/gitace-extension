@@ -109,8 +109,8 @@ describe("the bar as glass", () => {
      * matched the bar to the class on `Section.tsx` (`rounded-md`, six pixels) while two
      * stylesheets took the cards to twelve, and reported parity with a number nobody saw.
      */
-    expect(CARD).toContain("rounded-lg")
-    expect(paneRule()).toContain("border-radius: var(--radius-lg)")
+    expect(CARD).toContain("rounded-md")
+    expect(paneRule()).toContain("border-radius: var(--radius-md)")
   })
 
   test("is solid where a backdrop cannot be blurred", () => {

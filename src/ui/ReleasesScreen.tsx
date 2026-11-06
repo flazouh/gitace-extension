@@ -96,7 +96,7 @@ export const ReleasesScreen = ({
         recall={recallRepositories}
       />
       {shown === undefined ? null : (
-        <div className="t-panels flex flex-col gap-3 pt-2 pb-2">
+        <div className="t-panels flex flex-col gap-0.5 pt-2 pb-2">
           {Option.isSome(offered) && Option.isSome(shown.attached) ? (
             <Yours
               version={offered.value}

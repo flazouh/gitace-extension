@@ -66,6 +66,9 @@ export const LATELY = `${OURS}lately`
 /** The Destination a press off Home asked it for, in the tab's session until Home takes it. */
 export const HOME_ASKED = `${OURS}home.asked`
 
+/** How much of the Working Set Home last drew waiting on the reader, for the mark on other pages. */
+export const KEPT_WAITING = `${OURS}kept.waiting`
+
 /** The last list drawn, so a launch has something to show while GitHub answers. */
 export const KEPT_ROWS = `${OURS}kept.rows`
 

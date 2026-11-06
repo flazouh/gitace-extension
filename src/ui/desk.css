@@ -1,11 +1,9 @@
 /*
- * The desk: one frame around every screen, the rail down its left edge and one panel
- * beside it holding the bar and the screen. Measurements are the approved mockup's
- * (`.desk`, `.rail`, `.panel`, `.phead`, `.gsplit`): a 4px frame and gap, a 32px rail,
- * a 44px bar, a 14px panel corner, and 6px for every card, well and control inside it.
- *
- * The bar and the screen are two elements on GitHub's page, so the panel is drawn in two
- * halves that meet under the bar: the bar is its top, `#gitace-root`'s first child the rest.
+ * The desk: one frame around every screen, the rail down its left edge, the bar across the
+ * top on the frame itself, and the screen under it in a panel of its own. As the Ace window
+ * draws it: a 4px frame and gap, a 32px rail, a 44px bar, and 6px for the panel and for
+ * every card, well and control inside it. A panel parts from the frame by tone and by a
+ * hairline of the ink at 5%, never a line of its own colour.
  */
 
 :root,
@@ -13,19 +11,19 @@
   --d-pad: 4px;
   --d-inset: 8px;
   --d-text: 16px;
-  --d-gap: 4px;
+  --d-gap: 2px;
   /* Every control, and the icon inside one. One size each, so no control drifts on its own. */
   --d-control: 28px;
   --d-icon: 16px;
   --d-rail: 32px;
   --d-rail-gap: 6px;
   --d-bar: calc(var(--d-control) + 2 * var(--d-inset));
-  --d-r: 14px;
+  --d-r: 6px;
   --d-r-in: 6px;
 }
 
 :is(#gitace-root, [data-gitace-outside]) {
-  --d-frame: var(--color-inset);
+  --d-frame: var(--color-canvas);
   --d-page: var(--color-canvas);
   --d-card: var(--color-surface);
   --d-ink: var(--color-ink);
@@ -36,6 +34,7 @@
   --d-danger: var(--color-fail);
   --d-info: var(--color-ink-accent);
   --d-line: var(--color-line);
+  --d-edge: color-mix(in srgb, var(--d-ink) 5%, transparent);
   --d-tint: var(--color-hover);
   --d-tint2: var(--color-active);
   --d-brand-top: #e19872;
@@ -44,14 +43,13 @@
   --d-tint-e: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* The two halves of the panel. */
+/* The bar, on the frame, and the panel under it. */
 
 :is(#gitace-bar, [data-gitace-bar]) > header[data-desk-head] {
   height: var(--d-bar);
   gap: 8px;
   padding: 0 calc(var(--d-inset) - var(--d-pad));
-  border-radius: var(--d-r) var(--d-r) 0 0;
-  background: var(--d-page);
+  background: var(--d-frame);
   box-shadow: none;
 }
 
@@ -60,10 +58,8 @@
 }
 
 #gitace-root > :first-child {
-  min-height: calc(100vh - var(--d-bar) - 2 * var(--d-pad));
-  padding: var(--d-gap) var(--d-pad) var(--d-pad);
-  border-radius: 0 0 var(--d-r) var(--d-r);
-  background: var(--d-page);
+  min-height: calc(100vh - var(--d-bar) - var(--d-gap) - var(--d-pad));
+  margin-top: var(--d-gap);
 }
 
 /* The rail. */
@@ -144,22 +140,21 @@
   opacity: 1;
 }
 
-/* Out on the lower corner, ringed in the rail's own fill: inside a small button it covers the
-   icon, and on the upper one the mark's would be cut by the top of the window. */
+/* Under the glyph's lower corner rather than over it: no ring, so nothing bites the mark. */
 :is(#gitace-root, [data-gitace-outside]) .d-count {
   position: absolute;
-  bottom: -4px;
-  right: -6px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
+  right: -4px;
+  bottom: -5px;
+  min-width: 14px;
+  height: 13px;
+  padding: 0 3px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
-  background: var(--d-tint2);
-  box-shadow: 0 0 0 2px var(--d-frame);
+  border: 1px solid var(--d-edge);
+  border-radius: 7px;
+  background: var(--d-card);
   color: var(--d-ink);
-  font: 500 10px/1 var(--font-mono);
+  font: 600 9px/1 var(--font-mono);
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
@@ -426,7 +421,8 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  border-radius: var(--d-r-in);
+  border: 1px solid var(--d-edge);
+  border-radius: var(--d-r);
   background: var(--d-card);
 }
 
@@ -586,7 +582,8 @@
   display: flex;
   flex-direction: column;
   padding: var(--d-pad);
-  border-radius: var(--d-r-in);
+  border: 1px solid var(--d-edge);
+  border-radius: var(--d-r);
   background: var(--d-card);
 }
 

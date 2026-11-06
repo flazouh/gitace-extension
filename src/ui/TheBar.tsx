@@ -22,6 +22,7 @@ import { usePaintedTheme } from "./Theme";
 import { useOursToDraw } from "./useOursToDraw";
 import { whenTheScreenMoves } from "./mount";
 import { useSettings } from "./useSettings";
+import { keepWaiting, keptWaiting } from "./keptWaiting";
 import type { Destination } from "../domain/Settings";
 import { useScreenActivity } from "./screenActivity";
 import { tabMark } from "./tabMarks";
@@ -90,7 +91,10 @@ export const TheBar = ({
   readonly recall?: () => Effect.Effect<
     Option.Option<ReadonlyArray<Repository>>
   >;
-  /** How much of the Working Set is waiting on the reader, for the count on the mark. */
+  /**
+   * How much of the Working Set is waiting on the reader, for the count on the mark. Handed in by
+   * Home, which keeps it; anywhere else the mark shows what Home last counted.
+   */
   readonly needsYou?: number;
   /**
    * Home's switch between its Destinations, handed in by Home alone. Anywhere else a press on one
@@ -105,6 +109,10 @@ export const TheBar = ({
   readonly onPrepareRoute?: (path: string) => void;
 }) => {
   const active = useScreenActivity();
+  const waiting = needsYou ?? keptWaiting();
+  useEffect(() => {
+    if (needsYou !== undefined) keepWaiting(needsYou);
+  }, [needsYou]);
   const prepareRoute = onPrepareRoute ?? prepareOnThisPage;
   /*
    * Whatever is around this screen, which in the extension is a page and answers none
@@ -486,7 +494,7 @@ export const TheBar = ({
       <GlobalRail
         where={props.where}
         unread={props.unread}
-        needsYou={needsYou}
+        needsYou={waiting}
         aimAt={aimAt}
         repositories={findable}
         pinned={settings.pinned}
