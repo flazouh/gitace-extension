@@ -70,6 +70,7 @@ import type { Point } from "@/ui/near";
 import {
   type Stop,
   whenAddressChangesAfterInput,
+  whenLocationChanges,
   whenTheyStayPut,
   whenTraversalStarts,
 } from "@/ui/navigation";
@@ -118,6 +119,17 @@ import "@/ui/gates.bar.css";
  * quarter of an hour later.
  */
 const AT_MOST = 12;
+
+/**
+ * How often a pointer that is still, and near nothing worth reading, is looked at again.
+ *
+ * A still pointer sends no events, and the page moves under it: a list that draws its
+ * rows after the pointer came to rest, a press that came back to the list, rows that a
+ * refresh shifted. Looked at only on the next movement, a reader resting on a row for
+ * seconds had nothing read. Four times a second is one hit test each, and a row that
+ * arrives under the pointer starts earning within a quarter of a second.
+ */
+const STILL_LOOK = 250;
 
 const LIKELY_NEXT: Partial<Record<Wanted, ReadonlyArray<Wanted>>> = {
   "working-set": ["pull-request", "issue"],
@@ -373,6 +385,9 @@ export default defineContentScript({
      * closure. See that file: every bug it has had was in the part with no test.
      */
     const readAhead = readingAhead();
+    // A visit is one page. The script outlives every soft navigation, and a share
+    // counted from its start ran out a dozen reads into the tab, for good.
+    whenLocationChanges(window, () => readAhead.arrived());
 
     const linkAddress = (link: HTMLAnchorElement): URL =>
       new URL(link.getAttribute(OWNED_ROUTE) ?? link.href, window.location.origin);
@@ -427,6 +442,8 @@ export default defineContentScript({
     let lingering: Lingering = NOTHING;
     let at: Point | undefined;
     let ticking = 0;
+    /** The look again at a still pointer. See {@link STILL_LOOK}. */
+    let beat = 0;
     let lastLook = 0;
     /** Where the pointer was when it was last looked at, and where it is going. */
     let wasAt: Point | undefined;
@@ -495,6 +512,7 @@ export default defineContentScript({
       // the page the reader is leaving. See `readAhead`.
       if (readAhead.waiting(now)) {
         lingering = NOTHING;
+        lookAgainSoon();
         return;
       }
 
@@ -549,8 +567,21 @@ export default defineContentScript({
 
       // Nothing near and nothing part-way there is the pointer at rest over GitHub's own
       // furniture, and there is no reason to hit test the page sixty times a second for
-      // it. The next move starts this again.
+      // it. The next move starts this again, or the beat does, for a page that moved.
       if (worth !== null || lingering.size > 0) ticking = window.requestAnimationFrame(look);
+      else lookAgainSoon();
+    };
+
+    // On a beat rather than every frame, and only while the pointer is in the window.
+    const lookAgainSoon = (): void => {
+      if (at === undefined || beat !== 0) return;
+      beat = window.setTimeout(() => {
+        beat = 0;
+        if (ticking !== 0) return;
+        // Credit is for the frames the pointer spends there from now, not for the beat.
+        lastLook = performance.now();
+        ticking = window.requestAnimationFrame(look);
+      }, STILL_LOOK);
     };
 
     const keepLooking = (event: PointerEvent): void => {

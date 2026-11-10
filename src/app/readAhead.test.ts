@@ -89,6 +89,58 @@ describe("reading pages nobody has asked for", () => {
   })
 })
 
+/**
+ * One visit is one page, not the life of the tab.
+ *
+ * The content script outlives every soft navigation, so a share counted from its start
+ * ran out after a dozen reads anywhere in the tab, and a page read ahead once was never
+ * read again: a reader back on a list for the third time rested on a row for seconds
+ * and nothing was read.
+ */
+describe("a visit to another page", () => {
+  test("has a share of its own", () => {
+    const ahead = readingAhead()
+    ahead.offer("a", Effect.void)
+    ahead.offer("b", Effect.void)
+    expect(ahead.read()).toBe(2)
+
+    ahead.arrived()
+
+    expect(ahead.read()).toBe(0)
+  })
+
+  test("reads again a page the last one read ahead", async () => {
+    const ahead = readingAhead()
+    const before = held()
+    ahead.offer("a", before.read)
+    before.land()
+    await settle()
+
+    ahead.arrived()
+    const again = held()
+    expect(ahead.already("a")).toBe(false)
+    ahead.offer("a", again.read)
+    await settle()
+
+    expect(again.marks.started).toBe(1)
+  })
+
+  test("does not start a second read of the page still in the air", async () => {
+    const ahead = readingAhead()
+    const first = held()
+    ahead.offer("a", first.read)
+
+    ahead.arrived()
+    const second = held()
+    expect(ahead.already("a")).toBe(true)
+    ahead.offer("a", second.read)
+    first.land()
+    await settle()
+
+    expect(second.marks.started).toBe(0)
+  })
+})
+
 describe("getting out of the reader's way when they press", () => {
   test("calls off a read for anywhere but the page they asked for", async () => {
     const ahead = readingAhead()
