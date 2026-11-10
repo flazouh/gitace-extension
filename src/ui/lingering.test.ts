@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { AHEAD } from "./linkNear";
 import {
+	attending,
 	forwardness,
 	lingerFor,
 	type Lingering,
 	NOTHING,
+	PARKED,
 	rateAt,
 	RIPE,
 	type Seen,
@@ -214,5 +216,40 @@ describe("where the pointer is going, across frames", () => {
 		// second: slow enough to ignore one bad frame, quick enough to follow a real turn.
 		expect(travel.x).toBeCloseTo(0, 0);
 		expect(travel.y).toBeCloseTo(10, 0);
+	});
+});
+
+/*
+ * A parked pointer is not a reader deciding. It was dropped on the row by a scroll, or
+ * left there by a hand that went to the keyboard, and what it rests on is wherever the
+ * page happened to put a row.
+ */
+describe("a pointer that has stopped moving", () => {
+	test("is attending for a while after it moved, which is how a rest begins", () => {
+		expect(attending(1_000, 1_000)).toBe(true);
+		expect(attending(1_000, 1_000 + PARKED)).toBe(true);
+	});
+
+	test("is parked once it has been still for longer than any page takes to ripen", () => {
+		expect(attending(1_000, 1_000 + PARKED + 1)).toBe(false);
+	});
+
+	test("is parked when it never moved at all, which is a pointer the page loaded under", () => {
+		expect(attending(undefined, 5_000)).toBe(false);
+	});
+});
+
+describe("what one link needs before its page is read", () => {
+	test("is its own page's figure where it says one", () => {
+		const dear = (millis: number) =>
+			held("pull", 0, millis).map((seen) => ({ ...seen, ripe: 250 }));
+
+		expect(across(dear(250 - FRAME)).ripened).toEqual([]);
+		expect(across(dear(250 + FRAME)).ripened).toEqual(["pull"]);
+	});
+
+	test("ripens a cheap page sooner than the ordinary dwell", () => {
+		const cheap = held("person", 0, 100 + FRAME).map((seen) => ({ ...seen, ripe: 100 }));
+		expect(across(cheap).ripened).toEqual(["person"]);
 	});
 });

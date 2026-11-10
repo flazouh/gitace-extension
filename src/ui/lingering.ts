@@ -33,6 +33,11 @@ export type Seen<Page> = {
   readonly reach: number
   /** How much of the pointer's travel is aimed at it. See {@link forwardness}. */
   readonly forward: number
+  /**
+   * The credit this link needs, by what its page costs to read. {@link RIPE} where it
+   * says nothing.
+   */
+  readonly ripe?: number
   readonly page: Page
 }
 
@@ -42,7 +47,8 @@ export type Lingering = ReadonlyMap<string, number>
 export const NOTHING: Lingering = new Map()
 
 /**
- * The credit one link needs before its page is read.
+ * The credit one link needs before its page is read, where its page names no figure of
+ * its own (see `DEAR` in `app/warming`).
  *
  * Expressed in milliseconds of a pointer sitting directly on it, which is the same figure
  * the interface used when resting was the only thing that counted. An approach spends
@@ -50,6 +56,26 @@ export const NOTHING: Lingering = new Map()
  * reaches it sooner than one whose pointer appears on it from a scroll.
  */
 export const RIPE = 150
+
+/**
+ * How long a pointer may be still and still be a reader deciding.
+ *
+ * A reader who moves to a row and stops has their page ripen while the hand is at rest:
+ * the dearest page asks for 250 ms of it, with the approach already paid towards that.
+ * A pointer still for longer than this is parked — dropped on a row by a scroll, or left
+ * there by a hand gone to the keyboard — and what it rests on is wherever the page put a
+ * row, which is no reason to spend the reader's requests on it.
+ */
+export const PARKED = 600
+
+/**
+ * Whether the pointer is a reader's attention or a parked one.
+ *
+ * `movedAt` is when it last moved, and nothing for a pointer that has not moved since the
+ * page was loaded under it.
+ */
+export const attending = (movedAt: number | undefined, now: number): boolean =>
+  movedAt !== undefined && now - movedAt <= PARKED
 
 /**
  * The most one frame is ever worth.
@@ -140,7 +166,7 @@ export const lingerFor = <Page>(
   if (seen === null) return { lingering, ripe: null }
 
   const earned = (before.get(seen.key) ?? 0) + spent * rateAt(seen.reach, seen.forward)
-  if (earned >= RIPE) return { lingering, ripe: seen.page }
+  if (earned >= (seen.ripe ?? RIPE)) return { lingering, ripe: seen.page }
 
   lingering.set(seen.key, earned)
   return { lingering, ripe: null }

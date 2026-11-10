@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { dataToSpare, warmingFor } from "./warming"
+import { CHEAP, DEAR, dataToSpare, warmingFor } from "./warming"
 
 /**
  * The coverage, page by page, and the two rules that keep it honest.
@@ -149,5 +149,27 @@ describe("whether a guess is worth the reader's data", () => {
   test("reads ahead where the browser has no opinion to offer", () => {
     expect(dataToSpare(undefined)).toBe(true)
     expect(dataToSpare({})).toBe(true)
+  })
+})
+
+/*
+ * How long a link must hold the reader's attention, by what reading it costs. A pull
+ * request is seven requests made with their session, a person's page is one.
+ */
+describe("how sure a guess must be, by what it costs", () => {
+  test("waits longer over a pull request, which is seven requests", () => {
+    expect(warming("https://github.com/oven-sh/bun/pull/36915")?.ripe).toBe(DEAR)
+  })
+
+  test("goes sooner over a person, which is one", () => {
+    expect(warming("https://github.com/Jarred-Sumner")?.ripe).toBe(CHEAP)
+  })
+
+  test("leaves the ordinary dwell to every other page", () => {
+    expect(warming("https://github.com/oven-sh/bun/pulls")?.ripe).toBeUndefined()
+  })
+
+  test("asks more of a pull request than of a person", () => {
+    expect(DEAR).toBeGreaterThan(CHEAP)
   })
 })
