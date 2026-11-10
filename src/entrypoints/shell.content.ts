@@ -52,6 +52,7 @@ import {
   theScreenIsNotElsewhere,
   unmarkPage,
 } from "@/ui/mount";
+import { whenTheKeyRests } from "@/ui/keyRest";
 import { linkNear, type Reached } from "@/ui/linkNear";
 import {
   attending,
@@ -59,6 +60,7 @@ import {
   lingerFor,
   type Lingering,
   NOTHING,
+  RIPE,
   type Seen,
   smoothed,
 } from "@/ui/lingering";
@@ -466,6 +468,24 @@ export default defineContentScript({
       (navigator as Navigator & { connection?: Connection }).connection;
 
     /**
+     * The page behind a link, where reading it ahead is worth it: there is a page of ours
+     * behind it, it is not read yet, this visit has not read its share, and the reader's
+     * connection can spare a guess.
+     */
+    const worthAhead = (link: HTMLAnchorElement): Ahead | null => {
+      if (readAhead.read() >= AT_MOST || !dataToSpare(connectionNow())) return null;
+
+      const ahead = aheadOf(link);
+      return ahead === null || readAhead.already(ahead.key) ? null : ahead;
+    };
+
+    /** Reads a page ahead, the pointer's way and the keyboard's alike. */
+    const readNow = (ahead: Ahead, path: string): void => {
+      prepareTo(window, path);
+      readAhead.offer(ahead.key, ahead.read.pipe(Effect.provide(gatewayLayer)));
+    };
+
+    /**
      * Whether what the pointer is near is worth earning credit towards, and at what rate.
      *
      * Several reasons it is not, and they are different kinds of reason: nothing is near
@@ -476,12 +496,10 @@ export default defineContentScript({
     const worthReading = (
       found: Reached | null,
     ): Seen<{ readonly ahead: Ahead; readonly path: string }> | null => {
-      if (found === null || readAhead.read() >= AT_MOST || !dataToSpare(connectionNow())) {
-        return null;
-      }
+      if (found === null) return null;
 
-      const ahead = aheadOf(found.link);
-      if (ahead === null || readAhead.already(ahead.key)) return null;
+      const ahead = worthAhead(found.link);
+      if (ahead === null) return null;
 
       return {
         key: ahead.key,
@@ -550,11 +568,7 @@ export default defineContentScript({
           opening(found.link) !== null
         )
           markOwnedRoute(found.link);
-        prepareTo(window, step.ripe.path);
-        readAhead.offer(
-          step.ripe.ahead.key,
-          step.ripe.ahead.read.pipe(Effect.provide(gatewayLayer)),
-        );
+        readNow(step.ripe.ahead, step.ripe.path);
       }
 
       // Gone from a built extension entirely: `import.meta.env.DEV` is `false` before the
@@ -608,6 +622,26 @@ export default defineContentScript({
       lastLook = performance.now();
       ticking = window.requestAnimationFrame(look);
     };
+
+    /*
+     * And the row the keyboard rests on, which is where Enter will press. The same rules
+     * as the pointer's, asked again when the dwell is up: a read that started meanwhile,
+     * the visit's share, and a press on its way all still say no.
+     */
+    whenTheKeyRests(
+      document,
+      (link) => {
+        const ahead = worthAhead(link);
+        return ahead === null ? null : (ahead.ripe ?? RIPE);
+      },
+      (link) => {
+        if (view === "github" || readAhead.waiting(performance.now())) return;
+        const ahead = worthAhead(link);
+        if (ahead === null) return;
+        soon(link);
+        readNow(ahead, linkAddress(link).pathname);
+      },
+    );
 
     document.addEventListener("pointermove", keepLooking, { passive: true });
     // The pointer put on a link by a scroll rather than by a hand, which is the one case
