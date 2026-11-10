@@ -74,6 +74,12 @@ export type ReadingAhead = {
   readonly pressed: (keep: string | null, waiting: Waiting) => void
   /** Whether the page the reader pressed for is still on its way. */
   readonly waiting: (now: number) => boolean
+  /**
+   * The reader is on another page, which is a visit of its own: its own share, and
+   * nothing read yet. The read still in the air keeps its place and its key, so it is
+   * neither started twice nor called off for a page that may well be the one it is for.
+   */
+  readonly arrived: () => void
 }
 
 export const readingAhead = (): ReadingAhead => {
@@ -174,6 +180,11 @@ export const readingAhead = (): ReadingAhead => {
     waiting: (now) => {
       arriving = stillWaiting(arriving, now)
       return arriving !== undefined
+    },
+    arrived: () => {
+      asked.clear()
+      after = undefined
+      if (inFlightKey !== null) asked.add(inFlightKey)
     }
   }
 }
