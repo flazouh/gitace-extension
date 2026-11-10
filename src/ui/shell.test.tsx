@@ -820,6 +820,7 @@ describe("a markdown file, which is prose rather than code", () => {
 const drawing = () => {
   const asked: Array<DiffRequest> = []
   const load: LoadEngine = Effect.succeed({
+    warm: () => Effect.void,
     renderDiff: (container: HTMLElement, request: DiffRequest) => {
       asked.push(request)
       const hang = (notes: ReadonlyArray<Note>) => {

@@ -48,7 +48,7 @@ import type { View } from "@/domain/Settings"
 import { chosenSettings, rememberView } from "@/app/settings"
 import { prepareAScreen, standAScreen, type Standing } from "@/shell/screen"
 import { liveUpdates, settings, throughGitHub } from "@/shell/supplied"
-import { loadDiffEngine } from "@/shell/diffEngine"
+import { warmDiffEngine } from "@/shell/diffEngine"
 import { type Loaded, PullRequestScreen } from "@/ui/PullRequestScreen"
 import {
   hasPreparedScreen,
@@ -82,6 +82,15 @@ const recallRepositories = () => rememberedRepositories().pipe(throughGitHub)
  * mistake.
  */
 const ABANDON = 6_000
+
+/**
+ * How many of a pull request's files have their grammar loaded before the first draw.
+ *
+ * The first file is the one on screen and the next two are the ones Next and the
+ * idle drawing reach first. A grammar is the larger half of a highlighter's warm-up,
+ * and one the screen never reaches is parsed for nothing.
+ */
+const FIRST_GRAMMARS = 3
 
 /**
  * Puts the interface on the page for one pull request, and hands back the way
@@ -195,6 +204,8 @@ const open = (
   // how anything that needs the answer waits without asking GitHub again.
   const reading = Effect.runFork(
     asking((loaded) => {
+      if (sofar === undefined)
+        warming(loaded.snapshot.files.slice(0, FIRST_GRAMMARS).map((file) => file.path))
       sofar = loaded
       tell?.(loaded)
     })
@@ -210,7 +221,17 @@ const open = (
   // The renderer as well, which the first file's pane asks for only once it is
   // mounted: on a direct load that was its import, a fifth of a second, begun after
   // the card was already drawn. Held once fetched, so the pane's ask is free.
-  Effect.runFork(Effect.ignore(loadDiffEngine))
+  //
+  // And its highlighter made, in the reader's colours, which the renderer otherwise
+  // starts on the first draw and paints nothing until it lands. Warmed again with the
+  // first files' grammars once the pull request says which they are.
+  const warming = (paths: ReadonlyArray<string>) =>
+    Effect.runFork(
+      Effect.ignore(
+        chosenSettings(settings()).pipe(Effect.flatMap((chosen) => warmDiffEngine(chosen, paths)))
+      )
+    )
+  warming([])
 
   const fetchDiffs = (paths: ReadonlyArray<string>, head: string) =>
     loadDiffs(reference, head, paths).pipe(throughGitHub)

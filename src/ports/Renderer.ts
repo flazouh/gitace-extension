@@ -13,7 +13,7 @@
  * pane cannot tell the difference.
  */
 
-import { Data } from "effect"
+import { Data, type Effect } from "effect"
 import type { DiffChoices } from "../domain/choices"
 import type { Pack } from "../domain/theme"
 
@@ -215,6 +215,8 @@ export const PAPER = "--diffs-paper"
 
 export type DiffEngine = {
   readonly renderDiff: (container: HTMLElement, request: DiffRequest) => DiffHandle
+  /** Readies the colours and the grammars a draw will ask for, so it paints at once. */
+  readonly warm: (themes: ReadonlyArray<string>, paths: ReadonlyArray<string>) => Effect.Effect<void>
 }
 
 /**
