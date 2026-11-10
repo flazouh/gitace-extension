@@ -47,7 +47,21 @@ import { warmWorkingSet } from "./workingSet"
 export type Ahead = {
   readonly key: string
   readonly read: Effect.Effect<unknown, unknown, GitHubGateway>
+  /** How sure the pointer must be before it is read. See {@link DEAR}. */
+  readonly ripe?: number
 }
+
+/**
+ * How long a link must hold the reader's attention before a page that costs this much
+ * is read, in milliseconds of a pointer on it, as `RIPE` in `ui/lingering` is.
+ *
+ * By what a wrong guess spends. A pull request is seven requests made with the reader's
+ * own session, the changes and six `page_data` routes, so it waits for a rest the reader
+ * means; a person's page is one, and is worth having on a slighter hint. Every other page
+ * takes the ordinary dwell of 150.
+ */
+export const DEAR = 250
+export const CHEAP = 100
 
 /** As much of `navigator.connection` as this decision needs, and no more. */
 export type Connection = {
@@ -108,7 +122,7 @@ export const warmingFor = (href: string, at: string): Ahead | null => {
   if (repo === null || Option.isSome(repoHomeIn(href))) return page
 
   return {
-    key: page.key,
+    ...page,
     read: Effect.all([page.read, warmTabs(repo)], { concurrency: "unbounded" })
   }
 }
@@ -134,7 +148,7 @@ const pageFor = (href: string, at: string): Ahead | null => {
   const pull = elsewhereThan(here.pathname, link.pathname)
   if (Option.isSome(pull)) {
     const { owner, repo, number } = pull.value
-    return { key: `${owner}/${repo}/${number}`, read: warmPullRequest(pull.value) }
+    return { key: `${owner}/${repo}/${number}`, read: warmPullRequest(pull.value), ripe: DEAR }
   }
 
   // Home as well as their dashboard, under the one name: both draw this list, and reading
@@ -231,7 +245,8 @@ const pageFor = (href: string, at: string): Ahead | null => {
    * while three answers landed out of order. See `app/person.ts`.
    */
   const person = Option.filter(personPageIn(link.href), (page) => page.tab !== "stars")
-  if (Option.isSome(person)) return { key: keyOf(link), read: warmPerson(person.value) }
+  if (Option.isSome(person))
+    return { key: keyOf(link), read: warmPerson(person.value), ripe: CHEAP }
 
   // The reader's own issues, which is the same one search again.
   const mine = issueDashboardIn(link.href)

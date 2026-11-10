@@ -54,6 +54,7 @@ import {
 } from "@/ui/mount";
 import { linkNear, type Reached } from "@/ui/linkNear";
 import {
+  attending,
   forwardness,
   lingerFor,
   type Lingering,
@@ -124,10 +125,11 @@ const AT_MOST = 12;
  * How often a pointer that is still, and near nothing worth reading, is looked at again.
  *
  * A still pointer sends no events, and the page moves under it: a list that draws its
- * rows after the pointer came to rest, a press that came back to the list, rows that a
- * refresh shifted. Looked at only on the next movement, a reader resting on a row for
- * seconds had nothing read. Four times a second is one hit test each, and a row that
- * arrives under the pointer starts earning within a quarter of a second.
+ * rows just after the pointer came to rest on it, rows that a refresh shifted. Looked at
+ * only on the next movement, a reader resting on a row for seconds had nothing read.
+ * Four times a second is one hit test each, and a row that arrives under a pointer that
+ * has just moved starts earning within a quarter of a second. One under a pointer that
+ * has been still for long is parked, and earns nothing: see `attending`.
  */
 const STILL_LOOK = 250;
 
@@ -444,6 +446,8 @@ export default defineContentScript({
     let ticking = 0;
     /** The look again at a still pointer. See {@link STILL_LOOK}. */
     let beat = 0;
+    /** When the pointer last moved, as opposed to the page moving under it. */
+    let movedAt: number | undefined;
     let lastLook = 0;
     /** Where the pointer was when it was last looked at, and where it is going. */
     let wasAt: Point | undefined;
@@ -483,6 +487,7 @@ export default defineContentScript({
         key: ahead.key,
         reach: found.from.reach,
         forward: forwardness(travel, found.from),
+        ripe: ahead.ripe,
         page: { ahead, path: linkAddress(found.link).pathname },
       };
     };
@@ -530,7 +535,8 @@ export default defineContentScript({
       // fetched once a session either way, and the pages worth having it are ours.
       if (found !== null) soon(found.link);
 
-      const worth = worthReading(found);
+      // Near something, but parked there: no credit, and what it had runs down.
+      const worth = worthReading(attending(movedAt, now) ? found : null);
       const step = lingerFor(lingering, worth, elapsed);
       lingering = step.lingering;
 
@@ -587,6 +593,10 @@ export default defineContentScript({
     const keepLooking = (event: PointerEvent): void => {
       if (view === "github") return;
 
+      // Only a movement of the pointer itself. `pointerover` also comes from a scroll or
+      // a row drawn under a still pointer, which is the parked case: see `attending`.
+      if (event.type === "pointermove" && (at?.x !== event.clientX || at?.y !== event.clientY))
+        movedAt = performance.now();
       at = { x: event.clientX, y: event.clientY };
       if (ticking !== 0) return;
 
