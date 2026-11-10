@@ -32,7 +32,9 @@ import { sameName } from "./sameName"
 import {
   CORE_CSS_ATTRIBUTE,
   FileDiff,
+  getFiletypeFromFileName,
   parsePatchFiles,
+  preloadHighlighter,
   registerCustomTheme,
   wrapCoreCSS
 } from "@pierre/diffs"
@@ -368,6 +370,26 @@ const dressedContainer = (theme: "light" | "dark", choices: DiffChoices): HTMLEl
   shadow.append(style)
   return host
 }
+
+/**
+ * The highlighter made, with the reader's colours and these files' grammars, before
+ * anything is drawn.
+ *
+ * Pierre's renderer draws nothing at all while its shared highlighter is missing or
+ * lacks the theme it is asked for: it starts making one on the first draw and paints
+ * when that lands. On a pull request already in hand that was the whole gap between
+ * the title and the first diff, about a third of a second of nothing with no request
+ * in it. Made here first, the first draw finds it and paints in the call that asked.
+ * A grammar still on its way only costs the colours: the lines are drawn plain and
+ * coloured when it arrives.
+ */
+export const warm = (themes: ReadonlyArray<string>, paths: ReadonlyArray<string>): Effect.Effect<void> =>
+  Effect.promise(() =>
+    preloadHighlighter({
+      themes: [...new Set(themes)] as Parameters<typeof preloadHighlighter>[0]["themes"],
+      langs: [...new Set(paths.map((path) => getFiletypeFromFileName(path)))]
+    })
+  )
 
 export const renderDiff = (container: HTMLElement, request: DiffRequest): DiffHandle => {
   // A patch parses to a list of patches, each holding a list of files. One file

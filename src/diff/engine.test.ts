@@ -1,5 +1,8 @@
 import { describe, expect, it, test } from "bun:test"
-import { drawnBy, held, named, nameIn, sameName, SURFACES, shadowFor } from "./engine"
+import { Effect } from "effect"
+import { diffChoices } from "../domain/choices"
+import { DEFAULTS } from "../domain/Settings"
+import { drawnBy, held, named, nameIn, renderDiff, sameName, SURFACES, shadowFor, warm } from "./engine"
 
 /**
  * The one line in the engine that behaves differently on the two platforms.
@@ -380,5 +383,46 @@ describe("the name under the pointer", () => {
     // reported at the token's start makes every press a navigation.
     const one = named({ ...token("  Effect.", 0), lineNumber: 4 }, over(4))
     expect(one).toEqual({ line: 4, from: 2, to: 8, text: "Effect" })
+  })
+})
+
+/**
+ * The first diff on a page, drawn in the call that asked for it.
+ *
+ * Pierre's renderer drew nothing while its highlighter was still being made, and it
+ * only started making one on the first draw — so a pull request already in hand
+ * showed its title and then, a third of a second later, its first file. Warmed
+ * first, the lines are there when `renderDiff` returns.
+ */
+describe("the first diff on a page", () => {
+  const patch = [
+    "diff --git a/first.ts b/first.ts",
+    "--- a/first.ts",
+    "+++ b/first.ts",
+    "@@ -1,1 +1,2 @@",
+    " const kept = 1",
+    "+const added = 2",
+    ""
+  ].join("\n")
+
+  it("is drawn at once once the highlighter is warm", async () => {
+    await Effect.runPromise(warm(["one-dark-pro", "one-light"], ["first.ts"]))
+
+    const container = document.createElement("div")
+    document.body.append(container)
+    const handle = renderDiff(container, {
+      patch,
+      path: "first.ts",
+      theme: "dark",
+      pack: "cursor",
+      choices: diffChoices(DEFAULTS.diff)
+    })
+
+    const lines = [...(container.firstElementChild?.shadowRoot?.querySelectorAll("[data-line]") ?? [])]
+    const drawn = lines.map((line) => line.textContent).join("\n")
+    handle.destroy()
+    container.remove()
+    expect(lines.length).toBeGreaterThan(0)
+    expect(drawn).toContain("const added = 2")
   })
 })

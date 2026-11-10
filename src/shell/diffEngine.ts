@@ -1,4 +1,8 @@
 import { Effect } from "effect"
+import { diffChoices } from "../domain/choices"
+import type { Settings } from "../domain/Settings"
+import { syntaxOf } from "../domain/syntax"
+import { packOf, type Pack } from "../domain/theme"
 import { DiffEngineUnavailable, type DiffEngine } from "../ports/Renderer"
 import { lendCustomElements } from "../ui/customElements"
 
@@ -41,3 +45,31 @@ export const loadDiffEngine = Effect.suspend(() => {
     )
   )
 })
+
+/**
+ * Where a pack chosen as `match` can resolve: GitHub's own colours on their page, ours
+ * in a window of our own. Both are warmed, since which one this is is the theme's
+ * business and a theme nobody draws in costs one small import.
+ */
+const MATCHED: ReadonlyArray<Pack> = ["github", "cursor"]
+
+/**
+ * The engine loaded and its highlighter made, in the reader's colours and for these
+ * files, before the first file is drawn.
+ *
+ * Started with the screen rather than with the first draw: the renderer draws nothing
+ * until its highlighter exists, and making one on the first draw put a third of a
+ * second between a pull request's title and its first diff. See `warm` in the engine.
+ */
+export const warmDiffEngine = (
+  chosen: Settings,
+  paths: ReadonlyArray<string>
+): Effect.Effect<void, DiffEngineUnavailable> => {
+  const syntax = diffChoices(chosen.diff).syntax
+  const themes = MATCHED.flatMap((here) => {
+    const pair = syntaxOf(syntax, packOf(chosen.theme.pack, here))
+    return [pair.dark, pair.light]
+  })
+
+  return loadDiffEngine.pipe(Effect.flatMap((engine) => engine.warm(themes, paths)))
+}
