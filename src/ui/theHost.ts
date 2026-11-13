@@ -130,6 +130,30 @@ export const theSheetIfReady = (): CSSStyleSheet | null => shared.sheet
  */
 const hosts = shared.hosts
 
+/**
+ * Letters typed into our fields, kept from their hotkeys.
+ *
+ * Their page is still running under ours, with its hotkeys on the document. A key
+ * typed in here reaches the document retargeted to the host, so their test for
+ * "somebody is typing" sees a `div` and takes `c`, `i`, `s` and `t` as shortcuts,
+ * and the letters never reach the box. Stopped at the shadow root, on the way
+ * out: our own keyboard listens on the document in the capture phase and has
+ * already heard the key. Only typing is stopped — a key with a modifier, Escape,
+ * Enter and the arrows still go by.
+ */
+const keepTyping = (shadow: ShadowRoot): ShadowRoot => {
+  shadow.addEventListener("keydown", (event) => {
+    if (!(event instanceof KeyboardEvent)) return
+    if (event.key.length !== 1 || event.metaKey || event.ctrlKey || event.altKey) return
+    const [innermost] = event.composedPath()
+    if (!(innermost instanceof HTMLElement)) return
+    if (innermost.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(innermost.tagName)) {
+      event.stopPropagation()
+    }
+  })
+  return shadow
+}
+
 export const theHost = (target: Document): { host: HTMLElement; shadow: ShadowRoot } => {
   const had = target.getElementById(HOST_ID) ?? hosts.get(target) ?? null
   const host = had ?? target.createElement("div")
@@ -139,7 +163,7 @@ export const theHost = (target: Document): { host: HTMLElement; shadow: ShadowRo
     hosts.set(target, host)
   }
 
-  const shadow = host.shadowRoot ?? host.attachShadow({ mode: "open" })
+  const shadow = host.shadowRoot ?? keepTyping(host.attachShadow({ mode: "open" }))
   const sheet = shared.sheet
   if (sheet !== null && !shadow.adoptedStyleSheets.includes(sheet)) {
     shadow.adoptedStyleSheets = [...shadow.adoptedStyleSheets, sheet]

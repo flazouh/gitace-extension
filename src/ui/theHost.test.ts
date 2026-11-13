@@ -294,3 +294,38 @@ describe("our sheet inside the shadow root", () => {
   })
 })
 
+
+describe("what is typed in our fields stays ours", () => {
+  /*
+   * Their page is still alive under ours, and their hotkeys listen on the
+   * document. A key typed into one of our fields reaches the document retargeted
+   * to the host, so their check for "is this somebody typing" sees a `div` and
+   * answers no: `c`, `i`, `s` and `t` were taken as their shortcuts and never
+   * reached the box. Go to Name read "gePah" for "getPath".
+   */
+  const typedInto = (key: string, init: KeyboardEventInit = {}) => {
+    const page = document.implementation.createHTMLDocument("github")
+    const { shadow } = theHost(page)
+    const box = page.createElement("input")
+    shadow.append(box)
+    const theirs: string[] = []
+    const ours: string[] = []
+    page.addEventListener("keydown", (event) => theirs.push(event.key))
+    page.addEventListener("keydown", (event) => ours.push(event.key), true)
+    box.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true, ...init }))
+    return { theirs, ours }
+  }
+
+  test("a letter typed in a field does not reach their hotkeys", () => {
+    expect(typedInto("t").theirs).toEqual([])
+  })
+
+  test("while our own keyboard, listening first, still hears it", () => {
+    expect(typedInto("t").ours).toEqual(["t"])
+  })
+
+  test("and the keys that are not typing still go by", () => {
+    expect(typedInto("Escape").theirs).toEqual(["Escape"])
+    expect(typedInto("k", { metaKey: true }).theirs).toEqual(["k"])
+  })
+})
