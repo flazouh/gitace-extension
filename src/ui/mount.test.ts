@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "bun:test"
+import { afterEach, beforeEach, describe, expect, test } from "bun:test"
 import { Effect } from "effect"
 import {
   GOING,
@@ -11,6 +11,7 @@ import {
   reveal,
   takeOverSlot,
   takeOverSlotWhenReady,
+  type Takeover,
   theScreenArrived,
   theScreenIsAt,
   theScreenIsNotElsewhere,
@@ -648,7 +649,23 @@ describe("taking the page only once the address is ours", () => {
     return { surface, arriving }
   }
 
-  const tidy = (): void => {
+  /*
+   * Every takeover made here, given back after its test.
+   *
+   * A takeover watches the body it stands in and puts our host back when it is taken
+   * out, which is the point of it. Emptying the body under a live one only had it put
+   * the host straight back, standing over every file that ran after this one: there
+   * the keyboard took that host for the part of the page that is ours, and looked in
+   * it for the dialog a test had drawn in the body.
+   */
+  const made: Array<Takeover> = []
+  const kept = (takeover: Takeover | null): Takeover | null => {
+    if (takeover !== null) made.push(takeover)
+    return takeover
+  }
+
+  afterEach(() => {
+    for (const takeover of made.splice(0)) takeover.stepAside()
     // The host and its shadow root go with the body they stand in, and their
     // stylesheets come back on: both are module state that outlives one test.
     letTheirStylesBack(document)
@@ -661,7 +678,7 @@ describe("taking the page only once the address is ours", () => {
       "data-gitace-page"
     ])
       document.documentElement.removeAttribute(name)
-  }
+  })
 
   test("waits while the address still names the page being left", async () => {
     history.replaceState(null, "", LEFT)
@@ -669,7 +686,7 @@ describe("taking the page only once the address is ours", () => {
 
     const waiting = Effect.runPromise(
       takeOverSlotWhenReady(document, arriving, 400, 20, ACTIONS, surface)
-    )
+    ).then(kept)
     await new Promise((done) => setTimeout(done, 60))
 
     expect(arriving.isConnected).toBe(false)
@@ -677,7 +694,6 @@ describe("taking the page only once the address is ours", () => {
 
     history.pushState(null, "", ASKED)
     expect(await waiting).not.toBeNull()
-    tidy()
   })
 
   test("takes it the moment the address arrives", async () => {
@@ -686,12 +702,11 @@ describe("taking the page only once the address is ours", () => {
 
     const waiting = Effect.runPromise(
       takeOverSlotWhenReady(document, arriving, 400, 20, ACTIONS, surface)
-    )
+    ).then(kept)
     history.pushState(null, "", ASKED)
 
     expect(await waiting).not.toBeNull()
     expect(arriving.isConnected).toBe(true)
-    tidy()
   })
 
   test("gives the page back where the address never arrives", async () => {
@@ -702,11 +717,10 @@ describe("taking the page only once the address is ours", () => {
 
     const takeover = await Effect.runPromise(
       takeOverSlotWhenReady(document, arriving, 40, 20, ACTIONS, surface)
-    )
+    ).then(kept)
 
     expect(takeover).toBeNull()
     expect(arriving.isConnected).toBe(false)
-    tidy()
   })
 
   test("stands straight away when the address is already ours", async () => {
@@ -717,14 +731,13 @@ describe("taking the page only once the address is ours", () => {
 
     const takeover = await Effect.runPromise(
       takeOverSlotWhenReady(document, arriving, 400, 20, ACTIONS, surface)
-    )
+    ).then(kept)
 
     // That it took the page at all, which is the whole of what this one is about:
     // the address was already ours, so there was nothing to wait for. Where the
     // container ends up is asserted by the tests that are about placement — and
     // asserting it here reads whatever the tests before it left in module state.
     expect(takeover).not.toBeNull()
-    tidy()
   })
 })
 
