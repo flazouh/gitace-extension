@@ -201,6 +201,22 @@ describe("every overlay goes to the one host built for overlays", () => {
     expect(guilty).toEqual([])
   })
 
+  test("no float portals straight into body", () => {
+    /*
+     * The card a held key opens over a name, and the one for a name in another
+     * repository, were portaled into `document.body`. That is the same unmarked
+     * child of `body` the menus were, so on every page we take the gate rule
+     * gave it `display: none`: the underline drew, the card was in the document
+     * with its signature and its line, and nobody could see it.
+     */
+    const guilty = [...sourcesIn(uiDir, ".tsx")]
+      .map(([name, whole]) => [name, whole.replace(/\/\*[\s\S]*?\*\//g, "")] as [string, string])
+      .filter(([, text]) => /createPortal\([\s\S]*?,\s*document\.body\s*\)/.test(text))
+      .map(([name]) => name)
+
+    expect(guilty).toEqual([])
+  })
+
   test("and the host they do use is one their page cannot hide", () => {
     const page = document.implementation.createHTMLDocument("github")
     const host = outsideHost(page, "gitace-over")

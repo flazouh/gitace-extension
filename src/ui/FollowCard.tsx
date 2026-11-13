@@ -2,6 +2,7 @@ import { createPortal } from "react-dom"
 import type { Writing } from "../ports/Ledger"
 import type { Bounds } from "../ports/Renderer"
 import { FLOAT } from "./dress"
+import { OVER_ID, outsideHost } from "./outside"
 
 /**
  * What a Name means, beside the Name, while the key is held.
@@ -68,6 +69,6 @@ export const FollowCard = ({ writing, at, where }: FollowCardProps) => {
         </span>
       </p>
     </div>,
-    document.body
+    outsideHost(document, OVER_ID)
   )
 }
