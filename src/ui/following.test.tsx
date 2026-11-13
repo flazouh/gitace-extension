@@ -688,6 +688,29 @@ describe("a name this file borrowed from another", () => {
     expect(opened).toEqual([{ path: "src/whole.ts", line: 2 }])
   })
 
+  test("peeks it where this view does not hold that file", async () => {
+    // A pull request holds the files it changed. A name written in any other was
+    // handed to `open`, which had nowhere to put it, and the press did nothing.
+    const { stage, opened } = crossing({
+      holds: (path) => path === "src/one.ts",
+      read: () => Effect.succeed("// one\nexport const two = () => 2")
+    })
+    await Effect.runPromise(settled())
+
+    stage.request?.onNameEnter?.(name, held({ go: true }))
+    await Effect.runPromise(settled())
+    stage.request?.onName?.(name, held({ go: true }))
+
+    await waitFor(() => {
+      const [rows] = stage.shown.slice(-1)
+      expect(rows?.some((note) => note.line === name.line)).toBe(true)
+    })
+    const filled = stage.request?.fillNote?.("gitace/peek")
+    expect(filled?.textContent).toContain("export const two = () => 2")
+    expect(filled?.textContent).toContain("src/whole.ts:2")
+    expect(opened).toEqual([])
+  })
+
   test("asks who depends on it from the keyboard, where there is nowhere to go", async () => {
     const { stage } = crossing()
     await Effect.runPromise(settled())

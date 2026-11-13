@@ -2,6 +2,7 @@ import { Effect, Option } from "effect"
 import { beyond } from "./beyond"
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
 import type {
+  ChangedFile,
   Check,
   CheckNote,
   CommitDetail,
@@ -441,20 +442,27 @@ export const Shell = ({
    * `reach` below has always been keyed on the two strings for the same reason.
    */
   const { owner, repo } = snapshot.reference
-  const across = useMemo(
-    (): Across | undefined =>
-      readPaths === undefined || readWholeFile === undefined
-        ? undefined
-        : {
-            paths,
-            repo: { owner, repo },
-            sha: snapshot.headSha,
-            read: (path) => readWholeFile(snapshot.headSha, path),
-            open: (path, line) => setWanted({ path, line }),
-            reach: reachOut
-          },
-    [paths, readPaths, readWholeFile, snapshot.headSha, owner, repo, reachOut]
-  )
+  // Read through a ref for the same reason: the list is a new array on every read.
+  const changed = useRef<ReadonlyArray<ChangedFile>>(snapshot.files)
+  changed.current = snapshot.files
+  const across = useMemo((): Across | undefined => {
+    if (readPaths === undefined || readWholeFile === undefined) return undefined
+    const holds = (path: string): boolean => changed.current.some((file) => file.path === path)
+    return {
+      paths,
+      repo: { owner, repo },
+      sha: snapshot.headSha,
+      read: (path) => readWholeFile(snapshot.headSha, path),
+      holds,
+      // A file the pull request did not change is not on this page, so it is
+      // opened on its own, at the commit under review — as a commit's page does.
+      open: (path, line) => {
+        if (holds(path)) setWanted({ path, line })
+        else window.location.assign(`/${owner}/${repo}/blob/${snapshot.headSha}/${path}#L${line}`)
+      },
+      reach: reachOut
+    }
+  }, [paths, readPaths, readWholeFile, snapshot.headSha, owner, repo, reachOut])
 
   const onPost = useMemo(
     () =>
@@ -746,7 +754,11 @@ export const Shell = ({
           <GoToName
             repo={snapshot.reference}
             sha={snapshot.headSha}
-            onOpen={(place) => setWanted({ path: place.path, line: place.writing.line })}
+            onOpen={(place) =>
+              across === undefined
+                ? setWanted({ path: place.path, line: place.writing.line })
+                : across.open(place.path, place.writing.line)
+            }
             onClose={() => setNamingRepo(false)}
           />
         ) : null}

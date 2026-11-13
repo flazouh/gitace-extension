@@ -155,6 +155,12 @@ export type Across = {
   readonly read: (path: string) => Effect.Effect<string, unknown>
   /** Opens another file at a line. The address follows, as a Follow's does. */
   readonly open: (path: string, line: number) => void
+  /**
+   * Whether `open` keeps the reader on this page. A pull request holds only the files
+   * it changed, and opening any other leaves the review; a press Peeks those instead.
+   * Absent where every file opens here.
+   */
+  readonly holds?: (path: string) => boolean
 }
 
 /**
@@ -811,7 +817,9 @@ export const useFollowing = (
       const arrive = (writing: Writing, where?: string): void => {
         clear()
         if (where !== undefined && where !== source?.path) {
-          repository.current?.open(where, writing.line)
+          const across = repository.current
+          if (across?.holds?.(where) === false) peek(writing, where)
+          else across?.open(where, writing.line)
           return
         }
         if (showLine(host.current, writing.line)) return
