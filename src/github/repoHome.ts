@@ -189,8 +189,18 @@ export const repoHomeInDocument = (url: string, doc: Document): Option.Option<Re
   const parsed = repoHomeIn(url)
   if (Option.isNone(parsed) || parsed.value.branch === null) return parsed
 
+  const address = URL.parse(url)
+  if (address === null) return Option.none()
+
+  const routeTail = address.pathname
+    .split("/")
+    .filter((part) => part.length > 0)
+    .slice(3)
+    .map(unescaped)
+    .join("/")
+
   const script = doc.querySelector(EMBEDDED)
-  if (script === null) return Option.none()
+  if (script === null) return repoHomeInTitle(parsed.value.repo, routeTail, doc.title)
 
   const raw = Option.liftThrowable(JSON.parse)(script.textContent ?? "")
   if (Option.isNone(raw)) return Option.none()
@@ -205,15 +215,6 @@ export const repoHomeInDocument = (url: string, doc: Document): Option.Option<Re
       repository.value.repo.name.toLowerCase() !== parsed.value.repo.repo.toLowerCase())
   ) return Option.none()
 
-  const address = URL.parse(url)
-  if (address === null) return Option.none()
-
-  const routeTail = address.pathname
-    .split("/")
-    .filter((part) => part.length > 0)
-    .slice(3)
-    .map(unescaped)
-    .join("/")
   const resolvedPath = location.value.path === "/" ? "" : location.value.path
   const resolvedTail = [location.value.refInfo.name, resolvedPath]
     .filter((part) => part.length > 0)
@@ -225,6 +226,45 @@ export const repoHomeInDocument = (url: string, doc: Document): Option.Option<Re
     branch: location.value.refInfo.name,
     reading: resolvedPath === "" ? null : resolvedPath
   })
+}
+
+/**
+ * The same answer out of the page's title, for GitHub's newer code view.
+ *
+ * That view ships no payload in the document at all, and the one place it still
+ * says which part of the address is the branch is its title:
+ * `hono/src/types.ts at chore/x · honojs/hono`. A git ref cannot hold a space,
+ * so the ref is the word after the last ` at `. The title is checked against
+ * the address the same way the payload is, so the title of the page GitHub is
+ * navigating away from never reads as this one.
+ *
+ * A tree at a branch's root carries the front page's title instead, with no ref
+ * in it, and is only read where the tail is one word: there the whole tail is
+ * the branch, and a stale front-page title cannot be mistaken for a slashed one.
+ */
+const repoHomeInTitle = (
+  repo: { readonly owner: string; readonly repo: string },
+  routeTail: string,
+  title: string
+): Option.Option<RepoHome> => {
+  const said = title.replace(/ · GitHub$/, "")
+  const same = (owner: string, name: string): boolean =>
+    owner.toLowerCase() === repo.owner.toLowerCase() && name.toLowerCase() === repo.repo.toLowerCase()
+
+  const titled = /^(.+) at (\S+) · ([^\s/]+)\/([^\s/]+)$/.exec(said)
+  if (titled !== null) {
+    const [, where = "", ref = "", owner = "", name = ""] = titled
+    const lead = `${name}/`
+    if (!same(owner, name) || !where.toLowerCase().startsWith(lead.toLowerCase())) return Option.none()
+    const reading = where.slice(lead.length)
+    if (routeTail !== `${ref}/${reading}`) return Option.none()
+    return Option.some({ repo, branch: ref, reading })
+  }
+
+  const front = /^(?:GitHub - )?([^\s/]+)\/([^\s/:]+)(?::|$)/.exec(said)
+  if (front === null || routeTail.includes("/") || routeTail === "") return Option.none()
+  const [, owner = "", name = ""] = front
+  return same(owner, name) ? Option.some({ repo, branch: routeTail, reading: null }) : Option.none()
 }
 
 /**

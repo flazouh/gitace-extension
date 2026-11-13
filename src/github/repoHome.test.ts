@@ -386,3 +386,47 @@ describe("a repository address resolved by GitHub", () => {
     )
   })
 })
+
+const titledDocument = (title: string): Document => {
+  const page = document.implementation.createHTMLDocument()
+  page.title = title
+  page.body.append(Object.assign(page.createElement("main"), { id: "ui-service-main-content" }))
+  return page
+}
+
+describe("a repository address in GitHub's newer code view, which ships no payload", () => {
+  test("reads a slashed branch and the file out of the title", () => {
+    const url = "https://github.com/honojs/hono/blob/chore/dont-merge/src/types.ts"
+
+    expect(
+      Option.getOrNull(repoHomeInDocument(url, titledDocument("hono/src/types.ts at chore/dont-merge · honojs/hono")))
+    ).toEqual({ repo: { owner: "honojs", repo: "hono" }, branch: "chore/dont-merge", reading: "src/types.ts" })
+  })
+
+  test("reads a folder at a commit, and a path that says ` at ` itself", () => {
+    const sha = "f6fbaf0299c48eea9e656e03e2ffe7ac755e8823"
+    const url = `https://github.com/honojs/hono/tree/${sha}/docs/look%20at%20this`
+
+    expect(
+      Option.getOrNull(repoHomeInDocument(url, titledDocument(`hono/docs/look at this at ${sha} · honojs/hono`)))
+    ).toEqual({ repo: { owner: "honojs", repo: "hono" }, branch: sha, reading: "docs/look at this" })
+  })
+
+  test("does not read the title of the page GitHub is leaving", () => {
+    const url = "https://github.com/honojs/hono/tree/main/src/utils"
+
+    expect(repoHomeInDocument(url, titledDocument("hono/src at main · honojs/hono"))).toEqual(Option.none())
+    expect(repoHomeInDocument(url, titledDocument("hono/src/utils at main · honojs/other"))).toEqual(Option.none())
+  })
+
+  test("reads a branch's root, which carries the front page's title, only where the tail is one word", () => {
+    const front = titledDocument("honojs/hono: Web framework built on Web Standards")
+
+    expect(Option.getOrNull(repoHomeInDocument("https://github.com/honojs/hono/tree/v4", front))).toEqual({
+      repo: { owner: "honojs", repo: "hono" },
+      branch: "v4",
+      reading: null
+    })
+    expect(repoHomeInDocument("https://github.com/honojs/hono/tree/main/src", front)).toEqual(Option.none())
+  })
+})
