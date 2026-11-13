@@ -120,6 +120,13 @@ describe("the keyboard, over the whole page", () => {
 
     await userEvent.keyboard("{Escape}")
     await userEvent.keyboard("s")
+    console.log("DEBUG-ROOTS", JSON.stringify({
+      roots: [...document.querySelectorAll("#gitace-root")].map((e) => [e.parentElement?.tagName, e.parentElement?.id, e.outerHTML.slice(0, 200)]),
+      host: document.getElementById("gitace-host") !== null,
+      body: [...document.body.children].map((e) => `${e.tagName}#${e.id}.${e.className}`),
+      html: document.documentElement.outerHTML.length,
+      at: location.href
+    }))
 
     // The dialog is the innermost thing open, so it owns the way out. The page
     // taking Escape first closed whatever was behind the dialog and left the

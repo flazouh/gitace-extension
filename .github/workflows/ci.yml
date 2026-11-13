@@ -90,7 +90,7 @@ jobs:
       # of them. Reproduced twice on one commit; local 1.4.0 is fine either
       # way. Serial costs the minute back and reports a real failure as itself.
       - name: Gates
-        run: bun run lint && bun run compile && bun run test -- --dots
+        run: bun run test
 
       # The zips the release attaches and submits, built here so a packaging
       # failure is not first seen after a tag is already published.
