@@ -15,6 +15,7 @@
 
 import { Effect } from "effect"
 import { Language, Parser, type Tree } from "web-tree-sitter"
+import { signaturesApart } from "./signatures"
 import { extensionOf } from "./syntax"
 import type { Syntax } from "./syntax"
 
@@ -96,6 +97,30 @@ export const grammarFor = (path: string): string | null => {
   return extension === null ? null : (GRAMMARS[extension] ?? null)
 }
 
+const TYPESCRIPT_GRAMMARS = new Set(["tree-sitter-typescript.wasm", "tree-sitter-tsx.wasm"])
+
+/**
+ * The file's tree, read a second time with its call signatures set apart where the
+ * first reading failed. Kept only where that reading is clean, so a file that
+ * parses, and JSX, whose lines open with `<` too, are read as they always were.
+ * See {@link signaturesApart}.
+ */
+const treeOf = (parser: Parser, file: string, text: string): Tree | null => {
+  const tree = parser.parse(text)
+  if (tree === null || !tree.rootNode.hasError || !TYPESCRIPT_GRAMMARS.has(file)) return tree
+
+  const apart = signaturesApart(text)
+  if (apart === text) return tree
+  const again = parser.parse(apart)
+  if (again === null) return tree
+  if (again.rootNode.hasError) {
+    again.delete()
+    return tree
+  }
+  tree.delete()
+  return again
+}
+
 let started: Effect.Effect<void, unknown> | undefined
 const loaded = new Map<string, Effect.Effect<Language, unknown>>()
 
@@ -157,7 +182,7 @@ export const reader = <A>(
 
       const parser = new Parser()
       parser.setLanguage(language)
-      const tree = parser.parse(text)
+      const tree = treeOf(parser, file, text)
       if (tree === null) {
         parser.delete()
         return null
@@ -282,7 +307,7 @@ export const parsed = <A>(
 
     const parser = new Parser()
     parser.setLanguage(language)
-    const tree = parser.parse(text)
+    const tree = treeOf(parser, file, text)
     if (tree === null) {
       parser.delete()
       return null
