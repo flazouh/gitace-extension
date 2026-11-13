@@ -169,7 +169,8 @@ export const Writing = ({
   onSend,
   suggest,
   onUpload,
-  send
+  send,
+  dictation = false
 }: {
   readonly text: string
   readonly onText: (text: string) => void
@@ -201,6 +202,11 @@ export const Writing = ({
    * of its own to send it with.
    */
   readonly send?: ReactNode
+  /**
+   * Whether the microphone is drawn. Off in every box for now: the browser's recogniser hears
+   * only in Google Chrome, and an engine that hears everywhere is still to be chosen.
+   */
+  readonly dictation?: boolean
 }) => {
   const [previewing, setPreviewing] = useState(false)
   const box = useRef<HTMLTextAreaElement>(null)
@@ -623,7 +629,7 @@ export const Writing = ({
           )}
         </div>
         <div className="t-composer-group">
-          {hearing.can ? (
+          {dictation && hearing.can ? (
             <Dictation
               hearing={hearing}
               choices={choices}
