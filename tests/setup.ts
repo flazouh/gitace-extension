@@ -5,6 +5,7 @@ import { forgetDrawn } from "../src/ui/lastDrawn"
 import { forgetTheSpot } from "../src/shell/handOver"
 import { forgetTheHost } from "../src/ui/theHost"
 import { forgetLanded } from "../src/ui/landing"
+import { ROOT_ID } from "../src/ui/mount"
 import { forgetLanded as forgetOurWrites } from "../src/github/landed"
 import { forgetEverything } from "./storage"
 
@@ -177,4 +178,17 @@ afterEach(() => forgetTheHost(document))
  */
 afterEach(() => {
   Reflect.deleteProperty(document, "visibilityState")
+})
+
+/*
+ * And the container a screen is drawn into, where a test planted one in the page itself.
+ *
+ * The keyboard reads that container as the part of the page that is ours, so one left
+ * behind is where the next file's keys look for an open dialog, and they look past the
+ * one its test drew. Most files remove what they made; on CI a new runner image put a
+ * file that did not ahead of the keyboard's tests, and "steps back while a dialog has
+ * the screen" failed there and nowhere else.
+ */
+afterEach(() => {
+  for (const left of document.querySelectorAll(`#${ROOT_ID}`)) left.remove()
 })
