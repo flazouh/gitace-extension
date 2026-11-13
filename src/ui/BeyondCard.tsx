@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom"
 import type { Beyond } from "../ports/Ledger"
 import { FLOAT } from "./dress"
+import { OVER_ID, outsideHost } from "./outside"
 import type { Bounds } from "../ports/Renderer"
 
 /**
@@ -72,6 +73,6 @@ export const BeyondCard = ({ beyond, at, onGo, onClose }: BeyondCardProps) => {
         </span>
       </button>
     </div>,
-    document.body
+    outsideHost(document, OVER_ID)
   )
 }
