@@ -95,6 +95,10 @@ the right, the microphone and Send. Send stands in the box where the surface sen
 remark on the pull request, on some lines, an answer in a thread); a review and a new issue keep
 the buttons of their own. `composer.css` holds the measures, and every colour is the pack's.
 
+The microphone is parked: no box draws it (`Writing`'s `dictation`, off by default), because the
+browser's recogniser hears only in Google Chrome and an engine that hears everywhere is still to
+be chosen. What follows is how it works when it is on.
+
 The microphone is the browser's speech recognition, so there is nothing to install. The words
 land after what was typed, as they are heard. While it listens the button grows into the
 recording pill (the bars, the clock, a stop) and the narrow button of its menu steps aside. The

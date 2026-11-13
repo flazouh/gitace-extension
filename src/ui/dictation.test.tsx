@@ -55,6 +55,7 @@ const Box = ({ start = "", onSent = () => {} }: { readonly start?: string; reado
         placeholder="Say something"
         onEscape={() => {}}
         onSend={() => onSent(text)}
+        dictation
         send={
           <Send onSend={() => onSent(text)} disabled={text.trim() === ""}>
             Comment
@@ -81,6 +82,11 @@ describe("the words heard", () => {
 })
 
 describe("the writing box, as Ace's composer", () => {
+  test("draws no microphone unless the surface asks for one", () => {
+    render(<Writing text="" onText={() => {}} placeholder="Say something" onEscape={() => {}} onSend={() => {}} />)
+    expect(screen.queryByRole("button", { name: "Dictate" })).toBeNull()
+  })
+
   test("holds its Send at the foot of its own controls", () => {
     render(<Box />)
     const send = screen.getByRole("button", { name: "Comment" })
