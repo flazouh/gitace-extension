@@ -1,5 +1,5 @@
 import { Effect, Option } from "effect"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   type CommitList,
   type Day,
@@ -9,6 +9,7 @@ import {
   pageBefore
 } from "../domain/commitList"
 import { checkName, useArt } from "./art"
+import { walkFrom } from "./commitWalk"
 import { CHIP, PRESSABLE } from "./dress"
 import { CHECK_TONE, rollupArtState } from "./Icon"
 import { CommitMessage } from "./GitHubHtml"
@@ -578,6 +579,15 @@ export const History = ({
    */
   let sofar = 0
   const columns = columnsIn(history)
+
+  /*
+   * The page's order, left for `[` and `]` on a commit opened from it. On the drawing rather
+   * than on the press: the shell answers a press on a commit before the row hears it.
+   */
+  const order = [...commitsOf(history)].map((commit) => commit.sha).join(" ")
+  useEffect(() => {
+    if (order !== "") walkFrom(list.repo, order.split(" "))
+  }, [order, list.repo])
 
   return (
     <div className="flex flex-col gap-3 pb-6">

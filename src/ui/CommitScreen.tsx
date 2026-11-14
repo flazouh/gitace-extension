@@ -1,5 +1,5 @@
 import { Effect, type Option } from "effect"
-import { useDeferredValue, useEffect, useMemo, useState } from "react"
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react"
 import type { DiffFetcher } from "../domain/library"
 import type { CommitDetail } from "../domain/PullRequest"
 import type { CommitRef } from "../domain/CommitRef"
@@ -8,7 +8,10 @@ import { diffChoices, treeChoices } from "../domain/choices"
 import { CommitView } from "./CommitView"
 import type { Repository } from "../domain/repositories"
 import { TheBar } from "./TheBar"
-import { KeyboardScope } from "./useKeys"
+import { besideIn } from "./commitWalk"
+import { goTo } from "./going"
+import { useKeyboard } from "./useKeyboard"
+import { KeyboardScope, useKeys } from "./useKeys"
 import { useSettings } from "./useSettings"
 
 export type CommitScreenProps = {
@@ -83,6 +86,21 @@ export const CommitScreen = ({
   const settled = useDeferredValue(settings)
   const diff = useMemo(() => diffChoices(settled.diff), [settled.diff])
   const tree = useMemo(() => treeChoices(settled.tree), [settled.tree])
+
+  /*
+   * `]` and `[`, down and up the list this commit was opened from. Past that list's end, or
+   * with no list behind it, older is still the parent: the one neighbour a commit always knows.
+   */
+  const [parent, setParent] = useState<string | undefined>(undefined)
+  const heard = useCallback((commit: CommitDetail) => setParent(commit.parentSha), [])
+  useEffect(() => setParent(undefined), [reference.sha])
+  const walkTo = (sha: string | undefined): void => {
+    if (sha !== undefined) goTo(window, `/${reference.owner}/${reference.repo}/commit/${sha}`)
+  }
+  useKeys(useKeyboard(keys), {
+    olderCommit: () => walkTo(besideIn(reference, reference.sha).older ?? parent),
+    newerCommit: () => walkTo(besideIn(reference, reference.sha).newer)
+  })
 
   // What the keyboard is scoped to, so a keypress inside this interface is not
   // also heard by GitHub's own page underneath it.
@@ -200,6 +218,7 @@ export const CommitScreen = ({
             proseAsDocument={settled.diff.prose === "on"}
             keys={keys}
             display={{ settings, onChange: change }}
+            onRead={heard}
           />
         </div>
       </div>

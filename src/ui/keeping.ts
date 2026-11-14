@@ -66,6 +66,9 @@ export const LATELY = `${OURS}lately`
 /** The Destination a press off Home asked it for, in the tab's session until Home takes it. */
 export const HOME_ASKED = `${OURS}home.asked`
 
+/** The commits of the page a commit was pressed from, in the tab's session, to walk with `[` and `]`. */
+export const COMMIT_WALK = `${OURS}commit.walk`
+
 /** How much of the Working Set Home last drew waiting on the reader, for the mark on other pages. */
 export const KEPT_WAITING = `${OURS}kept.waiting`
 

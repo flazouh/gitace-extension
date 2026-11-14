@@ -22,6 +22,8 @@ export type Command =
   | "nextFile"
   | "previousFile"
   | "markFile"
+  | "olderCommit"
+  | "newerCommit"
   | "reviewMode"
   | "openAside"
   | "search"
@@ -142,6 +144,12 @@ const STANDARD: Table = {
    */
   markFile: ["x"],
   /*
+   * The brackets for a commit's neighbours, as every editor's diff steps between changes with
+   * them. `]` goes on down the list, which is back in time; `[` comes up it.
+   */
+  olderCommit: ["]"],
+  newerCommit: ["["],
+  /*
    * `r` for review, and it goes both ways: pressed outside the mode it opens it,
    * pressed inside it closes it. Escape closes it as well and always did, but
    * Escape is the way out of everything and says nothing about what this is.
@@ -212,6 +220,9 @@ const VIM: Table = {
   nextFile: ["j"],
   previousFile: ["k"],
   markFile: ["x"],
+  // `j` and `k` are the files; held down, the same two walk the commits.
+  olderCommit: ["J"],
+  newerCommit: ["K"],
   // `r` replaces a character in vim and waits for the character. Nothing here
   // waits for a second key, so there is no habit of vim's to keep clear of.
   reviewMode: ["r"],
@@ -237,6 +248,8 @@ const NOTHING: Table = {
   nextFile: [],
   previousFile: [],
   markFile: [],
+  olderCommit: [],
+  newerCommit: [],
   reviewMode: [],
   openAside: [],
   search: [],
@@ -282,6 +295,8 @@ export const KEYBOARD: ReadonlyArray<{
     gist: "Back up the rail to the file before it"
   },
   { command: "markFile", word: "Mark file", gist: "Turn this file's mark over, read or unread" },
+  { command: "olderCommit", word: "Older commit", gist: "On a commit, the one below it in the list it came from" },
+  { command: "newerCommit", word: "Newer commit", gist: "On a commit, the one above it in that list" },
   { command: "reviewMode", word: "Review mode", gist: "The files on the whole screen, and back" },
   { command: "openAside", word: "Open aside", gist: "The row the walk is on, in the side panel" },
   { command: "search", word: "Search", gist: "The filter over whichever list is on screen" },

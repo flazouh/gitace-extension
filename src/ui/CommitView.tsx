@@ -72,6 +72,8 @@ export type CommitViewProps = {
   readonly keys?: Keys
   /** Handed straight to the band, so a commit is drawn by the same knobs. See `FileBrowser`. */
   readonly display?: FileBrowserProps["display"]
+  /** Told the commit once it is in hand, for whoever walks to its parent. */
+  readonly onRead?: (commit: CommitDetail) => void
 }
 
 type Reading =
@@ -103,7 +105,8 @@ export const CommitView = ({
   tree,
   proseAsDocument,
   keys,
-  display
+  display,
+  onRead
 }: CommitViewProps) => {
   const art = useArt()
   const Back = art.back
@@ -144,6 +147,11 @@ export const CommitView = ({
   const [reading, setReading] = useState<Reading>(
     already === undefined ? { step: "loading" } : { step: "ready", commit: already }
   )
+
+  const read = reading.step === "ready" ? reading.commit : undefined
+  useEffect(() => {
+    if (read !== undefined) onRead?.(read)
+  }, [read, onRead])
 
   /*
    * Revealing the lines between the hunks, and Following a name out of them.
