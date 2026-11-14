@@ -3,6 +3,7 @@ import { cleanup, render, screen, waitFor, within } from "@testing-library/react
 import userEvent from "@testing-library/user-event"
 import { Option } from "effect"
 import type { CommitList, Day, History as Read, Landed } from "../domain/commitList"
+import { besideIn } from "./commitWalk"
 import { History } from "./History"
 
 afterEach(cleanup)
@@ -362,5 +363,18 @@ describe("what else a row can say about a commit", () => {
     one(landed("3f12934", "One line and no more"))
 
     expect(screen.queryByRole("button", { name: "Show the rest of the message" })).toBeNull()
+  })
+})
+
+describe("a commit pressed from the list", () => {
+  afterEach(() => sessionStorage.clear())
+
+  test("leaves the page's order behind, so a commit opened from it can walk to its neighbours", () => {
+    showing()
+
+    expect(besideIn(list.repo, "4c84c54".padEnd(40, "0"))).toEqual({
+      newer: "3f12934".padEnd(40, "0"),
+      older: "b7988b0".padEnd(40, "0")
+    })
   })
 })

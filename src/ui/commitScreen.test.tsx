@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { Effect, Option } from "effect"
 import type { ChangedFile, CommitDetail } from "../domain/PullRequest"
 import { CommitScreen } from "./CommitScreen"
+import { besideIn, walkFrom } from "./commitWalk"
 
 afterEach(cleanup)
 
@@ -195,5 +196,45 @@ describe("a commit drawn from what was kept", () => {
     expect(await screen.findByText(stale.headline)).toBeTruthy()
     // Silently: what the corner used to say about this is in `Toasts.tsx`.
     await waitFor(() => expect(screen.getByText(commit.headline)).toBeDefined())
+  })
+})
+
+describe("walking to the commits beside this one", () => {
+  const older = "1111111111111111111111111111111111111111"
+  const newer = "2222222222222222222222222222222222222222"
+  const parent = "3333333333333333333333333333333333333333"
+  const at = () => window.location.pathname
+
+  afterEach(() => {
+    sessionStorage.clear()
+    window.history.replaceState(null, "", "/")
+  })
+
+  test("goes down and up the list it was opened from, with ] and [", async () => {
+    walkFrom(reference, [newer, commit.sha, older])
+    render(screenOf({ load: () => Effect.succeed({ ...commit, parentSha: parent }) }))
+    await waitFor(() => expect(screen.getByText(commit.headline)).toBeDefined())
+
+    await userEvent.setup().keyboard("]")
+    expect(at()).toBe(`/flazouh/githubpro/commit/${older}`)
+
+    await userEvent.setup().keyboard("[[")
+    expect(at()).toBe(`/flazouh/githubpro/commit/${newer}`)
+  })
+
+  test("goes to the parent with no list behind it, and nowhere newer", async () => {
+    render(screenOf({ load: () => Effect.succeed({ ...commit, parentSha: parent }) }))
+    await waitFor(() => expect(screen.getByText(commit.headline)).toBeDefined())
+
+    await userEvent.setup().keyboard("[[")
+    expect(at()).toBe("/")
+
+    await userEvent.setup().keyboard("]")
+    expect(at()).toBe(`/flazouh/githubpro/commit/${parent}`)
+  })
+
+  test("leaves another repository's list alone", () => {
+    walkFrom({ owner: "other", repo: "place" }, [newer, commit.sha, older])
+    expect(besideIn(reference, commit.sha)).toEqual({})
   })
 })
