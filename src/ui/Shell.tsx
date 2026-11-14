@@ -47,6 +47,7 @@ import { ColumnHandle } from "./ColumnHandle"
 import { useAboutWidth } from "./useAboutWidth"
 import { useSettings } from "./useSettings"
 import { whenIdle } from "../app/idle"
+import { replaceKeepingOurs } from "../app/ourEntries"
 import { onward } from "../observability/report"
 
 export type ShellProps = {
@@ -612,11 +613,7 @@ export const Shell = ({
       const here = window.location.pathname
       if (here !== mine && !here.startsWith(`${mine}/`)) return
 
-      window.history.replaceState(
-        window.history.state,
-        "",
-        `${window.location.pathname}${window.location.search}${fragment}`
-      )
+      replaceKeepingOurs(window, `${window.location.pathname}${window.location.search}${fragment}`)
     },
     [mine]
   )

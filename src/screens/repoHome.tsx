@@ -36,6 +36,7 @@ import { lastDrawn, repoNamed } from "@/ui/lastDrawn"
 import { markPage, reveal } from "@/ui/mount"
 import { whenLocationChanges } from "@/ui/navigation"
 import { REPO_HOME } from "@/ui/place"
+import { pushOurEntry } from "@/app/ourEntries"
 import { RepoHomeScreen } from "@/ui/RepoHomeScreen"
 import "@/ui/styles.css"
 
@@ -312,7 +313,7 @@ const open = (
     const anchor = reading === null || line === undefined ? "" : `#L${line}`
     if (window.location.pathname === at) {
       if (anchor === "" || window.location.hash === anchor) return
-      window.history.pushState(null, "", `${at}${anchor}`)
+      pushOurEntry(window, `${at}${anchor}`)
       showingLine = line
       page.redraw()
       return
@@ -323,7 +324,7 @@ const open = (
       branch: reading === null ? home.branch : branchNow,
       reading
     })
-    window.history.pushState(null, "", `${at}${anchor}`)
+    pushOurEntry(window, `${at}${anchor}`)
     show(reading, branchNow, line)
   }
 
@@ -558,7 +559,7 @@ export const start = (): void => {
     // is not answered a second time by the watcher below, and walking back into
     // the address later finds what it meant.
     moved(at, home)
-    if (window.location.pathname !== at) window.history.pushState(null, "", at)
+    if (window.location.pathname !== at) pushOurEntry(window, at)
     // A `show` that ran first left an observer waiting for a document that is
     // now never coming; the rebuild below is its answer.
     stopWaiting()

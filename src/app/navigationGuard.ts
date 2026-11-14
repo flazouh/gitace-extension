@@ -1,6 +1,7 @@
 export const OWNED_ROUTE = "data-gitace-owned-route"
 const OWNED_ROUTE_OFFER = "data-gitace-owned-route-offer"
 const OWNED_ROUTE_OFFER_PATH = "data-gitace-owned-route-offer-path"
+import { isOurEntry } from "./ourEntries"
 import {
   clearPreparedTraversal,
   offerPreparedTraversal,
@@ -69,7 +70,11 @@ type NavigationAttempt = {
 
 type TraversalAttempt = Event & {
   readonly navigationType?: string
-  readonly destination?: { readonly url?: string; readonly sameDocument?: boolean }
+  readonly destination?: {
+    readonly url?: string
+    readonly sameDocument?: boolean
+    readonly getState?: () => unknown
+  }
 }
 
 type OwnedRouteOffer = "press" | "click"
@@ -167,6 +172,24 @@ export const suppressNextEvent = (target: EventTarget, name: string): (() => voi
   return () => {
     armed = true
   }
+}
+
+/**
+ * Whether Back or Forward is landing on an entry this extension made.
+ *
+ * Their router answers the `popstate` of such a move by loading the whole address again,
+ * so the page-world guard keeps that one event from it. The `navigate` event itself is
+ * left alone: this extension's own world hears the move through it and through
+ * `currententrychange`, and draws the screen for the address the way it would for any
+ * other move.
+ */
+export const isTraversalOntoOurs = (event: Event): boolean => {
+  const move = event as TraversalAttempt
+  return (
+    move.navigationType === "traverse" &&
+    move.destination?.sameDocument === true &&
+    isOurEntry(move.destination.getState?.())
+  )
 }
 
 /** Lets the browser commit a prepared traversal without running GitHub's router. */

@@ -9,6 +9,7 @@ import {
 } from "./mount"
 import { beginNavigation } from "./navigationTiming"
 import type { Stop } from "./navigation"
+import { pushOurEntry } from "../app/ourEntries"
 
 /**
  * Moving from one of this extension's screens to another, without asking GitHub
@@ -460,7 +461,7 @@ export const goTo = (
    * record, so writing ours into it would be this extension keeping a fact GitHub
    * needs, in the one place GitHub is entitled to overwrite.
    */
-  target.history.pushState(null, "", path)
+  pushOurEntry(target, path)
 
   const deadline = (patience: number, confirmed: boolean): void => {
     // Somewhere else entirely by now: a second press, or the back button. This
