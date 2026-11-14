@@ -232,7 +232,36 @@ const AHEAD_KEPT = 8
  */
 export type Keeping = "standing" | "browsed" | "ahead"
 
-type Answer = { readonly at: number; readonly payload: unknown }
+type Answer = { readonly at: number; readonly payload: unknown; readonly options?: true }
+
+/*
+ * An `Option` keeps its tag on its prototype, and the store keeps own fields only: a Some came
+ * back as `{ value }` and a None as `{}`, which `Option.match` read as a Some of nothing and the
+ * run screen crashed on. So each is written as Effect's own JSON for it, and read back as one.
+ */
+type Encoding = { found: boolean }
+
+const encoded = (value: unknown, seen: Encoding): unknown => {
+  if (Option.isOption(value)) {
+    seen.found = true
+    return Option.isSome(value)
+      ? { _id: "Option", _tag: "Some", value: encoded(value.value, seen) }
+      : { _id: "Option", _tag: "None" }
+  }
+  if (Array.isArray(value)) return value.map((one) => encoded(one, seen))
+  if (typeof value !== "object" || value === null || Object.getPrototypeOf(value) !== Object.prototype)
+    return value
+  return Object.fromEntries(Object.entries(value).map(([name, one]) => [name, encoded(one, seen)]))
+}
+
+const revived = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(revived)
+  if (typeof value !== "object" || value === null) return value
+  const held: Record<string, unknown> = value as Record<string, unknown>
+  if (held._id === "Option" && held._tag === "Some") return Option.some(revived(held.value))
+  if (held._id === "Option" && held._tag === "None") return Option.none()
+  return Object.fromEntries(Object.entries(held).map(([name, one]) => [name, revived(one)]))
+}
 
 const isAnswer = (value: unknown): value is Answer => {
   if (typeof value !== "object" || value === null) return false
@@ -248,7 +277,8 @@ export const recallRoute = Effect.fn("snapshots.recallRoute")(function* (route: 
   const held = yield* orNothing(() => store.get(key), {})
   const entry: unknown = held[key]
 
-  return isAnswer(entry) ? Option.some(entry.payload) : Option.none<unknown>()
+  if (!isAnswer(entry)) return Option.none<unknown>()
+  return Option.some(entry.options === true ? revived(entry.payload) : entry.payload)
 })
 
 /**
@@ -309,7 +339,10 @@ export const rememberRoute = Effect.fn("snapshots.rememberRoute")(function* (
   if (store === undefined) return
 
   const key = `${ROUTE}${route}`
-  yield* orNothing(() => store.set({ [key]: { at: Date.now(), payload } satisfies Answer }), undefined)
+  const seen: Encoding = { found: false }
+  const written = encoded(payload, seen)
+  const answer: Answer = seen.found ? { at: Date.now(), payload: written, options: true } : { at: Date.now(), payload }
+  yield* orNothing(() => store.set({ [key]: answer }), undefined)
 
   const [index, kept] =
     keeping === "standing"

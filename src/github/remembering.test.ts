@@ -7,7 +7,7 @@ import { loadRepoList, rememberedRepoList } from "../app/repoList"
 import { loadWorkingSet, rememberedWorkingSet } from "../app/workingSet"
 import type { PullRequestRef } from "../domain/PullRequestRef"
 import type { RepoList } from "../domain/repoList"
-import { recall, recallRows, remember, rememberRoute, rememberSize, rememberStandings } from "./cache"
+import { recall, recallRoute, recallRows, remember, rememberRoute, rememberSize, rememberStandings } from "./cache"
 import { layer } from "./GitHubGateway"
 import type { RawPayloads } from "./snapshot"
 
@@ -623,5 +623,31 @@ describe("keeping what each row of a long list showed", () => {
     local.set = set
 
     expect(indexWrites).toBe(1)
+  })
+})
+
+/*
+ * The store keeps a copy and not the value: what a class carried on its prototype is gone. An
+ * `Option` carries its tag there, so a None came back as `{}` and a Some as `{ value }`.
+ */
+describe("keeping an answer that holds an Option", () => {
+  test("gives back a Some and a None as themselves, however deep", async () => {
+    const answer = { notes: [{ at: Option.some({ step: 3, line: 2 }) }, { at: Option.none() }], title: "ci" }
+    await Effect.runPromise(rememberRoute("/o/r/actions/runs/1", answer))
+
+    const back = (await Effect.runPromise(recallRoute("/o/r/actions/runs/1"))).pipe(Option.getOrThrow) as typeof answer
+
+    expect(Option.isOption(back.notes[0]?.at)).toBe(true)
+    expect(Option.getOrNull(back.notes[0]!.at)).toEqual({ step: 3, line: 2 })
+    expect(Option.isOption(back.notes[1]?.at)).toBe(true)
+    expect(Option.isNone(back.notes[1]!.at)).toBe(true)
+    expect(back.title).toBe("ci")
+  })
+
+  test("gives back an answer with no Option in it untouched", async () => {
+    const raw = { data: { repository: { name: "r", _id: "Option" } } }
+    await Effect.runPromise(rememberRoute("/o/r", raw))
+
+    expect(Option.getOrNull(await Effect.runPromise(recallRoute("/o/r")))).toEqual(raw)
   })
 })

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { Option } from "effect"
 import { faultsIn, toleratedIn, unescaped } from "../domain/run"
 import { secondsIn } from "./outcome"
-import { jobsIn, pressOn, pressesOn, runFrom, runOnPage } from "./runPage"
+import { isKeptRun, jobsIn, pressOn, pressesOn, runFrom, runOnPage } from "./runPage"
 
 /*
  * Run 30866145080 of `octo-org/octo-repo`, as GitHub served it on 2026-08-04:
@@ -337,5 +337,22 @@ describe("everything a run screen opens with, in one read", () => {
       step: 5,
       line: 54
     })
+  })
+})
+
+describe("a run kept to open again", () => {
+  const run = runOnPage(real)
+
+  test("is taken where every note's place is a place", () => {
+    expect(isKeptRun(run)).toBe(true)
+  })
+
+  /*
+   * What the store gave back before it kept an `Option` as one: a None came back as `{}`,
+   * and the screen read it as a Some of nothing and drew no run at all.
+   */
+  test("is refused where a note's place came back from an older store as nothing at all", () => {
+    const stale = run === null ? null : { ...run, notes: run.notes.map((note) => ({ ...note, at: {} })) }
+    expect(isKeptRun(stale)).toBe(false)
   })
 })

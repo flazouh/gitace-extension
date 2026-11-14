@@ -19,6 +19,7 @@
  * `scripts/probe-run-dom.js`.
  */
 
+import { Option } from "effect"
 import type { CheckState } from "../domain/PullRequest"
 import {
   type Job,
@@ -267,6 +268,10 @@ export const isKeptRun = (value: unknown): value is RunOpening => {
     // entry written before the presses existed would reach a screen that offers
     // controls and read `undefined` for whether to offer them.
     typeof kept.presses === "object" &&
-    kept.presses !== null
+    kept.presses !== null &&
+    // Written before the store kept an `Option` as one, a note's place came back as `{}`
+    // and the screen crashed reading it as a place.
+    kept.notes.every((note) => Option.isOption(note.at)) &&
+    kept.gathering.every((note) => Option.isOption(note.at))
   )
 }

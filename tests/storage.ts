@@ -35,11 +35,12 @@ export const installStorage = (): void => {
           get: (keys: string | Array<string>) =>
             Promise.resolve(
               Object.fromEntries(
-                (Array.isArray(keys) ? keys : [keys]).map((key) => [key, held.get(key)])
+                (Array.isArray(keys) ? keys : [keys]).map((key) => [key, structuredClone(held.get(key))])
               )
             ),
           set: (items: Record<string, unknown>) => {
-            for (const [key, value] of Object.entries(items)) held.set(key, value)
+            // A copy, as the real one keeps: what a class carried on its prototype is gone.
+            for (const [key, value] of Object.entries(items)) held.set(key, structuredClone(value))
             return Promise.resolve()
           },
           remove: (keys: Array<string>) => {
