@@ -298,3 +298,72 @@ describe("what the list folds down to", () => {
     expect(of1758?.earlier).toBe(0)
   })
 })
+
+/*
+ * `octo-org/octo-repo/actions` as their React page served it on 2026-11-14, cut to the two lists
+ * of its embedded payload a parser reads. The owner and every person are renamed; every field
+ * kept is theirs, unedited.
+ */
+describe("reading their React list page", () => {
+  const page = Bun.file("tests/fixtures/actionsReact.html").text()
+
+  test("finds every run on it, where the old rows are gone", async () => {
+    expect(runsOnPage(await page)).toHaveLength(25)
+  })
+
+  test("reads a run's facts out of the payload", async () => {
+    const ci = runsOnPage(await page)[6]
+
+    expect(ci?.run).toBe("42990172573")
+    expect(ci?.number).toBe("8843")
+    expect(ci?.workflow).toBe("ci")
+    expect(ci?.file).toBe("ci.yml")
+    expect(ci?.url).toBe("/octo-org/octo-repo/actions/runs/42990172573")
+    expect(ci?.state).toBe("succeeded")
+    expect(ci?.seconds).toBe(89)
+    expect(ci?.actor).toBe("octocat")
+    expect(ci?.trigger).toBe("Commit f6fbaf0 pushed")
+    expect(ci?.ref).toEqual({ kind: "branch", name: "main" })
+    expect(ci?.pullRequest).toBeNull()
+    expect(ci?.startedAt).toBe("2026-11-11T08:50:07Z")
+  })
+
+  test("reads a failure, a cancel and a skip as what they were", async () => {
+    const runs = runsOnPage(await page)
+
+    expect(runs[21]?.state).toBe("failed")
+    expect(runs[15]?.state).toBe("cancelled")
+    expect(runs[14]?.state).toBe("skipped")
+  })
+
+  test("names a pull request's run by the pull request, and its word for what set it off", async () => {
+    const runs = runsOnPage(await page)
+
+    expect(runs[15]?.pullRequest).toBe("5623")
+    expect(runs[15]?.trigger).toBe("opened")
+    expect(runs[15]?.ref).toEqual({ kind: "branch", name: "fix/serve-static-test-after-getpath" })
+    expect(runs[18]?.ref).toEqual({ kind: "pull", number: "5623" })
+  })
+
+  test("names a tag by its name, and says nothing where their row names no trigger", async () => {
+    const runs = runsOnPage(await page)
+
+    expect(runs[3]?.ref).toEqual({ kind: "branch", name: "v4.13.18" })
+    expect(runs[8]?.workflow).toBe("CodeQL")
+    expect(runs[8]?.trigger).toBe("")
+  })
+
+  test("finds every workflow the payload lists, and the file each one is", async () => {
+    const workflows = workflowsOnPage(await page)
+
+    expect(workflows).toHaveLength(9)
+    expect(workflows).toContainEqual({ name: "ci", file: "ci.yml" })
+  })
+
+  test("folds into strands, the newest first", async () => {
+    const strands = strandsIn(runsOnPage(await page))
+
+    expect(strands.length).toBeGreaterThan(1)
+    expect(strands.some((one) => one.pullRequest === "5623")).toBe(true)
+  })
+})
