@@ -387,13 +387,13 @@ describe("the reader's own settings", () => {
   test("stand in the tray, on every page the bar is on", () => {
     render(<TheBar where={{ kind: "home" }} participant={SOMEONE} />)
 
-    expect(screen.getByLabelText("GitAce settings")).toBeDefined()
+    expect(screen.getByLabelText("Ace settings")).toBeDefined()
   })
 
   test("open the sheet where the reader presses them", async () => {
     render(<TheBar where={WHERE} participant={SOMEONE} />)
 
-    await userEvent.click(screen.getByLabelText("GitAce settings"))
+    await userEvent.click(screen.getByLabelText("Ace settings"))
 
     expect(screen.getByRole("dialog", { name: "Settings" })).toBeDefined()
   })
@@ -408,7 +408,7 @@ describe("the reader's own settings", () => {
   test("hang outside the glass, because a filtered pane cannot hold a modal", async () => {
     render(<TheBar where={WHERE} participant={SOMEONE} />)
 
-    await userEvent.click(screen.getByLabelText("GitAce settings"))
+    await userEvent.click(screen.getByLabelText("Ace settings"))
 
     const pane = document.querySelector(`#${BAR_ID} > header`)
     expect(pane).not.toBeNull()

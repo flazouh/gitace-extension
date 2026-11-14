@@ -385,7 +385,7 @@ describe("a repository's front page", () => {
     expect(await screen.findByText(/Show GitHub's page/)).toBeTruthy()
   })
 
-  test("keeps Leave GitAce Extension in the bar, even when this page has loaded", async () => {
+  test("keeps Leave Ace in the bar, even when this page has loaded", async () => {
     // In the bar rather than only on the failure card. The pane replaces their
     // file toolbar, and a reader who still wants something on their page had
     // no way to reach it once ours had drawn.
@@ -396,7 +396,7 @@ describe("a repository's front page", () => {
       }
     })
 
-    const away = await screen.findByRole("button", { name: "Leave GitAce Extension" })
+    const away = await screen.findByRole("button", { name: "Leave Ace" })
     await userEvent.click(away)
 
     expect(handed).toBe(1)

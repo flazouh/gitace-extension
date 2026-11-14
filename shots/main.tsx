@@ -4,7 +4,7 @@ import { paintFloor } from "../src/ui/applyTheme"
 import { markLanded } from "../src/ui/landing"
 import { ROOT_ID } from "../src/ui/mount"
 import { tokensOf } from "../src/domain/theme"
-import { Supplied } from "./Supplied"
+import { STAGE_APPEARANCE, Supplied } from "./Supplied"
 import { VIEWS, viewNamed } from "./views"
 import "./stage.css"
 
@@ -40,7 +40,7 @@ if (stage === null) throw new Error(`#${ROOT_ID} is missing from index.html`)
  * extension that is what covers GitHub's own page. Here there is no page to cover,
  * and without it the frame around a screen is white.
  */
-paintFloor(document, tokensOf("cursor", "dark"))
+paintFloor(document, tokensOf("cursor", STAGE_APPEARANCE))
 document.documentElement.style.background = "var(--gitace-floor)"
 
 /*
@@ -75,7 +75,7 @@ if (view === undefined) {
       ).join("")}
     </ul>`
 } else {
-  document.title = `gitace: ${view.name}`
+  document.title = `ace: ${view.name}`
   stage.style.width = `${view.width}px`
   stage.style.height = `${view.height}px`
   stage.style.overflow = "hidden"

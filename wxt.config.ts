@@ -87,10 +87,10 @@ export default defineConfig({
      * The length that fits all of them is the App Store's (112), and
      * `manifest.test.ts` holds every target to it and says what happened without it.
      */
-    name: "GitAce Extension - A faster, quieter GitHub",
+    name: "Ace – Pull requests & code review for GitHub",
     // Toolbar / overflow menus. Store listing keeps the longer `name`.
-    short_name: "GitAce Extension",
-    description: `A faster, quieter GitHub in ${readIn[browser] ?? "your browser"}. Every pull request you're in, one screen, sorted by next action.`,
+    short_name: "Ace",
+    description: `GitHub in ${readIn[browser] ?? "your browser"}, sorted by who acts next. Review pull requests and go to any definition.`,
     ...(process.env.RELEASE_VERSION === undefined
       ? {}
       : { version: process.env.RELEASE_VERSION }),

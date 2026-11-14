@@ -17,7 +17,7 @@ const drawn = () => sourcesIn("src/ui", (name) => name.endsWith("Screen.tsx"))
  * stops there. Nothing was written down, so a reload drew ours again, and nothing was put
  * up, so the page had no way back to ours.
  */
-describe("Leave GitAce Extension", () => {
+describe("Leave Ace", () => {
   test("is the screen's own choosing of GitHub, never the shell's bare step aside", () => {
     for (const { name, text } of screens()) {
       if (!text.includes("handOverToGitHub(")) continue

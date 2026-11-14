@@ -122,7 +122,7 @@ describe("a commit on the page GitHub keeps for it", () => {
     expect(screen.queryByText("All changes")).toBeNull()
   })
 
-  test("keeps Leave GitAce Extension in the bar, when there is a page to go back to", async () => {
+  test("keeps Leave Ace in the bar, when there is a page to go back to", async () => {
     // In the bar rather than in this panel's corner, where it was a labelled
     // button of its own. The same control was in four places under three names,
     // so a reader who wanted their page had to work out which screen they were
@@ -130,7 +130,7 @@ describe("a commit on the page GitHub keeps for it", () => {
     let handed = 0
     render(screenOf({ onUseGitHub: () => void (handed += 1) }))
 
-    const away = await screen.findByRole("button", { name: "Leave GitAce Extension" })
+    const away = await screen.findByRole("button", { name: "Leave Ace" })
     await userEvent.click(away)
 
     expect(handed).toBe(1)
@@ -140,13 +140,13 @@ describe("a commit on the page GitHub keeps for it", () => {
     render(screenOf())
 
     await waitFor(() => expect(screen.getByText(commit.headline)).toBeDefined())
-    expect(screen.queryByRole("button", { name: "Leave GitAce Extension" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Leave Ace" })).toBeNull()
   })
 
   test("has the display settings the rest of the interface has", async () => {
     render(screenOf())
 
-    await waitFor(() => expect(screen.getByLabelText("GitAce settings")).toBeDefined())
+    await waitFor(() => expect(screen.getByLabelText("Ace settings")).toBeDefined())
     // And the menu at the end of the files band, which holds the same knobs. The
     // two are named apart on purpose: two buttons answering to one name are two
     // identical buttons to anybody listening to the page instead of looking at it.
