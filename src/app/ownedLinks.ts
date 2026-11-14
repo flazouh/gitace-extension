@@ -1,18 +1,28 @@
 import { markOwnedRoute, OWNED_ROUTE } from "./navigationGuard"
 import { ourTree } from "../ui/theHost"
 
+const WATCHING: MutationObserverInit = { childList: true, subtree: true, attributes: true, attributeFilter: ["href"] }
+
 /** Protects added links without walking GitHub's hidden page on each update. */
 export const protectOwnedLinks = (
   target: Document,
   owns: (link: HTMLAnchorElement) => boolean
 ): (() => void) => {
   let roots: readonly HTMLElement[] = []
+  // The interface lives in a shadow root, and an observer of the document never hears what
+  // changes inside one. Watched as well, and again whenever a new host stands one up.
+  let watched: ShadowRoot | null = null
   const protect = (link: HTMLAnchorElement) => {
     if (link.hasAttribute("href") && owns(link)) markOwnedRoute(link)
     else link.removeAttribute(OWNED_ROUTE)
   }
   const update = (changes: readonly MutationRecord[]) => {
-    const ours = ourTree(target) ?? target
+    const tree = ourTree(target)
+    if (tree !== null && tree !== watched) {
+      observer.observe(tree, WATCHING)
+      watched = tree
+    }
+    const ours = tree ?? target
     const current = [
       ours.querySelector<HTMLElement>("#gitace-root"),
       ours.querySelector<HTMLElement>("#gitace-bar")
@@ -38,9 +48,7 @@ export const protectOwnedLinks = (
     }
   }
   const observer = new MutationObserver(update)
-  observer.observe(target.documentElement, {
-    childList: true, subtree: true, attributes: true, attributeFilter: ["href"]
-  })
+  observer.observe(target.documentElement, WATCHING)
   update([])
-  return () => { observer.disconnect(); roots = [] }
+  return () => { observer.disconnect(); roots = []; watched = null }
 }
