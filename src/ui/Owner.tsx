@@ -32,8 +32,8 @@ export const Owner = ({
     <span
       aria-label={owner}
       role="img"
-      className="flex shrink-0 items-center justify-center overflow-hidden rounded-sm bg-surface text-[8px] font-semibold uppercase text-ink-muted"
-      style={{ width: size, height: size }}
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-sm bg-hover font-semibold uppercase text-ink-muted"
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.55) }}
     >
       {broken ? (
         owner.slice(0, 1)
