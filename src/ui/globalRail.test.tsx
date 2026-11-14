@@ -110,6 +110,44 @@ describe("the persistent global Ace rail", () => {
     }
     expect(said).toEqual(["Working Set g d", "Issues g i", "Notifications g n"])
   })
+
+  test("answers its chords away from Home, by asking Home for the Destination", async () => {
+    let homed = 0
+    render(
+      <GlobalRail
+        where={{ kind: "repository", owner: "oven-sh", repo: "bun" }}
+        onHome={() => {
+          homed += 1
+        }}
+      />
+    )
+
+    await userEvent.setup().keyboard("gf")
+    expect(homed).toBe(1)
+    expect(takeHomeAsked()).toBe("activity")
+
+    await userEvent.setup().keyboard("gg")
+    expect(homed).toBe(2)
+    expect(takeHomeAsked()).toBeUndefined()
+  })
+
+  test("switches Home's Destination in place on Home, without asking for a page", async () => {
+    const reached: Array<string> = []
+    let homed = 0
+    render(
+      <GlobalRail
+        where={{ kind: "home" }}
+        onDestination={(which) => reached.push(which)}
+        onHome={() => {
+          homed += 1
+        }}
+      />
+    )
+
+    await userEvent.setup().keyboard("grgd")
+    expect(reached).toEqual(["repositories", "working-set"])
+    expect(homed).toBe(0)
+  })
 })
 
 /**

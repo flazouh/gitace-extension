@@ -10,7 +10,6 @@ import { repositoriesAtWork, type RepositoryAtWork } from "../domain/rail";
 import type { Keys } from "../keys/commands";
 import { Rail } from "./Rail";
 import { TheBar } from "./TheBar";
-import { goTo as walkTo } from "./going";
 import { useWaiting } from "./useWaiting";
 import { useKeyboard } from "./useKeyboard";
 import { useKeys } from "./useKeys";
@@ -162,24 +161,10 @@ export const WorkingSetScreen = ({
   const board = useKeyboard(keys);
   const goTo = onDestination ?? (() => undefined);
 
-  /*
-   * `g d`, `g r` and `g f` are how a reader leaves a Destination, and must work on all three,
-   * with the left column shown or put away; `g i` and `g n` reach the rail's other two pages.
-   * Not animated: a chord pressed fifty times a day that waits for a page to slide reads as
-   * slower than the page it replaced.
-   */
+  /* The Destinations' chords are the rail's, which answers them on every screen. */
   useKeys(
     board,
-    home
-      ? {
-          workingSet: () => goTo("working-set"),
-          repositories: () => goTo("repositories"),
-          activity: () => goTo("activity"),
-          issues: () => walkTo(window, "/issues"),
-          notifications: () => walkTo(window, "/notifications"),
-          ...(onColumn === undefined ? {} : { toggleDetails: onColumn }),
-        }
-      : {},
+    home && onColumn !== undefined ? { toggleDetails: onColumn } : {},
   );
   const { read, meanwhile } = live;
   const waiting = useWaiting(read.status);

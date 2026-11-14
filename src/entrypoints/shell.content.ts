@@ -33,6 +33,7 @@ import { carryPageStorage } from "@/settings/browserRenaming";
 import {
   addressIn,
   answerPress,
+  oursToAnswer,
   aPlainPress,
   ARRIVING,
   drawingOurOwnRows,
@@ -965,11 +966,12 @@ export default defineContentScript({
           ? page
           : null;
       if (what === null) return null;
-      // No soft region (notifications, a commit): claiming the press cancelled the
-      // click, and a later location.assign was then killed by the duplicate-
-      // navigation guard as "GitHub answering the same owned route". Leave these
-      // to a real document load — the bar forces one where Turbo would soft-nav.
-      if (placeFor(what, address.pathname).soft === undefined) return null;
+      // No soft region (notifications, a commit) on a link of theirs: claiming the
+      // press cancelled the click, and the later location.assign was killed by the
+      // duplicate-navigation guard as "GitHub answering the same owned route". A
+      // link of ours is answered by ours alone, with no assign to kill.
+      if (placeFor(what, address.pathname).soft === undefined && !oursToAnswer(link, window))
+        return null;
       return { link, what, destination: address };
     };
 
