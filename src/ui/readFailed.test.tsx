@@ -150,14 +150,14 @@ describe("what a list shows when GitHub would not answer for it", () => {
     test("names the organisation rather than blaming GitHub", () => {
       render(card({ why: walled }))
 
-      expect(screen.getByText("octo-org wants a single sign-on")).toBeTruthy()
+      expect(screen.getByRole("heading").textContent).toContain("Sign on to octo-org")
       expect(screen.queryByText("Something GitHub sends has changed")).toBeNull()
     })
 
     test("offers their own page for it, coming back where the reader was", () => {
       render(card({ why: walled }))
 
-      const link = screen.getByRole("link", { name: "Sign on to octo-org" })
+      const link = screen.getByRole("link", { name: "Continue to octo-org" })
 
       expect(link.getAttribute("href")).toBe(
         `https://github.com/orgs/octo-org/sso?return_to=${encodeURIComponent(location.href)}`

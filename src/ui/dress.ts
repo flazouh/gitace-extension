@@ -145,6 +145,19 @@ export const INSIDE = "text-ink"
 export const PRESSABLE = `rounded-md ${TINT}`
 
 /**
+ * The one move a card is there for, filled: the accent Send wears, with the ink that reads on it.
+ *
+ * Its own hover, unlike {@link PRESSABLE}: the fill is the same on every surface, so the step
+ * under the pointer is too. `no-underline` because an anchor wears it as often as a button, and
+ * on github.com Primer underlines a link under the pointer.
+ */
+export const PRIMARY =
+  "rounded-md bg-accent-emphasis font-medium text-ink-on-emphasis no-underline hover:no-underline hover:opacity-90"
+
+/** Every other move on that card: the tint, a step deeper under the pointer, never a colour. */
+export const SECONDARY = `${PRESSABLE} text-ink no-underline hover:bg-active hover:text-ink hover:no-underline`
+
+/**
  * The same, wearing nothing until it is pointed at.
  *
  * For a control standing inside something that is already a fill: a card's own inset,

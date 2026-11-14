@@ -14,7 +14,12 @@
  * the setting's side.
  */
 import { pathIn, type Wall } from "../github/signOn"
+import { CARD, PRIMARY, SECONDARY } from "./dress"
 import { SignOnAsk } from "./SignOnAsk"
+import { Switch } from "./Switch"
+
+/** The sentence that names the switch, so the switch is read out by it. */
+const BY_ITSELF = "gitace-sign-on-by-itself"
 
 export type SignOnProps = {
   readonly wall: Wall
@@ -52,14 +57,14 @@ export const SignOn = ({
   const going = pathIn(wall.backTo)
 
   return (
-    <div className="mx-auto max-w-prose p-6">
-      <div className="Box p-4">
+    <main className="flex min-h-screen items-center justify-center bg-canvas p-6">
+      <div className={`${CARD} w-full max-w-md p-5`}>
         <SignOnAsk
           organisation={wall.organisation}
           what={going === "" ? "this page" : going}
           // The one place this card can promise more than the other one: their form
           // is in this document, so the button below really does answer the wall.
-          then="Continuing hands you to their identity provider and brings you back here."
+          then="Continue goes to their identity provider and comes back here."
         >
           {/* Only where it happened, and a reader who never switched this on is
               never told: the sentence would read as an error about a mechanism
@@ -70,36 +75,42 @@ export const SignOn = ({
               business, so "wants to see you" is offered as the usual reason and
               never as a report. */}
           {cameRound ? (
-            <p className="mb-3 text-sm text-ink-muted">
-              {`This was answered for you a moment ago and ${wall.organisation} is asking again, so it is being left to you rather than posted a second time. Usually that means their identity provider wants to see you rather than the session.`}
+            <p className="mb-4 text-sm leading-5 text-ink-muted">
+              {`Signed on for you a moment ago, and ${wall.organisation} asked again, so this one is yours. Usually that means their identity provider wants to see you.`}
             </p>
           ) : null}
         </SignOnAsk>
 
-        <div className="mb-3 flex items-center gap-2">
-          <button type="button" className="btn btn-sm btn-primary" onClick={onContinue}>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" className={`${PRIMARY} px-3 py-1.5 text-sm`} onClick={onContinue}>
             Continue to {wall.organisation}
           </button>
           {/* Their wall was hidden rather than removed, so this is a button that gives
               it back and never a link to the same address. */}
-          <button type="button" className="btn btn-sm" onClick={onStepAside}>
+          <button type="button" className={`${SECONDARY} px-3 py-1.5 text-sm`} onClick={onStepAside}>
             Show GitHub's page
           </button>
         </div>
 
-        <label className="flex items-start gap-2 text-sm text-ink-muted">
-          <input
-            type="checkbox"
-            className="mt-0.5"
-            checked={chosen === "always"}
-            onChange={(event) => onChoose(event.target.checked ? "always" : "ask")}
-          />
-          <span>
-            Do this without asking. Your identity provider still decides: if it wants a
-            password or a second factor, its own screen appears and this cannot skip it.
+        <div className="mt-5 flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <p id={BY_ITSELF} className="text-sm leading-5 text-ink">
+              Sign on by itself next time
+            </p>
+            <p className="text-xs leading-5 text-ink-muted">
+              Your identity provider still decides, and still asks for a password or a second factor when
+              it wants one.
+            </p>
+          </div>
+          <span className="pt-0.5">
+            <Switch
+              on={chosen === "always"}
+              labelledBy={BY_ITSELF}
+              onFlip={(on) => onChoose(on ? "always" : "ask")}
+            />
           </span>
-        </label>
+        </div>
       </div>
-    </div>
+    </main>
   )
 }
