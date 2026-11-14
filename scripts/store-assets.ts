@@ -5,8 +5,11 @@
  *
  * Starts the shots stage (5199) and the site (5173) if they are down, then:
  *
- *   1. photographs each screen the sheet crops, light, at twice its own size, into
- *      `site/public/shots/<view>@2x.png` (gitignored: the sheet's input, not a deliverable);
+ *   1. photographs each shot the sheet asks for (`window.__shots`), light, at the size it names and
+ *      twice its pixels, into `site/public/shots/<view>-<width>x<height>@2x.png` (gitignored: the
+ *      sheet's input, not a deliverable). A shot that names a `focus` has that element scrolled
+ *      to its middle first, and where it then stands goes to `site/public/shots/marks.json`, so
+ *      the sheet rings it where it is;
  *   2. photographs each `[data-asset]` frame of `site/assets.html` at one pixel per pixel:
  *
  *      site/public/store/icon-128.png      128 by 128, transparent
@@ -24,7 +27,6 @@ import { connect, findChrome } from "./chrome"
 const STAGE = "http://localhost:5199"
 const SITE = "http://localhost:5173"
 const PORT = 9334
-const SCREENS = ["home", "pull-request", "pull-request-peek", "commit", "run"]
 const SHOTS = "site/public/shots"
 const STORE = "site/public/store"
 const ELSEWHERE: Record<string, string> = { "social-card": "site/public/og.png" }
@@ -117,31 +119,63 @@ const views = await js<ReadonlyArray<{ name: string; width: number; height: numb
   "window.__views"
 )
 
-/** Whether a view's own `ready` selector is drawn, looking inside shadow roots, as `qa-shots.ts` does. */
-const drawn = (selector: string) =>
-  js<boolean>(`((want) => {
-    const somewhere = (within) => within.querySelector(want) !== null ||
-      [...within.querySelectorAll("*")].some((node) => node.shadowRoot && somewhere(node.shadowRoot))
-    return somewhere(document)
+/**
+ * Where a view's own `ready` selector is drawn, looking inside shadow roots as `qa-shots.ts` does,
+ * or "" while it is not.
+ */
+const FIND = `const find = (within, want) => within.querySelector(want) ??
+  [...within.querySelectorAll("*")].reduce((found, node) => found ?? (node.shadowRoot && find(node.shadowRoot, want)), null)`
+
+const drawnAt = (selector: string) =>
+  js<string>(`((want) => {
+    ${FIND}
+    const at = find(document, want)?.getBoundingClientRect()
+    return at === undefined ? "" : [at.x, at.y, at.width, at.height].map(Math.round).join(",")
   })(${JSON.stringify(selector)})`)
 
+const centre = (selector: string) =>
+  js<boolean>(`((want) => {
+    ${FIND}
+    find(document, want)?.scrollIntoView({ block: "center", behavior: "instant" })
+    return true
+  })(${JSON.stringify(selector)})`)
+
+/** Until the selector is drawn and has stood still for a second: a peek keeps scrolling after it appears. */
 const ready = async (selector: string | undefined): Promise<void> => {
   if (selector === undefined) return
   const deadline = Date.now() + 20_000
-  while (!(await drawn(selector))) {
-    if (Date.now() > deadline) throw new Error(`${selector} never appeared`)
+  let last = ""
+  let still = 0
+  while (still < 4) {
+    if (Date.now() > deadline) throw new Error(`${selector} never stood still`)
     await sleep(250)
+    const now = await drawnAt(selector)
+    still = now !== "" && now === last ? still + 1 : 0
+    last = now
   }
-  await sleep(1200)
+  await sleep(600)
 }
-for (const name of SCREENS) {
-  const view = views.find((one) => one.name === name)
-  if (view === undefined) throw new Error(`the stage has no view named ${name}`)
-  await open(`${STAGE}/?view=${name}&appearance=light`, view.width, view.height, 2)
+await open(`${SITE}/assets.html`, 1600, 1000, 1)
+const shots = await js<
+  ReadonlyArray<{ view: string; width: number; height: number; file: string; focus?: string }>
+>("window.__shots")
+const marks: Record<string, { x: number; y: number; width: number; height: number }> = {}
+for (const shot of shots) {
+  const view = views.find((one) => one.name === shot.view)
+  if (view === undefined) throw new Error(`the stage has no view named ${shot.view}`)
+  const url = `${STAGE}/?view=${shot.view}&appearance=light&width=${shot.width}&height=${shot.height}`
+  await open(url, shot.width, shot.height, 2)
   await ready(view.ready)
-  writeFileSync(`${SHOTS}/${name}@2x.png`, await png())
-  console.log(`  shots/${name}@2x.png`)
+  if (shot.focus !== undefined) {
+    await centre(shot.focus)
+    await ready(shot.focus)
+    const [x = 0, y = 0, width = 0, height = 0] = (await drawnAt(shot.focus)).split(",").map(Number)
+    marks[shot.file] = { x, y, width, height }
+  }
+  writeFileSync(`${SHOTS}/${shot.file}@2x.png`, await png())
+  console.log(`  shots/${shot.file}@2x.png`)
 }
+writeFileSync(`${SHOTS}/marks.json`, JSON.stringify(marks, null, 2))
 
 await open(`${SITE}/assets.html`, 1600, 1000, 1)
 const frames = await js<ReadonlyArray<string>>(
@@ -169,4 +203,4 @@ for (const name of frames) {
 chrome.kill()
 stopSite?.()
 stopStage?.()
-console.log(`\n${SCREENS.length} screen(s) and ${frames.length} asset(s) written`)
+console.log(`\n${shots.length} shot(s) and ${frames.length} asset(s) written`)

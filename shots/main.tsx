@@ -76,8 +76,10 @@ if (view === undefined) {
     </ul>`
 } else {
   document.title = `ace: ${view.name}`
-  stage.style.width = `${view.width}px`
-  stage.style.height = `${view.height}px`
+  // `?width=` and `?height=` draw a view at another size, as the store sheet's narrower windows do.
+  const sized = (name: string, otherwise: number) => Number(new URLSearchParams(window.location.search).get(name) ?? otherwise)
+  stage.style.width = `${sized("width", view.width)}px`
+  stage.style.height = `${sized("height", view.height)}px`
   stage.style.overflow = "hidden"
   stage.dataset.view = view.name
 

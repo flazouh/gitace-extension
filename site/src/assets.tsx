@@ -2,9 +2,10 @@
  * The store's images, one frame each, photographed by `scripts/store-assets.ts` (`bun run assets`).
  *
  * Ace's light look: paper, ink and one word on clay, with one moment of the product in a
- * browser on the right. The screens are the stage's own pictures (`bun run shots`, light),
- * read from `site/public/shots/<view>@2x.png` and cropped here to the part a picture is
- * about, so each one reads at the size the store shows it.
+ * browser on the right. The screens are the stage's own pictures, light, drawn at the size each
+ * window wants so the screen lays itself out whole, as it would in a narrower browser, and read
+ * from `site/public/shots/<view>-<width>x<height>@2x.png`. `window.__shots` tells the script
+ * which to take. A window shows its crop's full width and never leaves its frame.
  */
 import type { ReactNode } from "react"
 import { mount } from "./mount"
@@ -12,8 +13,23 @@ import { AceLockup } from "./AceLockup"
 import { Mark } from "@/ui/Mark"
 import "./store.css"
 
-/** A region of a stage view, in that view's own CSS pixels, and how large it is drawn. */
-type Crop = { readonly view: string; readonly width: number; readonly x: number; readonly y: number; readonly zoom: number }
+/** A stage view drawn at a size of the sheet's choosing, with the element it is about, if one. */
+type Shot = { readonly view: string; readonly width: number; readonly height: number; readonly focus?: string }
+
+/** A region of a shot, in its CSS pixels, from `x` across `width`: the window shows all of that width. */
+type Crop = { readonly shot: Shot; readonly x: number; readonly y: number; readonly width: number }
+
+const fileOf = (shot: Shot) => `${shot.view}-${shot.width}x${shot.height}`
+
+/** Where each shot's focus stood when it was taken, in the shot's pixels, from `scripts/store-assets.ts`. */
+const MARKS: Record<string, { x: number; y: number; width: number; height: number }> = await fetch(
+  "/shots/marks.json"
+)
+  .then((answer) => (answer.ok ? answer.json() : {}))
+  .catch(() => ({}))
+
+/** Where a point of a crop's screen lands in a frame, the window at `left`, `top` showing it `zoom` large. */
+type Place = { readonly left: number; readonly top: number; readonly zoom: number }
 
 const Tile = ({ size, radius }: { readonly size: number; readonly radius: number }) => (
   <div className="tile" style={{ width: size, height: size, borderRadius: radius }}>
@@ -30,12 +46,25 @@ const Lockup = ({ height }: { readonly height: number }) => (
   </div>
 )
 
+/** The browser's toolbar, above the screen. */
+const BAR = 46
+
+type Box = { readonly left: number; readonly top: number; readonly width: number; readonly height: number }
+
+const zoomOf = (at: Box, crop: Crop) => at.width / crop.width
+
+const placeOf = (at: Box, crop: Crop): Place => ({
+  left: at.left - crop.x * zoomOf(at, crop),
+  top: at.top + BAR - crop.y * zoomOf(at, crop),
+  zoom: zoomOf(at, crop)
+})
+
 const Window = ({
   at,
   url,
   crop
 }: {
-  readonly at: { readonly left: number; readonly top: number; readonly width: number; readonly height: number }
+  readonly at: Box
   readonly url: ReactNode
   readonly crop: Crop
 }) => (
@@ -51,11 +80,15 @@ const Window = ({
         <Tile size={20} radius={5} />
       </div>
     </div>
-    <div className="screen" style={{ height: at.height - 46 }}>
+    <div className="screen" style={{ height: at.height - BAR }}>
       <img
-        src={`/shots/${crop.view}@2x.png`}
+        src={`/shots/${fileOf(crop.shot)}@2x.png`}
         alt=""
-        style={{ width: crop.width * crop.zoom, left: -crop.x * crop.zoom, top: -crop.y * crop.zoom }}
+        style={{
+          width: crop.shot.width * zoomOf(at, crop),
+          left: -crop.x * zoomOf(at, crop),
+          top: -crop.y * zoomOf(at, crop)
+        }}
       />
     </div>
   </div>
@@ -74,39 +107,40 @@ type Picture = {
   readonly sub: string
   readonly path: string
   readonly crop: Crop
-  /** Something laid over the window, as a card the screen would show. */
-  readonly over?: ReactNode
+  /** Something laid over the screen, given where the screen's points land. */
+  readonly over?: (place: Place) => ReactNode
 }
 
-/** The keys the commit screen walks with, the defaults of `src/keys/commands.ts`. */
-const KEYS: ReadonlyArray<readonly [string, string]> = [
-  ["s", "Next file"],
-  ["w", "Previous file"],
-  ["x", "Mark it seen"],
-  ["]", "Older commit"],
-  ["t", "Go to a file"]
-]
+const PEEK_SHOT: Shot = { view: "pull-request-peek", width: 1280, height: 800, focus: "[data-gitace-peek]" }
 
-const KeysCard = () => (
-  <div className="keys" style={{ left: 516, top: 440 }}>
-    {KEYS.map(([key, says]) => (
-      <div key={key} className="row">
-        <kbd>{key}</kbd>
-        <span>{says}</span>
-      </div>
-    ))}
-  </div>
-)
-
-/** Where the peek stands in the cropped screen, ringed, and the pointer on the name it came from. */
-const Peeked = () => (
-  <>
-    <div className="ring" style={{ left: 612, top: 418, width: 700, height: 196 }} />
-    <svg className="pointer" style={{ left: 846, top: 412 }} width="26" height="30" viewBox="0 0 26 30" aria-hidden="true">
-      <path d="M3 2v22l6-5.5 4.2 9.3 4-1.8-4.2-9.2H21L3 2Z" fill="#0b0a09" stroke="#fff" strokeWidth="2" strokeLinejoin="round" />
-    </svg>
-  </>
-)
+/** The peek ringed where it stood, and the pointer on the line above it, the name it came from. */
+const Peeked = ({ left, top, zoom }: Place) => {
+  const peek = MARKS[fileOf(PEEK_SHOT)]
+  if (peek === undefined) return null
+  return (
+    <>
+      <div
+        className="ring"
+        style={{
+          left: left + (peek.x - 6) * zoom,
+          top: top + (peek.y - 6) * zoom,
+          width: (peek.width + 12) * zoom,
+          height: (peek.height + 12) * zoom
+        }}
+      />
+      <svg
+        className="pointer"
+        style={{ left: left + (peek.x + 232) * zoom, top: top + (peek.y - 24) * zoom }}
+        width="26"
+        height="30"
+        viewBox="0 0 26 30"
+        aria-hidden="true"
+      >
+        <path d="M3 2v22l6-5.5 4.2 9.3 4-1.8-4.2-9.2H21L3 2Z" fill="#0b0a09" stroke="#fff" strokeWidth="2" strokeLinejoin="round" />
+      </svg>
+    </>
+  )
+}
 
 /** The five screenshots, in the order the listing shows them. */
 const PICTURES: ReadonlyArray<Picture> = [
@@ -119,7 +153,7 @@ const PICTURES: ReadonlyArray<Picture> = [
     ),
     sub: "Across your repositories, sorted by who acts next: you, someone else, or CI.",
     path: "/pulls",
-    crop: { view: "home", width: 1440, x: 304, y: 30, zoom: 1.05 }
+    crop: { shot: { view: "working-set", width: 960, height: 740 }, x: 0, y: 0, width: 960 }
   },
   {
     name: "pull-request",
@@ -130,7 +164,7 @@ const PICTURES: ReadonlyArray<Picture> = [
     ),
     sub: "Failing checks, open threads and the commits since you last looked, beside the diff.",
     path: "/oven-sh/bun/pull/22841",
-    crop: { view: "pull-request", width: 1280, x: 22, y: 30, zoom: 1.12 }
+    crop: { shot: { view: "pull-request", width: 1000, height: 820 }, x: 0, y: 0, width: 1000 }
   },
   {
     name: "pull-request-peek",
@@ -141,8 +175,8 @@ const PICTURES: ReadonlyArray<Picture> = [
     ),
     sub: "Hold ⌘ over a name in a diff. Click to read where it is written, or what uses it.",
     path: "/oven-sh/bun/pull/22841/changes",
-    crop: { view: "pull-request-peek", width: 1280, x: 700, y: 236, zoom: 1.2 },
-    over: <Peeked />
+    crop: { shot: PEEK_SHOT, x: 456, y: 50, width: 822 },
+    over: (place) => <Peeked {...place} />
   },
   {
     name: "commit",
@@ -151,10 +185,9 @@ const PICTURES: ReadonlyArray<Picture> = [
         Every move has <mark>a key</mark>.
       </>
     ),
-    sub: "Next file, previous file, seen. ⌘K reaches any file, name or page.",
+    sub: "Next file, previous file, seen, the next commit. ⌘K reaches any file, name or page.",
     path: "/facebook/react/commit/b1f6d4a",
-    crop: { view: "commit", width: 1280, x: 300, y: 196, zoom: 1.08 },
-    over: <KeysCard />
+    crop: { shot: { view: "commit", width: 900, height: 740 }, x: 0, y: 0, width: 900 }
   },
   {
     name: "run",
@@ -165,7 +198,7 @@ const PICTURES: ReadonlyArray<Picture> = [
     ),
     sub: "A failed run opens on the test that failed, with each warning and where it came from.",
     path: "/oven-sh/bun/actions/runs/18742",
-    crop: { view: "run", width: 1280, x: 26, y: 34, zoom: 1.12 }
+    crop: { shot: { view: "run", width: 900, height: 740 }, x: 0, y: 0, width: 900 }
   }
 ]
 
@@ -190,25 +223,23 @@ const Frame = ({
   </figure>
 )
 
+const SCREENSHOT_WINDOW: Box = { left: 492, top: 80, width: 736, height: 640 }
+
 const Screenshot = ({ picture }: { readonly picture: Picture }) => (
   <Frame name={picture.name} width={1280} height={800}>
     <div style={{ position: "absolute", left: 72, top: 64 }}>
       <Lockup height={24} />
     </div>
-    <div className="words" style={{ left: 72, top: 0, bottom: 0, width: 470, justifyContent: "center", gap: 28 }}>
-      <p className="say" style={{ fontSize: 68 }}>
+    <div className="words" style={{ left: 72, top: 0, bottom: 0, width: 380, justifyContent: "center", gap: 26 }}>
+      <p className="say" style={{ fontSize: 56 }}>
         {picture.say}
       </p>
-      <p className="sub" style={{ fontSize: 22, lineHeight: 1.42, maxWidth: 430 }}>
+      <p className="sub" style={{ fontSize: 20, lineHeight: 1.45, maxWidth: 370 }}>
         {picture.sub}
       </p>
     </div>
-    <Window
-      at={{ left: 590, top: 96, width: 780, height: 780 }}
-      url={<Address path={picture.path} />}
-      crop={picture.crop}
-    />
-    {picture.over}
+    <Window at={SCREENSHOT_WINDOW} url={<Address path={picture.path} />} crop={picture.crop} />
+    {picture.over?.(placeOf(SCREENSHOT_WINDOW, picture.crop))}
   </Frame>
 )
 
@@ -220,29 +251,43 @@ const GROUPS: ReadonlyArray<readonly [string, number]> = [
   ["Settled", 6]
 ]
 
-const HOME_CROP: Crop = { view: "home", width: 1440, x: 304, y: 30, zoom: 1.05 }
+const BANNER_CROP: Crop = { shot: { view: "working-set", width: 960, height: 740 }, x: 0, y: 0, width: 960 }
 
-const Banner = ({ name, width, height }: { readonly name: string; readonly width: number; readonly height: number }) => (
+const Banner = ({
+  name,
+  width,
+  height,
+  window
+}: {
+  readonly name: string
+  readonly width: number
+  readonly height: number
+  readonly window: number
+}) => (
   <Frame name={name} width={width} height={height}>
     <div
       className="words"
-      style={{ left: 80, top: 0, bottom: 0, width: width - 760, justifyContent: "center", gap: 30 }}
+      style={{ left: 72, top: 0, bottom: 0, width: width - window - 160, justifyContent: "center", gap: 28 }}
     >
       <Lockup height={26} />
-      <p className="say" style={{ fontSize: width > 1300 ? 64 : 54 }}>
+      <p className="say" style={{ fontSize: width > 1300 ? 60 : 50 }}>
         GitHub, sorted by <mark>who acts next</mark>.
       </p>
-      <p className="sub" style={{ fontSize: 22, lineHeight: 1.42, maxWidth: 520 }}>
+      <p className="sub" style={{ fontSize: 20, lineHeight: 1.45, maxWidth: width - window - 200 }}>
         Review pull requests, go to any definition, and keep CI in view, on github.com.
       </p>
     </div>
     <Window
-      at={{ left: width - 640, top: 70, width: 700, height: height }}
+      at={{ left: width - window - 56, top: 56, width: window, height: height - 112 }}
       url={<Address path="/pulls" />}
-      crop={HOME_CROP}
+      crop={BANNER_CROP}
     />
   </Frame>
 )
+
+const SHOTS: ReadonlyArray<Shot> = [...PICTURES.map((picture) => picture.crop.shot), BANNER_CROP.shot]
+
+Object.assign(window, { __shots: SHOTS.map((shot) => ({ ...shot, file: fileOf(shot) })) })
 
 mount(
   "sheet",
@@ -271,7 +316,7 @@ mount(
         </div>
       </div>
     </Frame>
-    <Banner name="marquee" width={1400} height={560} />
-    <Banner name="social-card" width={1200} height={630} />
+    <Banner name="marquee" width={1400} height={560} window={720} />
+    <Banner name="social-card" width={1200} height={630} window={600} />
   </div>
 )
