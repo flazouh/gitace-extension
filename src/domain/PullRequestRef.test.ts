@@ -131,6 +131,14 @@ describe("linking back to GitHub", () => {
       expect(opensOnFiles("/microsoft/vscode/pull/327442/changes")).toBe(true)
     })
 
+    test("and a range of its changes, which is where a notification of new commits points", () => {
+      const range = "/microsoft/vscode/pull/327442/changes/35fae48e2bf926f1e35eee9009be914b044012aa..3201dabd3d446b04799d798dd4539407b12194ef"
+      expect(Option.getOrNull(fromPathname(range))).toEqual({ owner: "microsoft", repo: "vscode", number: 327442 })
+      expect(opensOnFiles(range)).toBe(true)
+      expect(opensOnFiles("/microsoft/vscode/pull/327442/files/35fae48")).toBe(true)
+      expect(Option.isNone(fromPathname("/microsoft/vscode/pull/327442/changes/not-a-commit"))).toBe(true)
+    })
+
     test("and the conversation is not the Files tab", () => {
       expect(opensOnFiles("/microsoft/vscode/pull/327442")).toBe(false)
       expect(opensOnFiles("/microsoft/vscode/pull/327442/commits")).toBe(false)

@@ -22,6 +22,13 @@ export const PullRequestRef = Schema.Struct({
 
 export type PullRequestRef = typeof PullRequestRef["Type"]
 
+/*
+ * A range of the changes as well, `/changes/{from}..{to}` or one commit, which is where their
+ * notification of new commits points. The screen draws the whole of the changes rather than the
+ * range; their own page for a range a force-push rewrote is "Commit range not found".
+ */
+const FILES = String.raw`(?:files|changes)(?:\/[0-9a-f]{7,40}(?:\.\.[0-9a-f]{7,40})?)?`
+
 /**
  * The pull request's own page, and the Files tab beside it.
  *
@@ -42,7 +49,7 @@ export type PullRequestRef = typeof PullRequestRef["Type"]
  * interface already draws every file of a pull request inside its own screen; all
  * that address ever needed was to be read.
  */
-const PULL_REQUEST_PATH = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)(?:\/(?:files|changes))?\/?$/
+const PULL_REQUEST_PATH = new RegExp(String.raw`^\/([^/]+)\/([^/]+)\/pull\/(\d+)(?:\/${FILES})?\/?$`)
 
 /**
  * Whether an address is the Files tab rather than the conversation.
@@ -59,7 +66,7 @@ const PULL_REQUEST_PATH = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)(?:\/(?:files|changes
  * reader is actually on.
  */
 export const opensOnFiles = (pathname: string): boolean =>
-  /^\/[^/]+\/[^/]+\/pull\/\d+\/(?:files|changes)\/?$/.test(pathname)
+  new RegExp(String.raw`^\/[^/]+\/[^/]+\/pull\/\d+\/${FILES}\/?$`).test(pathname)
 
 export const fromPathname = (pathname: string): Option.Option<PullRequestRef> => {
   const match = PULL_REQUEST_PATH.exec(pathname)
