@@ -17,6 +17,8 @@
  * title as often as the workflow. Measured against `tests/fixtures/actionsList.html`.
  */
 
+import { UndefinedOr } from "effect"
+import type { CheckState } from "../domain/PullRequest"
 import type { Listed, Strand, Workflow } from "../domain/strand"
 import { refIn } from "../domain/strand"
 import { secondsIn, stateOf, text } from "./outcome"
@@ -125,6 +127,112 @@ const rowIn = (
 }
 
 /**
+ * Their list as the React page carries it, in the JSON it renders from.
+ *
+ * Their list is React as of 2026-11-14: no `.Box-row`, and no label saying
+ * "Run 9857 of ci." on any link. The rows come out of `react-app.embeddedData` instead, which
+ * names each run's own file, so no Workflow has to be matched up by its `name:`. Measured
+ * against `tests/fixtures/actionsReact.html`.
+ */
+type PayloadRun = {
+  readonly id?: string
+  readonly runNumber?: number
+  readonly runUrl?: string
+  readonly workflowName?: string
+  readonly workflowFilePath?: string
+  readonly title?: string
+  readonly state?: { readonly status?: string; readonly conclusion?: string }
+  readonly createdAt?: { readonly timestamp?: string }
+  readonly branch?: { readonly name?: string; readonly title?: string }
+  readonly timing?: { readonly text?: string }
+  readonly actions?: { readonly pullRequestUrl?: string }
+  readonly description?: {
+    readonly primaryText?: string
+    readonly linkText?: string
+    readonly linkUrl?: string
+    readonly action?: string
+    readonly actorName?: string
+  }
+}
+
+type Payload = {
+  readonly payload?: {
+    readonly allWorkflowRunsRoute?: { readonly workflowRuns?: ReadonlyArray<PayloadRun> }
+    readonly workflowsLayoutRoute?: {
+      readonly workflows?: ReadonlyArray<{ readonly name?: string; readonly path?: string }>
+    }
+  }
+}
+
+const read = UndefinedOr.liftThrowable((held: string): Payload => JSON.parse(held) as Payload)
+
+const payloadIn = (page: Document): Payload | undefined => {
+  const held = page.querySelector("script[data-target='react-app.embeddedData']")?.textContent
+  return held === undefined || held === null ? undefined : read(held)
+}
+
+const PULL_IN = /\/pull\/(\d+)/
+
+const fileOf = (path: string | undefined): string => path?.split("/").pop() ?? ""
+
+/* Their status while it runs and their conclusion once it ran, in the seven outcomes. */
+const STATES_NOW: ReadonlyArray<readonly [string, CheckState]> = [
+  ["SUCCESS", "succeeded"],
+  ["FAILURE", "failed"],
+  ["TIMED_OUT", "failed"],
+  ["STARTUP_FAILURE", "failed"],
+  ["CANCELLED", "cancelled"],
+  ["SKIPPED", "skipped"],
+  ["ACTION_REQUIRED", "queued"],
+  ["IN_PROGRESS", "running"],
+  ["QUEUED", "queued"],
+  ["WAITING", "queued"],
+  ["PENDING", "queued"],
+  ["REQUESTED", "queued"]
+]
+
+const stateNow = (state: PayloadRun["state"]): CheckState => {
+  const said = state?.status === "WORKFLOW_RUN_STATUS_COMPLETED" ? state.conclusion : state?.status
+  return STATES_NOW.find(([name]) => said?.endsWith(`_${name}`) === true)?.[1] ?? "neutral"
+}
+
+const payloadRun = (one: PayloadRun): ReadonlyArray<Listed> => {
+  const run = one.id ?? ""
+  const workflow = one.workflowName ?? ""
+  if (run === "" || workflow === "" || one.runNumber === undefined) return []
+
+  const said = one.description
+  const pull = PULL_IN.exec(one.actions?.pullRequestUrl ?? said?.linkUrl ?? "")?.[1] ?? null
+  const named = refIn(one.branch?.name ?? "")
+  const ref = named.kind === "pull" ? named : refIn(one.branch?.title ?? "")
+  if (ref.kind === "branch" && ref.name === "" && pull === null) return []
+
+  /* Their own words, as on the old page: "synchronize" for a pull request, "Commit f6fbaf0 pushed" otherwise. */
+  const trigger =
+    pull !== null && said?.linkUrl?.includes("/pull/") === true
+      ? (said.action ?? "")
+      : [said?.primaryText, said?.linkText, said?.action].filter((word) => word !== undefined).join(" ")
+
+  return [
+    {
+      run,
+      url: one.runUrl === undefined ? "" : new URL(one.runUrl, "https://github.com").pathname,
+      workflow,
+      file: fileOf(one.workflowFilePath) || null,
+      number: String(one.runNumber),
+      title: one.title ?? "",
+      state: stateNow(one.state),
+      seconds: secondsIn(one.timing?.text ?? ""),
+      startedAt: one.createdAt?.timestamp ?? "",
+      actor: said?.actorName ?? "",
+      trigger,
+      ref: ref.kind === "branch" && ref.name === "" ? null : ref,
+      pullRequest: pull
+    }
+  ]
+}
+
+/**
  * Every Run their list page carries, in the order they gave them.
  *
  * The order is theirs, which is newest first, and it is kept: grouping reads it to date each
@@ -132,6 +240,8 @@ const rowIn = (
  */
 export const runsOnPage = (html: string): ReadonlyArray<Listed> => {
   const page = parse(html)
+  const runs = payloadIn(page)?.payload?.allWorkflowRunsRoute?.workflowRuns
+  if (runs !== undefined) return runs.flatMap(payloadRun)
   const files = filesIn(workflowsIn(page))
   return [...page.querySelectorAll(".Box-row")].flatMap((row) => rowIn(row, files))
 }
@@ -150,7 +260,15 @@ export const runsOnPage = (html: string): ReadonlyArray<Listed> => {
  * `/actions/workflows_partial`. Not followed. A Run of a Workflow that far down the list comes
  * back with no file and is named by its `name:`, which is what a reader sees anyway.
  */
-export const workflowsOnPage = (html: string): ReadonlyArray<Workflow> => workflowsIn(parse(html))
+export const workflowsOnPage = (html: string): ReadonlyArray<Workflow> => {
+  const page = parse(html)
+  const listed = payloadIn(page)?.payload?.workflowsLayoutRoute?.workflows
+  if (listed === undefined) return workflowsIn(page)
+  return listed.flatMap(({ name = "", path }) => {
+    const file = fileOf(path)
+    return name === "" || file === "" ? [] : [{ name, file }]
+  })
+}
 
 /**
  * Whether what came back out of the store is still the shape that went in.
