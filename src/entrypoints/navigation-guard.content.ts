@@ -2,6 +2,7 @@ import {
   guardDuplicateNavigation,
   guardOwnedRoute,
   guardPreparedTraversal,
+  isTraversalOntoOurs,
   OWNED_ROUTE,
   suppressNextEvent
 } from "@/app/navigationGuard"
@@ -36,6 +37,7 @@ export default defineContentScript({
         suppressNextPopstate()
         return
       }
+      if (isTraversalOntoOurs(event)) suppressNextPopstate()
       if (protectedRoute === null) return
       if (performance.now() > protectedRoute.until) {
         protectedRoute = null
