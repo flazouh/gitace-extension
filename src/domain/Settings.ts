@@ -202,8 +202,7 @@ export const THEME_KNOBS = [
     [
       { value: "match", label: "Match the page" },
       { value: "github", label: "GitHub" },
-      // "GitAce" alone: the full name pushes these three choices onto two rows.
-      { value: "gitace", label: "GitAce" }
+      { value: "gitace", label: "Ace" }
     ],
     "match"
   )

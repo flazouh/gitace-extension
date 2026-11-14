@@ -66,7 +66,7 @@ describe("the persistent global Ace rail", () => {
       />
     )
 
-    const leave = within(rail()).getByRole("button", { name: "Leave GitAce Extension" })
+    const leave = within(rail()).getByRole("button", { name: "Leave Ace" })
     await person.click(leave)
     expect(steppedAside).toBe(1)
   })
@@ -341,7 +341,7 @@ describe("the way into the settings", () => {
       />
     )
 
-    await person.click(within(rail()).getByRole("button", { name: "GitAce settings" }))
+    await person.click(within(rail()).getByRole("button", { name: "Ace settings" }))
     expect(opened).toBe(1)
   })
 })

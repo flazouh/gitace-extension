@@ -274,11 +274,11 @@ export const GlobalRail = ({
         {settings === undefined
           ? null
           : settings((open, isOpen) => (
-              <RailTip name="GitAce settings">
+              <RailTip name="Ace settings">
                 <button
                   type="button"
                   onClick={open}
-                  aria-label="GitAce settings"
+                  aria-label="Ace settings"
                   aria-expanded={isOpen}
                   className="d-nv"
                 >
@@ -321,7 +321,7 @@ export const GlobalRail = ({
             <button
               type="button"
               onClick={onStepAside}
-              aria-label="Leave GitAce Extension"
+              aria-label="Leave Ace"
               className="d-nv"
             >
               <GitHub size={16} />

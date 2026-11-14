@@ -1,0 +1,312 @@
+/**
+ * The store's images, in Ace's light palette: useace.dev's paper, ink and clay.
+ *
+ * Every frame is a picture at the exact size the store asks for, so nothing here
+ * reflows: sizes are in pixels and the frames clip.
+ */
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 200 500;
+  src: url(/fonts/archivo-latin.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Archivo Narrow";
+  font-style: normal;
+  font-weight: 400 500;
+  src: url(/fonts/archivo-narrow-latin.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  src: url(/fonts/geist-mono-latin.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: Geist;
+  font-style: normal;
+  font-weight: 400 600;
+  src: url(/fonts/geist-latin.woff2) format("woff2");
+}
+
+:root {
+  --paper: #ecebe7;
+  --paper-2: #e2e0db;
+  --ink: #0b0a09;
+  --ink-2: #4c4843;
+  --ink-3: #66615a;
+  --clay: #d2774f;
+  --clay-fill: #b95a2f;
+  --clay-top: #e19872;
+  --clay-bottom: #c97b54;
+}
+
+body {
+  margin: 0;
+  background: #d9d7d1;
+  font-family: Geist, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sheet {
+  padding: 48px;
+}
+
+.sheet figcaption {
+  padding: 0 0 8px;
+  color: var(--ink-3);
+  font: 500 12px/1 "Archivo Narrow", sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sheet figure {
+  margin: 0 0 48px;
+}
+
+/* One store picture. */
+.card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* The clay light the page sits in, and the grain over it, as on useace.dev. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(60% 75% at 88% 18%, #e8c3ad 0%, transparent 70%),
+    radial-gradient(55% 60% at 70% 100%, #dfd6cc 0%, transparent 75%);
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url(/images/noise.png);
+  opacity: 0.1;
+  mix-blend-mode: multiply;
+}
+
+.words {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+}
+
+.lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink);
+}
+
+.lockup .for {
+  color: var(--ink-3);
+  font: 500 15px/1 "Archivo Narrow", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+
+.say {
+  margin: 0;
+  font-family: Archivo, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+  color: var(--ink);
+}
+
+/* The one word a picture is about, on clay. */
+.say mark {
+  display: inline-block;
+  padding: 0 0.12em 0.04em;
+  margin: 0 -0.02em;
+  border-radius: 0.14em;
+  background: var(--clay-fill);
+  color: #fff;
+  line-height: 1.02;
+}
+
+.sub {
+  margin: 0;
+  color: var(--ink-2);
+  font-family: Geist, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* The browser the screen sits in. */
+.window {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(11, 10, 9, 0.1),
+    0 2px 4px rgba(11, 10, 9, 0.05),
+    0 30px 70px -20px rgba(70, 40, 20, 0.35);
+}
+
+.window .top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 46px;
+  padding: 0 14px 0 16px;
+  background: #f4f3f0;
+  border-bottom: 1px solid rgba(11, 10, 9, 0.08);
+}
+
+.window .dots {
+  display: flex;
+  gap: 7px;
+}
+
+.window .dots i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #d6d3cd;
+}
+
+.window .url {
+  flex: 1;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(11, 10, 9, 0.08);
+  color: var(--ink-2);
+  font: 400 13px/1 Geist, sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.window .url b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* The extension's own button in the toolbar, ringed, as the example's is. */
+.window .ours {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px var(--clay);
+}
+
+.window .screen {
+  position: relative;
+  overflow: hidden;
+}
+
+.window .screen img {
+  position: absolute;
+  transform-origin: 0 0;
+}
+
+.tile {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(var(--clay-top), var(--clay-bottom));
+  color: #fff;
+}
+
+/* A card the screen would float, drawn larger so it reads in the listing. */
+.keys {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 250px;
+  padding: 10px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(11, 10, 9, 0.1),
+    0 24px 50px -16px rgba(70, 40, 20, 0.4);
+}
+
+.keys .row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  color: var(--ink);
+  font: 400 18px/1 Geist, sans-serif;
+}
+
+.keys .row:first-child {
+  background: #f6e7de;
+}
+
+.keys kbd {
+  min-width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--paper);
+  box-shadow: inset 0 -2px 0 rgba(11, 10, 9, 0.12), 0 0 0 1px rgba(11, 10, 9, 0.1);
+  font: 500 16px/1 "Geist Mono", ui-monospace, monospace;
+}
+
+.ring {
+  position: absolute;
+  z-index: 2;
+  border-radius: 10px;
+  box-shadow: 0 0 0 3px var(--clay), 0 0 0 9px rgba(210, 119, 79, 0.18);
+}
+
+.pointer {
+  position: absolute;
+  z-index: 2;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+}
+
+.groups {
+  display: flex;
+  gap: 6px;
+}
+
+.groups span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(11, 10, 9, 0.08);
+  color: var(--ink-2);
+  font: 500 12.5px/1 Geist, sans-serif;
+}
+
+.groups span:first-child {
+  color: var(--clay-fill);
+}
+
+.groups b {
+  color: var(--ink);
+  font: 500 12px/1 "Geist Mono", monospace;
+}

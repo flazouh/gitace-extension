@@ -190,7 +190,8 @@ describe("no recycled marketing shots", () => {
     }
     // Public asset URLs only — fixture imports from repo `shots/` (Supplied/views) are fine.
     const publicShot = /["'`]\/shots\/|src=\{\`\/shots\//
-    for (const file of walk(root)) {
+    // Except the store sheet, whose shots `bun run assets` writes in the same run that photographs it.
+    for (const file of walk(root).filter((path) => !path.endsWith("assets.tsx"))) {
       const text = readFileSync(file, "utf8")
       expect(publicShot.test(text), file).toBe(false)
     }

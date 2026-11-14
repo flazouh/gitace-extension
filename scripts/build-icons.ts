@@ -12,10 +12,9 @@
  * (`brew install librsvg`): rendering each size from the vector keeps the ring crisp at
  * 16, which reducing the 128 would not.
  *
- * Ace's mark in white on a rounded square of the brand's one purple, at every size. Chrome
- * shows this image on a light toolbar and a dark one; a light or an ink square vanishes on
- * one of them, and the purple reads on both. The mark is Ace's own, unchanged: the colour
- * is what tells GitAce Extension from Ace.
+ * Ace's mark in white on Ace's own clay tile, at every size: this is Ace in the browser, so
+ * it carries the app's icon. Chrome shows it on a light toolbar and a dark one, and clay reads
+ * on both.
  *
  * The mark below is the same as `src/ui/Mark.tsx`, which is where the
  * mark is defined for the landing page and for the store's own images. Two copies of it,
@@ -27,15 +26,19 @@ import { execFileSync } from "node:child_process"
 import { mkdirSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-/** `MARK` in `site/src/brand.ts`. */
-const MARK = "#8b5cf6"
+/** `clay-top` and `clay-bottom` of Ace's design tokens: the gradient of the app's icon. */
+const CLAY_TOP = "#e19872"
+const CLAY_BOTTOM = "#c97b54"
 
 /** Ace's mark (`crates/ui/assets/ace-mark.svg` in flazouh/ace), 120 x 82. */
 const ACE = "M43.7 81.4H0L85.7 0H120v81.4H76.9L61.6 64.7 43.7 81.4Zm29.2-32.2h24.4V24.6L72.9 49.2Z"
 
 /** The mark on its tile: a 128 square with Ace's corner radius, the mark centred in the middle 60%. */
 const mark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="28" fill="${MARK}" />
+  <defs><linearGradient id="clay" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${CLAY_TOP}" /><stop offset="1" stop-color="${CLAY_BOTTOM}" />
+  </linearGradient></defs>
+  <rect width="128" height="128" rx="28" fill="url(#clay)" />
   <g transform="translate(25.6 37.3) scale(0.64)"><path fill="#fff" d="${ACE}" /></g>
 </svg>
 `

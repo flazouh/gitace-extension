@@ -26,7 +26,7 @@
     "qa": "bun scripts/qa-shots.ts",
     "shots:dev": "vite --config shots/vite.config.ts",
     "shots": "sed \"s|__REPO__|$PWD|\" shots/capture.js | ego-browser nodejs",
-    "assets": "sed \"s|__REPO__|$PWD|\" shots/store-assets.js | ego-browser nodejs",
+    "assets": "bun scripts/store-assets.ts",
     "copy": "ego-browser nodejs < site/copy.js",
     "bench": "bun scripts/benchmark-pull-request.ts",
     "drift": "bun scripts/check-drift.ts",

@@ -59,7 +59,7 @@ export const BEATS: ReadonlyArray<Beat> = [
    * leaves the list exactly where it is and only the words change.
    */
   {
-    title: "Welcome to GitAce Extension.",
+    title: "Welcome to Ace.",
     says: ["A faster, quieter GitHub."],
     picture: "working-set"
   },

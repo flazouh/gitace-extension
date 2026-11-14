@@ -131,7 +131,7 @@ const ROWS: ReadonlyArray<Row> = [
   },
   {
     owner: "rmeadows",
-    repo: "gitace-extension",
+    repo: "ace-extension",
     number: 412,
     title: "Serve the Working Set from the store before GitHub answers",
     author: VIEWER,
@@ -147,7 +147,7 @@ const ROWS: ReadonlyArray<Row> = [
   },
   {
     owner: "rmeadows",
-    repo: "gitace-extension",
+    repo: "ace-extension",
     number: 414,
     title: "Draw the Verdict box where the review is submitted",
     author: VIEWER,
@@ -194,7 +194,7 @@ const ROWS: ReadonlyArray<Row> = [
   },
   {
     owner: "rmeadows",
-    repo: "gitace-extension",
+    repo: "ace-extension",
     number: 409,
     title: "Publish releases through the Chrome Web Store",
     author: VIEWER,
@@ -223,7 +223,7 @@ const ROWS: ReadonlyArray<Row> = [
   },
   {
     owner: "rmeadows",
-    repo: "gitace-extension",
+    repo: "ace-extension",
     number: 405,
     title: "Keep what was written and not yet sent",
     author: VIEWER,
@@ -458,7 +458,7 @@ const involvedFrom = (row: Row, at: number): InvolvedPullRequest => ({
 const involved = ROWS.map(involvedFrom)
 
 /**
- * The branches, which is what makes the two `gitace` rows one pile.
+ * The branches, which is what makes the two `ace-extension` rows one pile.
  *
  * 414 stands on 409's branch, so the list folds them into a stack rather than
  * drawing two rows that look independent. Stacks are hard to explain in a sentence

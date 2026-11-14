@@ -1,104 +1,33 @@
 <div align="center">
 
-![GitAce Extension](site/public/store/marquee.png)
+![Ace for GitHub](site/public/store/marquee.png)
 
-**A faster, quieter GitHub.**
+**GitHub, sorted by who acts next.**
 
-[Install for Chrome](https://chromewebstore.google.com/detail/gitace-extension/ichobjnihnofjkpoegikjhefmoekaahe) · [gitace.dev](https://gitace.dev) · [Licence](#licence)
+[Install for Chrome](https://chromewebstore.google.com/detail/ichobjnihnofjkpoegikjhefmoekaahe) · [Install for Firefox](https://addons.mozilla.org/firefox/addon/gitquiet/) · [useace.dev](https://useace.dev) · [Licence](#licence)
 
 </div>
 
 ---
 
-GitHub splits a pull request by record type: Conversation, Commits, Checks, Files.
-None of those four tabs answers the question you opened it with, so you read all
-of them and work it out again on the next visit.
+Ace for GitHub is Ace in your browser. It opens on github.com's own addresses and files
+every pull request, issue and check by what needs you: **Needs You**, **Waiting**,
+**Running** and **Settled**. Every review, comment and merge still goes through GitHub.
 
-GitAce Extension is its own interface on that data, and it files everything by what needs
-you. It opens on github.com's own addresses, in Primer tokens and Octicons, so it
-follows whichever theme you already use. Their header, nav and repository tabs
-are left exactly as they are.
+![Every pull request that needs you](site/public/store/working-set.png)
 
-## Four groups
+![One pull request, one screen](site/public/store/pull-request.png)
 
-Every list uses the same four, and the words are the product's own vocabulary
-rather than a description of it.
+![Go to any definition](site/public/store/pull-request-peek.png)
 
-| Group | Means |
-| --- | --- |
-| **Needs You** | You can act on it now. |
-| **Waiting** | Someone else has to act. |
-| **Running** | A machine is still working. Nothing to do but wait. |
-| **Settled** | Finished. Nothing left to do. |
+![Every move has a key](site/public/store/commit.png)
 
-## What it looks like
-
-Every pull request you are in, across repositories, in one list.
-
-![The working set](site/public/store/working-set.png)
-
-One pull request: unresolved threads, failing checks and the commits pushed since
-you last looked, all above the diff.
-
-![A pull request](site/public/store/pull-request.png)
-
-<details>
-<summary>The rest of the screens</summary>
-
-| | |
-| --- | --- |
-| ![Issues](site/public/store/issues.png) | ![Actions](site/public/store/actions.png) |
-| ![A repository](site/public/store/repo-home.png) | ![Commits](site/public/store/commits.png) |
-| ![One issue](site/public/store/issue.png) | ![One run](site/public/store/run.png) |
-| ![A repository's pull requests](site/public/store/repo-pulls.png) | ![A repository's issues](site/public/store/repo-issues.png) |
-| ![One commit](site/public/store/commit.png) | ![Raising an issue](site/public/store/raise.png) |
-
-</details>
-
-## The pages
-
-Listed in [`src/ui/place.ts`](./src/ui/place.ts), which is the one list both the
-router and the takeover read.
-
-| | |
-| --- | --- |
-| `/` and `/dashboard` | the home dashboard |
-| `/pulls` | your pull requests |
-| `/issues` | your issues |
-| `/owner/repo` | a repository's front page |
-| `/owner/repo/pulls` | its pull requests |
-| `/owner/repo/issues` | its issues |
-| `/owner/repo/issues/new` | raising one |
-| `/owner/repo/issues/N` | one issue |
-| `/owner/repo/pull/N` | one pull request |
-| `/owner/repo/commits/BRANCH` | a branch's commits |
-| `/owner/repo/commit/SHA` | one commit |
-| `/owner/repo/blame/BRANCH/PATH` | who wrote each line |
-| `/owner/repo/actions` | workflow runs |
-| `/owner/repo/actions/runs/ID` | one run |
-| `/owner/repo/discussions` | its discussions |
-| `/owner/repo/discussions/categories/SLUG` | one category of them |
-| `/owner/repo/discussions/N` | one discussion |
-| `/orgs/ORG/discussions` | an organisation's discussions |
-| `/orgs/ORG/discussions/N` | one of them |
-| `/notifications` | your inbox |
+![Checks that say why](site/public/store/run.png)
 
 ## Keyboard
 
-Three profiles, in [`src/keys/commands.ts`](./src/keys/commands.ts): `standard`,
-`vim`, and `off` for anyone who wants GitHub's own shortcuts back untouched. A
-profile changes which keys reach a command, never what the command does. Every
-key can be changed under Settings, Keyboard.
-
-The standard profile stays under the left hand, because the right one is on the
-pointer for the whole of a review. The vim profile keeps `j` and `k`.
-
-Holding Command — Control off a Mac — underlines the name under the pointer where
-this can say where it is written. Click a use of it and you go there; click the
-place it is written and you get everywhere in the repository that means it, each
-marked by how sure the answer is. Shift with the click opens it under the line
-instead, without leaving the file. See
-[`docs/spec/following.md`](./docs/spec/following.md).
+Three profiles, in [`src/keys/commands.ts`](./src/keys/commands.ts): `standard`, `vim`, and
+`off` to leave GitHub's own shortcuts alone. Every key can be changed under Settings, Keyboard.
 
 | Key | Does |
 | --- | --- |
@@ -106,155 +35,50 @@ instead, without leaving the file. See
 | `o` `u` | the names in this file, and the uses of the one under the pointer |
 | `s` `w` | next and previous file |
 | `x` | mark the file read |
-| `A` | open the row in a tab of its own |
-| `f` | search, and `/` beside it |
-| `Escape` | dismiss |
+| `]` `[` | older and newer commit |
+| `f` `/` | search |
 | `g d` `g r` `g f` `g g` | working set, repositories, activity, home |
 
-## Addresses
-
-The file being read is in the address, and the lines marked out in it when
-there are any: `#src/ui/Files.tsx` and `#src/ui/Files.tsx:R42-48`, with `R` and
-`L` for the two halves of a diff. Copy it, send it, open it in another tab, and
-the same file opens at the same lines. The entry is replaced rather than pushed,
-so Back is still the way out of the page rather than a way of undoing a review
-one file at a time.
-
-## Merging
-
-The button that lands a pull request opens on the repository's own default and
-keeps the other ways GitHub allows behind a caret, the way GitHub's own merge
-box does. Update branch works the same: a merge commit or a rebase, whichever
-GitHub says is allowed. Both only offer what GitHub answered with, so a way a
-repository does not permit is never on the menu.
+Hold Command (Control off a Mac) over a name in a diff or a file: click a use to go to where it
+is written, or click where it is written to see everything that uses it. See
+[`docs/spec/following.md`](./docs/spec/following.md).
 
 ## Privacy
 
-There is no account and no server of ours. GitAce Extension uses the GitHub session you
-already have, and your code and reviews stay in your browser. Every review,
-comment and merge goes back through GitHub, so a colleague who has never
-installed it sees your work exactly as usual.
-
-There is no error reporting service. A failure this extension carries on through
-goes to the browser's own console and nowhere else. See
-[`src/observability/report.ts`](./src/observability/report.ts).
-
-## How it is built
-
-| Concern | Choice |
-| --- | --- |
-| Toolchain | Bun for install, scripts and tests |
-| Extension | WXT, Chrome MV3 |
-| UI | React 19 and Tailwind 4 over GitHub's Primer tokens and Octicons |
-| Domain and data | Effect v4: typed errors, Layers, Schema, Schedule |
-| Local store | `storage.local`, reachable from the content script and the worker |
-| Tests | `bun test`, `effect/testing`, Testing Library, happy-dom |
-
-The domain, the ports and the screens do not know what they are running inside.
-A screen reads ports, and what is behind a port is decided at the edge.
-
-Effect v4 differs from v3 in ways worth knowing before writing code: `Either` is
-`Result`, `Effect.catchAll` and `Effect.orElse` are gone in favour of
-`Effect.catch`, and `@effect/vitest` is v3 only. Test clocks and property testing
-come from `effect/testing`.
+No account and no server of ours. The extension uses the GitHub session you already have, and
+your code and reviews stay in your browser. No analytics and no error reporting: a failure goes
+to the browser's console and nowhere else.
 
 ## Build it yourself
 
 ```sh
 bun install          # also clones the Effect source and generates WXT types
-bun run compile      # typecheck
-bun test             # unit and behaviour tests
+bun run gates        # oxlint, tsc --noEmit, then the whole suite
 bun run dev          # load the extension in a dev browser
 bun run build        # production build into .output/chrome-mv3
-bun run qa           # photograph every screen into .output/qa, no GitHub needed
-bun run drift        # re-check GitHub's live payloads against our schemas
 ```
 
-`bun run qa` renders the screens on the shots stage with recorded payloads and
-photographs them with whatever Chrome `CHROME_PATH` names, headless — so a
-change can be looked at from a container with no display and no route to
-github.com. `--view working-set` narrows it to one screen.
+To load it by hand: `bun run build`, open `chrome://extensions`, enable Developer mode, choose
+Load unpacked and select `.output/chrome-mv3`.
 
-To load it by hand: `bun run build`, then open `chrome://extensions`, enable
-Developer mode, choose Load unpacked, and select `.output/chrome-mv3`. Open any
-pull request.
-
-For Firefox, `RELEASE_VERSION=0.2.1 bun run zip:firefox` writes
-`.output/gitace-extension-0.2.1-firefox.zip` and the sources archive beside it. Without
-`RELEASE_VERSION` the build carries version `0.0.0`, which is what a local build
-wants and what a store rejects.
-
-### Building from the source archive
-
-Mozilla asks a reviewer to rebuild the extension from the sources zip attached
-to a version. That archive is not a clone: there is no git repository in it, and
-`bun install` runs a prepare hook that installs git hooks and clones the Effect
-source, neither of which a reviewer needs.
+From the Firefox sources archive, which has no git repository in it:
 
 ```sh
 bun install --ignore-scripts   # the prepare hook needs a git repository
 bun run types                  # writes .wxt/tsconfig.json, which the build reads
-bun run build
 RELEASE_VERSION=0.2.1 bun run zip:firefox
 ```
 
-`.output/gitace-extension-0.2.1-firefox.zip` comes back out, the same 2.71 MB as the
-uploaded one.
+`bun run assets` rewrites the store images from the shots stage and `site/assets.html`.
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) has the gates and the words, [`CONTEXT.md`](./CONTEXT.md)
+the glossary, and [`docs/spec/`](./docs/spec) what each screen is for.
 
-`bun run drift` needs a session cookie and is not part of CI; see
-[`fixtures/README.md`](./fixtures/README.md). `bun install` clones the Effect
-source to `.repos/effect` so its API can be read rather than guessed. It is
-gitignored.
-
-## Where to start reading
-
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md) — the gates, the words, and what a change looks like.
-- [`CONTEXT.md`](./CONTEXT.md) — the glossary. The code uses these terms exactly.
-- [`docs/spec/`](./docs/spec) — what each screen is for.
-- [`src/ui/place.ts`](./src/ui/place.ts) — how a page is taken over.
-- [`site/`](./site) — the landing page.
-
-## Release
-
-Publish a GitHub release with a version tag:
-
-```sh
-gh release create v0.1.0 --generate-notes
-```
-
-The workflow checks the tag, builds the extension, attaches the ZIP to the
-release, and submits it for Chrome Web Store review. Chrome updates installed
-copies once Google publishes it.
-
-Submitting needs `CHROME_EXTENSION_ID`, `CHROME_PUBLISHER_ID`,
-`CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL` and `CHROME_SERVICE_ACCOUNT_PRIVATE_KEY`
-as repository secrets. `bunx wxt submit init` walks through the Google Cloud
-setup. Do not commit the `.env.submit` it writes.
-
-## Contributing
-
-Three gates decide whether a change can land, and `bun install` writes the git
-hooks that run them before a push rather than after it:
-
-```sh
-bun run gates   # oxlint over src, then tsc --noEmit, then the whole suite
-```
-
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) says what the linter enforces and why,
-and what a commit message here looks like. Open an issue first for anything that
-changes a screen.
-
-Found a security problem? Do not open an issue. See
-[`SECURITY.md`](./SECURITY.md).
+Found a security problem? Do not open an issue; see [`SECURITY.md`](./SECURITY.md).
 
 ## Licence
 
-[GNU AGPL v3 or later](./LICENSE). Run it, read it, change it, share it. If you
-run a modified version as a network service, its users are entitled to its
-source.
+[GNU AGPL v3 or later](./LICENSE). The licence covers the code and not the name or the logo; a
+fork is welcome and needs its own name. See [NOTICE](./NOTICE).
 
-The licence covers the code and not the name or the logo. A fork is welcome and
-needs its own name. See [NOTICE](./NOTICE).
-
-GitHub is a trademark of GitHub, Inc. This project is not affiliated with,
-endorsed by, or sponsored by GitHub.
+GitHub is a trademark of GitHub, Inc. This project is not affiliated with, endorsed by, or
+sponsored by GitHub.

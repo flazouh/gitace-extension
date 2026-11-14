@@ -604,7 +604,7 @@ describe("what the bar leaves to the rail beside it", () => {
     const bar = screen.getByRole("banner")
     expect(within(bar).queryByRole("link", { name: /Notifications/ })).toBeNull()
     expect(within(bar).queryByRole("button", { name: /your account/ })).toBeNull()
-    expect(within(bar).queryByRole("button", { name: "Leave GitAce Extension" })).toBeNull()
+    expect(within(bar).queryByRole("button", { name: "Leave Ace" })).toBeNull()
   })
 })
 

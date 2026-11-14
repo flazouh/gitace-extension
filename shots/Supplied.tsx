@@ -162,14 +162,24 @@ const nobody = {
  *
  * Defaults alone are `appearance: "system"` and `pack: "match"`. On a light
  * machine that paints light tokens onto the dark floor `main.tsx` set first —
- * white cards on grey, which is what the hand-driven shots looked like. Force
- * dark GitAce Extension so interactive viewing matches store captures.
+ * white cards on grey, which is what the hand-driven shots looked like. So the
+ * stage holds one appearance, `?appearance=light` or dark.
  */
 const STAGE_CHOSEN: Record<string, unknown> = {
   [SETTINGS]: {
     ...DEFAULTS,
     theme: { ...DEFAULTS.theme, appearance: "dark", pack: "gitace", art: "gitace" }
   }
+}
+
+/** The stage's appearance, from `?appearance=light`; dark when the address says nothing. */
+export const STAGE_APPEARANCE: "light" | "dark" =
+  new URLSearchParams(globalThis.location?.search ?? "").get("appearance") === "light" ? "light" : "dark"
+
+/** A view's own settings, held to the stage's appearance whatever the view chose. */
+const inAppearance = (chosen: Record<string, unknown>): Record<string, unknown> => {
+  const settings = { ...STAGE_CHOSEN[SETTINGS] as typeof DEFAULTS, ...(chosen[SETTINGS] as typeof DEFAULTS | undefined) }
+  return { ...chosen, [SETTINGS]: { ...settings, theme: { ...settings.theme, appearance: STAGE_APPEARANCE } } }
 }
 
 export const Supplied = ({
@@ -191,7 +201,7 @@ export const Supplied = ({
   readonly element?: HTMLElement | undefined
   readonly children: ReactNode
 }) => {
-  const store: Store = settingsStore(inMemory({ ...STAGE_CHOSEN, ...chosen }))
+  const store: Store = settingsStore(inMemory(inAppearance(chosen)))
 
   return (
     /*

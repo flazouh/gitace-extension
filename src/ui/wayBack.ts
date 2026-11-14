@@ -58,23 +58,19 @@ const EDGE = 16
 /** How far one arrow key moves it, for a reader who is not using a pointer. */
 const STEP = 24
 
-const LABEL = "Turn the GitAce Extension interface back on"
+const LABEL = "Turn the Ace interface back on"
 
 /**
- * The GitAce Extension mark, drawn here rather than imported.
+ * Ace's mark, drawn here rather than imported.
  *
- * `Mark.tsx` is the one this product draws everywhere else and it is a React component.
- * There is no React on this page — this widget exists precisely because ours is not
- * running — so the geometry is written out a second time. The two are the same circle,
- * the same stem and the same dot, and a change to one is a change that has to be made
- * to both.
+ * `MARK_PATH` in `Mark.tsx` is the same geometry, but that module comes with React, and
+ * there is no React on this page: this widget exists precisely because ours is not
+ * running. A change to one is a change to both.
  */
 const MARK =
-  '<svg width="19" height="19" viewBox="0 0 32 32" fill="none" stroke="currentColor"' +
+  '<svg width="19" height="19" viewBox="0 -19 120 120" fill="currentColor"' +
   ' aria-hidden="true" focusable="false">' +
-  '<circle cx="15.4" cy="12.2" r="7" stroke-width="2.5"/>' +
-  '<path d="M22.4 12.2 V23.4" stroke-width="2.5"/>' +
-  '<circle cx="22.4" cy="25.6" r="2.5" fill="currentColor" stroke="none"/>' +
+  '<path d="M43.7 81.4H0L85.7 0H120v81.4H76.9L61.6 64.7 43.7 81.4Zm29.2-32.2h24.4V24.6L72.9 49.2Z"/>' +
   "</svg>"
 
 /** Six dots, which is what a thing you can pick up and move looks like everywhere else. */
