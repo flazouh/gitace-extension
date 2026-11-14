@@ -12,6 +12,7 @@ import { KNOB_ART } from "./knobArt"
 import { OVER_ID, outsideHost } from "./outside"
 import { FIELD, FLOAT } from "./dress"
 import { Slide } from "./Slide"
+import { Switch } from "./Switch"
 
 /**
  * Where everything this button opens is drawn.
@@ -82,28 +83,13 @@ const Pick = ({ knob, chosen, onPick }: Control) => (
  * knobs those are, so nothing here has to read a label to know which side of
  * the track means what.
  */
-const Switch = ({ knob, chosen, onPick }: Control) => {
-  const on = (chosen ?? knob.fallback) === "on"
-
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={knob.label}
-      onClick={() => onPick(knob.key, on ? "off" : "on")}
-      className={`flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors ${
-        on ? "bg-accent-emphasis" : "bg-line"
-      }`}
-    >
-      <span
-        className={`size-3 rounded-full bg-raised transition-transform ${
-          on ? "translate-x-3" : ""
-        }`}
-      />
-    </button>
-  )
-}
+const OnOff = ({ knob, chosen, onPick }: Control) => (
+  <Switch
+    on={(chosen ?? knob.fallback) === "on"}
+    label={knob.label}
+    onFlip={(on) => onPick(knob.key, on ? "on" : "off")}
+  />
+)
 
 /**
  * A run of sizes as one handle, in the room this panel gives it.
@@ -126,7 +112,7 @@ const Handle = ({ knob, chosen, onPick }: Control) => (
  */
 const CONTROLS: Readonly<Record<AnyKnob["shape"], (control: Control) => ReactNode>> = {
   list: Pick,
-  switch: Switch,
+  switch: OnOff,
   slide: Handle
 }
 

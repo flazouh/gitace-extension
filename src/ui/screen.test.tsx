@@ -816,7 +816,7 @@ describe("a pull request that could not be read", () => {
       failingWith({ reason: "sign-on", reference, detail: "HTTP 401" })
 
       await waitFor(() =>
-        expect(screen.getByRole("heading").textContent).toContain("acme wants a single sign-on")
+        expect(screen.getByRole("heading").textContent).toContain("Sign on to acme")
       )
     })
   })

@@ -17,6 +17,7 @@
 import { Option } from "effect"
 import { signOnPage } from "../github/signOn"
 import { askedToSignOn, couldNotReachGitHub, gitHubIsDown } from "../ports/GitHubGateway"
+import { CARD, PRIMARY, SECONDARY } from "./dress"
 import { SignOnAsk } from "./SignOnAsk"
 
 export type ReadFailedProps = {
@@ -67,21 +68,22 @@ export const ReadFailed = ({
 
   if (Option.isSome(organisation)) {
     return (
-      <div className="Box p-4">
+      <div className={`${CARD} p-4`}>
         <SignOnAsk
           organisation={organisation.value}
-          what={what}
-          then="Nothing is wrong here, and this page reads normally once you have."
+          // Mid-sentence there, where every other card opens with it.
+          what={`${what.slice(0, 1).toLowerCase()}${what.slice(1)}`}
+          then="Nothing is wrong here."
         >
           {/* Their own page for it, rather than the form on it: that one posts with
               a token this cannot have, because this card is not on that page. */}
           <a
-            className="btn btn-sm btn-primary mr-2"
+            className={`${PRIMARY} mr-2 inline-block px-3 py-1.5 text-sm`}
             href={signOnPage(organisation.value, location.href)}
           >
-            Sign on to {organisation.value}
+            Continue to {organisation.value}
           </a>
-          <button type="button" className="btn btn-sm" onClick={onStepAside}>
+          <button type="button" className={`${SECONDARY} px-3 py-1.5 text-sm`} onClick={onStepAside}>
             {asideLabel}
           </button>
         </SignOnAsk>
@@ -96,12 +98,12 @@ export const ReadFailed = ({
   // piece of advice guaranteed to waste their afternoon.
   if (couldNotReachGitHub(why)) {
     return (
-      <div className="Box p-4">
-        <h2 className="mb-1 text-base font-semibold">Nothing reached GitHub</h2>
+      <div className={`${CARD} p-4`}>
+        <h2 className="mb-1 text-base font-semibold text-ink">Nothing reached GitHub</h2>
         <p className="mb-3 max-w-prose text-sm text-ink-muted">
           {`The request for ${what.toLowerCase()} never arrived, three times running, so there is nothing to say about what GitHub thinks. The connection, a proxy or something else on this machine is in the way. GitHub itself may be perfectly well.`}
         </p>
-        <button type="button" className="btn btn-sm" onClick={onStepAside}>
+        <button type="button" className={`${SECONDARY} px-3 py-1.5 text-sm`} onClick={onStepAside}>
           {asideLabel}
         </button>
       </div>
@@ -110,20 +112,20 @@ export const ReadFailed = ({
 
   if (gitHubIsDown(why)) {
     return (
-      <div className="Box p-4">
-        <h2 className="mb-1 text-base font-semibold">GitHub is having trouble</h2>
+      <div className={`${CARD} p-4`}>
+        <h2 className="mb-1 text-base font-semibold text-ink">GitHub is having trouble</h2>
         <p className="mb-3 max-w-prose text-sm text-ink-muted">
           {`${what} could not be read: GitHub answered with an error, three times running. Nothing here is broken and nothing needs doing. Their status page says whether they know about it, and opening this again in a minute is worth a try.`}
         </p>
         <a
-          className="btn btn-sm mr-2"
+          className={`${SECONDARY} mr-2 inline-block px-3 py-1.5 text-sm`}
           href="https://www.githubstatus.com"
           target="_blank"
           rel="noreferrer"
         >
           GitHub status
         </a>
-        <button type="button" className="btn btn-sm" onClick={onStepAside}>
+        <button type="button" className={`${SECONDARY} px-3 py-1.5 text-sm`} onClick={onStepAside}>
           {asideLabel}
         </button>
       </div>
@@ -131,8 +133,8 @@ export const ReadFailed = ({
   }
 
   return (
-    <div className="Box p-4">
-      <h2 className="mb-1 text-base font-semibold">
+    <div className={`${CARD} p-4`}>
+      <h2 className="mb-1 text-base font-semibold text-ink">
         {signedOut ? "You are signed out of GitHub" : "Something GitHub sends has changed"}
       </h2>
       <p className="mb-3 max-w-prose text-sm text-ink-muted">
@@ -142,7 +144,7 @@ export const ReadFailed = ({
       </p>
       {signedOut ? (
         <a
-          className="btn btn-sm btn-primary mr-2"
+          className={`${PRIMARY} mr-2 inline-block px-3 py-1.5 text-sm`}
           href={`https://github.com/login?return_to=${encodeURIComponent(location.href)}`}
         >
           Sign in to GitHub
@@ -150,7 +152,7 @@ export const ReadFailed = ({
       ) : null}
       {/* Not a link back to the same page: their page was never removed, only hidden,
           so this is a button that gives it back. */}
-      <button type="button" className="btn btn-sm" onClick={onStepAside}>
+      <button type="button" className={`${SECONDARY} px-3 py-1.5 text-sm`} onClick={onStepAside}>
         {asideLabel}
       </button>
     </div>

@@ -28,7 +28,7 @@ describe("the card that stands where their single sign-on wall was", () => {
   test("names the organisation, which is the whole of what a reader has to know", () => {
     render(card())
 
-    expect(screen.getByRole("heading").textContent).toContain("octo-org wants a single sign-on")
+    expect(screen.getByRole("heading").textContent).toContain("Sign on to octo-org")
   })
 
   /*
@@ -45,7 +45,7 @@ describe("the card that stands where their single sign-on wall was", () => {
   test("still reads as a sentence where they sent no return address", () => {
     render(card({ wall: { ...theWall, backTo: "" } }))
 
-    expect(screen.getByText(/will not serve this page/)).toBeTruthy()
+    expect(screen.getByText("this page")).toBeTruthy()
   })
 
   test("posts their form on the button, which is what their own button does", () => {
@@ -70,25 +70,31 @@ describe("the card that stands where their single sign-on wall was", () => {
 })
 
 describe("the offer to stop asking", () => {
+  test("is named by the sentence beside it", () => {
+    render(card())
+
+    expect(screen.getByRole("switch", { name: "Sign on by itself next time" })).toBeTruthy()
+  })
+
   test("starts unticked, because answering for somebody is a thing to be asked for", () => {
     render(card())
 
-    expect(screen.getByRole("checkbox").hasAttribute("checked")).toBe(false)
+    expect(screen.getByRole("switch").getAttribute("aria-checked")).toBe("false")
   })
 
   test("shows what the reader already chose, rather than the default", () => {
     render(card({ chosen: "always" }))
 
-    expect((screen.getByRole("checkbox") as HTMLInputElement).checked).toBe(true)
+    expect(screen.getByRole("switch").getAttribute("aria-checked")).toBe("true")
   })
 
   test("asks for it on a tick, and takes it back on a second one", () => {
     const asked: Array<string> = []
     const { rerender } = render(card({ onChoose: (next) => asked.push(next) }))
 
-    fireEvent.click(screen.getByRole("checkbox"))
+    fireEvent.click(screen.getByRole("switch"))
     rerender(card({ chosen: "always", onChoose: (next) => asked.push(next) }))
-    fireEvent.click(screen.getByRole("checkbox"))
+    fireEvent.click(screen.getByRole("switch"))
 
     expect(asked).toEqual(["always", "ask"])
   })
@@ -109,7 +115,7 @@ describe("a wall that came round again", () => {
   test("says nothing about it on an ordinary wall", () => {
     render(card())
 
-    expect(screen.queryByText(/answered for you a moment ago/)).toBeNull()
+    expect(screen.queryByText(/for you a moment ago/)).toBeNull()
   })
 
   /*
@@ -119,7 +125,7 @@ describe("a wall that came round again", () => {
   test("explains itself where the same organisation is asking again", () => {
     render(card({ chosen: "always", cameRound: true }))
 
-    expect(screen.getByText(/answered for you a moment ago/)).toBeTruthy()
+    expect(screen.getByText(/for you a moment ago/)).toBeTruthy()
   })
 
   /*

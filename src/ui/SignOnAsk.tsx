@@ -12,6 +12,8 @@
  * the offer arrives as children, so what actually differs between the two is what
  * you see at each call site: one passes a link, the other a button and a tick.
  */
+import { Owner } from "./Owner"
+
 export type SignOnAskProps = {
   readonly organisation: string
   /** What is being kept from the reader, named as their page names it. */
@@ -23,9 +25,12 @@ export type SignOnAskProps = {
 
 export const SignOnAsk = ({ organisation, what, then, children }: SignOnAskProps) => (
   <>
-    <h2 className="mb-1 text-base font-semibold">{organisation} wants a single sign-on</h2>
-    <p className="mb-3 max-w-prose text-sm text-ink-muted">
-      {`GitHub will not serve ${what} until you sign on to ${organisation}. ${then}`}
+    <div className="mb-2 flex items-center gap-3">
+      <Owner owner={organisation} size={28} />
+      <h2 className="min-w-0 truncate text-base font-semibold text-ink">Sign on to {organisation}</h2>
+    </div>
+    <p className="mb-4 text-sm leading-5 text-ink-muted">
+      GitHub shows <span className="break-all text-ink">{what}</span> once you have signed on. {then}
     </p>
     {children}
   </>
