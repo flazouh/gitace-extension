@@ -150,19 +150,29 @@ const open = (
    * The branch a file link is written on.
    *
    * The address names it on `/tree/<branch>` and does not on the front page, so
-   * until the page is read this is a placeholder GitHub accepts in a blob
-   * address. The read replaces it with the real name, which happens long before
-   * a row can be pressed.
+   * until the page is known this is a placeholder GitHub accepts in a blob
+   * address. Replaced by the first word of the page that names it: a copy kept
+   * from before, or the read's first stage. Not the read's end, which on a front
+   * page arrived at by a press is still out when the rows are pressed, and wrote
+   * `/blob/HEAD/package.json` into the address.
    */
   let branchNow = home.branch ?? "HEAD"
+  const learn = (front: Front): void => {
+    branchNow = front.branch
+  }
 
   const reading = (partly: (front: Front) => void) =>
     having().pipe(
-      Effect.flatMap((inPage) => loadRepoHome(home.repo, home.branch, inPage, partly)),
+      Effect.flatMap((inPage) =>
+        loadRepoHome(home.repo, home.branch, inPage, (front) => {
+          learn(front)
+          partly(front)
+        })
+      ),
       throughGitHub,
       Effect.tap((front) =>
         Effect.sync(() => {
-          branchNow = front.branch
+          learn(front)
           onResolved?.(front.branch)
 
           /*
@@ -201,10 +211,12 @@ const open = (
   const held = Option.getOrUndefined(
     lastDrawn<Front>(repoNamed(home.repo, home.branch))
   )
+  if (held !== undefined) learn(held)
 
   const remembered = () =>
     rememberedRepoHome(home.repo, home.branch).pipe(
       throughGitHub,
+      Effect.tap((kept) => Effect.sync(() => Option.map(kept, learn))),
       Effect.catch(() => Effect.succeed(Option.none<Front>()))
     )
 
