@@ -122,3 +122,46 @@ test("a link moved into native content before delivery is not intercepted", asyn
   await turn()
   expect(link.hasAttribute(OWNED_ROUTE)).toBe(false)
 })
+
+test("links drawn into the interface's shadow root after it stood are protected", async () => {
+  // Where the interface really lives. A list stands its root first and its rows a read
+  // later, and the rows' links went unprotected: a press on a commit after arriving at
+  // the commits by a press loaded the whole document and left GitHub's page behind.
+  const page = document.implementation.createHTMLDocument("GitHub")
+  const host = page.createElement("div")
+  host.id = "gitace-host"
+  page.body.append(host)
+  const shadow = host.attachShadow({ mode: "open" })
+  const root = page.createElement("div")
+  root.id = "gitace-root"
+  shadow.append(root)
+  stop = protectOwnedLinks(page, owned)
+  await turn()
+
+  const row = page.createElement("a")
+  row.href = "/pull/row"
+  root.append(row)
+  await turn()
+
+  expect(row.getAttribute(OWNED_ROUTE)).toBe("/pull/row")
+})
+
+test("a host stood up after the watch began is watched too", async () => {
+  const page = document.implementation.createHTMLDocument("GitHub")
+  stop = protectOwnedLinks(page, owned)
+  const host = page.createElement("div")
+  host.id = "gitace-host"
+  const shadow = host.attachShadow({ mode: "open" })
+  const root = page.createElement("div")
+  root.id = "gitace-root"
+  shadow.append(root)
+  page.body.append(host)
+  await turn()
+
+  const row = page.createElement("a")
+  row.href = "/pull/late-host"
+  root.append(row)
+  await turn()
+
+  expect(row.getAttribute(OWNED_ROUTE)).toBe("/pull/late-host")
+})
