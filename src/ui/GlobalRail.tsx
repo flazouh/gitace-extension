@@ -11,6 +11,8 @@ import { Menu, type Row } from "./Menu"
 import { participantRows } from "./participant"
 import { RailTip, RailTips } from "./RailTip"
 import { openTab } from "../app/openTab"
+import { useKeyboard } from "./useKeyboard"
+import { useKeys } from "./useKeys"
 
 export type GlobalRailProps = {
   readonly where: Where
@@ -137,14 +139,32 @@ export const GlobalRail = ({
    * does, carrying which Destination was pressed. Only Home switches in place. The press never moves
    * the setting Home opens on: that is the reader's choice in settings, not the last button they hit.
    */
-  const toDestination = (which: Destination) => (event: React.MouseEvent) => {
-    if (!plainPress(event)) return
-    event.preventDefault()
-    if (onDestination !== undefined) return onDestination(which)
-    askHomeFor(which)
+  const home = (): void => {
     if (onHome !== undefined) onHome()
     else goTo(window, THE_HOME)
   }
+  const reach = (which: Destination): void => {
+    if (onDestination !== undefined) return onDestination(which)
+    askHomeFor(which)
+    home()
+  }
+  const toDestination = (which: Destination) => (event: React.MouseEvent) => {
+    if (!plainPress(event)) return
+    event.preventDefault()
+    reach(which)
+  }
+  /*
+   * The rail's chords on every screen, because the rail is on every screen. Home alone used to
+   * answer them, and everywhere else GitHub's own `g i` and `g d` loaded a document of theirs.
+   */
+  useKeys(useKeyboard(), {
+    workingSet: () => reach("working-set"),
+    repositories: () => reach("repositories"),
+    activity: () => reach("activity"),
+    issues: () => goTo(window, "/issues"),
+    notifications: () => goTo(window, "/notifications"),
+    home
+  })
 
   const [pinnedOwner, pinnedRepo] = pinned[0]?.split("/") ?? []
   const aimedAt =
