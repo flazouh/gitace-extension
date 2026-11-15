@@ -46,6 +46,16 @@ describe("the manifest description", () => {
   })
 })
 
+/*
+ * Apple refuses a Safari package whose name is over 40 characters: "The name field
+ * must be present, of string type, and 40 or fewer characters long" (90849).
+ */
+describe("the manifest name", () => {
+  test("fits what the App Store accepts", () => {
+    expect(describeFor("safari").name.length).toBeLessThanOrEqual(40)
+  })
+})
+
 describe("the screens script", () => {
   const shell = {
     matches: ["*://github.com/*"],
