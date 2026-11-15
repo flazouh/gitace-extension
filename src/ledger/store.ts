@@ -55,12 +55,22 @@ export type Manifest = {
   readonly goModules?: ReadonlyArray<readonly [string, string]>
   /** What its `composer.json` files map each PHP namespace prefix to, for the same reason. */
   readonly phpPrefixes?: ReadonlyArray<readonly [string, ReadonlyArray<string>]>
+  /**
+   * Its `package.json`, `go.mod` and `composer.json` files whole: path, blob sha, text.
+   *
+   * The next commit of the repository is read from its tree rather than its archive, and the
+   * tree names these files without holding them. Carried from here where the sha is the same,
+   * so a push that touched none of them fetches none of them.
+   */
+  readonly configs?: ReadonlyArray<readonly [string, string, string]>
 }
 
 /** What a store can be asked. Named so the offscreen document can be handed a fake one. */
 export type Store = {
   readonly manifest: (at: string) => Effect.Effect<Manifest | null, unknown>
   readonly keepManifest: (manifest: Manifest) => Effect.Effect<void, unknown>
+  /** The commit of `owner/repo` read most recently, whichever one it was. */
+  readonly latest: (repo: string) => Effect.Effect<Manifest | null, unknown>
   /** What these blob shas were found to say, as many as are known. */
   readonly told: (shas: ReadonlyArray<string>) => Effect.Effect<ReadonlyMap<string, Told>, unknown>
   readonly keepTold: (told: ReadonlyMap<string, Told>) => Effect.Effect<void, unknown>
@@ -110,6 +120,9 @@ const inStore = <A>(
     )
   )
 
+const newest = (all: ReadonlyArray<Manifest>): Manifest | null =>
+  all.reduce<Manifest | null>((best, one) => (best === null || one.seen > best.seen ? one : best), null)
+
 /**
  * The store, as IndexedDB.
  *
@@ -126,6 +139,13 @@ export const idbStore: Store = {
   keepManifest: (manifest) =>
     inStore(COMMITS, "readwrite", (store) =>
       done(store.put(manifest, manifest.at)).pipe(Effect.asVoid)
+    ),
+
+  latest: (repo) =>
+    inStore(COMMITS, "readonly", (store) =>
+      done<Array<unknown>>(store.getAll(IDBKeyRange.bound(`${repo}@`, `${repo}@\uffff`))).pipe(
+        Effect.map((found) => newest(found as ReadonlyArray<Manifest>))
+      )
     ),
 
   told: (shas) =>
@@ -184,6 +204,7 @@ export const idbStore: Store = {
 export const noStore: Store = {
   manifest: () => Effect.succeed(null),
   keepManifest: () => Effect.void,
+  latest: () => Effect.succeed(null),
   told: () => Effect.succeed(new Map()),
   keepTold: () => Effect.void,
   forgetBeyond: () => Effect.succeed(0)
