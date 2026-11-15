@@ -326,14 +326,13 @@ jobs:
     # bundle. Written once here rather than at each use below, where one use would
     # eventually be missed.
     #
-    # The bundle id is apart from it and is still the one from before the rename
-    # to GitAce Extension, on purpose: that id is the App Store record, and a new
-    # one is a new app, which current users would never be offered as an update.
-    # It used to be built from the name; it is written out now, so the name a
-    # reader sees in Applications can change and the id cannot.
+    # The bundle id is written out rather than built from the name, and its last
+    # part has to be the name with hyphens (see the converter step). It is the App
+    # Store record: a new id is a new app, which the old one's users are never
+    # offered as an update.
     env:
-      APP: GitAce Extension for Safari
-      BUNDLE: dev.gitquiet.GitQuiet-for-Safari
+      APP: Ace for Safari
+      BUNDLE: dev.useace.Ace-for-Safari
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -434,13 +433,14 @@ jobs:
       # extension once its app has been moved there and opened once.
       - name: Package a disk image
         run: |
-          echo "DMG=GitAce-Extension-$RELEASE_VERSION-safari.dmg" >> "$GITHUB_ENV"
+          dmg="Ace-for-Safari-$RELEASE_VERSION.dmg"
+          echo "DMG=$dmg" >> "$GITHUB_ENV"
           staging="$RUNNER_TEMP/safari-dmg"
           mkdir -p "$staging"
           cp -R "$RUNNER_TEMP/safari-export/$APP.app" "$staging/"
           ln -s /Applications "$staging/Applications"
           hdiutil create -volname "$APP" -srcfolder "$staging" \
-            -ov -format ULFO "GitAce-Extension-$RELEASE_VERSION-safari.dmg"
+            -ov -format ULFO "$dmg"
 
       # Apple has to see the image before Gatekeeper will open what is inside it,
       # and `stapler` writes that answer into the file so a reader who is offline
@@ -471,8 +471,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.gate.outputs.tag }}
         run: |
+          # The old fixed name too, so a link written before the rename still finds it.
+          cp "$DMG" Ace-for-Safari.dmg
           cp "$DMG" GitAce-Extension-safari.dmg
-          gh release upload "$RELEASE_TAG" "$DMG" GitAce-Extension-safari.dmg --clobber
+          gh release upload "$RELEASE_TAG" "$DMG" Ace-for-Safari.dmg GitAce-Extension-safari.dmg --clobber
 
       # What follows sends the same archive to the Mac App Store, which is where a
       # Safari reader looks for an extension and the only place Safari before 18.4
