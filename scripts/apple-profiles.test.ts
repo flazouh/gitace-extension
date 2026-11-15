@@ -7,7 +7,7 @@ const now = new Date("2026-08-16T00:00:00Z")
 // The Safari app's bundle id from before the rename to GitAce Extension, kept on
 // purpose so the App Store keeps treating it as the same app.
 const profile = (over: Partial<Profile> = {}): Profile => ({
-  name: "dev.gitquiet.GitQuiet-for-Safari Mac App Store",
+  name: "dev.useace.Ace-for-Safari Mac App Store",
   state: "ACTIVE",
   expires: "2027-08-15T21:48:08.000+00:00",
   content: "cHJvZmlsZQ==",
@@ -19,7 +19,7 @@ describe("which of the profiles that came back can be judged", () => {
 
   test("keeps one that says everything about itself", () => {
     const whole = record({
-      name: "dev.gitquiet.GitQuiet-for-Safari Mac App Store",
+      name: "dev.useace.Ace-for-Safari Mac App Store",
       profileState: "ACTIVE",
       expirationDate: "2027-08-15T21:48:08.000+00:00",
       profileContent: "cHJvZmlsZQ=="
@@ -37,7 +37,7 @@ describe("which of the profiles that came back can be judged", () => {
     "drops one with no %s",
     (missing) => {
       const half: Record<string, string> = {
-        name: "dev.gitquiet.GitQuiet-for-Safari Mac App Store",
+        name: "dev.useace.Ace-for-Safari Mac App Store",
         profileState: "ACTIVE",
         expirationDate: "2027-08-15T21:48:08.000+00:00",
         profileContent: "cHJvZmlsZQ=="
