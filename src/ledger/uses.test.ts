@@ -48,6 +48,23 @@ describe("everywhere in a repository that means one Writing", () => {
     expect(usesAcross(files, asked, PATHS)[0]?.sure).toBe(true)
   })
 
+  test("says which of a file's uses only bring the name in", () => {
+    const files = new Map([
+      [
+        "src/two.ts",
+        told({
+          mentions: [{ ...mention("shape", 1), imported: true as const }, mention("shape", 4)],
+          borrows: [{ name: "shape", specifier: "./one" }]
+        })
+      ]
+    ])
+
+    expect(usesAcross(files, asked, PATHS).map((one) => [one.line, one.imported === true])).toEqual([
+      [1, true],
+      [4, false]
+    ])
+  })
+
   test("is not sure about a file that merely holds the same word", () => {
     const files = new Map([["src/three.ts", told({ mentions: [mention("shape", 7)] })]])
 

@@ -885,6 +885,7 @@ export const Shell = ({
                   onUpload={onUpload}
                   revealing={revealing}
                   across={across}
+                  ofPullRequest
                   initialPeeked={initialPeeked}
                   onBringIn={
                     readPaths === undefined || readWholeFile === undefined

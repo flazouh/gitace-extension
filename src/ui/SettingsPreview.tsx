@@ -349,6 +349,20 @@ const SAMPLES: Record<string, (choice: string) => ReactNode> = {
         <div className="text-ink-muted">→ nothing to follow</div>
       </div>
     ),
+  /** The list of a name's uses, with the line that only brings it in and without. */
+  usesImports: (choice) => (
+    <div className="rounded bg-canvas px-1.5 py-1 font-mono text-[9px] leading-relaxed">
+      {choice === "on" ? <div className="text-ink-muted">1 import {"{ shape }"}</div> : null}
+      <div className="text-ink">9 shape(one)</div>
+    </div>
+  ),
+  /** The same list, with a use in a test file and without. */
+  usesTests: (choice) => (
+    <div className="rounded bg-canvas px-1.5 py-1 font-mono text-[9px] leading-relaxed">
+      <div className="text-ink">area.ts 9 shape(one)</div>
+      {choice === "on" ? <div className="text-ink-muted">area.test.ts 4 shape()</div> : null}
+    </div>
+  ),
   prose: (choice) =>
     choice === "on" ? (
       <div className="rounded bg-canvas px-1.5 py-1">

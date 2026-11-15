@@ -16,6 +16,7 @@ import { drawnWhenAsked } from "../domain/heavyFile"
 import { toPatch } from "../domain/toPatch"
 import { withoutWhitespace } from "../domain/withoutWhitespace"
 import type { ChangedFile, ChangeType, FileDiff, ReviewThread } from "../domain/PullRequest"
+import type { Changes } from "../domain/changes"
 import { SILENT, type Keys } from "../keys/commands"
 import type { DiffChoices, TreeChoices } from "../domain/choices"
 import { useKeyboard } from "./useKeyboard"
@@ -353,6 +354,8 @@ export type FileDiffPaneProps = {
    * the reader is where they were. See `Across` in `src/ui/following.ts`.
    */
   readonly across?: Across
+  /** What the pull request changed, for a name's uses to say which of them it touched. */
+  readonly changes?: Changes
   /** How the reader has asked for diffs to be drawn. */
   readonly choices: DiffChoices
   /**
@@ -462,6 +465,7 @@ const FileDiffPaneView = ({
   onUpload,
   revealing,
   across,
+  changes,
   initialPeeked
 }: FileDiffPaneProps) => {
   const host = useRef<HTMLDivElement | null>(null)
@@ -939,8 +943,9 @@ const FileDiffPaneView = ({
           across={
             across?.repo === undefined || across.sha === undefined
               ? undefined
-              : { repo: across.repo, sha: across.sha }
+              : { repo: across.repo, sha: across.sha, read: across.read }
           }
+          changes={changes}
         />
       )}
       {/* The rows live in the renderer's shadow DOM, under the lines they are

@@ -11,7 +11,7 @@ import { RendererProvider, type LoadEngine } from "./renderer"
 import { SettingsProvider } from "./settings"
 import type { Store } from "../ports/Settings"
 import { WholeFile } from "./WholeFile"
-import { DEFAULTS } from "../domain/Settings"
+import { DEFAULTS, type Settings } from "../domain/Settings"
 
 /**
  * Holding a key over a name, and pressing it.
@@ -92,6 +92,8 @@ type Stage = {
   readonly registryAsked: Array<boolean | undefined>
   /** Every set of rows the pane has hung under the code, newest last. */
   readonly shown: Array<ReadonlyArray<{ key: string; line: number }>>
+  /** Every set of settings written back, newest last. */
+  readonly stored: Array<Settings>
   request: DiffRequest | undefined
   /**
    * Every request the renderer was handed, in order.
@@ -131,7 +133,12 @@ const staged = (
       readonly from: number
       readonly to: number
       readonly sure: boolean
+      readonly imported?: true
     }>
+    /** The diff's settings as stored, over the defaults. */
+    readonly diff?: Partial<Settings["diff"]>
+    /** Whether the repository never answers, for what the panel shows while it reads. */
+    readonly unanswered?: boolean
     /**
      * A different Writing from the second question onward.
      *
@@ -163,6 +170,7 @@ const staged = (
     openAt: () => {},
     registryAsked: [],
     shown: [],
+    stored: [],
     request: undefined,
     /**
      * Every request the renderer was handed, in order.
@@ -274,7 +282,7 @@ const staged = (
         return over.beyond ?? { why: "nothing there" }
       }),
     usesAcross: () =>
-      Effect.succeed({
+      (over.unanswered === true ? Effect.never : Effect.void).pipe(Effect.as({
         ready: true,
         uses: over.uses ?? [
           // The file being read answers for itself, exactly, a few lines up in
@@ -283,18 +291,24 @@ const staged = (
           { path: "src/other.ts", line: 14, from: 3, to: 8, sure: true },
           { path: "src/guessed.ts", line: 3, from: 1, to: 6, sure: false }
         ]
-      }),
+      })),
     warm: () => Effect.succeed({ ready: true, read: 0, skipped: 0 }),
     namesLike: () => Effect.succeed({ places: [], ready: true })
   }
 
   const settings: Store = {
-    read: Effect.succeed(
-      over.registry === undefined
-        ? DEFAULTS
-        : { ...DEFAULTS, diff: { ...DEFAULTS.diff, registry: over.registry } }
-    ),
-    write: () => Effect.void,
+    read: Effect.succeed({
+      ...DEFAULTS,
+      diff: {
+        ...DEFAULTS.diff,
+        ...(over.registry === undefined ? {} : { registry: over.registry }),
+        ...over.diff
+      }
+    }),
+    write: (next) =>
+      Effect.sync(() => {
+        stage.stored.push(next)
+      }),
     watch: () => () => {}
   }
 
@@ -363,6 +377,12 @@ const drawRow = (stage: Stage, line: number): { readonly scrolled: () => number 
  * The renderer's callbacks arrive one render after the mount, and the Ledger's
  * answer a tick after it is asked. Two turns covers both.
  */
+/**
+ * What the head of the uses says for the stage's file: one use, on line 4, since
+ * where the name is written is listed but is not a use of it.
+ */
+const USED = "1 use in 1 file"
+
 const settled = (): Effect.Effect<void> =>
   Effect.promise(() => new Promise<void>((go) => setTimeout(() => setTimeout(go, 0), 0)))
 
@@ -721,8 +741,11 @@ describe("a name this file borrowed from another", () => {
     await Effect.runPromise(settled())
 
     // `u` is the same question for a hand already on the keyboard, and it is
-    // the only way to ask it about a name written somewhere else.
-    expect(await screen.findByText("written in src/whole.ts")).toBeTruthy()
+    // the only way to ask it about a name written somewhere else — which is
+    // listed under its own file, as the line it is written on.
+    const panel = await screen.findByLabelText(`Uses of ${elsewhere.name}`)
+    await waitFor(() => expect(panel.querySelector('[title="src/whole.ts"]')).not.toBeNull())
+    expect(panel.textContent).toContain(elsewhere.signature)
   })
 
   test("does nothing where the repository has no such file", async () => {
@@ -1063,7 +1086,7 @@ describe("everywhere in this file that means the same name", () => {
     // By what it says rather than by its role: `showModal` in happy-dom does not
     // put a dialog into the accessibility tree the way a browser does, which is
     // why every other dialog in these tests is found by its contents too.
-    expect(await screen.findByText("2 in this file")).toBeTruthy()
+    expect(await screen.findByText(USED)).toBeTruthy()
     // The line each Use is on, so a call can be told from a declaration without
     // going to look at it.
     expect(screen.getAllByText("const shape = () => 1").length).toBeGreaterThan(0)
@@ -1075,30 +1098,56 @@ describe("everywhere in this file that means the same name", () => {
 
     await userEvent.keyboard("u")
 
-    expect(screen.queryByText("2 in this file")).toBeNull()
+    expect(screen.queryByText(USED)).toBeNull()
   })
 })
 
 describe("uses across the repository", () => {
+  /** The other files the repository answers with, as they would be read whole. */
+  const FILES: Readonly<Record<string, string>> = {
+    "src/other.ts": [...Array.from({ length: 13 }, (_, at) => `// line ${at + 1}`), "  return shape() + 1"].join("\n"),
+    "src/guessed.ts": ["// one", "// two", "shape.width"].join("\n"),
+    "src/barrel.ts": 'export { shape } from "./one"',
+    "src/other.test.ts": ["// one", "// two", "// three", "// four", "expect(shape()).toBe(1)"].join("\n")
+  }
+
   const withRepo = (): Across => ({
-    paths: new Set(["src/one.ts", "src/other.ts"]),
-    repo: { owner: "flowline-labs", repo: "flowline" },
+    paths: new Set(["src/one.ts", ...Object.keys(FILES)]),
+    repo: { owner: "octo-org", repo: "octo-repo" },
     sha: "abc123",
-    read: () => Effect.succeed(""),
+    read: (path) => Effect.succeed(FILES[path] ?? ""),
     open: () => {}
   })
 
-  test("lists the rest of the repository under this file's own", async () => {
-    const stage = staged(writing, [], { across: withRepo() })
-    await Effect.runPromise(settled())
-
+  /** `u` over a use, which lists where the name is written as well as where it is used. */
+  const open = async (stage: Stage) => {
     stage.request?.onNameEnter?.(name, held({ go: true }))
     await Effect.runPromise(settled())
     await userEvent.keyboard("u")
     await Effect.runPromise(settled())
+    return screen.findByLabelText(`Uses of ${writing.name}`)
+  }
 
-    expect(await screen.findByText("Elsewhere in the repository")).toBeTruthy()
-    expect(screen.getByText("src/other.ts")).toBeTruthy()
+  /** The files the list names, in the order it names them. */
+  const filesIn = (panel: HTMLElement): ReadonlyArray<string> =>
+    [...panel.querySelectorAll("ul > li > div > span[title]")].map((chip) => chip.getAttribute("title") ?? "")
+
+  /** The rows under one file, as the line numbers they start with. */
+  const linesUnder = (panel: HTMLElement, path: string): ReadonlyArray<string> => {
+    const group = panel.querySelector(`ul > li > div > span[title="${path}"]`)?.closest("li")
+    return [...(group?.querySelectorAll("button") ?? [])].map((row) => row.firstElementChild?.textContent ?? "")
+  }
+
+  test("lists the uses by file, the file being read first, each as its line of code", async () => {
+    const stage = staged(writing, [], { across: withRepo() })
+    await Effect.runPromise(settled())
+    const panel = await open(stage)
+
+    await waitFor(() => expect(filesIn(panel)).toEqual(["src/one.ts", "src/other.ts"]))
+    // The line in the other file is its code, not its path.
+    await waitFor(() => expect(panel.textContent).toContain("return shape() + 1"))
+    expect(screen.getByText("2 uses in 2 files")).toBeTruthy()
+    expect(screen.getByText("this file")).toBeTruthy()
   })
 
   /**
@@ -1116,18 +1165,14 @@ describe("uses across the repository", () => {
   test("leaves the unproven ones out where there are proven ones", async () => {
     const stage = staged(writing, [], { across: withRepo() })
     await Effect.runPromise(settled())
-
-    stage.request?.onNameEnter?.(name, held({ go: true }))
-    await Effect.runPromise(settled())
-    await userEvent.keyboard("u")
-    await Effect.runPromise(settled())
+    const panel = await open(stage)
 
     // A file that states it borrowed the name is an answer; a file that merely
     // holds the word is a maybe, and a maybe costs more than it gives once
     // there are answers beside it — a row that leads to a different thing of
     // the same spelling has taken the reader somewhere and called it the place.
-    expect(screen.getByText("src/other.ts")).toBeTruthy()
-    expect(screen.queryByText("src/guessed.ts")).toBeNull()
+    await waitFor(() => expect(filesIn(panel)).toContain("src/other.ts"))
+    expect(filesIn(panel)).not.toContain("src/guessed.ts")
   })
 
   test("shows them, quietly, where they are the whole of what is known", async () => {
@@ -1136,15 +1181,11 @@ describe("uses across the repository", () => {
       uses: [{ path: "src/guessed.ts", line: 3, from: 1, to: 6, sure: false }]
     })
     await Effect.runPromise(settled())
-
-    stage.request?.onNameEnter?.(name, held({ go: true }))
-    await Effect.runPromise(settled())
-    await userEvent.keyboard("u")
-    await Effect.runPromise(settled())
+    await open(stage)
 
     // The difference between a list and none, so it is shown — and drawn in
     // less ink rather than labelled, because a badge on a row is a word to read.
-    const row = screen.getByText("src/guessed.ts").closest("button")
+    const row = (await screen.findByText("shape.width")).closest("button")
     expect(row).toBeTruthy()
     expect(row?.className).toContain("opacity-60")
     expect(screen.queryByText("Likely")).toBeNull()
@@ -1154,25 +1195,105 @@ describe("uses across the repository", () => {
   test("does not list this file twice, once exactly and once by a rule", async () => {
     const stage = staged(writing, [], { across: withRepo() })
     await Effect.runPromise(settled())
+    const panel = await open(stage)
 
-    stage.request?.onNameEnter?.(name, held({ go: true }))
-    await Effect.runPromise(settled())
-    await userEvent.keyboard("u")
-    await Effect.runPromise(settled())
-
-    expect(screen.queryByText("src/one.ts")).toBeNull()
+    // Where it is written and the one use, from the exact answer; the
+    // repository's own mention of line 2 is the same line and is not a third.
+    await waitFor(() => expect(filesIn(panel)).toContain("src/other.ts"))
+    expect(linesUnder(panel, "src/one.ts")).toEqual(["2", "4"])
   })
 
   test("asks nothing of a repository where the screen does not know one", async () => {
     const stage = staged()
     await Effect.runPromise(settled())
+    const panel = await open(stage)
 
-    stage.request?.onNameEnter?.(name, held({ go: true }))
-    await Effect.runPromise(settled())
-    await userEvent.keyboard("u")
-    await Effect.runPromise(settled())
+    await waitFor(() => expect(screen.queryByText(USED)).not.toBeNull())
+    expect(filesIn(panel)).toEqual(["src/one.ts"])
+  })
 
-    expect(screen.queryByText("Elsewhere in the repository")).toBeNull()
+  test("shows the code of a use in another file, and never asks to be pressed for it", async () => {
+    const stage = staged(writing, [], { across: withRepo() })
+    await Effect.runPromise(settled())
+    const panel = await open(stage)
+
+    const row = (await screen.findByText("return shape() + 1")).closest("button")
+    await userEvent.hover(row!)
+
+    await waitFor(() => expect(stage.drew.at(-1)?.path).toBe("src/other.ts"))
+    expect(stage.drew.at(-1)?.patch).toContain("return shape() + 1")
+    expect(panel.textContent).toContain(":14")
+    expect(panel.textContent).not.toContain("press to open it")
+  })
+
+  test("holds the shape of the answer while it is on its way, and says nothing yet", async () => {
+    const stage = staged(writing, [], { across: withRepo(), unanswered: true })
+    await Effect.runPromise(settled())
+    const panel = await open(stage)
+
+    expect(screen.getByLabelText("Reading the repository")).toBeTruthy()
+    expect(panel.textContent).not.toContain("nothing to show")
+    expect(panel.textContent).not.toContain("nothing else means this name")
+  })
+
+  describe("the boxes that hold imports and tests back", () => {
+    const mixed = {
+      across: withRepo(),
+      uses: [
+        { path: "src/other.ts", line: 14, from: 10, to: 15, sure: true },
+        { path: "src/barrel.ts", line: 1, from: 10, to: 15, sure: true, imported: true as const },
+        { path: "src/other.test.ts", line: 5, from: 8, to: 13, sure: true }
+      ]
+    }
+
+    test("lists the tests after the code, and counts what each box would hold back", async () => {
+      const stage = staged(writing, [], mixed)
+      await Effect.runPromise(settled())
+      const panel = await open(stage)
+
+      await waitFor(() =>
+        expect(filesIn(panel)).toEqual(["src/one.ts", "src/barrel.ts", "src/other.ts", "src/other.test.ts"])
+      )
+      expect(screen.getByText("4 uses in 4 files")).toBeTruthy()
+      const imports = screen.getByRole("checkbox", { name: "Imports 1" }) as HTMLInputElement
+      const tests = screen.getByRole("checkbox", { name: "Tests 1" }) as HTMLInputElement
+      expect([imports.checked, tests.checked]).toEqual([true, true])
+    })
+
+    test("hides the imports when the box is unticked, says so, and remembers it", async () => {
+      const stage = staged(writing, [], mixed)
+      await Effect.runPromise(settled())
+      const panel = await open(stage)
+      await waitFor(() => expect(filesIn(panel)).toContain("src/barrel.ts"))
+
+      await userEvent.click(screen.getByRole("checkbox", { name: "Imports 1" }))
+
+      await waitFor(() => expect(filesIn(panel)).not.toContain("src/barrel.ts"))
+      expect(screen.getByText("3 uses in 3 files · 1 hidden")).toBeTruthy()
+      expect(stage.stored.at(-1)?.diff.usesImports).toBe("off")
+    })
+
+    test("opens with the tests held back where the reader left them so", async () => {
+      const stage = staged(writing, [], { ...mixed, diff: { usesTests: "off" } })
+      await Effect.runPromise(settled())
+      const panel = await open(stage)
+
+      await waitFor(() => expect(filesIn(panel)).toContain("src/barrel.ts"))
+      expect(filesIn(panel)).not.toContain("src/other.test.ts")
+      expect((screen.getByRole("checkbox", { name: "Tests 1" }) as HTMLInputElement).checked).toBe(false)
+      // Where it is written is not a use, and no box holds it back.
+      expect(filesIn(panel)[0]).toBe("src/one.ts")
+    })
+
+    test("offers no box for a kind of use the list does not hold", async () => {
+      const stage = staged(writing, [], { across: withRepo() })
+      await Effect.runPromise(settled())
+      await open(stage)
+
+      await waitFor(() => expect(screen.getByText("2 uses in 2 files")).toBeTruthy())
+      expect((screen.getByRole("checkbox", { name: "Imports 0" }) as HTMLInputElement).disabled).toBe(true)
+      expect((screen.getByRole("checkbox", { name: "Tests 0" }) as HTMLInputElement).disabled).toBe(true)
+    })
   })
 })
 
@@ -1190,7 +1311,7 @@ describe("what a press on an underlined name does", () => {
     // Reading somebody's pull request, the question is nearly always "what is
     // this and who depends on it" rather than "take me there" — and being moved
     // mid-review is the thing this interface exists to stop happening.
-    expect(await screen.findByText("2 in this file")).toBeTruthy()
+    expect(await screen.findByText(USED)).toBeTruthy()
   })
 
   test("does not offer the line the reader pressed, which is the one they are on", async () => {
@@ -1209,8 +1330,7 @@ describe("what a press on an underlined name does", () => {
     // reader was shown the thing they were already looking at, and the uses
     // they asked for were underneath it.
     await screen.findByLabelText(`Uses of ${writing.name}`)
-    await waitFor(() => expect(screen.queryByText("2 in this file")).not.toBeNull())
-    expect(screen.queryByText("written")).toBeNull()
+    await waitFor(() => expect(screen.queryByText(USED)).not.toBeNull())
     expect(
       screen.getAllByRole("button").filter((row) => (row.textContent ?? "").includes(writing.signature))
     ).toHaveLength(0)
@@ -1228,12 +1348,18 @@ describe("what a press on an underlined name does", () => {
     await userEvent.keyboard("u")
     await Effect.runPromise(settled())
 
-    await screen.findByLabelText(`Uses of ${writing.name}`)
+    const panel = await screen.findByLabelText(`Uses of ${writing.name}`)
     // Once, not twice. `usesIn` answers with every occurrence and the
     // declaration is one of them, so this used to draw it as its own row and
     // again in the list below — the same line twice, under a heading that could
     // say "used nowhere else in this file".
-    await waitFor(() => expect(screen.getAllByText("written")).toHaveLength(1))
+    await waitFor(() =>
+      expect(
+        [...panel.querySelectorAll("li button")].filter((row) =>
+          (row.textContent ?? "").includes(writing.signature)
+        )
+      ).toHaveLength(1)
+    )
   })
 
   test("still peeks on Shift, whichever end the press is on", async () => {
@@ -1245,7 +1371,7 @@ describe("what a press on an underlined name does", () => {
     stage.request?.onName?.(itself, held({ go: true, shift: true }))
     await Effect.runPromise(settled())
 
-    expect(screen.queryByText("2 in this file")).toBeNull()
+    expect(screen.queryByText(USED)).toBeNull()
     expect(stage.shown.at(-1)).toHaveLength(1)
   })
 })
@@ -1312,7 +1438,7 @@ describe("a use in the panel on a line the diff folded away", () => {
     stage.request?.onNameEnter?.(name, held({ go: true }))
     await Effect.runPromise(settled())
     await userEvent.keyboard("u")
-    await screen.findByText("2 in this file")
+    await screen.findByText(USED)
     const [row] = screen
       .getAllByRole("button")
       .filter((one) => (one.textContent ?? "").includes("shape()"))
@@ -1327,7 +1453,7 @@ describe("a use in the panel on a line the diff folded away", () => {
 
     await pressed(stage)
 
-    expect(screen.queryByText("2 in this file")).not.toBeNull()
+    expect(screen.queryByText(USED)).not.toBeNull()
   })
 
   test("closes where the line is drawn, because the reader was taken there", async () => {
@@ -1339,7 +1465,7 @@ describe("a use in the panel on a line the diff folded away", () => {
     await pressed(stage)
 
     expect(row.scrolled()).toBe(1)
-    expect(screen.queryByText("2 in this file")).toBeNull()
+    expect(screen.queryByText(USED)).toBeNull()
   })
 })
 
@@ -1353,7 +1479,7 @@ describe("which of the two a press is", () => {
     stage.request?.onName?.(name, held({ go: true }))
     await Effect.runPromise(settled())
 
-    expect(screen.queryByText("2 in this file")).toBeNull()
+    expect(screen.queryByText(USED)).toBeNull()
   })
 
   test("a press on the Writing itself asks who depends on it", async () => {
@@ -1366,7 +1492,7 @@ describe("which of the two a press is", () => {
     await Effect.runPromise(settled())
 
     // There is nowhere to be taken: the reader is already looking at it.
-    expect(await screen.findByText("2 in this file")).toBeTruthy()
+    expect(await screen.findByText(USED)).toBeTruthy()
   })
 
   test("counts the two sides' columns as the two sides count them", async () => {
@@ -1383,7 +1509,7 @@ describe("which of the two a press is", () => {
     stage.request?.onName?.(beside, held({ go: true }))
     await Effect.runPromise(settled())
 
-    expect(screen.queryByText("2 in this file")).toBeNull()
+    expect(screen.queryByText(USED)).toBeNull()
   })
 
 })
@@ -1646,7 +1772,7 @@ describe("a press after the pointer has moved on", () => {
     stage.request?.onName?.(itself, held({ go: true }))
     await Effect.runPromise(settled())
 
-    expect(await screen.findByText("2 in this file")).toBeTruthy()
+    expect(await screen.findByText(USED)).toBeTruthy()
   })
 
   test("a hover that arrives late still draws nothing", async () => {
@@ -1712,7 +1838,7 @@ describe("a press that the pointer has already left", () => {
     stage.request?.onName?.(itself, held({ go: true }))
     await Effect.runPromise(settled())
 
-    expect(await screen.findByText("2 in this file")).toBeTruthy()
+    expect(await screen.findByText(USED)).toBeTruthy()
   })
 })
 
@@ -1735,7 +1861,7 @@ describe("asking by the letter rather than by the key", () => {
     await userEvent.keyboard("u")
     await Effect.runPromise(settled())
 
-    expect(await screen.findByText("2 in this file")).toBeTruthy()
+    expect(await screen.findByText(USED)).toBeTruthy()
   })
 
   test("still says nothing where the pointer is on nothing", async () => {
@@ -1746,7 +1872,7 @@ describe("asking by the letter rather than by the key", () => {
     await userEvent.keyboard("u")
     await Effect.runPromise(settled())
 
-    expect(screen.queryByText("2 in this file")).toBeNull()
+    expect(screen.queryByText(USED)).toBeNull()
   })
 })
 

@@ -909,6 +909,12 @@ export type Mention = {
    * `Status.ACTIVE` read through a class is `through` a module nobody has.
    */
   readonly orPlain?: true
+  /**
+   * Whether it is written inside a statement that borrows or passes names on: an
+   * import, or a re-export. A list of uses can then hold back the lines that only
+   * bring a name in, which in a repository with a barrel per folder are half of it.
+   */
+  readonly imported?: true
   readonly name: string
   readonly line: number
   readonly from: number
@@ -928,7 +934,7 @@ export type Told = {
 }
 
 /** Where a word is, as a Mention of it. */
-const mentionOf = (node: Syntax): Mention => ({
+const mentionAt = (node: Syntax): Mention => ({
   name: node.text,
   line: node.startPosition.row + 1,
   from: node.startPosition.column + 1,
@@ -961,9 +967,20 @@ export const toldBy = (root: Syntax, source: string, dialect: Dialect): Told => 
   const memo: Memo = new Map()
   /** The nodes from the root down to this one, which is the scope chain. */
   const path: Array<Syntax> = []
+  /** How many statements that borrow or pass names on the walk is inside. */
+  let importing = 0
+  const mentionOf = (node: Syntax): Mention =>
+    importing > 0 ? { ...mentionAt(node), imported: true } : mentionAt(node)
 
   const walk = (node: Syntax): void => {
     path.push(node)
+    // Asked before the mention is kept, because a grammar may hang the binding on
+    // the very node that is the name.
+    const { outer, inner } = dialect.bindings(node)
+    const passed = dialect.passedOn === undefined ? [] : [...dialect.passedOn(node)]
+    const opens = passed.length > 0 || outer.some((bound) => bound.kind === "import")
+    if (opens) importing += 1
+
     const qualifier = dialect.qualifierOf?.(node, path.at(-2) ?? null) ?? null
     if (qualifier !== null) {
       /*
@@ -986,7 +1003,6 @@ export const toldBy = (root: Syntax, source: string, dialect: Dialect): Told => 
       }
     } else if (dialect.names.has(node.type)) mentions.push(mentionOf(node))
 
-    const { outer, inner } = dialect.bindings(node)
     for (const bound of [...outer, ...inner]) {
       declares.add(bound.name.text)
       if (bound.from !== undefined) borrows.push(bound.from)
@@ -994,11 +1010,10 @@ export const toldBy = (root: Syntax, source: string, dialect: Dialect): Told => 
 
     // A re-export borrows without binding, so it is walked for on its own and
     // adds to `borrows` and to nothing else. See {@link passedOn}.
-    if (dialect.passedOn !== undefined) {
-      for (const from of dialect.passedOn(node)) borrows.push(from)
-    }
+    for (const from of passed) borrows.push(from)
 
     for (const child of childrenOf(node)) walk(child)
+    if (opens) importing -= 1
     path.pop()
   }
   walk(root)

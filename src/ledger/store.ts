@@ -27,10 +27,11 @@ const VERSION = 1
  *
  * Raised whenever what a file is found to say changes shape — a plain Ruby
  * `require` recorded, a Python star import, a mention read through a module, a
- * TypeScript file whose call signatures the grammar ran together — so a file read
- * before is read again rather than answered with what was true then.
+ * TypeScript file whose call signatures the grammar ran together, a mention marked
+ * as inside an import — so a file read before is read again rather than answered
+ * with what was true then.
  */
-const READER = 3
+const READER = 4
 
 /** The key a file's saying is kept under. */
 const keyFor = (sha: string): string => `${READER}:${sha}`

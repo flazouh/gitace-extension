@@ -348,7 +348,7 @@ export const WholeFile = ({
           across={
             across?.repo === undefined || across.sha === undefined
               ? undefined
-              : { repo: across.repo, sha: across.sha }
+              : { repo: across.repo, sha: across.sha, read: across.read }
           }
         />
       )}
