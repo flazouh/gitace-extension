@@ -20,7 +20,6 @@ import { Effect } from "effect"
 import type { Told } from "./writings"
 
 const NAME = "gitace-ledger"
-const VERSION = 1
 
 /**
  * Which reading of a file a saying is, part of the key it is kept under.
@@ -32,6 +31,13 @@ const VERSION = 1
  * with what was true then.
  */
 const READER = 4
+
+/**
+ * The database's version, which is the reader's: raising the reader upgrades the
+ * database, and the upgrade drops the readings no key can reach any more. The
+ * manifests stay, because a commit's paths and blob shas do not depend on it.
+ */
+const VERSION = READER
 
 /** The key a file's saying is kept under. */
 const keyFor = (sha: string): string => `${READER}:${sha}`
@@ -76,6 +82,7 @@ const opened = (): Effect.Effect<IDBDatabase, unknown> =>
     asked.onupgradeneeded = () => {
       const database = asked.result
       if (!database.objectStoreNames.contains(TOLD)) database.createObjectStore(TOLD)
+      else asked.transaction?.objectStore(TOLD).clear()
       if (!database.objectStoreNames.contains(COMMITS)) database.createObjectStore(COMMITS)
     }
     asked.onsuccess = () => resume(Effect.succeed(asked.result))

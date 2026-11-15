@@ -325,6 +325,13 @@ const passedOn = function* (statement: Syntax): Generator<Borrowed> {
   if (!named) yield { name: "*", specifier }
 }
 
+/** `export { one, two }`, which names what the file has rather than declaring or borrowing it. */
+const listsExports = (statement: Syntax): boolean =>
+  statement.type === "export_statement" &&
+  statement.childForFieldName("source") === null &&
+  statement.childForFieldName("declaration") === null &&
+  childrenOf(statement).some((child) => child.type === "export_clause")
+
 /** A string literal's text, without its quotes. */
 const STRINGS: ReadonlySet<string> = new Set(["string"])
 
@@ -390,6 +397,7 @@ export const TYPESCRIPT: Dialect = {
   names: NAMES,
   bindings,
   passedOn,
+  listsExports,
   // `export * from` is a re-export: a barrel's importers read those names through it.
   passesOnWhole: true,
   comments: COMMENTS,

@@ -134,6 +134,11 @@ type Elsewhere = {
  */
 const UNANSWERED: Elsewhere = { uses: [], ready: false }
 
+/** An answer and the name it answers, written as where that name is written. */
+type Answered<A> = { readonly about: string; readonly answer: A }
+
+const NO_ADDS: ReadonlyMap<string, ReadonlySet<number>> = new Map()
+
 /** How many lines of context the preview shows either side of a row. */
 const AROUND = 8
 
@@ -386,8 +391,16 @@ export const UsesPanel = ({
   const choices = useMemo(() => diffChoices(settings.diff), [settings.diff])
   /** The rows, so the arrow keys can move between them. */
   const listed = useRef<Array<HTMLButtonElement | null>>([])
-  const [uses, setUses] = useState<ReadonlyArray<Use> | null>(null)
-  const [elsewhere, setElsewhere] = useState<Elsewhere | null>(null)
+  /*
+   * Each answer with the name it answers. A step along the trail asks again, and
+   * until the new answer lands the old one is the previous name's uses under the
+   * new name's breadcrumb; keyed, it is an answer still on its way.
+   */
+  const askedAbout = `${step.where ?? reading.path}:${step.writing.line}:${step.writing.from}:${step.writing.name}`
+  const [usesFor, setUsesFor] = useState<Answered<ReadonlyArray<Use>> | null>(null)
+  const [elsewhereFor, setElsewhereFor] = useState<Answered<Elsewhere> | null>(null)
+  const uses = usesFor?.about === askedAbout ? usesFor.answer : null
+  const elsewhere = elsewhereFor?.about === askedAbout ? elsewhereFor.answer : null
   /**
    * The repository's Uses, minus the ones in the file already listed above.
    *
@@ -537,18 +550,18 @@ export const UsesPanel = ({
 
   useEffect(() => {
     if (!here) {
-      setUses([])
+      setUsesFor({ about: askedAbout, answer: [] })
       return
     }
 
     const asking = Effect.runFork(
       ledger.usesIn(reading, step.writing).pipe(
         Effect.catch(onwardWith<ReadonlyArray<Use>>([])),
-        Effect.map(setUses)
+        Effect.map((answer) => setUsesFor({ about: askedAbout, answer }))
       )
     )
     return () => asking.interruptUnsafe()
-  }, [here, ledger, reading, step.writing])
+  }, [here, ledger, reading, step.writing, askedAbout])
 
   /*
    * The rest of the repository, where there is a Ledger that has read it.
@@ -571,11 +584,11 @@ export const UsesPanel = ({
           })
         ),
         Effect.catch(onwardWith(UNANSWERED)),
-        Effect.map(setElsewhere)
+        Effect.map((answer) => setElsewhereFor({ about: askedAbout, answer }))
       )
     )
     return () => asking.interruptUnsafe()
-  }, [ledger, across, exact, reading.path, step.where, step.writing])
+  }, [ledger, across, exact, reading.path, step.where, step.writing, askedAbout])
 
   /**
    * Whether where it is written is worth a row.
@@ -618,7 +631,7 @@ export const UsesPanel = ({
       to: use.to,
       written: false,
       sure: true,
-      imported: false
+      imported: use.imported === true
     })),
     ...beyond
       // The repository answers with where the name is written as one of its own
@@ -645,14 +658,15 @@ export const UsesPanel = ({
   /*
    * The other files the list names, read whole for their lines.
    *
-   * Every file with a use, the hidden ones too, so ticking a box shows lines that
-   * are already there rather than a second wait. Keyed by the paths and not by the
-   * rows, which are built fresh on every render.
+   * Only the files a row is drawn for, in the order they are drawn: an answer of
+   * two hundred uses is two hundred reads, most of them behind a box the reader
+   * left unticked. Keyed by the paths and not by the rows, which are built fresh
+   * on every render.
    */
   const read = useRef(across?.read)
   read.current = across?.read
   const sha = across?.sha
-  const others = [...new Set(hits.map((hit) => hit.path))].filter((path) => path !== reading.path).sort()
+  const others = listed_.groups.map((group) => group.path).filter((path) => path !== reading.path)
   const othersKey = others.join("\n")
   const [texts, setTexts] = useState<ReadonlyMap<string, string | null>>(new Map())
 
@@ -703,29 +717,39 @@ export const UsesPanel = ({
    * nothing. Until every one has answered, the head says the counts and not the
    * share, rather than a share of some of them.
    */
-  const changing = useRef(changes)
-  changing.current = changes
-  const touched = [...new Set(hits.filter((hit) => !hit.written).map((hit) => hit.path))]
+  const touched = [...new Set(listed_.uses.map((hit) => hit.path))]
     .filter((path) => changes?.paths.has(path) === true)
     .sort()
   const touchedKey = touched.join("\n")
-  const [adds, setAdds] = useState<ReadonlyMap<string, ReadonlySet<number>>>(new Map())
+  /*
+   * Kept with the changes they were asked of. A new commit on the pull request is
+   * a new `changes`, and lines added by the head before it are not lines added now.
+   */
+  const [addsOf, setAddsOf] = useState<{
+    readonly of: Changes
+    readonly lines: ReadonlyMap<string, ReadonlySet<number>>
+  } | null>(null)
+  const adds = addsOf !== null && addsOf.of === changes ? addsOf.lines : NO_ADDS
 
   useEffect(() => {
-    const asked = changing.current
-    if (asked === undefined || touchedKey === "") return
+    if (changes === undefined || touchedKey === "") return
     const asking = Effect.runFork(
       Effect.forEach(
         touchedKey.split("\n"),
         (path) =>
-          asked.added(path).pipe(
-            Effect.map((lines) => setAdds((was) => (was.has(path) ? was : new Map(was).set(path, lines))))
+          changes.added(path).pipe(
+            Effect.map((lines) =>
+              setAddsOf((was) => {
+                const kept = was !== null && was.of === changes ? was.lines : NO_ADDS
+                return kept.has(path) ? was : { of: changes, lines: new Map(kept).set(path, lines) }
+              })
+            )
           ),
         { concurrency: AT_ONCE, discard: true }
       )
     )
     return () => asking.interruptUnsafe()
-  }, [touchedKey])
+  }, [changes, touchedKey])
 
   const addedIn = (path: string): ReadonlySet<number> | undefined => adds.get(path)
   const added =

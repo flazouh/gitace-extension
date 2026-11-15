@@ -71,7 +71,7 @@ const stage = (uses: ReadonlyArray<AcrossUse>, changes: Changes) => {
   }
   const settings: Store = { read: Effect.succeed(DEFAULTS), write: () => Effect.void, watch: () => () => {} }
 
-  render(
+  const tree = (changes: Changes) => (
     <SettingsProvider store={settings}>
       <RendererProvider load={renderer}>
         <LedgerProvider ledger={ledger}>
@@ -93,7 +93,8 @@ const stage = (uses: ReadonlyArray<AcrossUse>, changes: Changes) => {
       </RendererProvider>
     </SettingsProvider>
   )
-  return { drew }
+  const { rerender } = render(tree(changes))
+  return { drew, again: (next: Changes) => rerender(tree(next)) }
 }
 
 const across = (path: string, line: number, imported = false): AcrossUse => ({
@@ -124,6 +125,14 @@ describe("the uses of a name on a pull request", () => {
     cleanup()
 
     stage([across("src/old.ts", 3)], changes)
+    expect(await screen.findByText("1 use in 1 file · none touched by this PR")).toBeTruthy()
+  })
+
+  test("counts again when the pull request gets a new commit", async () => {
+    const { again } = stage([across("src/added.ts", 3)], changes)
+    await screen.findByText("1 use in 1 file · all added by this PR")
+
+    again({ paths: changes.paths, added: () => Effect.succeed(new Set()) })
     expect(await screen.findByText("1 use in 1 file · none touched by this PR")).toBeTruthy()
   })
 

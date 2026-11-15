@@ -29,13 +29,14 @@ const SOURCE = await Bun.file("fixtures/code/shadowing.ts").text()
 const lines = SOURCE.split("\n")
 
 let root: Syntax
+let parser: Parser
 
 beforeAll(async () => {
   await Parser.init({ locateFile: () => "node_modules/web-tree-sitter/web-tree-sitter.wasm" })
   const language = await Language.load(
     "node_modules/@vscode/tree-sitter-wasm/wasm/tree-sitter-typescript.wasm"
   )
-  const parser = new Parser()
+  parser = new Parser()
   parser.setLanguage(language)
   root = parser.parse(SOURCE)! .rootNode as unknown as Syntax
 })
@@ -203,6 +204,23 @@ describe("everywhere a Writing is used", () => {
     const inner = at("shape", 3)!
 
     expect(usesIn(root, SOURCE, inner, TYPESCRIPT)).toHaveLength(3)
+  })
+
+  test("marks the uses that only pass the name on, and none of the ones that use it", () => {
+    const source = "const shape = 1\nexport { shape }\nshape + 1\n"
+    const tree = parser.parse(source)!.rootNode as unknown as Syntax
+    const shape = writingsIn(tree, source, TYPESCRIPT).find((one) => one.name === "shape")!
+
+    expect(usesIn(tree, source, shape, TYPESCRIPT).map((use) => [use.line, use.imported === true])).toEqual([
+      [1, false],
+      [2, true],
+      [3, false]
+    ])
+    expect(toldBy(tree, source, TYPESCRIPT).mentions.map((one) => [one.line, one.imported === true])).toEqual([
+      [1, false],
+      [2, true],
+      [3, false]
+    ])
   })
 })
 
