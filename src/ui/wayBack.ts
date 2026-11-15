@@ -84,12 +84,13 @@ const GRIP =
   "</g></svg>"
 
 /**
- * Their tokens first and a literal behind each one, so the widget is GitHub's own
- * green on GitHub's page and still a green button on a page that never loaded their
- * variables. The same reasoning the tab row control was dressed by.
+ * Ace's primary button, which is the page turned over: the page's ink for the fill and
+ * the page itself for the mark. GitHub's tokens first and a literal behind each, so it
+ * follows their light and dark themes and is still drawn on a page that never loaded
+ * their variables.
  */
-const REST = "var(--button-primary-bgColor-rest, #1f883d)"
-const LIT = "var(--button-primary-bgColor-hover, #1a7f37)"
+const INK = "var(--fgColor-default, #1f2328)"
+const PAGE = "var(--bgColor-default, #ffffff)"
 
 /**
  * How far the widget can travel on each axis, which is the window less the widget
@@ -165,10 +166,11 @@ const markStyle = (lit: boolean): string =>
     "height: " + SIZE + "px",
     "padding: 0",
     "margin: 0",
-    "border: 1px solid var(--button-primary-borderColor-rest, rgba(31, 35, 40, 0.15))",
-    "border-radius: 50%",
-    "background: " + (lit ? LIT : REST),
-    "color: var(--button-primary-fgColor-rest, #ffffff)",
+    "border: 0",
+    "border-radius: 6px",
+    "background: " + INK,
+    "color: " + PAGE,
+    "opacity: " + (lit ? "0.9" : "1"),
     "box-shadow: var(--shadow-floating-small, 0 3px 6px rgba(31, 35, 40, 0.15))",
     "cursor: pointer",
     "font: inherit",
