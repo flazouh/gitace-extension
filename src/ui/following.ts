@@ -1,6 +1,7 @@
 import { Effect, Option } from "effect"
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react"
-import type { Beyond, Reading, Where, Writing } from "../ports/Ledger"
+import type { Beyond, Place, Reading, Where, Writing } from "../ports/Ledger"
+import { crateOf, rustDocs } from "../ledger/rustDocs"
 import type { Bounds, DiffHandle, Modifiers, Name } from "../ports/Renderer"
 import { goModulesKnown, knowGoModules, knowPhpPrefixes, phpPrefixesKnown, reachingAll } from "../ledger/reaching"
 import { goModulesIn, isGoMod } from "../ledger/goModules"
@@ -87,6 +88,28 @@ const learnLayout = (source: string, across: Across): Effect.Effect<void> => {
 
 /** A file whose bare imports name npm packages rather than folders of this repository. */
 const SCRIPT = /\.[cm]?[jt]sx?$/u
+
+/** A Rust file, whose presses end on a guess or a crate's documentation rather than on nothing. */
+const RUST = /\.rs$/u
+
+/** How many of the repository's writings of a name a guess weighs. */
+const MOST_GUESSED = 50
+
+/** The place whose file shares the most folders with this one: the same crate before another. */
+const nearest = (places: ReadonlyArray<Place>, path: string): Place | undefined => {
+  const folders = path.split("/").slice(0, -1)
+  const shared = (other: string): number => {
+    const theirs = other.split("/")
+    let at = 0
+    while (at < folders.length && folders[at] === theirs[at]) at += 1
+    return at
+  }
+  let best: Place | undefined
+  for (const place of places) {
+    if (best === undefined || shared(place.path) > shared(best.path)) best = place
+  }
+  return best
+}
 import { useLedger } from "./ledger"
 import { useSettings } from "./useSettings"
 import { sameName } from "../diff/sameName"
@@ -463,6 +486,48 @@ export const useFollowing = (
       insist = false
     ) => {
       if (source === null) return
+      const rust = RUST.test(source.path)
+
+      /** A card that goes to where a name no file here writes is documented. A press's answer, never a hover's. */
+      const documented = (docs: string, crate?: string): Effect.Effect<void> =>
+        Effect.sync(() => {
+          if (!insist) return
+          const at = handle.current?.boundsOf(name) ?? lineBounds(host.current, name.line)
+          if (at === null) return
+          setBeyond({ at, found: { name: name.text, docs, ...(crate === undefined ? {} : { crate }) } })
+        })
+
+      /*
+       * The last answer a Rust press has, when nothing the file says leads anywhere.
+       *
+       * `draft.metadata` and `.with_title(…)` are read through a value, and what a
+       * value is takes types to know. The repository's own index of what it writes
+       * is asked for the name, and the writing nearest this file is the likely one;
+       * where the repository writes no such name, it is the standard library's or a
+       * dependency's, and the card offers a search of Rust's documentation.
+       */
+      const guessed = (): Effect.Effect<void> => {
+        if (!insist || !rust) return Effect.void
+        const across = repository.current
+        const searched = documented(rustDocs("std", name.text))
+        if (across?.repo === undefined || across.sha === undefined) return searched
+        return ledger.namesLike(across.repo, across.sha, name.text, MOST_GUESSED).pipe(
+          Effect.flatMap((found) => {
+            const best = nearest(
+              found.places.filter((place) => place.writing.name === name.text),
+              source.path
+            )
+            if (best === undefined) return searched
+            return across.read(best.path).pipe(
+              Effect.map((text) => {
+                on.current = { name, writing: best.writing, where: best.path, text }
+                then(best.writing, best.path)
+              })
+            )
+          }),
+          Effect.catch((cause) => onward(cause).pipe(Effect.andThen(searched)))
+        )
+      }
 
       const mine = (found: Where): Effect.Effect<void> => {
         if (found.at === "here") {
@@ -675,8 +740,14 @@ export const useFollowing = (
               }
 
               const candidates = candidatesFor(source.path, found)
-              if (candidates.length === 0) return Effect.void
-              return seek(candidates, asked, 0, new Set()).pipe(Effect.asVoid)
+              if (candidates.length === 0) {
+                // A crate no file here is: `serde_json::Value`, `std::collections::BTreeMap`.
+                const crate = rust ? crateOf(found.borrowed.specifier) : null
+                return crate === null ? guessed() : documented(rustDocs(crate, found.borrowed.name), crate)
+              }
+              return seek(candidates, asked, 0, new Set()).pipe(
+                Effect.flatMap((done) => (done ? Effect.void : guessed()))
+              )
             })
           )
         )
@@ -688,7 +759,7 @@ export const useFollowing = (
             ledger.writingAt(whole, { row: name.line - 1, column: name.from })
           ),
           Effect.flatMap((found) =>
-            Option.isNone(found) ? Effect.void : mine(found.value)
+            Option.isNone(found) ? guessed() : mine(found.value)
           ),
           // A Ledger that could not answer leaves the file as it is. There is
           // nothing to tell a reader who asked for nothing.
@@ -696,7 +767,7 @@ export const useFollowing = (
         )
       )
     },
-    [asking, askRegistry, ledger, source]
+    [asking, askRegistry, host, ledger, source]
   )
 
   /*

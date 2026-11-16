@@ -624,28 +624,35 @@ const pythonEndings = (asked: string): ReadonlyArray<string> => [
  * A path that stops at a module, `use super::{A, B}`, names that module's own file:
  * `engine.rs`, `engine/mod.rs`, or the `lib.rs` of a crate's root.
  *
+ * A first word that is the name of a crate in this workspace is that crate's `src/`
+ * as well: `ori_domain::ids` from anywhere is `crates/ori-domain/src/ids.rs`. Cargo
+ * spells the folder with dashes and the code with underscores, and the folder is
+ * where the name is read from, since a `Cargo.toml` is not in hand here.
+ *
  * A `#[path]` attribute moves a module anywhere, and is not read. `std::`, and any
  * other crate, is outside the repository, the answer every dependency gets.
  */
 function couldBeRust({ from, specifier, paths }: Asked): ReadonlyArray<string> {
   const parts = specifier.split("::").filter((part) => part !== "")
   const first = parts[0]
-  let folder: string
-  let at = 1
-  if (first === "crate") folder = crateRootOf(from, paths)
-  else if (first === "self") folder = moduleFolderOf(from)
-  else if (first === "super") {
-    folder = moduleFolderOf(from)
-    at = 0
+  if (first === "crate") return filesOf(crateRootOf(from, paths), parts.slice(1))
+  if (first === "self") return filesOf(moduleFolderOf(from, paths), parts.slice(1))
+  if (first === "super") {
+    let folder = moduleFolderOf(from, paths)
+    let at = 0
     while (parts[at] === "super") {
       folder = folderOf(folder)
       at += 1
     }
-  } else {
-    folder = moduleFolderOf(from)
-    at = 0
+    return filesOf(folder, parts.slice(at))
   }
-  const rest = parts.slice(at)
+  const beside = filesOf(moduleFolderOf(from, paths), parts)
+  const crate = first === undefined ? undefined : cratesIn(paths).get(first)
+  return crate === undefined ? beside : [...beside, ...filesOf(crate, parts.slice(1))]
+}
+
+/** The files a module path under a folder could be. A path that stops at the folder is its root. */
+const filesOf = (folder: string, rest: ReadonlyArray<string>): ReadonlyArray<string> => {
   const asked = [folder, ...rest].filter((part) => part !== "").join("/")
   if (rest.length === 0) {
     const roots = CRATE_ROOTS.map((root) => (asked === "" ? root : `${asked}/${root}`))
@@ -658,10 +665,28 @@ function couldBeRust({ from, specifier, paths }: Asked): ReadonlyArray<string> {
 const CRATE_ROOTS: ReadonlyArray<string> = ["lib.rs", "main.rs"]
 
 /**
+ * The folders Cargo builds every file of as a crate of its own, beside a `Cargo.toml`.
+ *
+ * `tests/server.rs` is a crate, so its `mod common;` is `tests/common/mod.rs` and not
+ * `tests/server/common.rs`, which is where a module of that name would be.
+ */
+const ROOTS_EACH: ReadonlySet<string> = new Set(["tests", "examples", "benches", "bin"])
+
+/** Whether a file is the root of a crate by where Cargo puts it, not by its name. */
+const rootsItself = (file: string, paths: ReadonlySet<string>): boolean => {
+  const folder = folderOf(file)
+  const kind = folder.slice(folder.lastIndexOf("/") + 1)
+  if (!ROOTS_EACH.has(kind)) return false
+  const above = kind === "bin" ? folderOf(folderOf(folder)) : folderOf(folder)
+  return paths.has(above === "" ? "Cargo.toml" : `${above}/Cargo.toml`)
+}
+
+/**
  * The folder of the crate a file is in: the nearest one up holding a `lib.rs` or a
  * `main.rs`. `src` where none does, which is Cargo's default and the old guess.
  */
 const crateRootOf = (from: string, paths: ReadonlySet<string>): string => {
+  if (rootsItself(from, paths)) return folderOf(from)
   let folder = folderOf(from)
   for (;;) {
     const here = folder
@@ -672,10 +697,28 @@ const crateRootOf = (from: string, paths: ReadonlySet<string>): string => {
 }
 
 /** The folder a Rust file's own submodules are in. */
-const moduleFolderOf = (file: string): string => {
+const moduleFolderOf = (file: string, paths: ReadonlySet<string>): string => {
   const name = file.slice(file.lastIndexOf("/") + 1)
-  if (name === "mod.rs" || CRATE_ROOTS.includes(name)) return folderOf(file)
+  if (name === "mod.rs" || CRATE_ROOTS.includes(name) || rootsItself(file, paths)) return folderOf(file)
   return file.replace(/\.rs$/u, "")
+}
+
+/** The crates of a workspace by the name code spells them with, each at its `src/`. Read once per tree. */
+const crates = new WeakMap<ReadonlySet<string>, ReadonlyMap<string, string>>()
+
+const cratesIn = (paths: ReadonlySet<string>): ReadonlyMap<string, string> => {
+  const known = crates.get(paths)
+  if (known !== undefined) return known
+  const found = new Map<string, string>()
+  for (const path of paths) {
+    if (!path.endsWith("/Cargo.toml")) continue
+    const folder = folderOf(path)
+    const root = `${folder}/src`
+    if (!CRATE_ROOTS.some((one) => paths.has(`${root}/${one}`))) continue
+    found.set(folder.slice(folder.lastIndexOf("/") + 1).replaceAll("-", "_"), root)
+  }
+  crates.set(paths, found)
+  return found
 }
 
 /**

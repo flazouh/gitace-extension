@@ -34,10 +34,11 @@ export const addressOf = (beyond: Beyond): string | null => {
 }
 
 export const BeyondCard = ({ beyond, at, onGo, onClose }: BeyondCardProps) => {
+  const above = at.top > 200
+  if (beyond.docs !== undefined) return documented(beyond, beyond.docs, at, above, onClose)
+
   const address = addressOf(beyond)
   if (address === null) return null
-
-  const above = at.top > 200
 
   return createPortal(
     <div
@@ -76,3 +77,34 @@ export const BeyondCard = ({ beyond, at, onGo, onClose }: BeyondCardProps) => {
     outsideHost(document, OVER_ID)
   )
 }
+
+/**
+ * A name no repository here holds, and where it is documented.
+ *
+ * In a tab of its own: the documentation is not a page of this review, and the
+ * review should still be there when the reader is done with it.
+ */
+const documented = (beyond: Beyond, docs: string, at: Bounds, above: boolean, onClose: () => void) =>
+  createPortal(
+    <div
+      className={`${FLOAT} fixed z-50 max-w-[32rem] overflow-hidden text-ink`}
+      style={{
+        left: Math.max(8, Math.min(at.left, window.innerWidth - 520)),
+        ...(above ? { bottom: window.innerHeight - at.top + CLEAR } : { top: at.bottom + CLEAR })
+      }}
+    >
+      <a
+        href={docs}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onClose}
+        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-hover"
+      >
+        <code className="font-mono">{beyond.name}</code>
+        <span className="text-ink-muted">
+          {beyond.crate === undefined ? "Not in this repository · search Rust's docs" : `${beyond.crate} · docs`}
+        </span>
+      </a>
+    </div>,
+    outsideHost(document, OVER_ID)
+  )
