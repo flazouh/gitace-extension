@@ -461,9 +461,21 @@ export const Shell = ({
         if (holds(path)) setWanted({ path, line })
         else window.location.assign(`/${owner}/${repo}/blob/${snapshot.headSha}/${path}#L${line}`)
       },
-      reach: reachOut
+      reach: reachOut,
+      // A removed line names what the base commit had, which this page does not
+      // draw, so its answers are Peeks read at that commit. The paths are the
+      // head's: a file the change added is one more that holds nothing asked for.
+      before: {
+        paths,
+        repo: { owner, repo },
+        sha: snapshot.baseSha,
+        read: (path) => readWholeFile(snapshot.baseSha, path),
+        holds: () => false,
+        open: (path, line) => window.location.assign(`/${owner}/${repo}/blob/${snapshot.baseSha}/${path}#L${line}`),
+        reach: reachOut
+      }
     }
-  }, [paths, readPaths, readWholeFile, snapshot.headSha, owner, repo, reachOut])
+  }, [paths, readPaths, readWholeFile, snapshot.headSha, snapshot.baseSha, owner, repo, reachOut])
 
   const onPost = useMemo(
     () =>

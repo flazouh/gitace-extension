@@ -5,7 +5,7 @@ import "./customElements"
 import { FileTree, useFileTree } from "@pierre/trees/react"
 import type { GitStatus } from "@pierre/trees"
 import { Effect, Option } from "effect"
-import { memo, useEffect, useMemo, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { afterPaint, whenIdle } from "../app/idle"
 import type { Revealer } from "../app/revealing"
@@ -440,6 +440,8 @@ const WRITING = "writing"
  * diff would move the reader, and not moving the reader is what a Peek is for.
  */
 const PEEKING = "peeking"
+/** The Peek a name on a removed line asked for, under that line. */
+const PEEKING_BEFORE = "peeking-before"
 
 const FileDiffPaneView = ({
   file,
@@ -613,8 +615,8 @@ const FileDiffPaneView = ({
    * answer. Nothing is fetched until a reader holds the key.
    *
    * The new half of the file, which is the side the line numbers on an addition
-   * and a context line belong to. A Name on a deleted line is a name in a file
-   * that no longer exists at this commit, and is left alone.
+   * and a context line belong to. A Name on a deleted line is a name in the file
+   * as it was, and is asked of the old half, in the repository as it was.
    */
   const following = useMemo(
     () =>
@@ -640,6 +642,19 @@ const FileDiffPaneView = ({
     peeked,
     unpeek
   } = useFollowing(following, host, across, initialPeeked)
+  const followingBefore = useMemo(
+    () =>
+      reveal === undefined
+        ? null
+        : {
+            path: file.path,
+            text: Effect.tryPromise({ try: reveal, catch: (cause) => cause }).pipe(
+              Effect.map((halves) => halves.before ?? "")
+            )
+          },
+    [reveal, file.path]
+  )
+  const removed = useFollowing(followingBefore, host, across?.before, undefined, "before")
 
   /*
    * `u`, for the name the pointer is on, as on every other screen that draws
@@ -649,7 +664,11 @@ const FileDiffPaneView = ({
    * question is about the name under the pointer, and only the pane the pointer
    * is in has one. The rest answer nothing and do nothing.
    */
-  useKeys(useKeyboard(), { uses: askNow, dismiss: unpeek })
+  const unpeekBoth = useCallback(() => {
+    unpeek()
+    removed.unpeek()
+  }, [unpeek, removed.unpeek])
+  useKeys(useKeyboard(), { uses: askNow, dismiss: unpeekBoth })
 
   /*
    * Which lines GitHub's diff for this file holds, or nothing until it lands.
@@ -695,10 +714,12 @@ const FileDiffPaneView = ({
     // out where it was written, build the rows, and hand them to a pane that
     // never asked for them — every part of the gesture except the part a reader
     // can see.
-    const looking =
-      peeked === null
+    const looking: ReadonlyArray<NoteAt> = [
+      ...(peeked === null ? [] : [{ key: PEEKING, side: "additions" as const, line: peeked.under }]),
+      ...(removed.peeked === null
         ? []
-        : [{ key: PEEKING, side: "additions" as const, line: peeked.under }]
+        : [{ key: PEEKING_BEFORE, side: "deletions" as const, line: removed.peeked.under }])
+    ]
 
     if (picked === null) return [...said, ...written, ...looking]
 
@@ -707,7 +728,7 @@ const FileDiffPaneView = ({
     const at = draftKey({ path: file.path, ...picked })
     if (written.some((note) => note.key === at)) return [...said, ...written, ...looking]
     return [...said, ...written, ...looking, { key: WRITING, side: picked.side, line: picked.to }]
-  }, [hung, drafts, picked, file.path, peeked])
+  }, [hung, drafts, picked, file.path, peeked, removed.peeked])
 
   // One element per note, made here and kept: the renderer asks for a row's
   // contents while it is drawing, which is no time to be creating React roots,
@@ -772,16 +793,20 @@ const FileDiffPaneView = ({
         // open a box whose Comment button cannot come up, over a draft that can be
         // saved and never sent.
         onPick: canPost ? setPicked : undefined,
-        // Only the new half. A Name on a deleted line belongs to a file this
-        // commit does not have, and answering about it would be answering about
-        // a different file than the one on the screen.
+        // Each half asked of its own file: a Name on a deleted line is in the
+        // file as it was, and its line numbers are that file's.
         onName: (name, held) => {
-          if (name.side !== "deletions") names.onName(name, held)
+          if (name.side === "deletions") removed.names.onName(name, held)
+          else names.onName(name, held)
         },
         onNameEnter: (name, held) => {
-          if (name.side !== "deletions") names.onNameEnter(name, held)
+          if (name.side === "deletions") removed.names.onNameEnter(name, held)
+          else names.onNameEnter(name, held)
         },
-        onNameLeave: names.onNameLeave,
+        onNameLeave: (name) => {
+          names.onNameLeave(name)
+          removed.names.onNameLeave(name)
+        },
         // The way to fetch the rest of the file, so a reader can reveal what
         // GitHub left out between the hunks. The renderer calls it on a press
         // and not before, so a file nobody expands costs no request.
@@ -791,6 +816,7 @@ const FileDiffPaneView = ({
       })
       handle.current = live
       names.drawnBy(live)
+      removed.names.drawnBy(live)
     }
 
     const wait = afterPaint(draw)
@@ -798,11 +824,12 @@ const FileDiffPaneView = ({
       wait()
       handle.current = null
       names.drawnBy(null)
+      removed.names.drawnBy(null)
       live?.destroy()
     }
     // Every one of these is baked into the DOM the renderer writes, so a change
     // to any of them is a file drawn again from the patch.
-  }, [engine, source, file.path, prose, drawnWith, canPost, reveal, names])
+  }, [engine, source, file.path, prose, drawnWith, canPost, reveal, names, removed.names])
 
   useEffect(() => {
     handle.current?.showNotes(notes)
@@ -872,6 +899,9 @@ const FileDiffPaneView = ({
       {card === null ? null : (
         <FollowCard writing={card.writing} at={card.at} where={card.where} />
       )}
+      {removed.shown === null ? null : (
+        <FollowCard writing={removed.shown.writing} at={removed.shown.at} where={removed.shown.where} />
+      )}
       {/* A name in another repository, which is a page rather than a scroll. */}
       {beyond === null || card !== null ? null : (
         <BeyondCard
@@ -879,6 +909,14 @@ const FileDiffPaneView = ({
           at={beyond.at}
           onGo={(address) => window.location.assign(address)}
           onClose={unbeyond}
+        />
+      )}
+      {removed.beyond === null || removed.shown !== null ? null : (
+        <BeyondCard
+          beyond={removed.beyond.found}
+          at={removed.beyond.at}
+          onGo={(address) => window.location.assign(address)}
+          onClose={removed.unbeyond}
         />
       )}
       {/*
@@ -926,6 +964,10 @@ const FileDiffPaneView = ({
         if (note.key === PEEKING) {
           if (peeked === null) return null
           return createPortal(<Peek peeked={peeked} />, node, note.key)
+        }
+        if (note.key === PEEKING_BEFORE) {
+          if (removed.peeked === null) return null
+          return createPortal(<Peek peeked={removed.peeked} />, node, note.key)
         }
 
         if (note.key === WRITING) {

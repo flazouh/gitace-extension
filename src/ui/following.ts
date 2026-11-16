@@ -184,6 +184,11 @@ export type Across = {
    * Absent where every file opens here.
    */
   readonly holds?: (path: string) => boolean
+  /**
+   * The same repository at the commit a change started from, for a name on a
+   * line it removed. Absent where there is no such commit to read.
+   */
+  readonly before?: Across
 }
 
 /**
@@ -321,7 +326,13 @@ export const useFollowing = (
    * For fixtures and marketing mounts that need the Writing under a line without
    * a Shift-press. Absent elsewhere; the reader peeks themselves.
    */
-  initialPeeked?: Peeked | null
+  initialPeeked?: Peeked | null,
+  /**
+   * Which half of a diff the names are on. The removed half's line numbers are
+   * the old file's and no row of the drawing can be scrolled to by one, so every
+   * answer there is a Peek.
+   */
+  half: "after" | "before" = "after"
 ): Follows => {
   const ledger = useLedger()
   /*
@@ -921,7 +932,8 @@ export const useFollowing = (
       }
 
       const answer = (writing: Writing, where?: string): void => {
-        if (isTheWriting(name, writing, where, source?.path ?? "")) show(writing, where)
+        if (half === "before") peek(writing, where)
+        else if (isTheWriting(name, writing, where, source?.path ?? "")) show(writing, where)
         else arrive(writing, where)
       }
 
@@ -942,7 +954,7 @@ export const useFollowing = (
       // told us the pointer left it.
       ask(name, answer, true)
     },
-    [anchorOf, ask, clear, host, linesOf, source]
+    [anchorOf, ask, clear, half, host, linesOf, source]
   )
 
   const drawnBy = useCallback((given: DiffHandle | null) => {
