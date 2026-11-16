@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { Effect, Option } from "effect"
 import { aComment, aThread, anchoredAt, person } from "../../tests/snapshots"
 import { revealer } from "../app/revealing"
-import type { Ledger, Writing } from "../ports/Ledger"
+import type { Ledger, Place, Writing } from "../ports/Ledger"
 import { LedgerProvider, noLedger } from "./ledger"
 import type { DiffHandle, DiffRequest } from "../ports/Renderer"
 import type { ChangedFile } from "../domain/PullRequest"
@@ -641,6 +641,89 @@ describe("a Peek in a diff", () => {
     await waitFor(() => {
       expect(noted.at(-1)?.some((note) => note.key === "peeking")).toBe(false)
     })
+  })
+})
+
+describe("a press in a Rust file that nothing in the file leads anywhere", () => {
+  const rust: ChangedFile = { ...file, path: "crates/app/src/engine/plan.rs" }
+  const placed = (path: string, line: number): Place => ({
+    path,
+    writing: { name: "with_title", kind: "member", line, from: 12, to: 22, signature: "pub fn with_title()", doc: null, sure: true }
+  })
+  const pressed = { line: 2, from: 3, to: 13, text: "with_title" }
+
+  const staged = (over: Partial<Ledger>) => {
+    const opened: Array<string> = []
+    const ledger: Ledger = {
+      ...noLedger,
+      ready: () => Effect.void,
+      writingAt: () => Effect.succeed(Option.none()),
+      ...over
+    }
+    const measured: LoadEngine = Effect.succeed({
+      warm: () => Effect.void,
+      renderDiff: (_container: HTMLElement, request: DiffRequest) => {
+        asked.push(request)
+        return { ...handle, boundsOf: () => ({ top: 300, left: 40, bottom: 320, right: 120 }) }
+      }
+    })
+    render(
+      <LedgerProvider ledger={ledger}>
+        <RendererProvider load={measured}>
+          <FileDiffPane
+            file={rust}
+            ask={() => Effect.succeed(Option.none())}
+            choices={CHOICES}
+            across={{
+              paths: new Set([rust.path, "crates/app/src/lib.rs"]),
+              repo: { owner: "flowline-labs", repo: "flowline" },
+              sha: "abc123",
+              read: () => Effect.succeed("pub fn with_title() {}\n"),
+              open: (path, line) => opened.push(`${path}:${line}`)
+            }}
+            revealing={revealer(() => Effect.succeed("fn plan() {\n  with_title()\n}\n"), { base: "before", head: "after" })}
+          />
+        </RendererProvider>
+      </LedgerProvider>
+    )
+    return { opened }
+  }
+
+  test("goes to the repository's writing of that name nearest the file", async () => {
+    const { opened } = staged({
+      namesLike: () =>
+        Effect.succeed({ ready: true, places: [placed("crates/other/src/lib.rs", 4), placed("crates/app/src/types.rs", 9)] })
+    })
+    const request = await drawn()
+
+    request.onName?.(pressed, { go: true, shift: false, alt: false })
+
+    await waitFor(() => {
+      expect(opened).toEqual(["crates/app/src/types.rs:9"])
+    })
+  })
+
+  test("offers a search of Rust's documentation where the repository writes no such name", async () => {
+    staged({ namesLike: () => Effect.succeed({ ready: true, places: [] }) })
+    const request = await drawn()
+
+    request.onName?.(pressed, { go: true, shift: false, alt: false })
+
+    const link = await screen.findByRole("link", { name: /search Rust's docs/ })
+    expect(link.getAttribute("href")).toBe("https://doc.rust-lang.org/std/?search=with_title")
+  })
+
+  test("goes to a dependency's documentation for a name the file says is from one", async () => {
+    staged({
+      writingAt: () =>
+        Effect.succeed(Option.some({ at: "elsewhere" as const, borrowed: { name: "Value", specifier: "serde_json" } }))
+    })
+    const request = await drawn()
+
+    request.onName?.({ ...pressed, text: "Value" }, { go: true, shift: false, alt: false })
+
+    const link = await screen.findByRole("link", { name: /serde_json · docs/ })
+    expect(link.getAttribute("href")).toBe("https://docs.rs/serde_json/latest/serde_json/?search=Value")
   })
 })
 

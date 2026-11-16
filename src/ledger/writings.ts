@@ -161,6 +161,17 @@ export type Dialect = {
    */
   readonly qualifierOf?: (name: Syntax, above: Syntax | null) => Syntax | null
   /**
+   * The path a name is read through, segment by segment, where it is written at
+   * the end of one: `["crate", "document"]` for `core` in `crate::document::core`,
+   * `["SeedMessage"]` for `User` in `SeedMessage::User`. Empty where the name is
+   * the first segment of a longer path, and absent where it is in no path.
+   *
+   * A segment that names the type of the code around it, `Self` or the `self` a
+   * method reads its fields through, is that type's own name. See
+   * {@link throughPath} for what the segments then say.
+   */
+  readonly pathOf?: (path: ReadonlyArray<Syntax>) => ReadonlyArray<string> | null
+  /**
    * The name an import binds where no node in the file says it.
    *
    * A Go import with no alias binds its package's name, which Go reads off the
@@ -217,6 +228,25 @@ export type Dialect = {
    * thing around it can.
    */
   readonly offering: (node: Syntax) => Offering | null
+  /**
+   * What a call to a macro writes, where the file offers it: Rust's
+   * `define_id!(ItemId)` is the only place `ItemId` is written, and no node says
+   * it declares anything. Asked of what the outline reaches, so never of a body.
+   */
+  readonly minted?: (node: Syntax) => ReadonlyArray<Bound>
+  /**
+   * The type whose members a node offers: `Box` for `struct Box` and for `impl
+   * Box`. Where a language writes a type's members apart from the type, this is
+   * how `Box::new` is found among them. See {@link pathOf}.
+   */
+  readonly holderOf?: (node: Syntax) => string | null
+  /**
+   * The library a name no scope binds comes from, where the language always brings
+   * it in: Rust's `Clone`, `Some`, `vec!`, `#[derive]` and `.unwrap()` are its
+   * standard library's, in every file, and no import says so. Asked after the
+   * file's own scopes, so a name the file binds is still its own.
+   */
+  readonly preludeOf?: (path: ReadonlyArray<Syntax>) => string | null
 }
 
 /** What a node offers the outline. See {@link Dialect.offering}. */
@@ -361,6 +391,15 @@ const found = (
   const name = path.at(-1)
   if (name === undefined) return null
 
+  const member = memberAt(path, source, comments, dialect)
+  if (member !== null) return { at: "here", writing: member }
+
+  const through = dialect.pathOf?.(path) ?? null
+  if (through !== null) {
+    const followed = throughPath(root, source, name, through, path, memo, dialect, whole)
+    if (followed !== null) return followed
+  }
+
   // Asked before the name is, because `shapes.Box` is never the file's own `Box`.
   const qualifier = dialect.qualifierOf?.(name, path.at(-2) ?? null) ?? null
   if (qualifier !== null) {
@@ -375,9 +414,13 @@ const found = (
     if (bound === undefined || bound.kind === "import" || !dialect.names.has(name.type)) return null
   }
 
+  const bound = dialect.names.has(name.type) ? boundIn(path, name.text, memo, dialect) : undefined
+  if (bound === undefined) {
+    const library = dialect.preludeOf?.(path) ?? null
+    if (library !== null) return { at: "elsewhere", borrowed: { name: name.text, specifier: library } }
+  }
   if (!dialect.names.has(name.type)) return null
 
-  const bound = boundIn(path, name.text, memo, dialect)
   if (bound !== undefined) {
     // An import binds the name, and where it was written is in another file.
     // What this file knows is what it states, which is enough for whoever can
@@ -470,6 +513,110 @@ const throughQualifier = (
     : { at: "elsewhere", borrowed: { name: name.text, specifier: through.specifier } }
 }
 
+/**
+ * The member a press landed on where it is declared: a struct's field, an enum's variant.
+ *
+ * Neither is a name a scope binds, since a field is reached through what holds it,
+ * so a press on the declaration itself found nothing where it should ask who reads
+ * it. The outline already says which names a type offers as its members.
+ */
+const memberAt = (
+  path: ReadonlyArray<Syntax>,
+  source: string,
+  comments: ReadonlyMap<number, Syntax>,
+  dialect: Dialect
+): Writing | null => {
+  const name = path.at(-1)
+  if (name === undefined) return null
+  for (let step = path.length - 2; step >= Math.max(0, path.length - 4); step--) {
+    const holder = path[step]
+    if (holder === undefined) continue
+    const offered = dialect.offering(holder)
+    if (offered === null) continue
+    if (offered.at !== "members") return null
+    const member = offered.members.find(
+      (one) =>
+        one.name.startPosition.row === name.startPosition.row &&
+        one.name.startPosition.column === name.startPosition.column
+    )
+    // A variant offers its fields, and its own name is offered by the enum around it.
+    if (member === undefined) continue
+    const lines = source.split("\n")
+    return docked(written(member.name, member.kind, lines), member.name, comments, lines)
+  }
+  return null
+}
+
+/** Whether a segment of a path names a type rather than a module, by Rust's convention of capitals. */
+const namesType = (segment: string): boolean => /^[A-Z]/u.test(segment)
+
+/** What separates a type from its member in a name a Follow carries: `SeedMessage::User`. */
+const MEMBER = "::"
+
+/**
+ * A name read through a path, `crate::document::core` or `SeedMessage::User`.
+ *
+ * The segments before the first that names a type say which module; that type and
+ * what follows it say which name in that module, carried as one `Type::member` for
+ * {@link writingNamed} to find at the end. The first segment says where the module
+ * is: a keyword of the path's own (`crate`, `self`, `super`), an import this file
+ * made, a module or type it declares, or a crate it names.
+ *
+ * Nothing where the path says nothing a Follow could use, and the name is then
+ * asked about the ordinary way.
+ */
+const throughPath = (
+  root: Syntax,
+  source: string,
+  name: Syntax,
+  through: ReadonlyArray<string>,
+  path: ReadonlyArray<Syntax>,
+  memo: Memo,
+  dialect: Dialect,
+  whole: () => ReadonlyArray<Borrowed>
+): Found | null => {
+  if (through.length === 0) {
+    // The first segment of a longer path: a crate, where nothing here binds it.
+    if (namesType(name.text) || boundIn(path, name.text, memo, dialect) !== undefined) return null
+    return { at: "elsewhere", borrowed: { name: "*", specifier: name.text } }
+  }
+
+  const segments = [...through, name.text]
+  const typed = segments.findIndex(namesType)
+  const split = typed === -1 ? segments.length - 1 : typed
+  const module = segments.slice(0, split)
+  const wanted = segments.slice(split)
+  const head = segments[0]!
+
+  if (module.length === 0) {
+    const bound = boundIn(path, head, memo, dialect)
+    if (bound?.kind === "import") {
+      if (bound.from === undefined) return null
+      const named = [bound.from.name, ...wanted.slice(1)].join(MEMBER)
+      return { at: "elsewhere", borrowed: { name: named, specifier: bound.from.specifier } }
+    }
+    const writing = writingNamed(root, source, wanted.join(MEMBER), dialect)
+    if (writing !== null) return { at: "here", writing }
+    if (bound !== undefined) return null
+    // A type nothing here binds came in with a file taken whole: `use protocol::*`.
+    const [first, ...rest] = whole()
+    if (first === undefined) return null
+    return {
+      at: "elsewhere",
+      borrowed: { name: wanted.join(MEMBER), specifier: first.specifier },
+      ...(rest.length === 0 ? {} : { orFrom: rest.map((one) => one.specifier) })
+    }
+  }
+
+  const keyword = head === "crate" || head === "self" || head === "super"
+  const bound = keyword ? undefined : boundIn(path, head, memo, dialect)
+  const from =
+    bound?.kind === "import" && bound.from !== undefined
+      ? [bound.from.specifier, bound.from.name, ...module.slice(1)].filter((part) => part !== "" && part !== "*")
+      : module
+  return { at: "elsewhere", borrowed: { name: wanted.join(MEMBER), specifier: from.join("::") } }
+}
+
 /** The module an import names, when it is used as a qualifier. See {@link Dialect.moduleThrough}. */
 const moduleOf = (from: Borrowed, qualifier: string, dialect: Dialect): string =>
   dialect.moduleThrough?.(from, qualifier) ?? from.specifier
@@ -487,6 +634,14 @@ export const borrowedAs = (
   name: string,
   dialect: Dialect
 ): { readonly borrowed: Borrowed; readonly orFrom?: ReadonlyArray<string> } | null => {
+  // A type's member goes wherever the type went: `pub use types::SeedMessage`.
+  const split = name.indexOf(MEMBER)
+  if (split > 0) {
+    const passed = borrowedAs(root, name.slice(0, split), dialect)
+    if (passed === null) return null
+    return { ...passed, borrowed: { ...passed.borrowed, name: `${passed.borrowed.name}${name.slice(split)}` } }
+  }
+
   const bound = declarationsOf(root, new Map(), dialect).get(name)
   if (bound?.kind === "import" && bound.from !== undefined) {
     return { borrowed: { name: bound.from.name === "*" ? name : bound.from.name, specifier: bound.from.specifier } }
@@ -700,7 +855,38 @@ export const writingNamed = (
   const offered = writingsIn(root, source, dialect)
   if (name === "default" || name === "*") return offered[0] ?? null
 
+  const split = name.lastIndexOf(MEMBER)
+  if (split > 0) {
+    const owner = name.slice(0, split).split(MEMBER).at(-1) ?? ""
+    return memberNamed(root, source, owner, name.slice(split + MEMBER.length), dialect)
+  }
+
   return offered.find((writing) => writing.name === name) ?? null
+}
+
+/**
+ * `SeedMessage::User`: a member of a type, found only where that type's members are.
+ *
+ * In the type's own body or in an `impl` for it, and nowhere else: several types in
+ * one file can each have a `new`, and a member of the same spelling on another type
+ * is another thing. Nothing where the type has no such member here.
+ */
+const memberNamed = (root: Syntax, source: string, owner: string, member: string, dialect: Dialect): Writing | null => {
+  if (dialect.holderOf === undefined) return null
+  let found: Bound | undefined
+  const walk = (node: Syntax): void => {
+    if (found !== undefined) return
+    const offering = dialect.offering(node)
+    if (offering?.at === "working") return
+    if (offering?.at === "members" && dialect.holderOf?.(node) === owner) {
+      found = offering.members.find((one) => one.name.text === member)
+    }
+    for (const child of childrenOf(node)) walk(child)
+  }
+  walk(root)
+  if (found === undefined) return null
+  const lines = source.split("\n")
+  return docked(written(found.name, found.kind, lines), found.name, commentsBy(root, dialect), lines)
 }
 
 /**
@@ -875,6 +1061,9 @@ export const writingsIn = (
       // to the one function that takes it, and a reader looking for the shape of
       // a file is not looking for an argument list.
       if (bound.kind === "import" || bound.kind === "parameter") continue
+      found.push(docked(written(bound.name, bound.kind, lines), bound.name, comments, lines))
+    }
+    for (const bound of dialect.minted?.(node) ?? []) {
       found.push(docked(written(bound.name, bound.kind, lines), bound.name, comments, lines))
     }
 

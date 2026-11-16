@@ -216,6 +216,13 @@ export type Beyond = {
   /** True where the package turned out to be one this repository holds itself. */
   readonly here?: boolean
   readonly why?: string
+  /**
+   * Where the name is documented, for one no repository here holds: a Rust
+   * crate's page on docs.rs, or a search of Rust's own. See `src/ledger/rustDocs.ts`.
+   */
+  readonly docs?: string
+  /** The crate it is from, where the file says which. */
+  readonly crate?: string
 }
 
 /** Uses across a repository, and whether there is a Ledger to have found them in. */

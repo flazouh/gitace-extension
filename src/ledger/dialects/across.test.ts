@@ -689,6 +689,185 @@ describe("a Rust name a module hands on with pub use", () => {
     const other = FILES[written!]!
     expect(writingNamed(parsed("tree-sitter-rust.wasm", other), other, "HiArgs", dialectFor(written!)!)?.line).toBe(1)
   })
+
+  test("is followed from super, through a pub use of a module declared beside it", () => {
+    const FILES: Readonly<Record<string, string>> = {
+      "src/engine/duplicate.rs": "use super::{Agent, SeedMessage};\n\nstruct Seeded {\n    messages: Vec<SeedMessage>,\n}\n",
+      "src/engine/mod.rs": "mod duplicate;\nmod types;\n\npub struct Agent;\n\npub use types::{\n    SeedMessage, StopCause,\n};\n",
+      "src/engine/types.rs": "pub enum SeedMessage {\n    User(String),\n}\n",
+      "src/lib.rs": "pub mod engine;\n"
+    }
+    const paths = new Set(Object.keys(FILES))
+    const from = "src/engine/duplicate.rs"
+    const text = FILES[from]!
+    const lines = text.split("\n")
+    const row = lines.findIndex((line) => line.includes("Vec<SeedMessage>"))
+    const found = writingAt(parsed("tree-sitter-rust.wasm", text), text, { row, column: lines[row]!.indexOf("SeedMessage") }, dialectFor(from)!)
+    expect(found?.at).toBe("elsewhere")
+    if (found?.at !== "elsewhere") return
+
+    const [module] = reachingAll(from, found.borrowed.specifier, paths, found.borrowed.name)
+    expect(module).toBe("src/engine/mod.rs")
+    const passed = borrowedAs(parsed("tree-sitter-rust.wasm", FILES[module!]!), "SeedMessage", dialectFor(module!)!)
+    expect(passed?.borrowed).toEqual({ name: "SeedMessage", specifier: "types" })
+
+    const [written] = reachingAll(module!, passed!.borrowed.specifier, paths, "SeedMessage")
+    expect(written).toBe("src/engine/types.rs")
+    const other = FILES[written!]!
+    expect(writingNamed(parsed("tree-sitter-rust.wasm", other), other, "SeedMessage", dialectFor(written!)!)?.line).toBe(1)
+  })
+})
+
+describe("every name of a Rust workspace", () => {
+  const FILES: Readonly<Record<string, string>> = {
+    "Cargo.toml": "[workspace]\n",
+    "crates/core/acme-kernel/Cargo.toml": "[package]\n",
+    "crates/core/acme-kernel/src/lib.rs": "pub mod document;\npub mod engine;\n",
+    "crates/core/acme-kernel/src/document/mod.rs": "pub mod core;\n",
+    "crates/core/acme-kernel/src/document/core.rs": "pub struct DocChange;\n",
+    "crates/core/acme-kernel/src/engine/mod.rs":
+      "mod duplicate;\nmod types;\n\npub use types::{SeedMessage, Seeded};\n",
+    "crates/core/acme-kernel/src/engine/types.rs": [
+      "pub enum SeedMessage {",
+      "    User { author: String },",
+      "    Assistant(String),",
+      "}",
+      "",
+      "pub struct Seeded {",
+      "    pub messages: Vec<SeedMessage>,",
+      "}",
+      "",
+      "impl Seeded {",
+      "    pub fn new() -> Self {",
+      "        Self { messages: vec![] }",
+      "    }",
+      "}",
+      ""
+    ].join("\n"),
+    "crates/core/acme-kernel/src/engine/duplicate.rs": [
+      "use super::{SeedMessage, Seeded};",
+      "use crate::document::core::DocChange;",
+      "use acme_domain::ids::ItemId;",
+      "use acme_protocol as wire;",
+      "use serde_json::Value;",
+      "",
+      "#[derive(Clone, Debug)]",
+      "struct Plan {",
+      "    doc_writes: Vec<DocChange>,",
+      "    seeded: Seeded,",
+      "}",
+      "",
+      "impl Plan {",
+      "    fn start(&self, at: ItemId) -> Option<Value> {",
+      "        let first = SeedMessage::User { author: String::new() };",
+      "        let plan = Plan { doc_writes: vec![], seeded: Seeded::new() };",
+      "        let _ = (self.doc_writes.clone(), Self::fresh(), wire::ApiError, Box::new(first));",
+      "        match plan { Plan { seeded, .. } => drop(seeded) }",
+      "        None",
+      "    }",
+      "",
+      "    fn fresh() -> Self {",
+      "        todo!()",
+      "    }",
+      "}",
+      ""
+    ].join("\n"),
+    "crates/core/acme-domain/Cargo.toml": "[package]\n",
+    "crates/core/acme-domain/src/lib.rs": "pub mod ids;\n",
+    "crates/core/acme-domain/src/ids.rs": "macro_rules! define_id {\n    ($name:ident) => {};\n}\n\ndefine_id!(\n    ItemId\n);\n",
+    "crates/acme-protocol/Cargo.toml": "[package]\n",
+    "crates/acme-protocol/src/lib.rs": "mod error;\n\npub use error::*;\n",
+    "crates/acme-protocol/src/error.rs": "pub struct ApiError;\n",
+    "crates/acme-server/Cargo.toml": "[package]\n",
+    "crates/acme-server/src/lib.rs": "",
+    "crates/acme-server/tests/common/mod.rs": "pub struct Harness;\n",
+    "crates/acme-server/tests/server.rs": "mod common;\n\nuse common::*;\n\nfn check() {\n    let _ = Harness;\n}\n"
+  }
+  const paths = new Set(Object.keys(FILES))
+  const FROM = "crates/core/acme-kernel/src/engine/duplicate.rs"
+
+  /** Where a press on a word lands, followed file to file as a press is: `path:line`, a library, or nothing. */
+  const pressed = (holds: string, word: string, from = FROM, nth = 0): string | null => {
+    const text = FILES[from]!
+    const lines = text.split("\n")
+    const row = lines.findIndex((line) => line.includes(holds))
+    if (row === -1) throw new Error(`no line holds ${holds}`)
+    let column = -1
+    for (let at = 0; at <= nth; at++) column = lines[row]!.indexOf(word, column + 1)
+    const found = writingAt(parsed("tree-sitter-rust.wasm", text), text, { row, column }, dialectFor(from)!)
+    if (found === null) return null
+    if (found.at === "here") return `${from}:${found.writing.line}`
+    return follow(from, [found.borrowed.specifier, ...(found.orFrom ?? [])], found.borrowed.name, 0)
+  }
+
+  const follow = (from: string, specifiers: ReadonlyArray<string>, name: string, hops: number): string | null => {
+    const candidates = specifiers.flatMap((specifier) => reachingAll(from, specifier, paths, name))
+    if (candidates.length === 0) return `library ${specifiers[0]} ${name}`
+    for (const path of candidates) {
+      const text = FILES[path]!
+      const writing = writingNamed(parsed("tree-sitter-rust.wasm", text), text, name, dialectFor(path)!)
+      if (writing !== null) return `${path}:${writing.line}`
+    }
+    if (hops >= 3) return null
+    for (const path of candidates) {
+      const passed = borrowedAs(parsed("tree-sitter-rust.wasm", FILES[path]!), name, dialectFor(path)!)
+      if (passed === null) continue
+      const next = follow(path, [passed.borrowed.specifier, ...(passed.orFrom ?? [])], passed.borrowed.name, hops + 1)
+      if (next !== null) return next
+    }
+    return null
+  }
+
+  const KERNEL = "crates/core/acme-kernel/src"
+
+  test("a segment of a path is the module its parent declares", () => {
+    expect(pressed("use crate::document", "document")).toBe(`${KERNEL}/lib.rs:1`)
+    expect(pressed("use crate::document", "core")).toBe(`${KERNEL}/document/mod.rs:1`)
+  })
+
+  test("another crate of the workspace is that crate's src, and a macro there writes a type", () => {
+    expect(pressed("use acme_domain", "ItemId")).toBe("crates/core/acme-domain/src/ids.rs:6")
+    expect(pressed("use acme_domain", "acme_domain")).toBe("crates/core/acme-domain/src/lib.rs:1")
+  })
+
+  test("a crate brought in under another name is followed through it, and through what it takes whole", () => {
+    expect(pressed("wire::ApiError", "ApiError")).toBe("crates/acme-protocol/src/error.rs:1")
+    expect(pressed("use acme_protocol as wire", "wire")).toBe("crates/acme-protocol/src/lib.rs:1")
+  })
+
+  test("a variant and a type's function are found where the type is, through what passed it on", () => {
+    expect(pressed("let first = SeedMessage::User", "User")).toBe(`${KERNEL}/engine/types.rs:2`)
+    expect(pressed("seeded: Seeded::new()", "new")).toBe(`${KERNEL}/engine/types.rs:11`)
+  })
+
+  test("a field is found from self, from a literal and from a pattern, and Self is the impl's type", () => {
+    expect(pressed("self.doc_writes.clone()", "doc_writes")).toBe(`${FROM}:9`)
+    expect(pressed("let plan = Plan {", "doc_writes")).toBe(`${FROM}:9`)
+    expect(pressed("Self::fresh()", "fresh")).toBe(`${FROM}:22`)
+    expect(pressed("let first = SeedMessage::User", "author")).toBe(`${KERNEL}/engine/types.rs:2`)
+  })
+
+  test("a field, a variant's field and a pattern's shorthand each answer where they are written", () => {
+    expect(pressed("doc_writes: Vec<DocChange>", "doc_writes")).toBe(`${FROM}:9`)
+    expect(pressed("User { author: String }", "author", `${KERNEL}/engine/types.rs`)).toBe(`${KERNEL}/engine/types.rs:2`)
+    expect(pressed("Plan { seeded, .. } => drop(seeded)", "seeded", FROM, 1)).toBe(`${FROM}:18`)
+  })
+
+  test("a test file is a crate of its own, and what it takes whole is looked in", () => {
+    expect(pressed("let _ = Harness", "Harness", "crates/acme-server/tests/server.rs")).toBe(
+      "crates/acme-server/tests/common/mod.rs:1"
+    )
+  })
+
+  test("what the standard library and a dependency give is said to be theirs", () => {
+    expect(pressed("#[derive(Clone", "Clone")).toBe("library std Clone")
+    expect(pressed("#[derive(Clone", "derive")).toBe("library std derive")
+    expect(pressed("self.doc_writes.clone()", "clone")).toBe("library std clone")
+    expect(pressed("todo!()", "todo")).toBe("library std todo")
+    expect(pressed("Box::new(first)", "new")).toBe("library std Box::new")
+    expect(pressed("use serde_json::Value", "Value")).toBe("library serde_json Value")
+    expect(pressed("Option<Value>", "Value")).toBe("library serde_json Value")
+  })
 })
 
 /*

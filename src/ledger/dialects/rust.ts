@@ -14,13 +14,12 @@
  * not reachable from the type in the way a class's are — the outline offers each
  * `impl` block where it stands, which is where a reader is looking for it.
  *
- * A name a `use` brings in is followed by nothing here yet: a Rust path is not a
- * file path, and `std::io::Read` resolves against a crate rather than against a
- * tree of files. What the file borrowed is recorded, so the answer can arrive
- * later without the vocabulary changing.
+ * A Rust path is not a file path: what the file borrowed is recorded as the path
+ * it wrote, and `src/ledger/reaching.ts` says which files a path could be. A name
+ * written after a path, `crate::a::B` or `B::new`, is read through it.
  */
 
-import type { Bound, Dialect, Offering, WritingKind } from "../writings"
+import type { Borrowed, Bound, Dialect, Offering, WritingKind } from "../writings"
 import { childrenOf, kindFrom, namesUnder, type Syntax } from "../syntax"
 
 /**
@@ -62,7 +61,7 @@ const OPENS: ReadonlySet<string> = new Set([
  * `i32` is a keyword wearing a type's clothes, and there is nowhere to follow it
  * to.
  */
-const NAMES: ReadonlySet<string> = new Set(["identifier", "type_identifier"])
+const NAMES: ReadonlySet<string> = new Set(["identifier", "type_identifier", "shorthand_field_identifier"])
 
 /** What a declaring node's kind is called, for the card and the outline. */
 const KINDS: Readonly<Record<string, WritingKind>> = {
@@ -94,7 +93,8 @@ const kindOf = kindFrom(KINDS)
  * rather than taken whole.
  */
 const boundBy = namesUnder(
-  new Set(["identifier"]),
+  // `ResolvedCut::At { documents, .. }` binds `documents`, spelled as the field it reads.
+  new Set(["identifier", "shorthand_field_identifier"]),
   new Set([
     "tuple_pattern",
     "tuple_struct_pattern",
@@ -117,10 +117,6 @@ const boundBy = namesUnder(
  * comes before it is where. `use a::b::C as D` binds `D` and says the same
  * about `C`. `use a::{b, c}` is a prefix and a list, and each member of the list
  * is read against that prefix.
- *
- * None of these is followed yet — a Rust path resolves against a crate and not
- * against the tree of files an archive holds — and all of them are recorded, so
- * the answer can arrive later without this changing.
  */
 const splitOf = (path: Syntax): { readonly name: Syntax; readonly from: string } | null => {
   if (path.type === "identifier" || path.type === "type_identifier") {
@@ -143,6 +139,11 @@ const used = function* (node: Syntax, under: string): Generator<Bound> {
     const what = node.childForFieldName("path")
     if (alias === null || what === null) return
     const split = splitOf(what)
+    // `use ori_agent_protocol as wire` names a crate, and binds the whole of it.
+    if (under === "" && split !== null && split.from === "" && what.type === "identifier") {
+      yield { name: alias, kind: "import", from: { name: "*", specifier: what.text } }
+      return
+    }
     yield {
       name: alias,
       kind: "import",
@@ -191,6 +192,7 @@ const bindings = (node: Syntax): { outer: ReadonlyArray<Bound>; inner: ReadonlyA
     case "type_item":
     case "const_item":
     case "static_item":
+    case "macro_definition":
     case "mod_item": {
       const name = node.childForFieldName("name")
       if (name !== null) outer.push({ name, kind: kindOf(node.type) })
@@ -305,6 +307,17 @@ const HOLDS_MEMBERS: ReadonlySet<string> = new Set([
   "trait_item"
 ])
 
+/** The fields a struct or a struct-like variant declares, in order. */
+const fieldsOf = (body: Syntax): ReadonlyArray<Bound> => {
+  const members: Array<Bound> = []
+  for (const field of childrenOf(body)) {
+    for (const part of childrenOf(field)) {
+      if (part.type === "field_identifier") members.push({ name: part, kind: "member" })
+    }
+  }
+  return members
+}
+
 const membersFor = (node: Syntax): ReadonlyArray<Bound> | null => {
   // The type first: this is asked of every node in the file, and a field lookup
   // is a call across the WebAssembly boundary.
@@ -312,15 +325,7 @@ const membersFor = (node: Syntax): ReadonlyArray<Bound> | null => {
   const body = node.childForFieldName("body")
   if (body === null) return null
 
-  if (node.type === "struct_item" || node.type === "union_item") {
-    const members: Array<Bound> = []
-    for (const field of childrenOf(body)) {
-      for (const part of childrenOf(field)) {
-        if (part.type === "field_identifier") members.push({ name: part, kind: "member" })
-      }
-    }
-    return members
-  }
+  if (node.type === "struct_item" || node.type === "union_item") return fieldsOf(body)
   if (node.type === "enum_item") {
     const members: Array<Bound> = []
     for (const variant of childrenOf(body)) {
@@ -365,14 +370,236 @@ const COMMENTS: ReadonlySet<string> = new Set(["line_comment", "block_comment", 
  */
 const offering = (node: Syntax): Offering | null => {
   if (BODIES.has(node.type)) return { at: "working" }
+  // Reached only by a press on one of them: the outline stops at the enum.
+  if (node.type === "enum_variant") {
+    const body = node.childForFieldName("body")
+    return body === null || body.type !== "field_declaration_list" ? null : { at: "members", members: fieldsOf(body) }
+  }
   const members = membersFor(node)
   return members === null ? null : { at: "members", members }
 }
+
+/**
+ * The modules a `use` takes whole: `use protocol::*`, and `use a::{b::*, C}`.
+ *
+ * A test file's `use super::*` and a crate's `use common::*` bring in every name
+ * the module offers and name none of them, so a name such a file never binds is
+ * looked for in each, the way C++ looks in what it includes.
+ */
+const passedOn = function* (statement: Syntax): Generator<Borrowed> {
+  if (statement.type !== "use_declaration") return
+  const argument = statement.childForFieldName("argument")
+  if (argument !== null) yield* wildcards(argument, "")
+}
+
+const wildcards = function* (node: Syntax, under: string): Generator<Borrowed> {
+  const joined = (more: string): string => (under === "" ? more : more === "" ? under : `${under}::${more}`)
+  if (node.type === "use_wildcard") {
+    const from = node.namedChild(0)
+    yield { name: "*", specifier: joined(from === null ? "" : from.text) }
+    return
+  }
+  if (node.type !== "scoped_use_list" && node.type !== "use_list") return
+  const prefix = node.childForFieldName("path")
+  const list = node.childForFieldName("list") ?? (node.type === "use_list" ? node : null)
+  if (list === null) return
+  for (const one of childrenOf(list)) yield* wildcards(one, joined(prefix === null ? "" : prefix.text))
+}
+
+/** The node types a Rust path is written with, `a::b::C` in an expression and in a type. */
+const SCOPED: ReadonlySet<string> = new Set(["scoped_identifier", "scoped_type_identifier"])
+
+/** Whether two nodes are the same one, which a node handed back by a field is not by identity. */
+const same = (one: Syntax | null, other: Syntax): boolean =>
+  one !== null &&
+  one.startPosition.row === other.startPosition.row &&
+  one.startPosition.column === other.startPosition.column &&
+  one.endPosition.column === other.endPosition.column
+
+/** The name of the type an `impl` around the name is for, which is what `Self` and `self.` mean. */
+const ownType = (path: ReadonlyArray<Syntax>): string | null => {
+  for (let step = path.length - 1; step >= 0; step--) {
+    const node = path[step]
+    if (node?.type === "impl_item") return holderOf(node)
+  }
+  return null
+}
+
+/** The type a node holds the members of. See {@link Dialect.holderOf}. */
+const holderOf = (node: Syntax): string | null => {
+  if (node.type === "impl_item") {
+    let type = node.childForFieldName("type")
+    if (type?.type === "generic_type") type = type.childForFieldName("type")
+    if (type?.type === "scoped_type_identifier") type = type.childForFieldName("name")
+    return type?.type === "type_identifier" ? type.text : null
+  }
+  if (HOLDS_MEMBERS.has(node.type) || node.type === "enum_variant") return node.childForFieldName("name")?.text ?? null
+  return null
+}
+
+/** A path's segments, or nothing where one of them is not a plain name: `<T as Trait>::f`. */
+const segmentsOf = (node: Syntax, path: ReadonlyArray<Syntax>): ReadonlyArray<string> | null => {
+  if (SCOPED.has(node.type)) {
+    const before = node.childForFieldName("path")
+    const last = node.childForFieldName("name")
+    if (last === null) return null
+    const head = before === null ? [] : segmentsOf(before, path)
+    return head === null ? null : [...head, last.text]
+  }
+  if (node.type === "generic_type") {
+    const type = node.childForFieldName("type")
+    return type === null ? null : segmentsOf(type, path)
+  }
+  if (node.text === "Self") {
+    const own = ownType(path)
+    return own === null ? null : [own]
+  }
+  if (["identifier", "type_identifier", "crate", "self", "super"].includes(node.type)) return [node.text]
+  return null
+}
+
+/**
+ * The path a name is read through. See {@link Dialect.pathOf}.
+ *
+ * `self.messages` and `self.start()` are read through the type of the `impl` they
+ * are written in, which is the one receiver whose type a file says outright.
+ */
+const pathOf = (path: ReadonlyArray<Syntax>): ReadonlyArray<string> | null => {
+  const name = path.at(-1)
+  const above = path.at(-2)
+  if (name === undefined || above === undefined) return null
+  if (SCOPED.has(above.type)) {
+    const before = above.childForFieldName("path")
+    if (same(above.childForFieldName("name"), name)) {
+      const through = before === null ? null : segmentsOf(before, path)
+      // `Box::new` is the standard library's, the way `Box` alone is.
+      return through !== null && PRELUDE.has(through[0] ?? "") ? ["std", ...through] : through
+    }
+    return same(before, name) && name.type === "identifier" ? [] : null
+  }
+  if (above.type === "scoped_use_list" || above.type === "use_wildcard" || above.type === "use_as_clause") {
+    const before = above.type === "use_wildcard" ? above.namedChild(0) : above.childForFieldName("path")
+    return same(before, name) && name.type === "identifier" ? [] : null
+  }
+  // `SeedMessage::User { author: … }`: a field named in a literal is the literal's type's.
+  if (above.type === "field_initializer" && same(above.childForFieldName("field"), name)) {
+    const literal = path.at(-4)
+    const type = literal?.type === "struct_expression" ? literal.childForFieldName("name") : null
+    return type === null ? null : segmentsOf(type, path)
+  }
+  if (above.type === "field_expression" && same(above.childForFieldName("field"), name)) {
+    if (above.childForFieldName("value")?.type !== "self") return null
+    const own = ownType(path)
+    return own === null ? null : [own]
+  }
+  return null
+}
+
+/**
+ * The types a macro called among a file's items writes. See {@link Dialect.minted}.
+ *
+ * What a macro does with its arguments takes expanding it to know; a capitalised
+ * name handed to one at the top of a module is, by Rust's convention, a type it
+ * defines, as `define_id!(ItemId)` does.
+ */
+const minted = (node: Syntax): ReadonlyArray<Bound> => {
+  if (node.type !== "macro_invocation") return []
+  const given = childrenOf(node).find((child) => child.type === "token_tree")
+  if (given === undefined) return []
+  return [...childrenOf(given)]
+    .filter((child) => child.type === "identifier" && /^[A-Z]/u.test(child.text))
+    .map((name) => ({ name, kind: "type" as const }))
+}
+
+/** What every Rust file can name without a `use`: the prelude's types, traits and variants. */
+const PRELUDE: ReadonlySet<string> = new Set([
+  "Box", "String", "Vec", "Option", "Some", "None", "Result", "Ok", "Err",
+  "Clone", "Copy", "Debug", "Default", "PartialEq", "Eq", "PartialOrd", "Ord", "Hash",
+  "Send", "Sync", "Sized", "Unpin", "Drop", "Fn", "FnMut", "FnOnce",
+  "Iterator", "IntoIterator", "DoubleEndedIterator", "ExactSizeIterator", "Extend",
+  "From", "Into", "TryFrom", "TryInto", "AsRef", "AsMut", "ToString", "ToOwned"
+])
+
+/** The standard library's macros, which no file declares. */
+const MACROS: ReadonlySet<string> = new Set([
+  "assert", "assert_eq", "assert_ne", "debug_assert", "debug_assert_eq", "debug_assert_ne",
+  "println", "print", "eprintln", "eprint", "format", "format_args", "write", "writeln",
+  "vec", "panic", "todo", "unimplemented", "unreachable", "matches", "dbg", "concat",
+  "stringify", "include_str", "include_bytes", "env", "option_env", "cfg", "line", "file",
+  "column", "module_path", "compile_error", "thread_local"
+])
+
+/** The attributes the compiler itself reads. */
+const ATTRIBUTES: ReadonlySet<string> = new Set([
+  "derive", "cfg", "cfg_attr", "test", "allow", "warn", "deny", "forbid", "expect", "must_use",
+  "inline", "doc", "repr", "non_exhaustive", "deprecated", "path", "macro_export", "track_caller"
+])
+
+/**
+ * The standard library's methods a value is most often asked for, `.clone()` and
+ * `.unwrap()`. Read through a value, a name is answered by its spelling alone, and
+ * the repository's own `map` is rarely the `map` an iterator was asked for.
+ */
+const METHODS: ReadonlySet<string> = new Set([
+  "clone", "to_owned", "to_string", "into", "try_into", "as_ref", "as_mut", "as_str", "as_slice",
+  "unwrap", "expect", "unwrap_or", "unwrap_or_default", "unwrap_or_else", "ok", "err", "ok_or",
+  "ok_or_else", "and_then", "or_else", "is_some", "is_none", "is_ok", "is_err", "map_err",
+  "iter", "iter_mut", "into_iter", "map", "filter", "filter_map", "find", "any", "all", "collect",
+  "next", "take", "skip", "chain", "zip", "enumerate", "rev", "count", "sum", "fold", "flat_map",
+  "len", "is_empty", "push", "pop", "get", "get_mut", "insert", "remove", "contains", "contains_key",
+  "extend", "entry", "or_insert", "or_default", "join", "split", "trim", "starts_with", "ends_with",
+  "parse", "lock", "read", "write", "await"
+])
+
+/** The attribute a name is written in, where it is in one, and whether it is its own path. */
+const attributeOf = (path: ReadonlyArray<Syntax>): { readonly path: string; readonly own: boolean } | null => {
+  const name = path.at(-1)
+  for (let step = path.length - 2; step >= Math.max(0, path.length - 4); step--) {
+    const node = path[step]
+    if (node?.type !== "attribute") continue
+    const own = node.namedChild(0)
+    if (own === null || name === undefined) return null
+    return { path: own.text, own: same(own, name) }
+  }
+  return null
+}
+
+/** The library a name no scope binds is from. See {@link Dialect.preludeOf}. */
+const preludeOf = (path: ReadonlyArray<Syntax>): string | null => {
+  const name = path.at(-1)
+  const above = path.at(-2)
+  // `default` in `#[serde(default)]` is a keyword, and the node under it the whole `(default)`.
+  if (name === undefined || name.type === "token_tree") return null
+  if (above?.type === "macro_invocation" && same(above.childForFieldName("macro"), name)) {
+    return MACROS.has(name.text) ? "std" : null
+  }
+  const attribute = attributeOf(path)
+  if (attribute !== null) {
+    const crate = attribute.path.split("::")[0] ?? ""
+    if (attribute.own) return ATTRIBUTES.has(attribute.path) ? "std" : crate
+    if (attribute.path === "derive") return PRELUDE.has(name.text) ? "std" : null
+    return ATTRIBUTES.has(attribute.path) ? "std" : crate
+  }
+  if (above?.type === "field_expression" && same(above.childForFieldName("field"), name)) {
+    return METHODS.has(name.text) ? "std" : null
+  }
+  return NAMES.has(name.type) && PRELUDE.has(name.text) ? "std" : null
+}
+
+/** Whether a name no scope binds may have come in with a module taken whole. Any plain name may. */
+const looksWhole = (name: Syntax): boolean => NAMES.has(name.type)
 
 export const RUST: Dialect = {
   opens: OPENS,
   names: NAMES,
   bindings,
   comments: COMMENTS,
-  offering
+  offering,
+  passedOn,
+  passesOnWhole: true,
+  looksWhole,
+  pathOf,
+  minted,
+  holderOf,
+  preludeOf
 }
