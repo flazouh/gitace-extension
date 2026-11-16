@@ -689,6 +689,33 @@ describe("a Rust name a module hands on with pub use", () => {
     const other = FILES[written!]!
     expect(writingNamed(parsed("tree-sitter-rust.wasm", other), other, "HiArgs", dialectFor(written!)!)?.line).toBe(1)
   })
+
+  test("is followed from super, through a pub use of a module declared beside it", () => {
+    const FILES: Readonly<Record<string, string>> = {
+      "src/engine/duplicate.rs": "use super::{Agent, SeedMessage};\n\nstruct Seeded {\n    messages: Vec<SeedMessage>,\n}\n",
+      "src/engine/mod.rs": "mod duplicate;\nmod types;\n\npub struct Agent;\n\npub use types::{\n    SeedMessage, StopCause,\n};\n",
+      "src/engine/types.rs": "pub enum SeedMessage {\n    User(String),\n}\n",
+      "src/lib.rs": "pub mod engine;\n"
+    }
+    const paths = new Set(Object.keys(FILES))
+    const from = "src/engine/duplicate.rs"
+    const text = FILES[from]!
+    const lines = text.split("\n")
+    const row = lines.findIndex((line) => line.includes("Vec<SeedMessage>"))
+    const found = writingAt(parsed("tree-sitter-rust.wasm", text), text, { row, column: lines[row]!.indexOf("SeedMessage") }, dialectFor(from)!)
+    expect(found?.at).toBe("elsewhere")
+    if (found?.at !== "elsewhere") return
+
+    const [module] = reachingAll(from, found.borrowed.specifier, paths, found.borrowed.name)
+    expect(module).toBe("src/engine/mod.rs")
+    const passed = borrowedAs(parsed("tree-sitter-rust.wasm", FILES[module!]!), "SeedMessage", dialectFor(module!)!)
+    expect(passed?.borrowed).toEqual({ name: "SeedMessage", specifier: "types" })
+
+    const [written] = reachingAll(module!, passed!.borrowed.specifier, paths, "SeedMessage")
+    expect(written).toBe("src/engine/types.rs")
+    const other = FILES[written!]!
+    expect(writingNamed(parsed("tree-sitter-rust.wasm", other), other, "SeedMessage", dialectFor(written!)!)?.line).toBe(1)
+  })
 })
 
 /*

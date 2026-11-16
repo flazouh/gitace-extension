@@ -671,6 +671,18 @@ describe("a Rust path, from where the crate and the module really are", () => {
     expect(reachingAll("src/shapes/circle.rs", "super::square", paths)).toEqual(["src/shapes/square/mod.rs"])
     expect(reachingAll("src/shapes/square/side.rs", "super::super::circle", paths)).toEqual(["src/shapes/circle.rs"])
   })
+
+  test("a path that stops at a module is that module's own file", () => {
+    expect(reachingAll("src/shapes/circle.rs", "super", paths)).toEqual(["src/shapes.rs"])
+    expect(reachingAll("src/shapes/square/side.rs", "super", paths)).toEqual(["src/shapes/square/mod.rs"])
+    expect(reachingAll("src/shapes.rs", "crate", paths)).toEqual(["src/lib.rs"])
+  })
+
+  test("any other first word is a module declared in this one", () => {
+    expect(reachingAll("src/shapes/square/mod.rs", "side", paths)).toEqual(["src/shapes/square/side.rs"])
+    expect(reachingAll("src/shapes.rs", "circle", paths)).toEqual(["src/shapes/circle.rs"])
+    expect(reachingAll("src/shapes.rs", "serde_json", paths)).toEqual([])
+  })
 })
 
 describe("a PHP class, read against the namespaces composer.json maps", () => {

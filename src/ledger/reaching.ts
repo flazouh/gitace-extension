@@ -617,6 +617,12 @@ const pythonEndings = (asked: string): ReadonlyArray<string> => [
  *    folder of a `mod.rs`, `lib.rs` or `main.rs`. Rust says this; `src/x/y.rs` and
  *    `src/x/y/mod.rs` both put `mod a` at `src/x/y/a.rs`.
  *  - **`super::`** is the folder of the module around it, once for each.
+ *  - **Any other word** is a module declared in this one, read as `self::` would be:
+ *    `pub use types::{A, B}` in a `mod.rs` is the `types.rs` beside it. A crate's name
+ *    is read the same way and names no file here, which is the answer it gets.
+ *
+ * A path that stops at a module, `use super::{A, B}`, names that module's own file:
+ * `engine.rs`, `engine/mod.rs`, or the `lib.rs` of a crate's root.
  *
  * A `#[path]` attribute moves a module anywhere, and is not read. `std::`, and any
  * other crate, is outside the repository, the answer every dependency gets.
@@ -635,10 +641,16 @@ function couldBeRust({ from, specifier, paths }: Asked): ReadonlyArray<string> {
       folder = folderOf(folder)
       at += 1
     }
-  } else return []
+  } else {
+    folder = moduleFolderOf(from)
+    at = 0
+  }
   const rest = parts.slice(at)
-  if (rest.length === 0) return []
   const asked = [folder, ...rest].filter((part) => part !== "").join("/")
+  if (rest.length === 0) {
+    const roots = CRATE_ROOTS.map((root) => (asked === "" ? root : `${asked}/${root}`))
+    return [`${asked}.rs`, `${asked}/mod.rs`, ...roots]
+  }
   return [`${asked}.rs`, `${asked}/mod.rs`]
 }
 
