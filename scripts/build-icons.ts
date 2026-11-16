@@ -3,7 +3,7 @@
  *
  *     bun scripts/build-icons.ts
  *
- * Writes `public/icon/16.png`, `32.png`, `48.png` and `128.png`, which is where WXT
+ * Writes `public/icon/16.png` to `128.png`, which is where WXT
  * looks for them: a PNG under that folder named for its own width becomes an entry of
  * the manifest's `icons`, and nothing in `wxt.config.ts` has to name it.
  *
@@ -44,13 +44,15 @@ const mark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
 `
 
 /**
- * The four Chrome asks for by name.
+ * The four Chrome asks for by name, and the two a Retina screen asks for beside them.
  *
  * 16 for the favicon of an extension's own page and its context menu entry, 32 because
  * Windows rounds to it and would otherwise reduce the 48 itself, 48 for the row on
- * `chrome://extensions`, and 128 for the store listing and the install dialog.
+ * `chrome://extensions`, and 128 for the store listing and the install dialog. 64 and 96
+ * are the 32 and the 48 at twice the pixels: without them Chrome enlarged the 48 on a
+ * Retina screen, and the row on `chrome://extensions` was soft.
  */
-const SIZES = [16, 32, 48, 128]
+const SIZES = [16, 32, 48, 64, 96, 128]
 
 const here = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 
