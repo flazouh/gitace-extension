@@ -283,6 +283,8 @@ export default defineConfig({
       "shots/**",
       "public/*.js",
       "public/screens/**",
+      // TypeScript's own lib files, which `scripts/build-ledger.ts` copies in.
+      "public/exact/**",
       /*
        * The probes, which no rebuild runs.
        *
