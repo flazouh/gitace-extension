@@ -599,6 +599,42 @@ describe("a Peek in a diff", () => {
     expect(request.fillNote?.("peeking")?.querySelector("[data-gitace-peek]")).not.toBeNull()
   })
 
+  test("answers a name on a removed line out of the file as it was, under that line", async () => {
+    const askedOf: Array<string> = []
+    render(
+      <LedgerProvider
+        ledger={{
+          ...ledger,
+          writingAt: (reading) =>
+            Effect.sync(() => {
+              askedOf.push(reading.text)
+              return Option.some({ at: "here" as const, writing })
+            })
+        }}
+      >
+        <RendererProvider load={stub}>
+          <FileDiffPane
+            file={file}
+            ask={() => Effect.succeed(Option.none())}
+            choices={CHOICES}
+            revealing={revealer((sha) => Effect.succeed(sha === "before" ? "const old = 1\nconst two = 2\n" : "const one = 1\n"), {
+              base: "before",
+              head: "after"
+            })}
+          />
+        </RendererProvider>
+      </LedgerProvider>
+    )
+    const request = await drawn()
+
+    request.onName?.({ line: 1, from: 6, to: 9, text: "two", side: "deletions" }, { go: true, shift: false, alt: false })
+
+    await waitFor(() => {
+      expect(noted.at(-1)?.find((note) => note.key === "peeking-before")?.line).toBe(1)
+    })
+    expect(askedOf).toEqual(["const old = 1\nconst two = 2\n"])
+  })
+
   test("opens with a seeded Peek without a Shift-press", async () => {
     render(
       reading({
