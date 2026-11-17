@@ -790,7 +790,10 @@ describe("every name of a Rust workspace", () => {
       "    let _ = Harness;",
       "    let _ = vec![Harness::reply(), common::Harness::reply()];",
       "    let reply = 1;",
+      "    assert!(matches!(reply, 1));",
       "}",
+      "",
+      "fn matches() {}",
       ""
     ].join("\n")
   }
@@ -877,6 +880,7 @@ describe("every name of a Rust workspace", () => {
     expect(pressed("vec![Harness::reply()", "reply", SERVER, 1)).toBe(`${COMMON}:4`)
     expect(pressed("vec![Harness::reply()", "common", SERVER)).toBe(`${SERVER}:1`)
     expect(pressed("vec![Harness::reply()", "Harness", SERVER)).toBe(`${COMMON}:1`)
+    expect(pressed("assert!(matches!", "matches", SERVER)).toBe("library std matches")
   })
 
   test("what the standard library and a dependency give is said to be theirs", () => {

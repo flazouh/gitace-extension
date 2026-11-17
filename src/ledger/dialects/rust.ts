@@ -468,6 +468,10 @@ const pathOf = (path: ReadonlyArray<Syntax>): ReadonlyArray<string> | null => {
   const name = path.at(-1)
   const above = path.at(-2)
   if (name === undefined || above === undefined) return null
+  // A macro is never the function or the local of its spelling, whatever this file binds.
+  if (above.type === "macro_invocation" && same(above.childForFieldName("macro"), name)) {
+    return MACROS.has(name.text) ? ["std"] : null
+  }
   if (SCOPED.has(above.type)) {
     const before = above.childForFieldName("path")
     if (same(above.childForFieldName("name"), name)) {
@@ -524,7 +528,12 @@ const tokenPathOf = (tree: Syntax, name: Syntax, path: ReadonlyArray<Syntax>): R
     one !== undefined && other !== undefined && SEGMENT.has(one.type) && between(tree, one, other) === "::"
   const segments: Array<string> = []
   for (let step = at; joins(tokens[step - 1], tokens[step]); step--) segments.unshift(tokens[step - 1]!.text)
-  if (segments.length === 0) return name.type === "identifier" && joins(name, tokens[at + 1]) ? [] : null
+  if (segments.length === 0) {
+    // `matches!` in `assert!(matches!(…))`, which the outer macro holds as tokens.
+    const next = tokens[at + 1]
+    if (next !== undefined && between(tree, name, next) === "!") return MACROS.has(name.text) ? ["std"] : null
+    return name.type === "identifier" && joins(name, next) ? [] : null
+  }
   if (segments[0] === "Self") {
     const own = ownType(path)
     return own === null ? null : [own, ...segments.slice(1)]
@@ -607,9 +616,8 @@ const preludeOf = (path: ReadonlyArray<Syntax>): string | null => {
   const above = path.at(-2)
   // `default` in `#[serde(default)]` is a keyword, and the node under it the whole `(default)`.
   if (name === undefined || name.type === "token_tree") return null
-  if (above?.type === "macro_invocation" && same(above.childForFieldName("macro"), name)) {
-    return MACROS.has(name.text) ? "std" : null
-  }
+  // A standard macro is answered by `pathOf`; any other is the crate's own.
+  if (above?.type === "macro_invocation" && same(above.childForFieldName("macro"), name)) return null
   const attribute = attributeOf(path)
   if (attribute !== null) {
     const crate = attribute.path.split("::")[0] ?? ""
