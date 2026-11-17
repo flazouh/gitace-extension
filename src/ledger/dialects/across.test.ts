@@ -780,8 +780,22 @@ describe("every name of a Rust workspace", () => {
     "crates/acme-protocol/src/error.rs": "pub struct ApiError;\n",
     "crates/acme-server/Cargo.toml": "[package]\n",
     "crates/acme-server/src/lib.rs": "",
-    "crates/acme-server/tests/common/mod.rs": "pub struct Harness;\n",
-    "crates/acme-server/tests/server.rs": "mod common;\n\nuse common::*;\n\nfn check() {\n    let _ = Harness;\n}\n"
+    "crates/acme-server/tests/common/mod.rs": "pub struct Harness;\n\nimpl Harness {\n    pub fn reply() {}\n}\n",
+    "crates/acme-server/tests/server.rs": [
+      "mod common;",
+      "",
+      "use common::*;",
+      "",
+      "fn check() {",
+      "    let _ = Harness;",
+      "    let _ = vec![Harness::reply(), common::Harness::reply()];",
+      "    let reply = 1;",
+      "    assert!(matches!(reply, 1));",
+      "}",
+      "",
+      "fn matches() {}",
+      ""
+    ].join("\n")
   }
   const paths = new Set(Object.keys(FILES))
   const FROM = "crates/core/acme-kernel/src/engine/duplicate.rs"
@@ -857,6 +871,16 @@ describe("every name of a Rust workspace", () => {
     expect(pressed("let _ = Harness", "Harness", "crates/acme-server/tests/server.rs")).toBe(
       "crates/acme-server/tests/common/mod.rs:1"
     )
+  })
+
+  test("a path handed to a macro is read as a path, not as a local of the same name", () => {
+    const SERVER = "crates/acme-server/tests/server.rs"
+    const COMMON = "crates/acme-server/tests/common/mod.rs"
+    expect(pressed("vec![Harness::reply()", "reply", SERVER)).toBe(`${COMMON}:4`)
+    expect(pressed("vec![Harness::reply()", "reply", SERVER, 1)).toBe(`${COMMON}:4`)
+    expect(pressed("vec![Harness::reply()", "common", SERVER)).toBe(`${SERVER}:1`)
+    expect(pressed("vec![Harness::reply()", "Harness", SERVER)).toBe(`${COMMON}:1`)
+    expect(pressed("assert!(matches!", "matches", SERVER)).toBe("library std matches")
   })
 
   test("what the standard library and a dependency give is said to be theirs", () => {
