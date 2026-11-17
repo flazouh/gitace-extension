@@ -492,7 +492,44 @@ const pathOf = (path: ReadonlyArray<Syntax>): ReadonlyArray<string> | null => {
     const own = ownType(path)
     return own === null ? null : [own]
   }
+  if (above.type === "token_tree") return tokenPathOf(above, name, path)
   return null
+}
+
+/** What is written between two tokens of a tree on one line, which the grammar names no node for. */
+const between = (tree: Syntax, one: Syntax, other: Syntax): string | null => {
+  const row = one.endPosition.row
+  if (other.startPosition.row !== row) return null
+  const line = tree.text.split("\n")[row - tree.startPosition.row] ?? ""
+  const shift = row === tree.startPosition.row ? tree.startPosition.column : 0
+  return line.slice(one.endPosition.column - shift, other.startPosition.column - shift)
+}
+
+/** The names a path is spelt with, among the tokens a macro is handed. */
+const SEGMENT: ReadonlySet<string> = new Set(["identifier", "crate", "self", "super"])
+
+/**
+ * The path a name handed to a macro is read through: `Message::user` in `vec![Message::user(…)]`.
+ *
+ * A macro's arguments are tokens until it is expanded, so the grammar writes no path
+ * there. The segments are the names before it joined by `::`, as a parsed path's
+ * are; without them the name was read as the bare word, and a local of that
+ * spelling answered for a type's function.
+ */
+const tokenPathOf = (tree: Syntax, name: Syntax, path: ReadonlyArray<Syntax>): ReadonlyArray<string> | null => {
+  const tokens = [...childrenOf(tree)]
+  const at = tokens.findIndex((token) => same(token, name))
+  if (at === -1) return null
+  const joins = (one: Syntax | undefined, other: Syntax | undefined): boolean =>
+    one !== undefined && other !== undefined && SEGMENT.has(one.type) && between(tree, one, other) === "::"
+  const segments: Array<string> = []
+  for (let step = at; joins(tokens[step - 1], tokens[step]); step--) segments.unshift(tokens[step - 1]!.text)
+  if (segments.length === 0) return name.type === "identifier" && joins(name, tokens[at + 1]) ? [] : null
+  if (segments[0] === "Self") {
+    const own = ownType(path)
+    return own === null ? null : [own, ...segments.slice(1)]
+  }
+  return PRELUDE.has(segments[0]!) ? ["std", ...segments] : segments
 }
 
 /**
