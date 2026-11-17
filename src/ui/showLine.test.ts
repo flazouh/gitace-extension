@@ -123,4 +123,26 @@ describe("how it arrives", () => {
     // and at 0 without it, measured on a live page.
     expect(asked).toEqual([{ block: "center", behavior: "instant" }])
   })
+
+  test("leaves a line already on the screen where it is", () => {
+    // A definition five lines below the press moved the whole page by the
+    // half-screen `center` asks for, and the reader lost the line they were on.
+    const shadow = drawn([7])
+    const row = shadow.querySelector<HTMLElement>('[data-line="7"]')!
+    row.getBoundingClientRect = () => new DOMRect(0, 200, 400, 20)
+
+    expect(showLine(shadow, 7)).toBe(true)
+    expect(row.hasAttribute("data-shown")).toBe(false)
+  })
+
+  test("goes to the new side's row where the removed side drew the same number", () => {
+    const shadow = drawn([7, 7])
+    const [removed, added] = shadow.querySelectorAll<HTMLElement>('[data-line="7"]')
+    removed!.setAttribute("data-line-type", "change-deletion")
+
+    showLine(shadow, 7)
+
+    expect(removed!.hasAttribute("data-shown")).toBe(false)
+    expect(added!.hasAttribute("data-shown")).toBe(true)
+  })
 })

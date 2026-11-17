@@ -36,6 +36,7 @@ const handle: DiffHandle = {
     noted.push(notes.map((note) => ({ key: note.key, line: note.line })))
   },
   unpick: () => {},
+  land: () => {},
   mark: () => {},
   boundsOf: () => null,
   destroy: () => {}

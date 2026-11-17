@@ -834,6 +834,7 @@ const drawing = () => {
         onThemeChange: () => {},
         showNotes: hang,
         unpick: () => {},
+        land: () => {},
         mark: () => {},
         boundsOf: () => null,
         destroy: () => {}

@@ -17,8 +17,13 @@ import type { Bounds } from "../ports/Renderer"
  * top of the file they asked for.
  */
 export const showLine = (host: ParentNode | null, line: number): boolean => {
-  const row = drawnIn(host)?.querySelector(`[data-line="${line}"]`) ?? null
+  // The new side's row: a removed line drew the same number from the old file.
+  const rows = [...(drawnIn(host)?.querySelectorAll(`[data-line="${line}"]`) ?? [])]
+  const row = rows.find((one) => one.getAttribute("data-line-type") !== "change-deletion") ?? rows[0]
   if (!(row instanceof HTMLElement)) return false
+
+  // A line already on the screen stays where it is, and the reader with it.
+  if (onScreen(row)) return true
 
   /*
    * Instant, and said so rather than left to be inherited.
@@ -34,6 +39,32 @@ export const showLine = (host: ParentNode | null, line: number): boolean => {
    */
   row.scrollIntoView({ block: "center", behavior: "instant" })
   return true
+}
+
+/**
+ * Whether a drawn row is wholly inside the window and the pane that scrolls it.
+ * A row with no size has not been laid out, and is not.
+ */
+const onScreen = (row: HTMLElement): boolean => {
+  const box = row.getBoundingClientRect()
+  if (box.height <= 0 || box.top < 0 || box.bottom > window.innerHeight) return false
+  const pane = scrollerOf(row)?.getBoundingClientRect()
+  return pane === undefined || (box.top >= pane.top && box.bottom <= pane.bottom)
+}
+
+/** The nearest element that scrolls a row, across the shadow root it was drawn in. */
+const scrollerOf = (row: Element): Element | null => {
+  for (let at: Node | null = row.parentNode; at !== null; ) {
+    if (at instanceof ShadowRoot) {
+      at = at.host
+      continue
+    }
+    if (at instanceof Element && at.scrollHeight > at.clientHeight && /auto|scroll/u.test(getComputedStyle(at).overflowY)) {
+      return at
+    }
+    at = at.parentNode
+  }
+  return null
 }
 
 /**

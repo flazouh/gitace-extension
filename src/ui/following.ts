@@ -904,7 +904,10 @@ export const useFollowing = (
           else across?.open(where, writing.line)
           return
         }
-        if (showLine(host.current, writing.line)) return
+        if (showLine(host.current, writing.line)) {
+          handle.current?.land(writing.line)
+          return
+        }
         /*
          * The line is not on the screen, so there is nowhere to scroll to.
          *

@@ -611,6 +611,9 @@ export const renderDiff = (container: HTMLElement, request: DiffRequest): DiffHa
     unpick: () => {
       diff.setSelectedLines(null)
     },
+    land: (line) => {
+      diff.setSelectedLines({ start: line, end: line, side: "additions" }, { notify: false })
+    },
     boundsOf: (name) => {
       if (entered === null || !sameName(entered.name, name)) return null
 

@@ -74,6 +74,8 @@ const writing: Writing = {
 type Stage = {
   readonly asked: Array<{ row: number; column: number }>
   readonly marked: Array<readonly [Name | null, string | undefined]>
+  /** The lines a press arrived at, which the renderer marks. */
+  readonly landed: Array<number>
   /** How many times the outline was asked for, which should be never until it is. */
   outlined: number
   /** How many times the pane said it was ready to be asked, before any key. */
@@ -157,6 +159,7 @@ const staged = (
   const stage: Stage = {
     asked: [],
     marked: [],
+    landed: [],
     outlined: 0,
     readied: 0,
     refresh: () => {},
@@ -201,6 +204,9 @@ const staged = (
       }
     },
     unpick: () => {},
+    land: (line) => {
+      stage.landed.push(line)
+    },
     mark: (given, how) => {
       stage.marked.push([given, how])
     },
@@ -1295,6 +1301,9 @@ describe("a press on a name written on a line the diff folded away", () => {
     await Effect.runPromise(settled())
 
     expect(row.scrolled()).toBe(1)
+    // Marked where it lands: a line already on the screen is not scrolled to,
+    // and a press that moved nothing and marked nothing looked like no answer.
+    expect(stage.landed).toEqual([writing.line])
     // A reader who can see the line is taken there and shown nothing else.
     expect(stage.shown.at(-1)?.some((note) => note.key === "gitace/peek") ?? false).toBe(false)
   })

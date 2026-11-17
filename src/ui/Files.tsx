@@ -851,7 +851,10 @@ const FileDiffPaneView = ({
     const since = Date.now()
     const look = () => {
       if (stop) return
-      if (showLine(host.current, atLine)) return
+      if (showLine(host.current, atLine)) {
+        handle.current?.land(atLine)
+        return
+      }
       if (Date.now() - since > DRAWING) return
       beat = setTimeout(look, 100)
     }

@@ -103,6 +103,14 @@ export type DiffHandle = {
   /** Lets go of the marked lines, without waiting for a click elsewhere. */
   readonly unpick: () => void
   /**
+   * Marks the line a press arrived at, as an address's `#L` line is marked.
+   *
+   * A definition already on the screen is not scrolled to, so without it a press
+   * that answered moved nothing and looked like a press that did not. The line's
+   * own selection, set without telling `onPick`, so no comment box opens.
+   */
+  readonly land: (line: number) => void
+  /**
    * Marks one Name as somewhere the reader can go, or nothing to let go of it.
    *
    * Only the Name the pointer is on may be marked, which is both what an editor
