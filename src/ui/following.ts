@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } fro
 import type { Beyond, Place, Reading, Where, Writing } from "../ports/Ledger"
 import { crateOf, rustDocs } from "../ledger/rustDocs"
 import type { Bounds, DiffHandle, Modifiers, Name } from "../ports/Renderer"
-import { cratesIn, goModulesKnown, knowGoModules, knowPhpPrefixes, phpPrefixesKnown, reachingAll } from "../ledger/reaching"
+import { goModulesKnown, knowGoModules, knowPhpPrefixes, phpPrefixesKnown, reachingAll } from "../ledger/reaching"
 import { goModulesIn, isGoMod } from "../ledger/goModules"
 import { isComposerJson, phpPrefixesIn } from "../ledger/composer"
 
@@ -97,6 +97,13 @@ const RUST_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u
 const MOST_GUESSED = 50
 
 /**
+ * The crate a Rust file is in, by the name code spells it with: the folder above its `src/`, `tests/`, `examples/` or
+ * `benches/`. Read off the path alone, because a press can guess before the page has read the repository's paths.
+ */
+const crateHolding = (file: string): string | undefined =>
+  /(?:^|\/)([^/]+)\/(?:src|tests|examples|benches)\//u.exec(file)?.[1]?.replaceAll("-", "_")
+
+/**
  * The place a guess goes to: in the crate the code around the press reads from, then the one sharing the most folders.
  *
  * Folders alone tie across a workspace, where every crate shares `crates/`, and the tie went to whichever
@@ -107,7 +114,6 @@ const MOST_GUESSED = 50
 const nearest = (
   places: ReadonlyArray<Place>,
   path: string,
-  paths: ReadonlySet<string>,
   text: string,
   line: number
 ): Place | undefined => {
@@ -118,9 +124,7 @@ const nearest = (
     while (at < folders.length && folders[at] === theirs[at]) at += 1
     return at
   }
-  const crates = [...cratesIn(paths)]
-  const holding = (file: string) => crates.find(([, root]) => file.startsWith(`${root}/`))
-  const own = holding(path)
+  const own = crateHolding(path)
   const lines = text.split("\n")
   const away = new Map<string, number>()
   const distance = (crate: string): number => {
@@ -136,9 +140,9 @@ const nearest = (
     return nearestLine
   }
   const far = (place: Place): number => {
-    const theirs = holding(place.path)
+    const theirs = crateHolding(place.path)
     if (theirs === undefined) return Number.POSITIVE_INFINITY
-    return theirs === own ? 0 : distance(theirs[0])
+    return theirs === own ? 0 : distance(theirs)
   }
   let best: Place | undefined
   for (const place of places) {
@@ -564,12 +568,16 @@ export const useFollowing = (
         const across = repository.current
         const searched = documented(rustDocs("std", name.text))
         if (across?.repo === undefined || across.sha === undefined) return searched
-        return ledger.namesLike(across.repo, across.sha, name.text, MOST_GUESSED).pipe(
+        const { repo, sha } = across
+        // Warmed first, as Go to name does: an index nobody has built answers with no places, which is not the same as none.
+        return ledger.warm(repo, sha).pipe(
+          Effect.flatMap((warmth) =>
+            warmth.ready ? ledger.namesLike(repo, sha, name.text, MOST_GUESSED) : Effect.succeed({ ready: false, places: [] })
+          ),
           Effect.flatMap((found) => {
             const best = nearest(
               found.places.filter((place) => place.writing.name === name.text),
               source.path,
-              across.paths,
               text.current?.path === source.path ? text.current.text : "",
               name.line
             )
