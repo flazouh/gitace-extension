@@ -97,17 +97,19 @@ const RUST_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u
 const MOST_GUESSED = 50
 
 /**
- * The place a guess goes to: in this file's crate or a crate the file names, then the one sharing the most folders.
+ * The place a guess goes to: in the crate the code around the press reads from, then the one sharing the most folders.
  *
  * Folders alone tie across a workspace, where every crate shares `crates/`, and the tie went to whichever
- * writing came first: `message.role` in an API crate peeked at a `role` in the kernel's bus, when the file
- * reads its messages from `ori_agent_protocol`.
+ * writing came first: `message.role` in an API crate peeked at a `role` in the kernel's bus, the line under it
+ * reading `wire::SessionHistoryRole` from the protocol crate. So a crate is as near as the closest line that
+ * names it, by its name or by the name a `use … as` gives it; this file's own crate is nearest of all.
  */
 const nearest = (
   places: ReadonlyArray<Place>,
   path: string,
   paths: ReadonlySet<string>,
-  text: string
+  text: string,
+  line: number
 ): Place | undefined => {
   const folders = path.split("/").slice(0, -1)
   const shared = (other: string): number => {
@@ -119,15 +121,29 @@ const nearest = (
   const crates = [...cratesIn(paths)]
   const holding = (file: string) => crates.find(([, root]) => file.startsWith(`${root}/`))
   const own = holding(path)
-  const named = (other: string): boolean => {
-    const theirs = holding(other)
-    if (theirs === undefined) return false
-    return theirs === own || new RegExp(`\\b${theirs[0]}\\b`, "u").test(text)
+  const lines = text.split("\n")
+  const away = new Map<string, number>()
+  const distance = (crate: string): number => {
+    const known = away.get(crate)
+    if (known !== undefined) return known
+    const aliases = [...text.matchAll(new RegExp(`\\buse\\s+${crate}\\s+as\\s+(\\w+)`, "gu"))].map((m) => m[1])
+    const spelled = new RegExp(`\\b(?:${[crate, ...aliases].join("|")})\\b`, "u")
+    let nearestLine = Number.POSITIVE_INFINITY
+    lines.forEach((one, at) => {
+      if (spelled.test(one)) nearestLine = Math.min(nearestLine, Math.abs(at + 1 - line))
+    })
+    away.set(crate, nearestLine)
+    return nearestLine
   }
-  const score = (place: Place): number => (named(place.path) ? folders.length + 1 : 0) + shared(place.path)
+  const far = (place: Place): number => {
+    const theirs = holding(place.path)
+    if (theirs === undefined) return Number.POSITIVE_INFINITY
+    return theirs === own ? 0 : distance(theirs[0])
+  }
   let best: Place | undefined
   for (const place of places) {
-    if (best === undefined || score(place) > score(best)) best = place
+    if (best === undefined) best = place
+    else if (far(place) < far(best) || (far(place) === far(best) && shared(place.path) > shared(best.path))) best = place
   }
   return best
 }
@@ -554,7 +570,8 @@ export const useFollowing = (
               found.places.filter((place) => place.writing.name === name.text),
               source.path,
               across.paths,
-              text.current?.path === source.path ? text.current.text : ""
+              text.current?.path === source.path ? text.current.text : "",
+              name.line
             )
             if (best === undefined) return searched
             return across.read(best.path).pipe(

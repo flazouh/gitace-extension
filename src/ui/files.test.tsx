@@ -746,7 +746,7 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
     })
   })
 
-  test("goes to the crate the file reads from before another crate as far away", async () => {
+  test("goes to the crate the code beside the press reads from, where the file names two", async () => {
     const { opened } = staged(
       {
         namesLike: () =>
@@ -765,12 +765,12 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
           "crates/core/protocol/src/lib.rs",
           "crates/core/protocol/src/methods.rs"
         ],
-        after: "use protocol as wire;\nfn plan() {\n  with_title()\n}\n"
+        after: "use protocol as wire;\nuse kernel::Agent;\nfn plan() {\n  with_title()\n  wire::Role::User\n}\n"
       }
     )
     const request = await drawn()
 
-    request.onName?.({ ...pressed, line: 3 }, { go: true, shift: false, alt: false })
+    request.onName?.({ ...pressed, line: 4 }, { go: true, shift: false, alt: false })
 
     await waitFor(() => {
       expect(opened).toEqual(["crates/core/protocol/src/methods.rs:12"])
