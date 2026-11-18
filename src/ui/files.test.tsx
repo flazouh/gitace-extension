@@ -775,6 +775,33 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
 
     expect(screen.getByRole("link", { name: /serde_json · docs/ })).toBeTruthy()
   })
+
+  test("offers nothing for a comment, which is not a name", async () => {
+    const searched: Array<string> = []
+    let asked = false
+    staged({
+      writingAt: () => {
+        asked = true
+        return Effect.succeed(Option.none())
+      },
+      namesLike: (_repo, _sha, name) => {
+        searched.push(name)
+        return Effect.succeed({ ready: true, places: [] })
+      }
+    })
+    const request = await drawn()
+
+    request.onName?.(
+      { ...pressed, text: "/// Most text, in bytes, [`Params::history`] may hold." },
+      { go: true, shift: false, alt: false }
+    )
+    await waitFor(() => {
+      expect(asked).toBe(true)
+    })
+
+    expect(searched).toEqual([])
+    expect(screen.queryByRole("link", { name: /Rust's docs/ })).toBeNull()
+  })
 })
 
 /*

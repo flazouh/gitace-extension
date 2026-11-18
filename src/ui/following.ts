@@ -91,6 +91,7 @@ const SCRIPT = /\.[cm]?[jt]sx?$/u
 
 /** A Rust file, whose presses end on a guess or a crate's documentation rather than on nothing. */
 const RUST = /\.rs$/u
+const RUST_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u
 
 /** How many of the repository's writings of a name a guess weighs. */
 const MOST_GUESSED = 50
@@ -522,7 +523,8 @@ export const useFollowing = (
        * dependency's, and the card offers a search of Rust's documentation.
        */
       const guessed = (): Effect.Effect<void> => {
-        if (!insist || !rust) return Effect.void
+        // A token with no word under the pointer arrives whole, and in a comment that is the whole line.
+        if (!insist || !rust || !RUST_NAME.test(name.text)) return Effect.void
         const across = repository.current
         const searched = documented(rustDocs("std", name.text))
         if (across?.repo === undefined || across.sha === undefined) return searched
