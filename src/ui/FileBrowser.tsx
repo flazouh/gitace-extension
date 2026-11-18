@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { eachIdle } from "../app/idle";
+import { changesOf, type Changes } from "../domain/changes";
 import { diffLibrary, type DiffFetcher } from "../domain/library";
 import { railOrder } from "../domain/railOrder";
 import { readingOrder } from "../domain/readingOrder";
@@ -107,6 +108,12 @@ export type FileBrowserProps = {
    * repository's paths, and then a borrowed name has no underline.
    */
   readonly across?: Across;
+  /**
+   * Whether these files are a pull request's, so a name's uses can say which of
+   * them it changed and which lines it adds. A commit's page says nothing of a
+   * pull request, and leaves this out.
+   */
+  readonly ofPullRequest?: boolean;
   /**
    * A Peek already open on first paint. Handed to the open file's pane.
    */
@@ -219,6 +226,7 @@ const WAYS = [
 type DrawingProps = {
   readonly file: ChangedFile;
   readonly across?: Across;
+  readonly changes?: Changes;
   readonly open: boolean;
   readonly ask: (path: string) => Effect.Effect<Option.Option<FileDiff>>;
   readonly reading: boolean;
@@ -263,6 +271,7 @@ const Drawing = memo(
     onUpload,
     revealing,
     across,
+    changes,
     initialPeeked,
   }: DrawingProps) => {
     const heldDrafts = useMemo(() => draftsIn(drafts, file.path), [drafts, file.path]);
@@ -312,6 +321,7 @@ const Drawing = memo(
           onUpload={onUpload}
           revealing={revealing}
           across={across}
+          changes={changes}
           initialPeeked={initialPeeked}
         />
       </div>
@@ -344,6 +354,7 @@ export const FileBrowser = ({
   onUpload,
   revealing,
   across,
+  ofPullRequest = false,
   initialPeeked,
   onBringIn,
   review,
@@ -565,6 +576,10 @@ export const FileBrowser = ({
   const progress = review?.active === true ? read : seen;
 
   const library = useMemo(() => diffLibrary(fetchDiffs), [fetchDiffs]);
+  const changes = useMemo(
+    () => (ofPullRequest ? changesOf(files, library.ask) : undefined),
+    [ofPullRequest, files, library],
+  );
 
   // Held here rather than in the pane: the pane is torn down and built again
   // every time another file is opened, and a comment half-written in one file
@@ -1220,6 +1235,7 @@ export const FileBrowser = ({
                     onUpload={onUpload}
                     revealing={revealing}
                     across={across}
+                    changes={changes}
                     initialPeeked={
                       one.path === file?.path &&
                       initialPeeked !== undefined &&

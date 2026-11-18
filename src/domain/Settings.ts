@@ -388,6 +388,26 @@ export const DIFF_KNOBS = [
     "on",
     true,
   ),
+  /*
+   * The two boxes at the head of the list a press on a name opens, remembered here
+   * so a reader who never wants the import lines does not untick them on every name.
+   */
+  toggle(
+    "usesImports",
+    "Imports among uses",
+    "List the lines that only bring a name in",
+    "Whether the list of a name's uses holds the import and re-export lines that only bring it into a file. In a repository with a barrel in front of each folder those are half the list and say nothing about how the name is used. Off holds them back; the box at the head of the list turns the same knob.",
+    "on",
+    true,
+  ),
+  toggle(
+    "usesTests",
+    "Tests among uses",
+    "List the uses in test files",
+    "Whether the list of a name's uses holds the ones in test files, told apart by their names as the rail tells them apart. Off holds them back, for a reader asking what a change breaks in the code rather than in its cases; the box at the head of the list turns the same knob.",
+    "on",
+    true,
+  ),
 ] as const
 
 /** The rail's knobs. */

@@ -27,6 +27,8 @@ export type Found = {
   readonly from: number
   readonly to: number
   readonly sure: boolean
+  /** Whether it is on a line that only brings the name in: an import, or a re-export. */
+  readonly imported?: true
 }
 
 /** A Writing, and the file it is written in, as a question about a repository. */
@@ -227,7 +229,14 @@ export const usesAcross = (
         sure = how === "sure"
       }
 
-      found.push({ path, line: mention.line, from: mention.from, to: mention.to, sure })
+      found.push({
+        path,
+        line: mention.line,
+        from: mention.from,
+        to: mention.to,
+        sure,
+        ...(mention.imported === true ? { imported: true as const } : {})
+      })
       if (found.length >= most) return found
     }
   }

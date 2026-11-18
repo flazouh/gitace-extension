@@ -583,13 +583,23 @@ const across = (work: LedgerAcrossWork): LedgerAcross => {
       return {
         ready: true,
         exact: true,
-        uses: found.slice(0, work.most ?? 200).map((one) => ({
-          path: one.path.replace(/^\//, ""),
-          line: one.line,
-          from: one.column + 1,
-          to: one.column + 1 + work.name.length,
-          sure: true
-        }))
+        uses: found.slice(0, work.most ?? 200).map((one) => {
+          const path = one.path.replace(/^\//, "")
+          const from = one.column + 1
+          // The compiler says where, and the reading of shapes already said which
+          // of those lines only bring the name in.
+          const imported = ledger.files
+            .get(path)
+            ?.mentions.some((mention) => mention.line === one.line && mention.from === from && mention.imported === true)
+          return {
+            path,
+            line: one.line,
+            from,
+            to: from + work.name.length,
+            sure: true,
+            ...(imported === true ? { imported: true as const } : {})
+          }
+        })
       }
     }
   }

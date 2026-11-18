@@ -91,6 +91,13 @@ describe("reading what was stored", () => {
     const read = readSettings({ diff: { layout: "split" } })
     expect(read.tree.icons).toBe("material")
   })
+
+  it("lists imports and tests among a name's uses until the reader holds them back", () => {
+    expect([DEFAULTS.diff.usesImports, DEFAULTS.diff.usesTests]).toEqual(["on", "on"])
+
+    const read = readSettings({ diff: { usesImports: "off", usesTests: "off" } })
+    expect([read.diff.usesImports, read.diff.usesTests]).toEqual(["off", "off"])
+  })
 })
 
 describe("choosing whose pull request page to read", () => {

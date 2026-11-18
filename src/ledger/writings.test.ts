@@ -29,13 +29,14 @@ const SOURCE = await Bun.file("fixtures/code/shadowing.ts").text()
 const lines = SOURCE.split("\n")
 
 let root: Syntax
+let parser: Parser
 
 beforeAll(async () => {
   await Parser.init({ locateFile: () => "node_modules/web-tree-sitter/web-tree-sitter.wasm" })
   const language = await Language.load(
     "node_modules/@vscode/tree-sitter-wasm/wasm/tree-sitter-typescript.wasm"
   )
-  const parser = new Parser()
+  parser = new Parser()
   parser.setLanguage(language)
   root = parser.parse(SOURCE)! .rootNode as unknown as Syntax
 })
@@ -204,6 +205,23 @@ describe("everywhere a Writing is used", () => {
 
     expect(usesIn(root, SOURCE, inner, TYPESCRIPT)).toHaveLength(3)
   })
+
+  test("marks the uses that only pass the name on, and none of the ones that use it", () => {
+    const source = "const shape = 1\nexport { shape }\nshape + 1\n"
+    const tree = parser.parse(source)!.rootNode as unknown as Syntax
+    const shape = writingsIn(tree, source, TYPESCRIPT).find((one) => one.name === "shape")!
+
+    expect(usesIn(tree, source, shape, TYPESCRIPT).map((use) => [use.line, use.imported === true])).toEqual([
+      [1, false],
+      [2, true],
+      [3, false]
+    ])
+    expect(toldBy(tree, source, TYPESCRIPT).mentions.map((one) => [one.line, one.imported === true])).toEqual([
+      [1, false],
+      [2, true],
+      [3, false]
+    ])
+  })
 })
 
 describe("the outline", () => {
@@ -304,6 +322,16 @@ describe("what a Ledger keeps about one file", () => {
     expect(told.borrows).toContainEqual({ name: "two", specifier: "./whole" })
     expect(told.borrows).toContainEqual({ name: "default", specifier: "./whole" })
     expect(told.borrows).toContainEqual({ name: "elsewhere", specifier: "./elsewhere" })
+  })
+
+  test("marks the mentions that only bring a name in, and none of the ones that use it", () => {
+    const told = toldBy(root, SOURCE, TYPESCRIPT)
+
+    const elsewhere = told.mentions.filter((one) => one.name === "elsewhere")
+    expect(elsewhere.map((one) => [one.line, one.imported === true])).toEqual([
+      [1, true],
+      [spotOf("elsewhere", 3).row + 1, false]
+    ])
   })
 
   test("holds the same outline `writingsIn` answers with, and not a second one", () => {
@@ -550,6 +578,16 @@ describe("a name a file passes on", () => {
   test("is recorded as a borrow, under the name the other file writes", () => {
     const told = toldBy(types, TYPES, TYPESCRIPT)
     expect(told.borrows).toContainEqual({ name: "alsoUnbodied", specifier: "./whole" })
+  })
+
+  test("marks the name in a re-export as one that only passes it on", () => {
+    const told = toldBy(types, TYPES, TYPESCRIPT)
+    const line = TYPES.split("\n").findIndex((one) => one.includes("as passedAlong")) + 1
+    expect(told.mentions.filter((one) => one.line === line).map((one) => [one.name, one.imported])).toEqual([
+      ["alsoUnbodied", true],
+      ["passedAlong", true]
+    ])
+    expect(told.mentions.some((one) => one.line !== line && one.imported === true)).toBe(false)
   })
 
   test("takes a whole-module re-export as every name that file writes", () => {

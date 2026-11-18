@@ -31,19 +31,26 @@ export const wholeFile = (path: string, lines: ReadonlyArray<string>): Option.Op
 export const partOfFile = (
   path: string,
   lines: ReadonlyArray<string>,
-  from: number
+  from: number,
+  /**
+   * The lines a pull request adds, by their number in the file, written as
+   * additions so the renderer marks them as the diff does. The run is the file
+   * after the change either way; the side before it is only there to balance.
+   */
+  added: ReadonlySet<number> = new Set()
 ): Option.Option<string> => {
   if (lines.length === 0) return Option.none()
 
+  const adds = lines.filter((_, at) => added.has(from + at)).length
   return Option.some(
     [
       `diff --git a/${path} b/${path}`,
       `--- a/${path}`,
       `+++ b/${path}`,
-      `@@ -${from},${lines.length} +${from},${lines.length} @@`,
+      `@@ -${from},${lines.length - adds} +${from},${lines.length} @@`,
       // The leading space is what marks a line as context. A line of the file
       // that is itself empty becomes a line holding only that space.
-      ...lines.map((line) => ` ${line}`),
+      ...lines.map((line, at) => `${added.has(from + at) ? "+" : " "}${line}`),
       ""
     ].join("\n")
   )

@@ -43,6 +43,8 @@ export const KNOB_ART: Readonly<Record<KnobKey, ArtName>> = {
   // The tier that knows what a thing is, rather than what it looks like.
   exact: "search",
   registry: "repositories",
+  usesImports: "file",
+  usesTests: "check-passed",
 
   // The file list.
   density: "rows",
