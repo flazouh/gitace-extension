@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { cleanup, render, screen, waitFor } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Effect, Option } from "effect"
 import { aComment, aThread, anchoredAt, person } from "../../tests/snapshots"
@@ -760,6 +760,20 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
 
     const link = await screen.findByRole("link", { name: /serde_json · docs/ })
     expect(link.getAttribute("href")).toBe("https://docs.rs/serde_json/latest/serde_json/?search=Value")
+  })
+
+  test("keeps the documentation it opened when the reader lets go of the key", async () => {
+    staged({
+      writingAt: () =>
+        Effect.succeed(Option.some({ at: "elsewhere" as const, borrowed: { name: "Value", specifier: "serde_json" } }))
+    })
+    const request = await drawn()
+
+    request.onName?.({ ...pressed, text: "Value" }, { go: true, shift: false, alt: false })
+    await screen.findByRole("link", { name: /serde_json · docs/ })
+    fireEvent.keyUp(document, { key: "Meta" })
+
+    expect(screen.getByRole("link", { name: /serde_json · docs/ })).toBeTruthy()
   })
 })
 

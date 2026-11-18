@@ -1,3 +1,4 @@
+import { type RefObject, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import type { Beyond } from "../ports/Ledger"
 import { FLOAT } from "./dress"
@@ -34,14 +35,41 @@ export const addressOf = (beyond: Beyond): string | null => {
 }
 
 export const BeyondCard = ({ beyond, at, onGo, onClose }: BeyondCardProps) => {
+  const frame = useRef<HTMLDivElement>(null)
+
+  /*
+   * A press anywhere else, or Escape, puts it away, as for the uses panel.
+   *
+   * The pointer leaving the name is not leaving the card: it leaves the name on
+   * its way to the card. `composedPath`, on pointerdown and in the capture
+   * phase, for the reasons `UsesPanel` gives.
+   */
+  useEffect(() => {
+    const away = (event: Event) => {
+      const card = frame.current
+      if (card === null || event.composedPath().includes(card)) return
+      onClose()
+    }
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose()
+    }
+    document.addEventListener("pointerdown", away, true)
+    document.addEventListener("keydown", key, true)
+    return () => {
+      document.removeEventListener("pointerdown", away, true)
+      document.removeEventListener("keydown", key, true)
+    }
+  }, [onClose])
+
   const above = at.top > 200
-  if (beyond.docs !== undefined) return documented(beyond, beyond.docs, at, above, onClose)
+  if (beyond.docs !== undefined) return documented(beyond, beyond.docs, at, above, onClose, frame)
 
   const address = addressOf(beyond)
   if (address === null) return null
 
   return createPortal(
     <div
+      ref={frame}
       className={`${FLOAT} fixed z-50 max-w-[32rem] overflow-hidden text-ink`}
       style={{
         left: Math.max(8, Math.min(at.left, window.innerWidth - 520)),
@@ -84,9 +112,17 @@ export const BeyondCard = ({ beyond, at, onGo, onClose }: BeyondCardProps) => {
  * In a tab of its own: the documentation is not a page of this review, and the
  * review should still be there when the reader is done with it.
  */
-const documented = (beyond: Beyond, docs: string, at: Bounds, above: boolean, onClose: () => void) =>
+const documented = (
+  beyond: Beyond,
+  docs: string,
+  at: Bounds,
+  above: boolean,
+  onClose: () => void,
+  frame: RefObject<HTMLDivElement | null>
+) =>
   createPortal(
     <div
+      ref={frame}
       className={`${FLOAT} fixed z-50 max-w-[32rem] overflow-hidden text-ink`}
       style={{
         left: Math.max(8, Math.min(at.left, window.innerWidth - 520)),
