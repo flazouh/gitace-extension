@@ -758,14 +758,7 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
       },
       {
         path: "crates/api/src/sessions.rs",
-        paths: [
-          "crates/core/kernel/Cargo.toml",
-          "crates/core/kernel/src/lib.rs",
-          "crates/core/kernel/src/bus.rs",
-          "crates/core/protocol/Cargo.toml",
-          "crates/core/protocol/src/lib.rs",
-          "crates/core/protocol/src/methods.rs"
-        ],
+        paths: [],
         after: "use protocol as wire;\nuse kernel::Agent;\nfn plan() {\n  with_title()\n  wire::Role::User\n}\n"
       }
     )

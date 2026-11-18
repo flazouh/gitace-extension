@@ -706,7 +706,7 @@ const moduleFolderOf = (file: string, paths: ReadonlySet<string>): string => {
 /** The crates of a workspace by the name code spells them with, each at its `src/`. Read once per tree. */
 const crates = new WeakMap<ReadonlySet<string>, ReadonlyMap<string, string>>()
 
-export const cratesIn = (paths: ReadonlySet<string>): ReadonlyMap<string, string> => {
+const cratesIn = (paths: ReadonlySet<string>): ReadonlyMap<string, string> => {
   const known = crates.get(paths)
   if (known !== undefined) return known
   const found = new Map<string, string>()
