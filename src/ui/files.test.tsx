@@ -688,7 +688,14 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
   })
   const pressed = { line: 2, from: 3, to: 13, text: "with_title" }
 
-  const staged = (over: Partial<Ledger>) => {
+  const staged = (
+    over: Partial<Ledger>,
+    at: { path: string; paths: ReadonlyArray<string>; after: string } = {
+      path: rust.path,
+      paths: ["crates/app/src/lib.rs"],
+      after: "fn plan() {\n  with_title()\n}\n"
+    }
+  ) => {
     const opened: Array<string> = []
     const ledger: Ledger = {
       ...noLedger,
@@ -707,17 +714,17 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
       <LedgerProvider ledger={ledger}>
         <RendererProvider load={measured}>
           <FileDiffPane
-            file={rust}
+            file={{ ...rust, path: at.path }}
             ask={() => Effect.succeed(Option.none())}
             choices={CHOICES}
             across={{
-              paths: new Set([rust.path, "crates/app/src/lib.rs"]),
+              paths: new Set([at.path, ...at.paths]),
               repo: { owner: "flowline-labs", repo: "flowline" },
               sha: "abc123",
               read: () => Effect.succeed("pub fn with_title() {}\n"),
               open: (path, line) => opened.push(`${path}:${line}`)
             }}
-            revealing={revealer(() => Effect.succeed("fn plan() {\n  with_title()\n}\n"), { base: "before", head: "after" })}
+            revealing={revealer(() => Effect.succeed(at.after), { base: "before", head: "after" })}
           />
         </RendererProvider>
       </LedgerProvider>
@@ -736,6 +743,37 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
 
     await waitFor(() => {
       expect(opened).toEqual(["crates/app/src/types.rs:9"])
+    })
+  })
+
+  test("goes to the crate the file reads from before another crate as far away", async () => {
+    const { opened } = staged(
+      {
+        namesLike: () =>
+          Effect.succeed({
+            ready: true,
+            places: [placed("crates/core/kernel/src/bus.rs", 7), placed("crates/core/protocol/src/methods.rs", 12)]
+          })
+      },
+      {
+        path: "crates/api/src/sessions.rs",
+        paths: [
+          "crates/core/kernel/Cargo.toml",
+          "crates/core/kernel/src/lib.rs",
+          "crates/core/kernel/src/bus.rs",
+          "crates/core/protocol/Cargo.toml",
+          "crates/core/protocol/src/lib.rs",
+          "crates/core/protocol/src/methods.rs"
+        ],
+        after: "use protocol as wire;\nfn plan() {\n  with_title()\n}\n"
+      }
+    )
+    const request = await drawn()
+
+    request.onName?.({ ...pressed, line: 3 }, { go: true, shift: false, alt: false })
+
+    await waitFor(() => {
+      expect(opened).toEqual(["crates/core/protocol/src/methods.rs:12"])
     })
   })
 
