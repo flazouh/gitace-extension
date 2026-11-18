@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } fro
 import type { Beyond, Place, Reading, Where, Writing } from "../ports/Ledger"
 import { crateOf, rustDocs } from "../ledger/rustDocs"
 import type { Bounds, DiffHandle, Modifiers, Name } from "../ports/Renderer"
-import { goModulesKnown, knowGoModules, knowPhpPrefixes, phpPrefixesKnown, reachingAll } from "../ledger/reaching"
+import { cratesIn, goModulesKnown, knowGoModules, knowPhpPrefixes, phpPrefixesKnown, reachingAll } from "../ledger/reaching"
 import { goModulesIn, isGoMod } from "../ledger/goModules"
 import { isComposerJson, phpPrefixesIn } from "../ledger/composer"
 
@@ -96,8 +96,19 @@ const RUST_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u
 /** How many of the repository's writings of a name a guess weighs. */
 const MOST_GUESSED = 50
 
-/** The place whose file shares the most folders with this one: the same crate before another. */
-const nearest = (places: ReadonlyArray<Place>, path: string): Place | undefined => {
+/**
+ * The place a guess goes to: in this file's crate or a crate the file names, then the one sharing the most folders.
+ *
+ * Folders alone tie across a workspace, where every crate shares `crates/`, and the tie went to whichever
+ * writing came first: `message.role` in an API crate peeked at a `role` in the kernel's bus, when the file
+ * reads its messages from `ori_agent_protocol`.
+ */
+const nearest = (
+  places: ReadonlyArray<Place>,
+  path: string,
+  paths: ReadonlySet<string>,
+  text: string
+): Place | undefined => {
   const folders = path.split("/").slice(0, -1)
   const shared = (other: string): number => {
     const theirs = other.split("/")
@@ -105,9 +116,18 @@ const nearest = (places: ReadonlyArray<Place>, path: string): Place | undefined 
     while (at < folders.length && folders[at] === theirs[at]) at += 1
     return at
   }
+  const crates = [...cratesIn(paths)]
+  const holding = (file: string) => crates.find(([, root]) => file.startsWith(`${root}/`))
+  const own = holding(path)
+  const named = (other: string): boolean => {
+    const theirs = holding(other)
+    if (theirs === undefined) return false
+    return theirs === own || new RegExp(`\\b${theirs[0]}\\b`, "u").test(text)
+  }
+  const score = (place: Place): number => (named(place.path) ? folders.length + 1 : 0) + shared(place.path)
   let best: Place | undefined
   for (const place of places) {
-    if (best === undefined || shared(place.path) > shared(best.path)) best = place
+    if (best === undefined || score(place) > score(best)) best = place
   }
   return best
 }
@@ -532,7 +552,9 @@ export const useFollowing = (
           Effect.flatMap((found) => {
             const best = nearest(
               found.places.filter((place) => place.writing.name === name.text),
-              source.path
+              source.path,
+              across.paths,
+              text.current?.path === source.path ? text.current.text : ""
             )
             if (best === undefined) return searched
             return across.read(best.path).pipe(
