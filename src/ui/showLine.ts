@@ -1,4 +1,5 @@
 import type { Bounds } from "../ports/Renderer"
+import { millisOf } from "./motion"
 
 /**
  * Puts one line of a drawn diff on the screen, and says whether it found it.
@@ -33,7 +34,35 @@ export const showLine = (host: ParentNode | null, line: number): boolean => {
    * travel is two thousand pixels of a reader's file they did not ask to see.
    */
   row.scrollIntoView({ block: "center", behavior: "instant" })
+  arrivedAt(row)
   return true
+}
+
+/** How long the line a press arrived at keeps its tint, in milliseconds, before it fades. */
+export const ARRIVED = 900
+
+/**
+ * Tints the row a press arrived at, then lets it go.
+ *
+ * A writing a few lines away is already on the screen, and centring it moves the
+ * page by nothing: the press answered and the reader saw no change. The tint is
+ * the diff's own picked-line colour, held long enough to find and then faded,
+ * and it is an animation rather than a style so the row's own colour is back the
+ * moment it ends. Without the fade where the reader asked for less motion.
+ */
+const arrivedAt = (row: HTMLElement): void => {
+  if (typeof row.animate !== "function") return
+  const tint = "var(--diffs-computed-selected-line-bg)"
+  const still = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches
+  const fade = millisOf("--duration-slow", 300)
+  row.animate(
+    [
+      { backgroundColor: tint },
+      { backgroundColor: tint, offset: ARRIVED / (ARRIVED + fade) },
+      { backgroundColor: getComputedStyle(row).backgroundColor }
+    ],
+    { duration: ARRIVED + fade, easing: still ? "steps(1, end)" : "linear" }
+  )
 }
 
 /**

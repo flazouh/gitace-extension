@@ -39,6 +39,20 @@ describe("putting a line of a diff on the screen", () => {
     expect(showLine(drawn([1, 2]), 900)).toBe(false)
   })
 
+  test("tints the row it arrived at, which may already have been on the screen", () => {
+    const shadow = drawn([40, 41, 42])
+    const row = shadow.querySelector('[data-line="41"]') as HTMLElement
+    const asked: Array<ReadonlyArray<Keyframe>> = []
+    row.animate = (frames) => {
+      asked.push(frames as ReadonlyArray<Keyframe>)
+      return {} as Animation
+    }
+
+    showLine(shadow, 41)
+
+    expect(asked[0]?.[0]?.backgroundColor).toBe("var(--diffs-computed-selected-line-bg)")
+  })
+
   test("says so where nothing has been drawn at all", () => {
     expect(showLine(null, 42)).toBe(false)
   })
