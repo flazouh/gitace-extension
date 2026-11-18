@@ -9,10 +9,10 @@
 
 import { Effect } from "effect"
 import { filesIn, unzipped } from "@/ledger/archive"
-import { blobSha } from "@/ledger/blob"
 import { dialectFor } from "@/ledger/dialects"
-import { byPath, manifestOf, stillToRead, whollyKnown, type Named } from "@/ledger/keeping"
-import { everyPlace, kept, keyOf, placesFor, worthReading, type Kept } from "@/ledger/ledger"
+import { grownAt } from "@/ledger/fromTree"
+import { byPath, manifestOf, whollyKnown } from "@/ledger/keeping"
+import { everyPlace, kept, keyOf, placesFor, type Kept } from "@/ledger/ledger"
 import {
   heldIn as packagesIn,
   mightBe,
@@ -368,14 +368,6 @@ const archive = (owner: string, repo: string, sha: string): Effect.Effect<Uint8A
   return asked("include").pipe(Effect.catch(() => asked("omit")))
 }
 
-/** Every file of the archive worth reading, under git's name for its contents. */
-const namesFor = (files: ReadonlyMap<string, string>): Effect.Effect<ReadonlyArray<Named>, unknown> =>
-  Effect.forEach(
-    [...files].filter(([path, text]) => worthReading(path, text)),
-    ([path, text]) => blobSha(text).pipe(Effect.map((sha) => ({ path, sha, text }))),
-    { concurrency: 8 }
-  )
-
 /**
  * A repository read, off disk where it can be and off the network where it
  * cannot.
@@ -384,9 +376,16 @@ const namesFor = (files: ReadonlyMap<string, string>): Effect.Effect<ReadonlyArr
  *
  *   1. The commit is on disk whole. Nothing is fetched and nothing is parsed —
  *      a list of forty-character names, and what each one says.
- *   2. The commit is new but its files are not. A push touched four files; the
- *      other four hundred already have sayings under the names they still have.
- *   3. Nothing is known. The archive, once.
+ *   2. The commit is new and another commit of the repository has been read.
+ *      Its tree names every file and its blob sha in one request, and only the
+ *      files with no saying under that sha are fetched and parsed — a push that
+ *      touched four files fetches four. See `src/ledger/fromTree.ts`, and for
+ *      when it gives way to the archive: a private repository, a truncated
+ *      tree, or more new files than one request each is worth.
+ *   3. Nothing is known, or the tree could not say. The archive: every file
+ *      fetched and hashed, and only the ones with no saying parsed. Hashing is
+ *      cheap; the fetch is the whole repository, which on a large one is
+ *      minutes whatever share of it changed.
  */
 const read = (work: LedgerWarmWork, at: string): Effect.Effect<LedgerWarmth> =>
   Effect.gen(function* () {
@@ -432,56 +431,50 @@ const read = (work: LedgerWarmWork, at: string): Effect.Effect<LedgerWarmth> =>
       }
     }
 
-    const bytes = yield* archive(work.owner, work.repo, work.sha)
-    const whole = filesIn(bytes)
-    const named = yield* namesFor(whole)
-
-    const already = yield* store
-      .told(named.map((one) => one.sha))
-      .pipe(Effect.catch(() => Effect.succeed(new Map<string, Told>())))
-
-    const toRead = stillToRead(named, new Set(already.keys()))
-    const fresh = new Map<string, Told>()
-    for (const file of toRead) {
-      const told = outline(file.path, file.text)
-      if (told !== null) fresh.set(file.sha, told)
-    }
-
-    const known = new Map([...already, ...fresh])
-    // Only the files something could be said about. A `.md` has no grammar
-    // here, and a commit's manifest that named it would be a commit that could
-    // never be answered off disk.
-    const held = named.filter((one) => known.has(one.sha))
+    const { grown, whole } = yield* grownAt(
+      {
+        fetching: (url, init) => fetch(url, init),
+        store,
+        outline,
+        archive: archive(work.owner, work.repo, work.sha).pipe(Effect.map(filesIn))
+      },
+      { owner: work.owner, repo: work.repo },
+      work.sha
+    )
 
     const files = new Map<string, Told>()
-    for (const one of held) {
-      const told = known.get(one.sha)
+    for (const one of grown.held) {
+      const told = grown.known.get(one.sha)
       if (told !== undefined) files.set(one.path, told)
     }
 
-    const packages = packagesIn(whole)
+    const configs = new Map(grown.configs.map((one) => [one.path, one.text]))
+    const packages = packagesIn(configs)
     holdingPackages.set(at, packages)
-    const modules = goModulesIn(whole)
+    const modules = goModulesIn(configs)
     holdingModules.set(at, modules)
-    const prefixes = phpPrefixesIn(whole)
+    const prefixes = phpPrefixesIn(configs)
     holdingPrefixes.set(at, prefixes)
-    hold(kept(at, files, whole.size - files.size, packages))
+    hold(kept(at, files, grown.entries - files.size, packages))
 
     // After the answer, never before it. The tier below is already answering,
-    // and this is a second of work that makes those answers better.
-    if (work.exact === true) yield* Effect.forkDetach(beExact(at, whole))
+    // and this is a second of work that makes those answers better. Read from
+    // its tree, the commit has no files whole, and the tier has its archive.
+    if (work.exact === true) {
+      yield* Effect.forkDetach(whole === null ? exactFrom(work, at) : beExact(at, whole))
+    }
 
-    yield* store.keepTold(fresh).pipe(Effect.catch(onward))
+    yield* store.keepTold(grown.fresh).pipe(Effect.catch(onward))
     yield* store
-      .keepManifest(manifestOf(at, held, Date.now(), modules, prefixes))
+      .keepManifest(manifestOf(at, grown.held, Date.now(), modules, prefixes, grown.configs))
       .pipe(Effect.catch(onward))
     yield* store.forgetBeyond(ON_DISK).pipe(Effect.catch(() => Effect.succeed(0)))
 
     return {
       ready: true,
       read: files.size,
-      skipped: whole.size - files.size,
-      parsed: fresh.size,
+      skipped: grown.entries - files.size,
+      parsed: grown.fresh.size,
       exactReady: exactness?.at === at
     } satisfies LedgerWarmth
   }).pipe(

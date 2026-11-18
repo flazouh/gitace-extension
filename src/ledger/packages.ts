@@ -105,6 +105,15 @@ export const nameOf = (text: string): string | null => {
 }
 
 /**
+ * Whether a path is a `package.json` this repository wrote.
+ *
+ * `node_modules` in a repository is a vendored copy or a mistake, and either way
+ * is not a package this repository holds.
+ */
+export const isPackageJson = (path: string): boolean =>
+  (path === "package.json" || path.endsWith("/package.json")) && !path.includes("node_modules/")
+
+/**
  * Every package this repository holds itself, by the name other files import it
  * as.
  *
@@ -116,10 +125,7 @@ export const heldIn = (files: ReadonlyMap<string, string>): ReadonlyMap<string, 
   const held = new Map<string, Held>()
 
   for (const [path, text] of files) {
-    if (path !== "package.json" && !path.endsWith("/package.json")) continue
-    // `node_modules` in a repository is a vendored copy or a mistake, and
-    // either way is not a package this repository holds.
-    if (path.includes("node_modules/")) continue
+    if (!isPackageJson(path)) continue
 
     const name = nameOf(text)
     if (name === null) continue

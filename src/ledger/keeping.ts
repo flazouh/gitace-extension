@@ -47,16 +47,18 @@ export const stillToRead = (
 /** What a commit held, for the store to keep. */
 export const manifestOf = (
   at: string,
-  files: ReadonlyArray<Named>,
+  files: ReadonlyArray<Pick<Named, "path" | "sha">>,
   seen: number,
   goModules: ReadonlyMap<string, string> = new Map(),
-  phpPrefixes: ReadonlyMap<string, ReadonlyArray<string>> = new Map()
+  phpPrefixes: ReadonlyMap<string, ReadonlyArray<string>> = new Map(),
+  configs: ReadonlyArray<Named> = []
 ): Manifest => ({
   at,
   files: files.map((file) => [file.path, file.sha] as const),
   seen,
   ...(goModules.size === 0 ? {} : { goModules: [...goModules] }),
-  ...(phpPrefixes.size === 0 ? {} : { phpPrefixes: [...phpPrefixes] })
+  ...(phpPrefixes.size === 0 ? {} : { phpPrefixes: [...phpPrefixes] }),
+  ...(configs.length === 0 ? {} : { configs: configs.map((one) => [one.path, one.sha, one.text] as const) })
 })
 
 /**
