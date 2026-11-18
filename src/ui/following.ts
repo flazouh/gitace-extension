@@ -419,11 +419,15 @@ export const useFollowing = (
     if (at !== null && here !== null && sameName(here.name, name)) on.current = { ...here, at }
   }, [])
 
-  const clear = useCallback(() => {
+  const unhover = useCallback(() => {
     handle.current?.mark(null)
     setShown(null)
-    setBeyond(null)
   }, [])
+
+  const clear = useCallback(() => {
+    unhover()
+    setBeyond(null)
+  }, [unhover])
 
   /**
    * Where the Name is written, whichever file that turns out to be.
@@ -811,11 +815,12 @@ export const useFollowing = (
     [ask, draw]
   )
 
+  // Not the card a press opened: the pointer leaves the name on its way to it.
   const onNameLeave = useCallback(() => {
     on.current = null
     awaiting.current = null
-    clear()
-  }, [clear])
+    unhover()
+  }, [unhover])
 
   /** The lines a Writing is written on, out of whichever file holds it. */
   const linesOf = useCallback(
@@ -1040,9 +1045,10 @@ export const useFollowing = (
       ask(here.name, (writing, where) => draw(here.name, writing, where))
     }
 
+    // The hover's, and only that: letting go is how every press ends.
     const up = (event: KeyboardEvent) => {
       if (event.key !== "Meta" && event.key !== "Control") return
-      clear()
+      unhover()
     }
 
     // A window that loses the focus never hears the key come back up — the
@@ -1061,7 +1067,7 @@ export const useFollowing = (
       window.removeEventListener("blur", away)
       window.removeEventListener("scroll", away, true)
     }
-  }, [ask, clear, draw, source])
+  }, [ask, clear, draw, source, unhover])
 
   // Stable, because the renderer is handed these inside an effect and a new
   // object would redraw the whole file. Every one of them is a `useCallback`
