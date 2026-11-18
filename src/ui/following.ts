@@ -564,7 +564,12 @@ export const useFollowing = (
         const across = repository.current
         const searched = documented(rustDocs("std", name.text))
         if (across?.repo === undefined || across.sha === undefined) return searched
-        return ledger.namesLike(across.repo, across.sha, name.text, MOST_GUESSED).pipe(
+        const { repo, sha } = across
+        // Warmed first, as Go to name does: an index nobody has built answers with no places, which is not the same as none.
+        return ledger.warm(repo, sha).pipe(
+          Effect.flatMap((warmth) =>
+            warmth.ready ? ledger.namesLike(repo, sha, name.text, MOST_GUESSED) : Effect.succeed({ ready: false, places: [] })
+          ),
           Effect.flatMap((found) => {
             const best = nearest(
               found.places.filter((place) => place.writing.name === name.text),

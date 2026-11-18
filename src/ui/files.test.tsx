@@ -700,6 +700,7 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
     const ledger: Ledger = {
       ...noLedger,
       ready: () => Effect.void,
+      warm: () => Effect.succeed({ ready: true }),
       writingAt: () => Effect.succeed(Option.none()),
       ...over
     }
@@ -774,6 +775,28 @@ describe("a press in a Rust file that nothing in the file leads anywhere", () =>
 
     await waitFor(() => {
       expect(opened).toEqual(["crates/core/protocol/src/methods.rs:12"])
+    })
+  })
+
+  test("reads the repository before guessing, where nothing else has", async () => {
+    let warmed = false
+    const { opened } = staged({
+      warm: () =>
+        Effect.sync(() => {
+          warmed = true
+          return { ready: true }
+        }),
+      namesLike: () =>
+        Effect.succeed(
+          warmed ? { ready: true, places: [placed("crates/app/src/types.rs", 9)] } : { ready: false, places: [] }
+        )
+    })
+    const request = await drawn()
+
+    request.onName?.(pressed, { go: true, shift: false, alt: false })
+
+    await waitFor(() => {
+      expect(opened).toEqual(["crates/app/src/types.rs:9"])
     })
   })
 
