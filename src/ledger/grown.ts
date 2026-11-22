@@ -30,6 +30,22 @@ export type Grown = {
 /** What a file says, or nothing where no grammar here reads it. */
 export type Outline = (path: string, text: string) => Told | null
 
+/**
+ * Gives the event loop a turn between chunks of synchronous parsing.
+ *
+ * A large repository holds ten thousand files, and parsing them in one tight
+ * loop holds the offscreen document for tens of seconds — starving every other
+ * message (`usesIn`, `writingAt`, `mermaid`) and every IndexedDB completion
+ * behind it. Yielding a macrotask every slice keeps single-file questions
+ * responsive while a cold read runs.
+ */
+export const SLICE_MS = 16
+
+export const yieldTurn: Effect.Effect<void> = Effect.callback<void>((resume) => {
+  const timer = setTimeout(() => resume(Effect.void), 0)
+  return Effect.sync(() => clearTimeout(timer))
+})
+
 /** Every file of the archive worth reading, under git's name for its contents. */
 const namesFor = (files: ReadonlyMap<string, string>): Effect.Effect<ReadonlyArray<Named>, unknown> =>
   Effect.forEach(
@@ -58,9 +74,14 @@ export const fromFiles = (
     // reading them as the `.html` of a `.ts` beside it left both with nothing said.
     const readable = named.filter((one) => dialectFor(one.path) !== null)
     const fresh = new Map<string, Told>()
+    let sliceStart = performance.now()
     for (const file of stillToRead(readable, new Set(already.keys()))) {
       const told = using.outline(file.path, file.text)
       if (told !== null) fresh.set(file.sha, told)
+      if (performance.now() - sliceStart >= SLICE_MS) {
+        yield* yieldTurn
+        sliceStart = performance.now()
+      }
     }
 
     const known = new Map([...already, ...fresh])

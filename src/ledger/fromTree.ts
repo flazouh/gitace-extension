@@ -22,7 +22,7 @@ import { Effect } from "effect"
 import { blobSha } from "./blob"
 import { isConfig } from "./configs"
 import { dialectFor } from "./dialects"
-import { fromFiles, type Grown, type Outline } from "./grown"
+import { fromFiles, SLICE_MS, yieldTurn, type Grown, type Outline } from "./grown"
 import type { Named } from "./keeping"
 import { worthReading } from "./ledger"
 import type { Repo } from "./packages"
@@ -173,12 +173,17 @@ export const fromTree = (
 
     const renamed = new Map<string, string>()
     const fresh = new Map<string, Told>()
+    let sliceStart = performance.now()
     for (const { one, text, named } of read) {
       if (!worthReading(one.path, text)) continue
       const told = using.outline(one.path, text)
       if (told === null) continue
       fresh.set(named, told)
       renamed.set(one.sha, named)
+      if (performance.now() - sliceStart >= SLICE_MS) {
+        yield* yieldTurn
+        sliceStart = performance.now()
+      }
     }
 
     const fetchedConfigs = yield* Effect.forEach(

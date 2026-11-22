@@ -548,6 +548,16 @@ export const UsesPanel = ({
     return () => cancelAnimationFrame(frame)
   }, [])
 
+  /*
+   * Keyed on the values inside `reading` and `across` rather than on the
+   * objects themselves: callers build both fresh on every render (`Files.tsx`,
+   * `WholeFile.tsx`), and keying on the object reference interrupted and
+   * restarted both in-flight asks whenever the parent re-rendered (e.g. when
+   * releasing Command right after clicking a name).
+   */
+  const readingPath = reading.path
+  const readingText = reading.text
+
   useEffect(() => {
     if (!here) {
       setUsesFor({ about: askedAbout, answer: [] })
@@ -555,13 +565,13 @@ export const UsesPanel = ({
     }
 
     const asking = Effect.runFork(
-      ledger.usesIn(reading, step.writing).pipe(
+      ledger.usesIn({ path: readingPath, text: readingText }, step.writing).pipe(
         Effect.catch(onwardWith<ReadonlyArray<Use>>([])),
         Effect.map((answer) => setUsesFor({ about: askedAbout, answer }))
       )
     )
     return () => asking.interruptUnsafe()
-  }, [here, ledger, reading, step.writing, askedAbout])
+  }, [here, ledger, readingPath, readingText, step.writing, askedAbout])
 
   /*
    * The rest of the repository, where there is a Ledger that has read it.
@@ -570,15 +580,20 @@ export const UsesPanel = ({
    * asking the repository a question for the first time, and being told "no
    * Ledger" would be being told about a mechanism rather than answered.
    */
+  const acrossOwner = across?.repo.owner
+  const acrossRepo = across?.repo.repo
+  const acrossSha = across?.sha
+
   useEffect(() => {
-    if (across === undefined) return
+    if (acrossOwner === undefined || acrossRepo === undefined || acrossSha === undefined) return
+    const repo = { owner: acrossOwner, repo: acrossRepo }
 
     const asking = Effect.runFork(
-      ledger.warm(across.repo, across.sha, exact).pipe(
+      ledger.warm(repo, acrossSha, exact).pipe(
         Effect.flatMap(() =>
-          ledger.usesAcross(across.repo, across.sha, {
+          ledger.usesAcross(repo, acrossSha, {
             name: step.writing.name,
-            path: step.where ?? reading.path,
+            path: step.where ?? readingPath,
             line: step.writing.line,
             column: step.writing.from - 1
           })
@@ -588,7 +603,7 @@ export const UsesPanel = ({
       )
     )
     return () => asking.interruptUnsafe()
-  }, [ledger, across, exact, reading.path, step.where, step.writing, askedAbout])
+  }, [ledger, acrossOwner, acrossRepo, acrossSha, exact, readingPath, step.where, step.writing, askedAbout])
 
   /**
    * Whether where it is written is worth a row.

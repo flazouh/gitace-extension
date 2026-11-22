@@ -153,6 +153,25 @@ const grammar = (shelf: Shelf, file: string): Effect.Effect<Language, unknown> =
 }
 
 /**
+ * One parser per grammar, reused across every file a sweep parses.
+ *
+ * Bounded by the eleven grammars in {@link GRAMMARS}, so memory stays flat
+ * while avoiding thousands of WASM parser allocations and language bindings
+ * during a cold repository read. Every tree is still deleted right after it
+ * is read.
+ */
+const parsers = new Map<string, Parser>()
+
+const parserFor = (file: string, language: Language): Parser => {
+  const existing = parsers.get(file)
+  if (existing !== undefined) return existing
+  const made = new Parser()
+  made.setLanguage(language)
+  parsers.set(file, made)
+  return made
+}
+
+/**
  * A way to read many files, with the grammar loaded once.
  *
  * {@link parsed} is right for one file and wrong for a repository: it resolves
@@ -161,8 +180,8 @@ const grammar = (shelf: Shelf, file: string): Effect.Effect<Language, unknown> =
  * resolves them once and hands back something synchronous, which is what
  * building a Ledger wants.
  *
- * The parser and every tree are given back. This is WebAssembly memory, and a
- * build that leaked one tree per file would leak four thousand.
+ * Every tree is given back. This is WebAssembly memory, and a build that leaked
+ * one tree per file would leak four thousand.
  */
 export const reader = <A>(
   shelf: Shelf,
@@ -180,17 +199,12 @@ export const reader = <A>(
       const language = languages.get(file) ?? held.get(file) ?? null
       if (language === null) return null
 
-      const parser = new Parser()
-      parser.setLanguage(language)
+      const parser = parserFor(file, language)
       const tree = treeOf(parser, file, text)
-      if (tree === null) {
-        parser.delete()
-        return null
-      }
+      if (tree === null) return null
 
       const found = read(tree.rootNode as unknown as Syntax, text, path)
       tree.delete()
-      parser.delete()
       return found
     }
   })
