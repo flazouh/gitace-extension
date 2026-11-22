@@ -105,7 +105,17 @@ const stated = (body: string): string | null => {
  * merely long. Both are now read, and the path they state wins over the header
  * of the entry itself, which is the truncated copy they exist to correct.
  */
-export const filesIn = (bytes: Uint8Array): Held => {
+export const filesIn = (
+  bytes: Uint8Array,
+  /**
+   * Decides whether an entry is worth decoding into a string at all.
+   *
+   * An archive carries every binary asset in the repository — images, audio,
+   * video, jars — and decoding ninety megabytes of them into UTF-8 strings just
+   * to drop them in the next step burns seconds of CPU and memory.
+   */
+  keep?: (path: string, size: number) => boolean
+): Held => {
   const held = new Map<string, string>()
   let at = 0
   /** The path the header before this one stated, for the entry it describes. */
@@ -148,6 +158,7 @@ export const filesIn = (bytes: Uint8Array): Held => {
 
     const path = under(full)
     if (path === "") continue
+    if (keep !== undefined && !keep(path, size)) continue
     held.set(path, text.decode(bytes.subarray(from, from + size)))
   }
 

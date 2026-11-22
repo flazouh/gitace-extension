@@ -3,6 +3,7 @@ import { Effect } from "effect"
 import { blobSha } from "./blob"
 import { dialectFor } from "./dialects"
 import { grownAt, MOST_FETCHED, type Fetching } from "./fromTree"
+import { fromFiles, SLICE_MS } from "./grown"
 import type { Manifest, Store } from "./store"
 import type { Told } from "./writings"
 
@@ -200,5 +201,40 @@ describe("the archive, where the tree cannot answer", () => {
 
     expect(asked).toEqual([TREE])
     expect(opened).toBe(1)
+  })
+
+  test("yields the event loop while parsing a slow repository so other work is not starved", async () => {
+    const whole = new Map([
+      ["src/a.ts", "export const a = 1"],
+      ["src/b.ts", "export const b = 2"],
+      ["src/c.ts", "export const c = 3"]
+    ])
+    let parsed = 0
+    let ranMidParse = false
+    const timer = setTimeout(() => {
+      if (parsed > 0 && parsed < whole.size) ranMidParse = true
+    }, 0)
+
+    const grown = await Effect.runPromise(
+      fromFiles(
+        {
+          store: memory([], new Map()),
+          outline: (_path, text) => {
+            parsed += 1
+            // Spend slightly more than one slice so the loop yields between files.
+            const until = performance.now() + SLICE_MS + 2
+            while (performance.now() < until) {
+              // busy wait simulating synchronous WASM parsing
+            }
+            return saying(text)
+          }
+        },
+        whole
+      )
+    )
+    clearTimeout(timer)
+
+    expect(grown.fresh.size).toBe(3)
+    expect(ranMidParse).toBe(true)
   })
 })

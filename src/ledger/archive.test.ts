@@ -95,6 +95,13 @@ describe("a repository out of its archive", () => {
     expect(files.size).toBeGreaterThanOrEqual(2)
     expect([...files.keys()].every((path) => path.trim() !== "")).toBe(true)
   })
+
+  test("skips entries rejected by the keep predicate", async () => {
+    const files = filesIn(await made(), (path) => path.endsWith(".ts"))
+
+    expect(files.has("src/ui/place.ts")).toBe(true)
+    expect(files.has("README.md")).toBe(false)
+  })
 })
 
 /**

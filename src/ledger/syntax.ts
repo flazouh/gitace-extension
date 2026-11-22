@@ -20,18 +20,30 @@ export type Syntax = {
   readonly endPosition: Spot
   readonly namedChildCount: number
   readonly namedChild: (at: number) => Syntax | null
+  /**
+   * Every named child in one walk, where the tree offers it.
+   *
+   * Tree-sitter's `namedChild(at)` walks from the first child on every call —
+   * quadratic on a long block or array — whereas `namedChildren` walks once
+   * with a cursor. Optional so synthetic test trees stay minimal.
+   */
+  readonly namedChildren?: ReadonlyArray<Syntax>
   readonly childForFieldName: (name: string) => Syntax | null
 }
 
 /** Tree-sitter's own coordinates: both zero-based, the column in UTF-16 units. */
 export type Spot = { readonly row: number; readonly column: number }
 
-/** The named children, as something that can be walked rather than indexed. */
-export const childrenOf = function* (node: Syntax): Generator<Syntax> {
-  for (let at = 0; at < node.namedChildCount; at++) {
+/** The named children, as a list that can be walked in one pass. */
+export const childrenOf = (node: Syntax): ReadonlyArray<Syntax> => {
+  if (node.namedChildren !== undefined) return node.namedChildren
+  const count = node.namedChildCount
+  const list: Array<Syntax> = []
+  for (let at = 0; at < count; at++) {
     const child = node.namedChild(at)
-    if (child !== null) yield child
+    if (child !== null) list.push(child)
   }
+  return list
 }
 
 /** Whether a spot is inside a node, with the end exclusive as a range's end is. */

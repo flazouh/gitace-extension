@@ -96,12 +96,14 @@ const drawMermaidAwayFromThePage = (code: string): Effect.Effect<unknown> =>
   Effect.gen(function* () {
     if (!(yield* ensureOffscreen)) return unavailable()
 
-    const answer: unknown = yield* Effect.promise(() =>
-      browser.runtime.sendMessage({
-        kind: MERMAID_WORK,
-        code
-      } satisfies MermaidWork)
-    )
+    const answer: unknown = yield* Effect.tryPromise({
+      try: () =>
+        browser.runtime.sendMessage({
+          kind: MERMAID_WORK,
+          code
+        } satisfies MermaidWork),
+      catch: (cause) => cause
+    })
     return isMermaidAnswer(answer) ? answer : unavailable()
   }).pipe(Effect.orElseSucceed(unavailable))
 
@@ -131,22 +133,27 @@ const relay = <A>(work: { readonly kind: string }, instead: A): Effect.Effect<un
   Effect.gen(function* () {
     if (!(yield* ensureOffscreen)) return instead
 
-    return yield* Effect.promise(() => browser.runtime.sendMessage(work))
+    return yield* Effect.tryPromise({
+      try: () => browser.runtime.sendMessage(work),
+      catch: (cause) => cause
+    })
   }).pipe(Effect.catch(() => Effect.succeed(instead)))
 
 const askTheLedger = (ask: { readonly path: string; readonly text: string; readonly key?: string; readonly question: unknown }): Effect.Effect<unknown> =>
   Effect.gen(function* () {
     if (!(yield* ensureOffscreen)) return { kind: "gitace/ledger-answer", why: "no offscreen API" }
 
-    return yield* Effect.promise(() =>
-      browser.runtime.sendMessage({
-        kind: LEDGER_WORK,
-        path: ask.path,
-        text: ask.text,
-        ...(ask.key === undefined ? {} : { key: ask.key }),
-        question: ask.question
-      } as LedgerWork)
-    )
+    return yield* Effect.tryPromise({
+      try: () =>
+        browser.runtime.sendMessage({
+          kind: LEDGER_WORK,
+          path: ask.path,
+          text: ask.text,
+          ...(ask.key === undefined ? {} : { key: ask.key }),
+          question: ask.question
+        } as LedgerWork),
+      catch: (cause) => cause
+    })
   }).pipe(
     Effect.catch((cause) =>
       Effect.succeed({ kind: "gitace/ledger-answer", why: String(cause) })

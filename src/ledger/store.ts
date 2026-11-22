@@ -107,7 +107,15 @@ const opened = (): Effect.Effect<IDBDatabase, unknown> =>
 let database: Effect.Effect<IDBDatabase, unknown> | undefined
 
 const held = (): Effect.Effect<IDBDatabase, unknown> => {
-  database ??= opened().pipe(Effect.cached, Effect.runSync)
+  database ??= opened().pipe(
+    Effect.tapError(() =>
+      Effect.sync(() => {
+        database = undefined
+      })
+    ),
+    Effect.cached,
+    Effect.runSync
+  )
   return database
 }
 
@@ -195,6 +203,7 @@ export const idbStore: Store = {
           const all = found as ReadonlyArray<Manifest>
           const oldest = [...all].sort((one, two) => two.seen - one.seen).slice(most)
           return Effect.forEach(oldest, (one) => done(store.delete(one.at)), {
+            concurrency: "unbounded",
             discard: true
           }).pipe(Effect.as(oldest.length))
         })

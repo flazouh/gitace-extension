@@ -993,9 +993,15 @@ export const toldBy = (root: Syntax, source: string, dialect: Dialect): Told => 
     // Asked before the mention is kept, because a grammar may hang the binding on
     // the very node that is the name.
     const { outer, inner } = dialect.bindings(node)
-    const passed = dialect.passedOn === undefined ? [] : [...dialect.passedOn(node)]
+    let passed: Array<Borrowed> | null = null
+    if (dialect.passedOn !== undefined) {
+      for (const from of dialect.passedOn(node)) {
+        passed ??= []
+        passed.push(from)
+      }
+    }
     const opens =
-      passed.length > 0 ||
+      passed !== null ||
       outer.some((bound) => bound.kind === "import") ||
       dialect.listsExports?.(node) === true
     if (opens) importing += 1
@@ -1022,14 +1028,20 @@ export const toldBy = (root: Syntax, source: string, dialect: Dialect): Told => 
       }
     } else if (dialect.names.has(node.type)) mentions.push(mentionOf(node))
 
-    for (const bound of [...outer, ...inner]) {
+    for (const bound of outer) {
+      declares.add(bound.name.text)
+      if (bound.from !== undefined) borrows.push(bound.from)
+    }
+    for (const bound of inner) {
       declares.add(bound.name.text)
       if (bound.from !== undefined) borrows.push(bound.from)
     }
 
     // A re-export borrows without binding, so it is walked for on its own and
     // adds to `borrows` and to nothing else. See {@link passedOn}.
-    for (const from of passed) borrows.push(from)
+    if (passed !== null) {
+      for (const from of passed) borrows.push(from)
+    }
 
     for (const child of childrenOf(node)) walk(child)
     if (opens) importing -= 1

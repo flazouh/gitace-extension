@@ -155,4 +155,85 @@ describe("the uses of a name on a pull request", () => {
     expect(drew.at(-1)?.patch).toContain("+export const twice = () => shape() * 2")
     expect(drew.at(-1)?.patch).toContain('+import { shape } from "./one"')
   })
+
+  test("does not interrupt in-flight asks when parent re-renders with fresh reading and across objects", async () => {
+    let usesInCalls = 0
+    let warmCalls = 0
+    let warmInterrupted = 0
+    let finishWarm: (() => void) | null = null
+
+    const handle: DiffHandle = {
+      onThemeChange: () => {},
+      showNotes: () => {},
+      unpick: () => {},
+      mark: () => {},
+      boundsOf: () => null,
+      destroy: () => {}
+    }
+    const renderer: LoadEngine = Effect.succeed({
+      warm: () => Effect.void,
+      renderDiff: () => handle
+    })
+    const ledger: Ledger = {
+      ready: () => Effect.void,
+      writingAt: () => Effect.succeed(Option.none()),
+      writingNamed: () => Effect.succeed(Option.none()),
+      borrowedAs: () => Effect.succeed(Option.none()),
+      writingsIn: () => Effect.succeed([]),
+      usesIn: () =>
+        Effect.sync(() => {
+          usesInCalls += 1
+          return [{ line: 2, from: 14, to: 19 }]
+        }),
+      beyond: () => Effect.succeed({ why: "nothing there" }),
+      usesAcross: () => Effect.succeed({ ready: true, uses: [across("src/added.ts", 3)] }),
+      warm: () =>
+        Effect.callback((resume) => {
+          warmCalls += 1
+          finishWarm = () => resume(Effect.succeed({ ready: true, read: 1, skipped: 0 }))
+          return Effect.sync(() => {
+            warmInterrupted += 1
+          })
+        }),
+      namesLike: () => Effect.succeed({ places: [], ready: true })
+    }
+    const settings: Store = { read: Effect.succeed(DEFAULTS), write: () => Effect.void, watch: () => () => {} }
+
+    const renderWithFreshObjects = () => (
+      <SettingsProvider store={settings}>
+        <RendererProvider load={renderer}>
+          <LedgerProvider ledger={ledger}>
+            <UsesPanel
+              writing={writing}
+              reading={{ path: "src/one.ts", text: HERE }}
+              at={{ top: 400, left: 40, bottom: 416, right: 90 }}
+              under={writing.line}
+              onGo={() => false}
+              onClose={() => {}}
+              across={{
+                repo: { owner: "octo-org", repo: "octo-repo" },
+                sha: "abc123",
+                read: (path) => Effect.succeed(FILES[path] ?? "")
+              }}
+              changes={changes}
+            />
+          </LedgerProvider>
+        </RendererProvider>
+      </SettingsProvider>
+    )
+
+    const { rerender } = render(renderWithFreshObjects())
+    await waitFor(() => expect(warmCalls).toBe(1))
+
+    // Simulate parent re-renders (e.g. Cmd keyup in Files.tsx) passing fresh object literals
+    rerender(renderWithFreshObjects())
+    rerender(renderWithFreshObjects())
+
+    expect(usesInCalls).toBe(1)
+    expect(warmCalls).toBe(1)
+    expect(warmInterrupted).toBe(0)
+
+    finishWarm!()
+    expect(await screen.findByText("1 use in 1 file · all added by this PR")).toBeTruthy()
+  })
 })

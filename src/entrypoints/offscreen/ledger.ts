@@ -9,10 +9,11 @@
 
 import { Effect } from "effect"
 import { filesIn, unzipped } from "@/ledger/archive"
+import { isConfig } from "@/ledger/configs"
 import { dialectFor } from "@/ledger/dialects"
 import { grownAt } from "@/ledger/fromTree"
 import { byPath, manifestOf, whollyKnown } from "@/ledger/keeping"
-import { everyPlace, kept, keyOf, placesFor, type Kept } from "@/ledger/ledger"
+import { everyPlace, kept, keyOf, placesFor, worthReading, type Kept } from "@/ledger/ledger"
 import {
   heldIn as packagesIn,
   mightBe,
@@ -306,10 +307,24 @@ const beExact = (at: string, files: ReadonlyMap<string, string>): Effect.Effect<
     )
   )
 
+/**
+ * Only the files an archive holds that the Ledger or exact tier can read.
+ *
+ * Skips binary assets (video, audio, images, jars) and oversized files before
+ * UTF-8 decoding: a monorepo archive can carry ninety megabytes of media that
+ * neither the grammars nor the config readers ever look at.
+ */
+const ARCHIVE_TOO_BIG = 1_200_000
+
+const worthUnpacking = (path: string, size: number): boolean =>
+  size <= ARCHIVE_TOO_BIG &&
+  worthReading(path, "") &&
+  (dialectFor(path) !== null || isConfig(path))
+
 /** The archive again, for a repository whose Ledger came off disk without it. */
 const exactFrom = (work: LedgerWarmWork, at: string): Effect.Effect<void> =>
   archive(work.owner, work.repo, work.sha).pipe(
-    Effect.flatMap((bytes) => beExact(at, filesIn(bytes))),
+    Effect.flatMap((bytes) => beExact(at, filesIn(bytes, worthUnpacking))),
     Effect.catch(onward)
   )
 
@@ -329,8 +344,8 @@ const holdingModules = new Map<string, ReadonlyMap<string, string>>()
 /** What each repository's `composer.json` files map. See `src/ledger/composer.ts`. */
 const holdingPrefixes = new Map<string, ReadonlyMap<string, ReadonlyArray<string>>>()
 
-/** What is being read now, so two asks do not read a repository twice. */
-let warming: { readonly at: string; readonly work: Effect.Effect<LedgerWarmth> } | null = null
+/** What is being read now, by commit, so two asks do not read a repository twice. */
+const warming = new Map<string, Effect.Effect<LedgerWarmth>>()
 
 /**
  * Where a Ledger is kept between visits.
@@ -436,7 +451,9 @@ const read = (work: LedgerWarmWork, at: string): Effect.Effect<LedgerWarmth> =>
         fetching: (url, init) => fetch(url, init),
         store,
         outline,
-        archive: archive(work.owner, work.repo, work.sha).pipe(Effect.map(filesIn))
+        archive: archive(work.owner, work.repo, work.sha).pipe(
+          Effect.map((bytes) => filesIn(bytes, worthUnpacking))
+        )
       },
       { owner: work.owner, repo: work.repo },
       work.sha
@@ -511,19 +528,20 @@ const warm = (work: LedgerWarmWork): Effect.Effect<LedgerWarmth> =>
     // Already on its way. The second asker waits on the first's read rather
     // than starting a second one, which on a large repository is ten megabytes
     // fetched twice.
-    if (warming?.at === at) return yield* warming.work
+    const active = warming.get(at)
+    if (active !== undefined) return yield* active
 
     const reading = read(work, at).pipe(
       Effect.ensuring(
         Effect.sync(() => {
-          warming = null
+          warming.delete(at)
         })
       ),
       Effect.cached,
       Effect.runSync
     )
 
-    warming = { at, work: reading }
+    warming.set(at, reading)
     return yield* reading
   })
 
